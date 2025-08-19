@@ -1,0 +1,1 @@
+export const host = "https://o2api.spc.co.kr";
