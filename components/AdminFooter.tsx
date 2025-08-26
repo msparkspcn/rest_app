@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useUser } from '../contexts/UserContext';
 
 type AdminFooterProps = {
   onReset?: () => void;
@@ -9,9 +10,14 @@ type AdminFooterProps = {
 };
 
 export default function AdminFooter({ onReset, onLogoutPress }: AdminFooterProps) {
+  const { logout } = useUser();
   const handleHome = () => router.push('/');
   const handleReset = () => onReset && onReset();
-  const handleLogout = () => (onLogoutPress ? onLogoutPress() : console.log('로그아웃'));
+  const handleLogout = () => {
+    logout();
+    router.replace('/(auth)/login');
+    if (onLogoutPress) onLogoutPress();
+  };
 
   return (
     <View style={styles.footer}>

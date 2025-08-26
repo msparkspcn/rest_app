@@ -70,10 +70,26 @@ export default function RegisterScreen() {
       return;
     }
 
-    if (password.length < 6) {
-      Alert.alert('오류', '비밀번호는 최소 6자 이상이어야 합니다.');
+    if (password.length < 7 || password.length >20) {
+      Alert.alert('오류', '비밀번호 길이를 확인해주세요.');
       return;
     }
+
+  const hasLetters = /[a-zA-Z]/.test(password); // 영문 포함 여부
+  const hasNumbers = /[0-9]/.test(password); // 숫자 포함 여부
+  const hasSymbols = /[~!@#$%^&*()]/.test(password); // 특수문자 포함 여부
+
+  // 3. 포함된 문자 종류의 개수 확인
+  let charTypeCount = 0;
+  if (hasLetters) charTypeCount++;
+  if (hasNumbers) charTypeCount++;
+  if (hasSymbols) charTypeCount++;
+  
+  if(charTypeCount <2) {
+    Alert.alert('오류', '비밀번호 입력규칙을 확인해주세요.');
+    return;
+  }
+
 
     // 여기에 실제 회원가입 로직을 구현하세요
     console.log('회원가입 시도:', { name, id, password, termsAgreed, privacyAgreed });
@@ -279,6 +295,7 @@ export default function RegisterScreen() {
                 defaultValue={password}
                 onChangeText={(text) => {
                   setPassword(text);
+                  if (!showConfirm && text.length > 0) setShowConfirm(true);
                 }}
                 secureTextEntry
                 autoCapitalize="none"
@@ -287,22 +304,22 @@ export default function RegisterScreen() {
               />
             </View>
 
-          
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>비밀번호 확인</Text>
-              <TextInput
-                style={styles.input}
-                key="confirmPasswordInput"
-                defaultValue={confirmPassword}
-                onChangeText={setConfirmPassword}
-                secureTextEntry
-                textContentType="none"
-                autoCapitalize="none"
-                autoCorrect={false}
-                spellCheck={false}
-              /> 
-            </View>
-          
+            {showConfirm && (
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>비밀번호 확인</Text>
+                <TextInput
+                  style={styles.input}
+                  key="confirmPasswordInput"
+                  defaultValue={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  secureTextEntry
+                  textContentType="none"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  spellCheck={false}
+                />
+              </View>
+            )}
 
             <View style={styles.inputContainer}>
               <Text style={styles.label}>이름</Text>

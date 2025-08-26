@@ -2,20 +2,24 @@ import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
+import { DEP_G, DEP_OP, DEP_R } from '../../constants/RoleTypes';
+import { useUser } from '../../contexts/UserContext';
 
 export default function LoginScreen() {
+  const { login } = useUser();
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
   const [autoLogin, setAutoLogin] = useState(false);
+  const [selectedRoleType, setSelectedRoleType] = useState(DEP_R); // 기본값: 휴게소
 
   const handleLogin = () => {
     if (!id) {
@@ -35,6 +39,16 @@ export default function LoginScreen() {
       // AsyncStorage나 다른 저장소에 자동로그인 정보 저장
       console.log('자동로그인 설정 저장됨');
     }
+    
+    // 임시로 사용자 정보 설정 (실제로는 서버에서 받아와야 함)
+    // roleType은 실제 로그인 시 서버에서 받아와야 합니다
+    const userData = {
+      id: id,
+      name: '관리자',
+      roleType: selectedRoleType
+    };
+    
+    login(userData);
     
     // 로그인 성공 시 홈화면으로 이동
     router.replace('/(admin)');
@@ -84,6 +98,36 @@ export default function LoginScreen() {
               autoCapitalize="none"
               autoCorrect={false}
             /> 
+          </View>
+
+          <View style={styles.roleContainer}>
+            <Text style={styles.roleLabel}>권한 선택 (테스트용)</Text>
+            <View style={styles.roleButtons}>
+              <TouchableOpacity 
+                style={[styles.roleButton, selectedRoleType === DEP_OP && styles.roleButtonActive]}
+                onPress={() => setSelectedRoleType(DEP_OP)}
+              >
+                <Text style={[styles.roleButtonText, selectedRoleType === DEP_OP && styles.roleButtonTextActive]}>
+                  운영업체
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.roleButton, selectedRoleType === DEP_R && styles.roleButtonActive]}
+                onPress={() => setSelectedRoleType(DEP_R)}
+              >
+                <Text style={[styles.roleButtonText, selectedRoleType === DEP_R && styles.roleButtonTextActive]}>
+                  휴게소
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.roleButton, selectedRoleType === DEP_G && styles.roleButtonActive]}
+                onPress={() => setSelectedRoleType(DEP_G)}
+              >
+                <Text style={[styles.roleButtonText, selectedRoleType === DEP_G && styles.roleButtonTextActive]}>
+                  주유소
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           <View style={styles.autoLoginContainer}>
@@ -216,5 +260,40 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#007AFF',
     fontWeight: '600',
+  },
+  roleContainer: {
+    marginBottom: 16,
+  },
+  roleLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 8,
+  },
+  roleButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  roleButton: {
+    flex: 1,
+    backgroundColor: '#f0f0f0',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    paddingVertical: 12,
+    marginHorizontal: 4,
+    alignItems: 'center',
+  },
+  roleButtonActive: {
+    backgroundColor: '#007AFF',
+    borderColor: '#007AFF',
+  },
+  roleButtonText: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '500',
+  },
+  roleButtonTextActive: {
+    color: '#fff',
   },
 });

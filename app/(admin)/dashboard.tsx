@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 // import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React, { useMemo, useState } from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import { FlatList, Modal, Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import * as api from "../../services/api/api";
 
 type StoreRow = {
   no: number;
@@ -20,10 +21,27 @@ export default function DashboardScreen() {
   const [isDetailVisible, setIsDetailVisible] = useState(false);
   const [selectedStore, setSelectedStore] = useState<StoreRow | null>(null);
 
+  useEffect(() => {
+    console.log('api 테스트1')
+    getStoreInfo('5000511001','1234')
+  })
+
+  const getStoreInfo = (userId, password) => {
+    api.login(userId, password)
+        .then(response => {
+          if (response.data.responseBody != null) {
+            const userInfo = response.data.responseBody;
+            console.log('userInfo:' + JSON.stringify(userInfo))
+          }
+        })
+        .catch(error => console.log("userInfo error:"+error))
+        .finally()
+  }
+
   // 테스트 데이터 생성
   const baseData: StoreRow[] = useMemo(() => {
     const rows: StoreRow[] = [];
-    for (let i = 1; i <= 40; i += 1) {
+    for (let i = 1; i <= 30; i += 1) {
       rows.push({
         no: i,
         name: `매장 ${i.toString().padStart(2, '0')}`,
@@ -56,25 +74,92 @@ export default function DashboardScreen() {
     setIsDetailVisible(false);
   };
 
+  type Align = 'left' | 'center' | 'right';
+  type ColumnDef<T> = {
+    key: keyof T | string;
+    title: string;
+    flex: number;
+    align?: Align; // default align for both header and cell
+    headerAlign?: Align; // overrides header align
+    cellAlign?: Align;   // overrides cell align
+  };
+
+  const mainColumns: ColumnDef<StoreRow>[] = useMemo(() => ([
+    { key: 'no',       title: 'No',     flex: 0.8, align: 'center' },
+    { key: 'name',     title: '매장명',   flex: 2,   align: 'left'   },
+    { key: 'code',     title: '코드',    flex: 1.2, align: 'center' },
+    { key: 'posGroup', title: '포스그룹', flex: 1.5, align: 'left'   },
+    { key: 'useYn',    title: '사용여부', flex: 1,   align: 'center' },
+  ]), []);
+
+  const alignStyles = {
+    left: styles.alignLeft,
+    center: styles.alignCenter,
+    right: styles.alignRight,
+  } as const;
+
   const renderHeader = () => (
     <View style={styles.tableHeaderRow}>
-      <Text style={[styles.headerCell, styles.colNo]}>No</Text>
-      <Text style={[styles.headerCell, styles.colName]}>매장명</Text>
-      <Text style={[styles.headerCell, styles.colCode]}>코드</Text>
-      <Text style={[styles.headerCell, styles.colPosGroup]}>포스그룹</Text>
-      <Text style={[styles.headerCell, styles.colUseYn]}>사용여부</Text>
+      {mainColumns.map((col, i) => (
+        <View
+          key={String(col.key)}
+          style={[
+            { flex: col.flex },
+            styles.columnContainer,
+            i < mainColumns.length - 1 && styles.headerCellDivider,
+          ]}
+        >
+          <Text
+            style={[
+              styles.headerCell,
+              alignStyles[col.headerAlign ?? col.align ?? 'left'],
+            ]}
+          >
+            {col.title}
+          </Text>
+        </View>
+      ))}
     </View>
   );
 
-  const renderItem = ({ item }: { item: StoreRow }) => (
-    <View style={styles.tableRow}>
-      <Text style={[styles.cell, styles.colNo]}>{item.no}</Text>
-      <Pressable style={styles.storeNamePressable} onPress={() => openDetail(item)}>
-        <Text style={[styles.cell, styles.colName, styles.linkText]}>{item.name}</Text>
-      </Pressable>
-      <Text style={[styles.cell, styles.colCode]}>{item.code}</Text>
-      <Text style={[styles.cell, styles.colPosGroup]}>{item.posGroup}</Text>
-      <Text style={[styles.cell, styles.colUseYn]}>{item.useYn === 'Y' ? '운영' : '폐점'}</Text>
+  const renderItem = ({ item, index }: { item: StoreRow; index: number }) => (
+    <View style={[styles.tableRow, index % 2 === 0 ? styles.tableRowEven : styles.tableRowOdd]}>
+      {mainColumns.map((col, i) => {
+        const value = col.key === 'useYn' ? (item.useYn === 'Y' ? '운영' : '폐점') : (item as any)[col.key];
+        return (
+          <View
+            key={String(col.key)}
+            style={[
+              { flex: col.flex },
+              styles.columnContainer,
+              i < mainColumns.length - 1 && styles.cellDivider,
+            ]}
+          >
+            {col.key === 'name' ? (
+              <Pressable style={styles.columnPressable} onPress={() => openDetail(item)}>
+                <Text
+                  style={[
+                    styles.cell,
+                    alignStyles[col.cellAlign ?? col.align ?? 'left'],
+                    styles.linkText,
+                  ]}
+                >
+                  {value}
+                </Text>
+              </Pressable>
+            ) : (
+              <Text
+                style={[
+                  styles.cell,
+                  alignStyles[col.cellAlign ?? col.align ?? 'left'],
+                ]}
+              >
+                {value}
+              </Text>
+            )}
+          </View>
+        );
+      })}
     </View>
   );
 
@@ -88,19 +173,57 @@ export default function DashboardScreen() {
     []
   );
 
+  const productColumns: ColumnDef<ProductRow>[] = useMemo(() => ([
+    { key: 'no',          title: 'No',     flex: 0.7, align: 'center' },
+    { key: 'productCode', title: '상품코드',  flex: 1.4, align: 'center' },
+    { key: 'productName', title: '상품명',   flex: 2.2, align: 'left'   },
+  ]), []);
+
   const renderProductHeader = () => (
     <View style={styles.modalTableHeaderRow}>
-      <Text style={[styles.modalHeaderCell, styles.modalColNo]}>No</Text>
-      <Text style={[styles.modalHeaderCell, styles.modalColCode]}>상품코드</Text>
-      <Text style={[styles.modalHeaderCell, styles.modalColName]}>상품명</Text>
+      {productColumns.map((col, i) => (
+        <View
+          key={String(col.key)}
+          style={[
+            { flex: col.flex },
+            styles.modalColumnContainer,
+            i < productColumns.length - 1 && styles.modalHeaderCellDivider,
+          ]}
+        >
+          <Text
+            style={[
+              styles.modalHeaderCell,
+              alignStyles[col.headerAlign ?? col.align ?? 'left'],
+            ]}
+          >
+            {col.title}
+          </Text>
+        </View>
+      ))}
     </View>
   );
 
-  const renderProductItem = ({ item }: { item: ProductRow }) => (
-    <View style={styles.modalTableRow}>
-      <Text style={[styles.modalCell, styles.modalColNo]}>{item.no}</Text>
-      <Text style={[styles.modalCell, styles.modalColCode]}>{item.productCode}</Text>
-      <Text style={[styles.modalCell, styles.modalColName]}>{item.productName}</Text>
+  const renderProductItem = ({ item, index }: { item: ProductRow; index: number }) => (
+    <View style={[styles.modalTableRow, index % 2 === 0 ? styles.tableRowEven : styles.tableRowOdd]}>
+      {productColumns.map((col, i) => (
+        <View
+          key={String(col.key)}
+          style={[
+            { flex: col.flex },
+            styles.modalColumnContainer,
+            i < productColumns.length - 1 && styles.modalCellDivider,
+          ]}
+        >
+          <Text
+            style={[
+              styles.modalCell,
+              alignStyles[col.cellAlign ?? col.align ?? 'left'],
+            ]}
+          >
+            {(item as any)[col.key]}
+          </Text>
+        </View>
+      ))}
     </View>
   );
 
@@ -141,6 +264,9 @@ export default function DashboardScreen() {
           renderItem={renderItem}
           style={styles.tableList}
           contentContainerStyle={styles.tableListContent}
+          bounces={false}
+          alwaysBounceVertical={false}
+          overScrollMode="never"
           showsVerticalScrollIndicator
         />
       </View>
@@ -148,7 +274,7 @@ export default function DashboardScreen() {
       <View style={styles.sectionDivider} />
 
       {/* 전역 레이아웃의 푸터를 사용합니다. */}
-      
+
       {/* 상세 모달 */}
       <Modal visible={isDetailVisible} animationType="fade" transparent>
         <View style={styles.modalOverlay}>
@@ -160,19 +286,24 @@ export default function DashboardScreen() {
               </Pressable>
             </View>
 
-            {renderProductHeader()}
-            {selectedStore && (
-              <Text style={styles.modalStoreName}>{selectedStore.name}</Text>
-            )}
+            <View style={styles.modalTableContainer}>
+              {renderProductHeader()}
+              {selectedStore && (
+                <Text style={styles.modalStoreName}>{selectedStore.name}</Text>
+              )}
 
-            <FlatList
-              data={productData}
-              keyExtractor={(item) => String(item.no)}
-              renderItem={renderProductItem}
-              style={styles.modalTableList}
-              contentContainerStyle={styles.modalTableListContent}
-              showsVerticalScrollIndicator
-            />
+              <FlatList
+                data={productData}
+                keyExtractor={(item) => String(item.no)}
+                renderItem={renderProductItem}
+                style={styles.modalTableList}
+                contentContainerStyle={styles.modalTableListContent}
+                bounces={false}
+                alwaysBounceVertical={false}
+                overScrollMode="never"
+                showsVerticalScrollIndicator
+              />
+            </View>
           </View>
         </View>
       </Modal>
@@ -188,7 +319,7 @@ const styles = StyleSheet.create({
 
   // 상단
   topBar: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
     paddingTop: 12,
     paddingBottom: 8,
     backgroundColor: '#f5f5f5',
@@ -218,7 +349,14 @@ const styles = StyleSheet.create({
   sectionDivider: {
     height: 2,
     backgroundColor: '#b0b0b0',
-    // marginHorizontal: 20,
+    marginHorizontal: 10,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 1 },
+    zIndex: 1,
+    marginVertical: 4,
   },
   segmentItem: {
     paddingVertical: 8,
@@ -253,46 +391,86 @@ const styles = StyleSheet.create({
   tableContainer: {
     flex: 1,
     backgroundColor: '#fff',
-    marginHorizontal: 20,
+    marginHorizontal: 10,
     marginTop: 10,
-    borderRadius: 12,
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
-    shadowRadius: 6,
     elevation: 2,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#e0e0e0',
   },
   tableHeaderRow: {
     flexDirection: 'row',
     backgroundColor: '#f0f3f7',
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#e0e0e0',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
   },
   headerCell: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
     color: '#333',
+    textAlign: 'center',
+  },
+  headerCellDivider: {
+    borderRightWidth: StyleSheet.hairlineWidth,
+    borderRightColor: '#b0b0b0',
+    paddingRight: 10,
+    marginRight: 10,
+  },
+  columnPressable: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  alignLeft: {
+    textAlign: 'left',
+  },
+  alignCenter: {
+    textAlign: 'center',
+  },
+  alignRight: {
+    textAlign: 'right',
   },
   tableList: {
     flex: 1,
+    backgroundColor: '#fff'
   },
   tableListContent: {
-    paddingHorizontal: 12,
-    paddingBottom: 12,
+    backgroundColor: '#fff'
+    // paddingBottom: 12,
+  },
+  columnContainer: {
+    flexDirection: 'row',
+    alignItems: 'center', // vertical center
+    justifyContent: 'center',
+    height: '100%',
   },
   tableRow: {
     flexDirection: 'row',
     alignItems: 'center',
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#eee',
-    paddingVertical: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+  },
+  tableRowEven: {
+    backgroundColor: '#ffffff',
+  },
+  tableRowOdd: {
+    backgroundColor: '#fafafa',
   },
   cell: {
-    fontSize: 13,
-    color: '#444',
+    fontSize: 12,
+    color: '#444'
+  },
+  cellDivider: {
+    borderRightWidth: StyleSheet.hairlineWidth,
+    borderRightColor: '#eee',
+    paddingRight: 10,
+    marginRight: 10,
   },
   linkText: {
     color: '#007AFF',
@@ -324,6 +502,12 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     backgroundColor: '#f8f8f8',
     justifyContent: 'space-between',
+    // De-emphasize footer on both platforms
+    elevation: 0,
+    shadowColor: 'transparent',
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    shadowOffset: { width: 0, height: 0 },
   },
   footerTextButton: {
     paddingHorizontal: 20,
@@ -354,15 +538,20 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.3)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: 10,
   },
   modalCard: {
     width: '100%',
     maxWidth: 640,
     backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
+    padding: 10,
     height: '80%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    elevation: 2,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#e0e0e0',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -388,32 +577,59 @@ const styles = StyleSheet.create({
     borderBottomColor: '#e0e0e0',
     paddingVertical: 8,
     paddingHorizontal: 10,
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
   },
   modalHeaderCell: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
     color: '#333',
+    textAlign: 'center',
+    paddingRight: 8,
+  },
+  modalHeaderCellDivider: {
+    borderRightWidth: StyleSheet.hairlineWidth,
+    borderRightColor: '#b0b0b0',
+    paddingRight: 10,
+    marginRight: 10,
   },
   modalTableList: {
     flex: 1,
     marginTop: 2,
+    backgroundColor: '#fff'
   },
   modalTableListContent: {
-    paddingHorizontal: 10,
     paddingBottom: 8,
+    backgroundColor: '#fff'
+  },
+  modalTableContainer: {
+    flex:1,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#e0e0e0',
+    overflow: 'hidden',
+    backgroundColor: '#fff'
+  },
+  modalColumnContainer: {
+    flexDirection: 'row',
+    alignItems: 'center', // vertical center
+    justifyContent: 'center',
+    height: '100%',
   },
   modalTableRow: {
     flexDirection: 'row',
     alignItems: 'center',
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#eee',
-    paddingVertical: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
   },
   modalCell: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#444',
+  },
+  modalCellDivider: {
+    borderRightWidth: StyleSheet.hairlineWidth,
+    borderRightColor: '#eee',
+    paddingRight: 10,
+    marginRight: 10,
   },
   modalColNo: {
     flex: 0.7,

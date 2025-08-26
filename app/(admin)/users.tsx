@@ -1,196 +1,170 @@
 import { StatusBar } from 'expo-status-bar';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View
 } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 
 export default function UsersScreen() {
-  const [searchQuery, setSearchQuery] = useState('');
-  
-  const users = [
-    {
-      id: 1,
-      name: '김철수',
-      email: 'kim@example.com',
-      status: 'active',
-      role: 'user',
-      joinDate: '2024-01-15',
-    },
-    {
-      id: 2,
-      name: '이영희',
-      email: 'lee@example.com',
-      status: 'active',
-      role: 'user',
-      joinDate: '2024-01-20',
-    },
-    {
-      id: 3,
-      name: '박민수',
-      email: 'park@example.com',
-      status: 'suspended',
-      role: 'user',
-      joinDate: '2024-01-10',
-    },
-    {
-      id: 4,
-      name: '정수진',
-      email: 'jung@example.com',
-      status: 'active',
-      role: 'admin',
-      joinDate: '2024-01-05',
-    },
-    {
-      id: 5,
-      name: '최동욱',
-      email: 'choi@example.com',
-      status: 'inactive',
-      role: 'user',
-      joinDate: '2024-01-25',
-    },
-  ];
-
-  const filteredUsers = users.filter(user =>
-    user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchQuery.toLowerCase())
+  const [users, setUsers] = useState(
+    [
+      {
+        id: 1,
+        name: '김철수',
+        email: 'kim@example.com',
+        status: 'active',
+        role: 'user',
+        joinDate: '2024-01-15',
+        departmentType: '휴게소',
+      },
+    ]
   );
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active':
-        return '#34C759';
-      case 'suspended':
-        return '#FF9500';
-      case 'inactive':
-        return '#FF3B30';
-      default:
-        return '#999';
-    }
-  };
+  const currentUser = users[0];
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'active':
-        return '활성';
-      case 'suspended':
-        return '정지';
-      case 'inactive':
-        return '비활성';
-      default:
-        return '알 수 없음';
-    }
-  };
+  const [formName, setFormName] = useState(currentUser?.name ?? '');
+  const [formCurrentPassword, setFormCurrentPassword] = useState('');
+  const [formNewPassword, setFormNewPassword] = useState('');
+  const [formConfirmPassword, setFormConfirmPassword] = useState('');
 
-  const getRoleText = (role: string) => {
-    switch (role) {
-      case 'admin':
-        return '관리자';
-      case 'user':
-        return '사용자';
-      default:
-        return '사용자';
-    }
-  };
+  useEffect(() => {
+    setFormName(currentUser?.name ?? '');
+  }, [currentUser?.name]);
 
-  const handleUserAction = (userId: number, action: string) => {
-    console.log(`${action} for user ${userId}`);
-    // 여기에 실제 사용자 관리 로직을 구현하세요
+  const validateAndSave = () => {
+
+    if (formNewPassword.length > 0) {
+      if (!formCurrentPassword) {
+        Alert.alert('오류', '현재 비밀번호를 입력해주세요.');
+        return;
+      }
+      if (formNewPassword !== formConfirmPassword) {
+        Alert.alert('오류', '변경 비밀번호가 일치하지 않습니다.');
+        return;
+      }
+      if (formNewPassword.length < 7 || formNewPassword.length > 20) {
+        Alert.alert('오류', '비밀번호 길이를 확인해주세요.');
+        return;
+      }
+      const hasLetters = /[a-zA-Z]/.test(formNewPassword);
+      const hasNumbers = /[0-9]/.test(formNewPassword);
+      const hasSymbols = /[~!@#$%^&*()]/.test(formNewPassword);
+      let charTypeCount = 0;
+      if (hasLetters) charTypeCount++;
+      if (hasNumbers) charTypeCount++;
+      if (hasSymbols) charTypeCount++;
+      if (charTypeCount < 2) {
+        Alert.alert('오류', '비밀번호 입력규칙을 확인해주세요.');
+        return;
+      }
+    }
+
+    // 이름 변경 반영
+    if (currentUser) {
+      setUsers(prev => prev.map(u => u.id === currentUser.id ? { ...u, name: formName } : u));
+    }
+
+    // 실제 API 연동 위치: 현재 비밀번호 검증 및 변경 비밀번호 저장
+
+    Alert.alert('완료', '사용자 정보가 저장되었습니다.');
+    setFormCurrentPassword('');
+    setFormNewPassword('');
+    setFormConfirmPassword('');
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <KeyboardAvoidingView
+     style={styles.container}
+     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <StatusBar style="dark" />
-      
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
-          <Text style={styles.title}>사용자 관리</Text>
-          <Text style={styles.subtitle}>총 {users.length}명의 사용자</Text>
-        </View>
 
-        <View style={styles.searchContainer}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="사용자 검색..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-        </View>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.form}>
+          <View style={styles.formRow}> 
+            <Text style={styles.formLabel}>소속구분</Text>
+            <TextInput
+              style={[styles.formInput, styles.readonlyInput]}
+              value={currentUser?.departmentType ?? ''}
+              editable={false}
+            />
+          </View>
 
-        <View style={styles.statsContainer}>
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>{users.filter(u => u.status === 'active').length}</Text>
-            <Text style={styles.statLabel}>활성 사용자</Text>
+          <View style={styles.formRow}>
+            <Text style={styles.formLabel}>아이디</Text>
+            <TextInput
+              style={[styles.formInput, styles.readonlyInput]}
+              value={currentUser?.email ?? ''}
+              editable={false}
+            />
           </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>{users.filter(u => u.status === 'suspended').length}</Text>
-            <Text style={styles.statLabel}>정지된 사용자</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>{users.filter(u => u.role === 'admin').length}</Text>
-            <Text style={styles.statLabel}>관리자</Text>
-          </View>
-        </View>
 
-        <View style={styles.usersContainer}>
-          <Text style={styles.sectionTitle}>사용자 목록</Text>
-          
-          {filteredUsers.map((user) => (
-            <View key={user.id} style={styles.userCard}>
-              <View style={styles.userInfo}>
-                <View style={styles.userHeader}>
-                  <Text style={styles.userName}>{user.name}</Text>
-                  <View style={[
-                    styles.statusBadge,
-                    { backgroundColor: getStatusColor(user.status) }
-                  ]}>
-                    <Text style={styles.statusText}>{getStatusText(user.status)}</Text>
-                  </View>
-                </View>
-                
-                <Text style={styles.userEmail}>{user.email}</Text>
-                
-                <View style={styles.userDetails}>
-                  <Text style={styles.userRole}>{getRoleText(user.role)}</Text>
-                  <Text style={styles.userDate}>가입일: {user.joinDate}</Text>
-                </View>
-              </View>
-              
-              <View style={styles.userActions}>
-                {user.status === 'active' ? (
-                  <TouchableOpacity
-                    style={[styles.actionButton, styles.suspendButton]}
-                    onPress={() => handleUserAction(user.id, 'suspend')}
-                  >
-                    <Text style={styles.suspendButtonText}>정지</Text>
-                  </TouchableOpacity>
-                ) : (
-                  <TouchableOpacity
-                    style={[styles.actionButton, styles.activateButton]}
-                    onPress={() => handleUserAction(user.id, 'activate')}
-                  >
-                    <Text style={styles.activateButtonText}>활성화</Text>
-                  </TouchableOpacity>
-                )}
-                
-                <TouchableOpacity
-                  style={[styles.actionButton, styles.deleteButton]}
-                  onPress={() => handleUserAction(user.id, 'delete')}
-                >
-                  <Text style={styles.deleteButtonText}>삭제</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          ))}
+          <View style={styles.formRow}>
+            <Text style={styles.formLabel}>현재 비밀번호</Text>
+            <TextInput
+              style={styles.formInput}
+              value={formCurrentPassword}
+              onChangeText={setFormCurrentPassword}
+              secureTextEntry
+              autoCapitalize="none"
+              autoCorrect={false}
+              spellCheck={false}
+            />
+          </View>
+
+          <View style={styles.formRow}>
+            <Text style={styles.formLabel}>변경 비밀번호</Text>
+            <TextInput
+              style={styles.formInput}
+              value={formNewPassword}
+              onChangeText={setFormNewPassword}
+              secureTextEntry
+              autoCapitalize="none"
+              autoCorrect={false}
+              spellCheck={false}
+            />
+          </View>
+
+          <View style={styles.formRow}>
+            <Text style={styles.formLabel}></Text>
+            <TextInput
+              style={styles.formInput}
+              value={formConfirmPassword}
+              onChangeText={setFormConfirmPassword}
+              secureTextEntry
+              autoCapitalize="none"
+              autoCorrect={false}
+              spellCheck={false}
+            />
+          </View>
+
+          <View style={styles.formRow}>
+            <Text style={styles.formLabel}>사용자명</Text>
+            <TextInput
+              style={styles.formInput}
+              value={formName}
+              onChangeText={setFormName}
+              autoCapitalize="words"
+              autoCorrect={false}
+            />
+          </View>
+
+          <Pressable style={styles.saveButton} onPress={validateAndSave}>
+            <Text style={styles.saveButtonText}>저장</Text>
+          </Pressable>
         </View>
       </ScrollView>
-      {/* 전역 레이아웃의 푸터를 사용합니다. */}
-    </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -199,164 +173,172 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
-  scrollContent: {
-    padding: 20,
+  topBar: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 8,
+    backgroundColor: '#f5f5f5',
   },
-  header: {
-    marginBottom: 24,
+  filterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+  filterRowSpacing: {
+    marginBottom: 10,
+  },
+  pageTitle: {
+    fontSize: 24,
+    fontWeight: '700',
     color: '#333',
-    marginBottom: 8,
   },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
+  filterLabel: {
+    fontSize: 14,
+    color: '#555',
+    marginRight: 8,
+    width: 50,
   },
-  searchContainer: {
-    marginBottom: 24,
-  },
-  searchInput: {
+  input: {
+    flex: 1,
+    height: 40,
     backgroundColor: '#fff',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
     borderWidth: 1,
     borderColor: '#ddd',
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 24,
-  },
-  statCard: {
-    backgroundColor: '#fff',
     borderRadius: 8,
-    padding: 16,
-    flex: 1,
-    marginHorizontal: 4,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  statNumber: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#007AFF',
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#666',
-  },
-  usersContainer: {
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    paddingHorizontal: 12,
     color: '#333',
-    marginBottom: 16,
   },
-  userCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+  searchButton: {
+    marginLeft: 'auto',
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
   },
-  userInfo: {
-    marginBottom: 12,
+  searchButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 14,
   },
-  userHeader: {
+  sectionDivider: {
+    height: 2,
+    backgroundColor: '#b0b0b0',
+  },
+  scrollContent: {
+    // flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 40,
+  },
+  form: {
+    width: '100%',
+  },
+  formRow: {
+    marginBottom: 10,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
   },
-  userName: {
-    fontSize: 18,
+  formLabel: {
+    fontSize: 16,
     fontWeight: '600',
     color: '#333',
+    marginBottom: 0,
+    width: 110,
+    marginRight: 12,
+  },
+  formInput: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    fontSize: 16,
+    flex: 1,
+  },
+  readonlyInput: {
+    backgroundColor: '#f7f7f7',
+  },
+  saveButton: {
+    backgroundColor: '#007AFF',
+    borderRadius: 8,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: 24,
+  },
+  saveButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 18,
   },
   statusBadge: {
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
+    alignSelf: 'flex-start',
   },
   statusText: {
     fontSize: 12,
     color: '#fff',
     fontWeight: '500',
   },
-  userEmail: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
-  userDetails: {
+  modalCard: {
+    width: '100%',
+    maxWidth: 520,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  modalHeader: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#eee',
   },
-  userRole: {
-    fontSize: 12,
-    color: '#007AFF',
-    fontWeight: '500',
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#333',
   },
-  userDate: {
-    fontSize: 12,
-    color: '#999',
+  modalClose: {
+    fontSize: 18,
+    color: '#666',
   },
-  userActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+  modalBody: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     gap: 8,
   },
-  actionButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-    minWidth: 60,
+  userPickRow: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#eee',
   },
-  suspendButton: {
-    backgroundColor: '#FF9500',
+  userPickInfo: {
+    flexDirection: 'column',
+    gap: 2,
   },
-  suspendButtonText: {
-    color: '#fff',
+  userPickName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+  },
+  userPickEmail: {
     fontSize: 12,
-    fontWeight: '500',
-  },
-  activateButton: {
-    backgroundColor: '#34C759',
-  },
-  activateButtonText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  deleteButton: {
-    backgroundColor: '#FF3B30',
-  },
-  deleteButtonText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '500',
+    color: '#666',
   },
 });
