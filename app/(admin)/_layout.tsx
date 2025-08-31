@@ -28,7 +28,7 @@ export default function AdminLayout() {
           options={{ title: '설정', headerShown: true }}
         />
         <Stack.Screen
-          name="venderList"
+          name="vendorList"
           options={{ title: '거래처 목록', headerShown: true }}
         />
         <Stack.Screen

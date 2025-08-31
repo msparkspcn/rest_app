@@ -1,7 +1,7 @@
+import { commonStyles } from '@/styles';
 import { Ionicons } from '@expo/vector-icons';
-// import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React, {useEffect, useMemo, useState} from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { FlatList, Modal, Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import * as api from "../../services/api/api";
 
@@ -61,6 +61,7 @@ export default function DashboardScreen() {
 
   const onSearch = () => {
     setSubmittedFilter(operateFilter);
+    //api 호출 처리 필요
   };
 
   // 전역 푸터 사용으로 지역 초기화 핸들러는 현재 미사용입니다.
@@ -79,9 +80,9 @@ export default function DashboardScreen() {
     key: keyof T | string;
     title: string;
     flex: number;
-    align?: Align; // default align for both header and cell
-    headerAlign?: Align; // overrides header align
-    cellAlign?: Align;   // overrides cell align
+    align?: Align;
+    headerAlign?: Align;
+    cellAlign?: Align;
   };
 
   const mainColumns: ColumnDef<StoreRow>[] = useMemo(() => ([
@@ -93,25 +94,25 @@ export default function DashboardScreen() {
   ]), []);
 
   const alignStyles = {
-    left: styles.alignLeft,
-    center: styles.alignCenter,
-    right: styles.alignRight,
+    left: commonStyles.alignLeft,
+    center: commonStyles.alignCenter,
+    right: commonStyles.alignRight,
   } as const;
 
   const renderHeader = () => (
-    <View style={styles.tableHeaderRow}>
+    <View style={commonStyles.tableHeaderRow}>
       {mainColumns.map((col, i) => (
         <View
           key={String(col.key)}
           style={[
             { flex: col.flex },
-            styles.columnContainer,
+            commonStyles.columnContainer,
             i < mainColumns.length - 1 && styles.headerCellDivider,
           ]}
         >
           <Text
             style={[
-              styles.headerCell,
+              commonStyles.headerCell,
               alignStyles[col.headerAlign ?? col.align ?? 'left'],
             ]}
           >
@@ -123,23 +124,24 @@ export default function DashboardScreen() {
   );
 
   const renderItem = ({ item, index }: { item: StoreRow; index: number }) => (
-    <View style={[styles.tableRow, index % 2 === 0 ? styles.tableRowEven : styles.tableRowOdd]}>
+    <View style={[commonStyles.tableRow, index % 2 === 0 ? commonStyles.tableRowEven : commonStyles.tableRowOdd]}>
       {mainColumns.map((col, i) => {
-        const value = col.key === 'useYn' ? (item.useYn === 'Y' ? '운영' : '폐점') : (item as any)[col.key];
+        const value = col.key === 'useYn' ? (item.useYn === 'Y' ? '운영' : '폐점') 
+        : (item as any)[col.key];
         return (
           <View
             key={String(col.key)}
             style={[
               { flex: col.flex },
-              styles.columnContainer,
-              i < mainColumns.length - 1 && styles.cellDivider,
+              commonStyles.columnContainer,
+              i < mainColumns.length - 1 && commonStyles.cellDivider,
             ]}
           >
             {col.key === 'name' ? (
-              <Pressable style={styles.columnPressable} onPress={() => openDetail(item)}>
+              <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
                 <Text
                   style={[
-                    styles.cell,
+                    commonStyles.cell,
                     alignStyles[col.cellAlign ?? col.align ?? 'left'],
                     styles.linkText,
                   ]}
@@ -150,7 +152,7 @@ export default function DashboardScreen() {
             ) : (
               <Text
                 style={[
-                  styles.cell,
+                  commonStyles.cell,
                   alignStyles[col.cellAlign ?? col.align ?? 'left'],
                 ]}
               >
@@ -175,24 +177,24 @@ export default function DashboardScreen() {
 
   const productColumns: ColumnDef<ProductRow>[] = useMemo(() => ([
     { key: 'no',          title: 'No',     flex: 0.7, align: 'center' },
-    { key: 'productCode', title: '상품코드',  flex: 1.4, align: 'center' },
-    { key: 'productName', title: '상품명',   flex: 2.2, align: 'left'   },
+    { key: 'productCode', title: '상품코드',  flex: 1.4, align: 'left' },
+    { key: 'productName', title: '상품명',   flex: 2.2, align: 'left'   }, 
   ]), []);
 
   const renderProductHeader = () => (
-    <View style={styles.modalTableHeaderRow}>
+    <View style={commonStyles.modalTableHeaderRow}>
       {productColumns.map((col, i) => (
         <View
           key={String(col.key)}
           style={[
             { flex: col.flex },
-            styles.modalColumnContainer,
+            styles.modalHeaderContainer,
             i < productColumns.length - 1 && styles.modalHeaderCellDivider,
           ]}
         >
           <Text
             style={[
-              styles.modalHeaderCell,
+              commonStyles.modalHeaderCell,
               alignStyles[col.headerAlign ?? col.align ?? 'left'],
             ]}
           >
@@ -204,19 +206,19 @@ export default function DashboardScreen() {
   );
 
   const renderProductItem = ({ item, index }: { item: ProductRow; index: number }) => (
-    <View style={[styles.modalTableRow, index % 2 === 0 ? styles.tableRowEven : styles.tableRowOdd]}>
+    <View style={[commonStyles.modalTableRow, index % 2 === 0 ? commonStyles.tableRowEven : commonStyles.tableRowOdd]}>
       {productColumns.map((col, i) => (
         <View
           key={String(col.key)}
           style={[
             { flex: col.flex },
-            styles.modalColumnContainer,
-            i < productColumns.length - 1 && styles.modalCellDivider,
+            commonStyles.modalColumnContainer,
+            i < productColumns.length - 1 && commonStyles.modalCellDivider,
           ]}
         >
           <Text
             style={[
-              styles.modalCell,
+              commonStyles.modalCell,
               alignStyles[col.cellAlign ?? col.align ?? 'left'],
             ]}
           >
@@ -228,35 +230,35 @@ export default function DashboardScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={commonStyles.container}>
       <StatusBar style="dark" />
 
       {/* 상단 필터 영역 */}
-      <View style={styles.topBar}>
-        <View style={styles.filterRow}>
-          <Text style={styles.filterLabel}>운영여부</Text>
-          <View style={styles.segmented}>
+      <View style={commonStyles.topBar}>
+        <View style={commonStyles.filterRow}> 
+          <Text style={commonStyles.filterLabel}>운영여부</Text>
+          <View style={commonStyles.segmented}>
             {(['전체', '운영', '폐점'] as OperateFilter[]).map(option => (
               <Pressable
                 key={option}
                 onPress={() => setOperateFilter(option)}
-                style={[styles.segmentItem, operateFilter === option && styles.segmentItemActive]}
+                style={[commonStyles.segmentItem, operateFilter === option && commonStyles.segmentItemActive]}
               >
-                <Text style={[styles.segmentText, operateFilter === option && styles.segmentTextActive]}>
+                <Text style={[commonStyles.segmentText, operateFilter === option && commonStyles.segmentTextActive]}>
                   {option}
                 </Text>
               </Pressable>
             ))}
           </View>
-          <Pressable style={styles.searchButton} onPress={onSearch}>
-            <Text style={styles.searchButtonText}>조회</Text>
+          <Pressable style={commonStyles.searchButton} onPress={onSearch}>
+            <Text style={commonStyles.searchButtonText}>조회</Text>
           </Pressable>
         </View>
       </View>
-      <View style={styles.sectionDivider} />
+      <View style={commonStyles.sectionDivider} />
 
       {/* 그리드 영역 */}
-      <View style={styles.tableContainer}>
+      <View style={commonStyles.tableContainer}>
         {renderHeader()}
         <FlatList
           data={filteredData}
@@ -271,16 +273,16 @@ export default function DashboardScreen() {
         />
       </View>
 
-      <View style={styles.sectionDivider} />
+      <View style={commonStyles.sectionDivider} />
 
       {/* 전역 레이아웃의 푸터를 사용합니다. */}
 
       {/* 상세 모달 */}
       <Modal visible={isDetailVisible} animationType="fade" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>매장 취급상품</Text>
+        <View style={commonStyles.modalOverlay}>
+          <View style={commonStyles.modalCard}>
+            <View style={commonStyles.modalHeader}>
+              <Text style={commonStyles.modalTitle}>매장 취급상품</Text>
               <Pressable onPress={closeDetail} hitSlop={8}>
                 <Ionicons name="close" size={20} color="#333" />
               </Pressable>
@@ -312,108 +314,11 @@ export default function DashboardScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-
-  // 상단
-  topBar: {
-    paddingHorizontal: 10,
-    paddingTop: 12,
-    paddingBottom: 8,
-    backgroundColor: '#f5f5f5',
-  },
   screenTitle: {
     fontSize: 22,
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 12,
-  },
-  filterRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  filterLabel: {
-    fontSize: 14,
-    color: '#555',
-    marginRight: 8,
-  },
-  segmented: {
-    flexDirection: 'row',
-    backgroundColor: '#e8e8e8',
-    borderRadius: 8,
-    padding: 4,
-  },
-  sectionDivider: {
-    height: 2,
-    backgroundColor: '#b0b0b0',
-    marginHorizontal: 10,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
-    shadowOffset: { width: 0, height: 1 },
-    zIndex: 1,
-    marginVertical: 4,
-  },
-  segmentItem: {
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 6,
-  },
-  segmentItemActive: {
-    backgroundColor: '#007AFF',
-  },
-  segmentText: {
-    fontSize: 14,
-    color: '#333',
-  },
-  segmentTextActive: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  searchButton: {
-    marginLeft: 'auto',
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 28,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  searchButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-
-  // 테이블
-  tableContainer: {
-    flex: 1,
-    backgroundColor: '#fff',
-    marginHorizontal: 10,
-    marginTop: 10,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    elevation: 2,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#e0e0e0',
-  },
-  tableHeaderRow: {
-    flexDirection: 'row',
-    backgroundColor: '#f0f3f7',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e0e0e0',
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-  },
-  headerCell: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#333',
-    textAlign: 'center',
   },
   headerCellDivider: {
     borderRightWidth: StyleSheet.hairlineWidth,
@@ -421,19 +326,7 @@ const styles = StyleSheet.create({
     paddingRight: 10,
     marginRight: 10,
   },
-  columnPressable: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  alignLeft: {
-    textAlign: 'left',
-  },
-  alignCenter: {
-    textAlign: 'center',
-  },
-  alignRight: {
-    textAlign: 'right',
-  },
+
   tableList: {
     flex: 1,
     backgroundColor: '#fff'
@@ -442,36 +335,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff'
     // paddingBottom: 12,
   },
-  columnContainer: {
-    flexDirection: 'row',
-    alignItems: 'center', // vertical center
-    justifyContent: 'center',
-    height: '100%',
-  },
-  tableRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#eee',
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-  },
-  tableRowEven: {
-    backgroundColor: '#ffffff',
-  },
-  tableRowOdd: {
-    backgroundColor: '#fafafa',
-  },
-  cell: {
-    fontSize: 12,
-    color: '#444'
-  },
-  cellDivider: {
-    borderRightWidth: StyleSheet.hairlineWidth,
-    borderRightColor: '#eee',
-    paddingRight: 10,
-    marginRight: 10,
-  },
+
   linkText: {
     color: '#007AFF',
     textDecorationLine: 'underline',
@@ -494,97 +358,13 @@ const styles = StyleSheet.create({
   colUseYn: {
     flex: 1,
   },
-
-  // 푸터
-  footer: {
-    flexDirection: 'row',
-    paddingVertical: 10,
-    marginHorizontal: 20,
-    backgroundColor: '#f8f8f8',
-    justifyContent: 'space-between',
-    // De-emphasize footer on both platforms
-    elevation: 0,
-    shadowColor: 'transparent',
-    shadowOpacity: 0,
-    shadowRadius: 0,
-    shadowOffset: { width: 0, height: 0 },
-  },
-  footerTextButton: {
-    paddingHorizontal: 20,
-  },
-  footerItemRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  footerSeparator: {
-    width: 1,
-    height: 18,
-    backgroundColor: '#b0b0b0',
-    alignSelf: 'center',
-  },
-  footerText: {
-    color: '#333',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  footerTextDanger: {
-    color: '#FF3B30',
-  },
-
-  // Modal
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 10,
-  },
-  modalCard: {
-    width: '100%',
-    maxWidth: 640,
-    backgroundColor: '#fff',
-    padding: 10,
-    height: '80%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    elevation: 2,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#e0e0e0',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#333',
-  },
   modalStoreName: {
     fontSize: 14,
     color: '#555',
     paddingHorizontal: 10,
     paddingVertical: 8,
   },
-  modalTableHeaderRow: {
-    flexDirection: 'row',
-    backgroundColor: '#f0f3f7',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e0e0e0',
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-  },
-  modalHeaderCell: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#333',
-    textAlign: 'center',
-    paddingRight: 8,
-  },
+ 
   modalHeaderCellDivider: {
     borderRightWidth: StyleSheet.hairlineWidth,
     borderRightColor: '#b0b0b0',
@@ -607,37 +387,10 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: '#fff'
   },
-  modalColumnContainer: {
+  modalHeaderContainer: {
     flexDirection: 'row',
     alignItems: 'center', // vertical center
     justifyContent: 'center',
     height: '100%',
-  },
-  modalTableRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#eee',
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-  },
-  modalCell: {
-    fontSize: 12,
-    color: '#444',
-  },
-  modalCellDivider: {
-    borderRightWidth: StyleSheet.hairlineWidth,
-    borderRightColor: '#eee',
-    paddingRight: 10,
-    marginRight: 10,
-  },
-  modalColNo: {
-    flex: 0.7,
-  },
-  modalColCode: {
-    flex: 1.4,
-  },
-  modalColName: {
-    flex: 2.2,
   },
 });
