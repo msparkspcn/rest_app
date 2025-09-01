@@ -1,4 +1,4 @@
-import { router, type Href } from 'expo-router';
+import { router, Href } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useMemo, useState } from 'react';
 import {
@@ -18,7 +18,7 @@ type MenuGroup = { key: string; title: string; icon: string; children: MenuChild
 export default function AdminHomeScreen() {
   const { user } = useUser();
   console.log('user:'+JSON.stringify(user))
-  
+
   const menuGroups = useMemo((): MenuGroup[] => [
     {
       key: 'master',
@@ -28,8 +28,8 @@ export default function AdminHomeScreen() {
         { title: '사용자 정보수정', icon: '👤', route: '/(admin)/users', roleType: 'all_except_001' },
         { title: '매장현황(휴)', icon: '🏬', route: '/(admin)/dashboard', roleType: DEP_R },
         { title: '거래처현황(휴)', icon: '🏬', route: '/(admin)/vendorList', roleType: DEP_R },
-        { title: '거래처현황(주)', icon: '🏬', route: '/(admin)/vendorList', roleType: DEP_G }, 
-        { title: '키오스크품절관리(휴)', icon: '🛑', route: '/(admin)/kioskSoldOut', roleType: DEP_R }, 
+        { title: '거래처현황(주)', icon: '🏬', route: '/(admin)/vendorList', roleType: DEP_G },
+        { title: '키오스크품절관리(휴)', icon: '🛑', route: '/(admin)/kioskSoldOut', roleType: DEP_R },
       ],
     },
     {
@@ -40,8 +40,8 @@ export default function AdminHomeScreen() {
                 { title: '일자별 매입현황(휴)', icon: '📝', route: '/(admin)/purchaseDailyReport', roleType: DEP_R },
         { title: '일자별 매입현황(통합)', icon: '📝', route: '/(admin)/purchaseDailyReport', roleType: DEP_OP },
         { title: '일자별 매입현황(주)', icon: '📝', route: '/(admin)/purchaseDailyReport', roleType: DEP_G },
-        { title: '상품별 매입현황(휴)',  icon: '📄', route: '/(admin)/purchaseProductReport' as Href, roleType: DEP_R }, 
-      ], 
+        { title: '상품별 매입현황(휴)',  icon: '📄', route: '/(admin)/purchaseProductReport' as Href, roleType: DEP_R },
+      ],
     },
     {
       key: 'sales',
@@ -92,11 +92,11 @@ export default function AdminHomeScreen() {
     ], []);
 
   const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
-  
+
   // 사용자의 roleType에 따라 메뉴를 필터링
   const filteredMenuGroups = useMemo(() => {
     if (!user) return [];
-    
+
     return menuGroups.map(group => ({
       ...group,
       children: group.children.filter(item => {
@@ -109,13 +109,13 @@ export default function AdminHomeScreen() {
       })
     })).filter(group => group.children.length > 0); // 자식 메뉴가 없는 그룹은 제거
   }, [user, menuGroups]);
-  
+
   const toggleGroup = (key: string) => {
     setExpandedGroup(prev => (prev === key ? null : key));
   };
 
   const { logout } = useUser();
-  
+
   const handleLogout = () => {
     // 여기에 로그아웃 로직을 구현하세요
     console.log('로그아웃');
@@ -130,7 +130,7 @@ export default function AdminHomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
-      
+
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <Text style={styles.welcomeText}>관리자님, 환영합니다!</Text>

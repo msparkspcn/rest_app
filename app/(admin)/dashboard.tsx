@@ -126,7 +126,7 @@ export default function DashboardScreen() {
   const renderItem = ({ item, index }: { item: StoreRow; index: number }) => (
     <View style={[commonStyles.tableRow, index % 2 === 0 ? commonStyles.tableRowEven : commonStyles.tableRowOdd]}>
       {mainColumns.map((col, i) => {
-        const value = col.key === 'useYn' ? (item.useYn === 'Y' ? '운영' : '폐점') 
+        const value = col.key === 'useYn' ? (item.useYn === 'Y' ? '운영' : '폐점')
         : (item as any)[col.key];
         return (
           <View
@@ -178,7 +178,7 @@ export default function DashboardScreen() {
   const productColumns: ColumnDef<ProductRow>[] = useMemo(() => ([
     { key: 'no',          title: 'No',     flex: 0.7, align: 'center' },
     { key: 'productCode', title: '상품코드',  flex: 1.4, align: 'left' },
-    { key: 'productName', title: '상품명',   flex: 2.2, align: 'left'   }, 
+    { key: 'productName', title: '상품명',   flex: 2.2, align: 'left'   },
   ]), []);
 
   const renderProductHeader = () => (
@@ -235,7 +235,7 @@ export default function DashboardScreen() {
 
       {/* 상단 필터 영역 */}
       <View style={commonStyles.topBar}>
-        <View style={commonStyles.filterRow}> 
+        <View style={commonStyles.filterRow}>
           <Text style={commonStyles.filterLabel}>운영여부</Text>
           <View style={commonStyles.segmented}>
             {(['전체', '운영', '폐점'] as OperateFilter[]).map(option => (
@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 8,
   },
- 
+
   modalHeaderCellDivider: {
     borderRightWidth: StyleSheet.hairlineWidth,
     borderRightColor: '#b0b0b0',

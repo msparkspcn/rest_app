@@ -58,7 +58,6 @@ export const commonStyles = StyleSheet.create({
       tableContainer: {
         flex: 1,
         backgroundColor: '#fff',
-        marginHorizontal: 10,
         marginTop: 10,
         overflow: 'hidden',
         shadowColor: '#000',
@@ -74,12 +73,13 @@ export const commonStyles = StyleSheet.create({
         borderBottomWidth: StyleSheet.hairlineWidth,
         borderBottomColor: '#e0e0e0',
         paddingVertical: 8,
-        paddingHorizontal: 10,
+        marginHorizontal: 10,
       },
       headerCell: {
         fontSize: 12,
         fontWeight: '700',
         color: '#333',
+        width:'100%',
         textAlign: 'center',
       },
       tableRowEven: {
@@ -105,8 +105,6 @@ export const commonStyles = StyleSheet.create({
       cellDivider: {
         borderRightWidth: StyleSheet.hairlineWidth,
         borderRightColor: '#eee',
-        paddingRight: 10,
-        marginRight: 10,
       },
       columnPressable: {
         flex: 1,
@@ -124,6 +122,7 @@ export const commonStyles = StyleSheet.create({
       cell: {
         fontSize: 12,
         color: '#444',
+        width: '100%'
       },
       modalOverlay: {
         flex: 1,
@@ -215,7 +214,6 @@ export const commonStyles = StyleSheet.create({
     sectionDivider: {
         height: 2,
         backgroundColor: '#b0b0b0',
-        marginHorizontal: 10,
         elevation: 2,
         shadowColor: '#000',
         shadowOpacity: 0.08,
@@ -224,5 +222,8 @@ export const commonStyles = StyleSheet.create({
         zIndex: 1,
         marginVertical: 4,
       },
-
-}) 
+  headerCellDivider: {
+    borderRightWidth: StyleSheet.hairlineWidth,
+    borderRightColor: '#b0b0b0',
+  },
+})

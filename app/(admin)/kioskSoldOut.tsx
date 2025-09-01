@@ -1,9 +1,10 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useMemo, useState } from 'react';
 import { FlatList, Modal, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {commonStyles} from "../../styles/index";
 
 type StoreOption = { id: string; name: string };
-type ProductRow = { no: number; name: string; useYn: 'Y' | 'N' };
+type ProductRow = { no: number; itemNm: string; useYn: 'Y' | 'N' };
 
 export default function KioskSoldOutScreen() {
   const stores: StoreOption[] = useMemo(
@@ -19,7 +20,7 @@ export default function KioskSoldOutScreen() {
     () =>
       Array.from({ length: 60 }).map((_, index) => ({
         no: index + 1,
-        name: `상품 ${index + 1}`,
+        itemNm: `상품 ${index + 1}`,
         useYn: index % 3 === 0 ? 'N' : 'Y',
       })),
     []
@@ -40,31 +41,80 @@ export default function KioskSoldOutScreen() {
   const onSearch = () => {
     setSubmittedStoreId(selectedStoreId);
   };
+  type Align = 'left' | 'center' | 'right';
+  type ColumnDef<T> = {
+    key: keyof T | string;
+    title: string;
+    flex: number;
+    align?: Align;
+    headerAlign?: Align;
+    cellAlign?: Align;
+  };
+  const mainColumns: ColumnDef<ProductRow>[] = useMemo(() => ([
+    { key: 'no',       title: 'No',     flex: 0.3, align: 'center' },
+    { key: 'itemNm',     title: '상품명',   flex: 2,   align: 'left'   },
+    { key: 'useYn',    title: '사용여부', flex: 0.5,   align: 'center' },
+  ]), []);
+
+  const alignStyles = {
+    left: commonStyles.alignLeft,
+    center: commonStyles.alignCenter,
+    right: commonStyles.alignRight,
+  } as const;
 
   const renderHeader = () => (
-    <View style={styles.tableHeaderRow}>
-      <Text style={[styles.headerCell, styles.colNo]}>No</Text>
-      <Text style={[styles.headerCell, styles.colName]}>상품명</Text>
-      <Text style={[styles.headerCell, styles.colUseYn]}>출력여부</Text>
+    <View style={commonStyles.tableHeaderRow}>
+      {mainColumns.map((col, i) => (
+          <View
+              key={String(col.key)}
+              style={[
+                { flex: col.flex },
+                commonStyles.columnContainer,
+                i < mainColumns.length - 1 && commonStyles.headerCellDivider,
+              ]}
+          >
+            <Text style={commonStyles.headerCell}>{col.title}</Text>
+          </View>
+      ))}
     </View>
   );
 
-  const renderItem = ({ item }: { item: ProductRow }) => (
-    <View style={styles.tableRow}>
-      <Text style={[styles.cell, styles.colNo]}>{item.no}</Text>
-      <Text style={[styles.cell, styles.colName]}>{item.name}</Text>
-      <Text style={[styles.cell, styles.colUseYn]}>{item.useYn === 'Y' ? '출력' : '품절'}</Text>
+  const renderItem = ({ item, index }: { item: ProductRow, index: number }) => (
+      <View style={[commonStyles.tableRow, index % 2 === 0 ? commonStyles.tableRowEven : commonStyles.tableRowOdd]}>
+        {mainColumns.map((col, i) => {
+          const value = col.key === 'useYn' ? (item.useYn === 'Y' ? '출력' : '품절')
+              : (item as any)[col.key];
+          return (
+              <View
+                  key={String(col.key)}
+                  style={[
+                    { flex: col.flex },
+                    commonStyles.columnContainer,
+                    i < mainColumns.length - 1 && commonStyles.cellDivider,
+                  ]}
+              >
+                <Text
+                    style={[
+                      commonStyles.cell,
+                      alignStyles[col.cellAlign ?? col.align ?? 'left']
+                    ]}
+                >
+                  {value}
+                </Text>
+              </View>
+          );
+        })}
     </View>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={commonStyles.container}>
       <StatusBar style="dark" />
 
       {/* 상단 필터 영역 */}
-      <View style={styles.topBar}>
-        <View style={styles.filterRow}>
-          <Text style={styles.filterLabel}>매장</Text>
+      <View style={commonStyles.topBar}>
+        <View style={commonStyles.filterRow}>
+          <Text style={commonStyles.filterLabel}>매장</Text>
           <TouchableOpacity
             style={styles.selectInput}
             onPress={() => setShowStoreModal(true)}
@@ -74,16 +124,16 @@ export default function KioskSoldOutScreen() {
             </Text>
             <Text style={styles.selectArrow}>▼</Text>
           </TouchableOpacity>
-          <Pressable style={styles.searchButton} onPress={onSearch}>
-            <Text style={styles.searchButtonText}>조회</Text>
+          <Pressable style={commonStyles.searchButton} onPress={onSearch}>
+            <Text style={commonStyles.searchButtonText}>조회</Text>
           </Pressable>
         </View>
       </View>
+      <View style={commonStyles.sectionDivider} />
 
-      <View style={styles.sectionDivider} />
 
       {/* 그리드 영역 */}
-      <View style={styles.tableContainer}>
+      <View style={commonStyles.tableContainer}>
         {renderHeader()}
         <FlatList
           data={filteredData}
@@ -94,7 +144,7 @@ export default function KioskSoldOutScreen() {
           showsVerticalScrollIndicator
         />
       </View>
-      {/* 매장 선택 Modal */}
+
       <Modal
         visible={showStoreModal}
         transparent
@@ -133,26 +183,6 @@ export default function KioskSoldOutScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  topBar: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 8,
-    backgroundColor: '#f5f5f5',
-  },
-  filterRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  filterLabel: {
-    fontSize: 14,
-    color: '#555',
-    marginRight: 8,
-  },
   selectInput: {
     backgroundColor: '#fff',
     borderWidth: 1,
@@ -176,43 +206,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#666',
   },
-  searchButton: {
-    marginLeft: 'auto',
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 24,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  searchButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  sectionDivider: {
-    height: 2,
-    backgroundColor: '#b0b0b0',
-  },
-  tableContainer: {
-    flex: 1,
-    backgroundColor: '#fff',
-    marginHorizontal: 20,
-    marginTop: 10,
-    borderRadius: 12,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  tableHeaderRow: {
-    flexDirection: 'row',
-    backgroundColor: '#f0f3f7',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e0e0e0',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-  },
   headerCell: {
     fontSize: 13,
     fontWeight: '700',
@@ -222,7 +215,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   tableListContent: {
-    paddingHorizontal: 12,
     paddingBottom: 12,
   },
   tableRow: {
@@ -237,13 +229,14 @@ const styles = StyleSheet.create({
     color: '#444',
   },
   colNo: {
-    flex: 0.7,
+    flex: 0.3,
+    backgroundColor:'red'
   },
   colName: {
-    flex: 2.2,
+    flex: 2,
   },
   colUseYn: {
-    flex: 1,
+    flex: 0.5,
   },
   modalOverlay: {
     flex: 1,
@@ -255,7 +248,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     width: '80%',
-    maxHeight: '70%',
+    maxHeight: '80%',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -275,10 +268,10 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   modalList: {
-    maxHeight: 300,
+    maxHeight: 700,
   },
   modalItem: {
-    paddingVertical: 15,
+    paddingVertical: 13,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
