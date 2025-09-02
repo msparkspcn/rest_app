@@ -9,7 +9,7 @@ export default function AdminLayout() {
   const hideFooter = lastSegment === '(admin)';
 
   return (
-    <View style={styles.root}> 
+    <View style={styles.root}>
       <Stack>
         <Stack.Screen
           name="index"
@@ -37,7 +37,7 @@ export default function AdminLayout() {
         />
         <Stack.Screen
           name="purchaseDailyReport"
-          options={{ title: '일자별 매입현황(휴)', headerShown: true }} 
+          options={{ title: '일자별 매입현황(휴)', headerShown: true }}
         />
         <Stack.Screen
           name="purchaseProductReport"
@@ -46,6 +46,10 @@ export default function AdminLayout() {
         <Stack.Screen
           name="realtimeSales"
           options={{ title: '실시간 매출현황(휴)', headerShown: true }}
+        />
+        <Stack.Screen
+            name="saleReportByPeriod"
+            options={{ title: '기간별 매출현황(휴)', headerShown: true }}
         />
       </Stack>
       {!hideFooter && (

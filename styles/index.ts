@@ -4,6 +4,7 @@ export const commonStyles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#f5f5f5',
+        // backgroundColor: '#f5f5f5',
       },
       topBar: {
         paddingHorizontal: 10,
@@ -17,9 +18,9 @@ export const commonStyles = StyleSheet.create({
         gap: 12,
       },
       filterLabel: {
+        minWidth:50,
         fontSize: 14,
         color: '#555',
-        marginRight: 8,
       },
       segmented: {
         flexDirection: 'row',
@@ -126,10 +127,16 @@ export const commonStyles = StyleSheet.create({
       },
       modalOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.3)',
+        backgroundColor: 'rgba(0,0,0,0.5)',
         justifyContent: 'center',
         alignItems: 'center',
         padding: 10,
+      },
+      modalContent: {
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        width: '80%',
+        maxHeight: '80%',
       },
       modalCard: {
         width: '100%',
@@ -148,7 +155,9 @@ export const commonStyles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: 8,
+        padding: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
       },
       modalTitle: {
         fontSize: 18,
@@ -176,7 +185,7 @@ export const commonStyles = StyleSheet.create({
         paddingVertical: 8,
         paddingHorizontal: 10,
       },
-      modalCell: { 
+      modalCell: {
         fontSize: 12,
         color: '#444',
       },
@@ -204,7 +213,7 @@ export const commonStyles = StyleSheet.create({
         alignItems: 'center',
         height: '100%',
       },
-      
+
       modalCellDivider: {
         borderRightWidth: StyleSheet.hairlineWidth,
         borderRightColor: '#eee',
@@ -222,6 +231,48 @@ export const commonStyles = StyleSheet.create({
         zIndex: 1,
         marginVertical: 4,
       },
+  dateModalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 20
+  },
+  dateModalCard: {
+      width: '100%',
+      maxWidth: 480,
+      backgroundColor: '#fff',
+      borderRadius: 12,
+      overflow: 'hidden',
+      height: '40%'
+  },
+  dateModalHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: '#eee'
+  },
+  dateModalTitle: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: '#333'
+  },
+  modalClose: {
+      fontSize: 18,
+      color: '#666'
+  },
+  dateModalPickerContainer: {
+      alignItems: 'center'
+  },
+  modalActions: { padding: 12, alignItems: 'flex-end' },
+  modalOkButton: { backgroundColor: '#007AFF', borderRadius: 8, paddingHorizontal: 16, paddingVertical: 10 },
+  dateModalOkButtonText: { color: '#fff', fontWeight: '600', fontSize: 14 },
+  modalItem: { paddingVertical: 15, paddingHorizontal: 20, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#f0f0f0' },
+  modalItemText: { fontSize: 16, color: '#333' },
+
   headerCellDivider: {
     borderRightWidth: StyleSheet.hairlineWidth,
     borderRightColor: '#b0b0b0',

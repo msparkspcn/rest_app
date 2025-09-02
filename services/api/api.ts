@@ -3,44 +3,29 @@ import axios from 'axios';
 // export const host = "https://o2api.spc.co.kr";
 export const host = "https://s9rest.ngrok.io";
 
-function client() {
-    const client = axios.create({
-        baseURL: host,
-        // timeout: 10000,
+const api = axios.create({ baseURL: host });
+
+let authToken: string | null = null;
+api.interceptors.request.use((config) => {
+    if (authToken) {
+        // console.log("Using authToken:", authToken);
+        config.headers.Authorization = authToken;
+    }
+    return config;
+});
+export function setAuthToken(token: string) {
+    console.log('Set Token:', token);
+    authToken = token;
+}
+
+export function post(request: string, body: any) {
+    return api.post(request, body);
+}
+
+export function get(request: string, body: any) {
+    return axios.get(request, {
+        params: body,
     });
-    client.interceptors.request.use(x => {
-        return x;
-    });
-    client.interceptors.response.use(
-        x => {
-            return x;
-        },
-        x => {
-            return Promise.reject(x);
-        },
-    );
-    return client;
-}
-
-function get(request) {
-    return client().get(request);
-}
-
-function post(request, body) {
-    if (body) {
-        return client().post(request, body);
-    } else {
-        return client().post(request, null);
-    }
-}
-
-function patch(request, body) {
-    if (body) {
-        return client().patch(request, body);
-    }
-    else {
-        return client().patch(request, null);
-    }
 }
 
 export function login(userId, password) {
@@ -50,5 +35,10 @@ export function login(userId, password) {
         password: password
     };
     return post(request, body);
+}
+
+export function restDailySale(params) {
+    const request = host + "/api/v1/rest/sale/restDailySale";
+    return post(request, params);
 }
 

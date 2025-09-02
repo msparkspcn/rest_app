@@ -2,6 +2,7 @@ import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/dat
 import { StatusBar } from 'expo-status-bar';
 import React, { useMemo, useState } from 'react';
 import { FlatList, Modal, Platform, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {commonStyles} from "../../styles/index";
 
 type Row = { no: number; posGroup: string; cash: number; card: number; other: number; total: number };
 type SummaryTotals = { label: string; cash: number; cardEtc: number; total: number };
@@ -67,25 +68,29 @@ export default function RealtimeSalesScreen() {
     setShowDatePicker(true);
   };
 
+
+
   const renderHeader = () => (
-    <View style={styles.tableHeaderRow}>
-      <Text style={[styles.headerCell, styles.colNo]}>No</Text>
-      <Text style={[styles.headerCell, styles.colPosGroup]}>포스그룹</Text>
-      <Text style={[styles.headerCell, styles.colCash]}>현금</Text>
-      <Text style={[styles.headerCell, styles.colCardEtc]}>카드 외</Text>
-      <Text style={[styles.headerCell, styles.colTotal]}>총매출</Text>
+    <View style={commonStyles.tableHeaderRow}>
+      <Text style={[commonStyles.headerCell, styles.colNo]}>No</Text>
+      <Text style={[commonStyles.headerCell, styles.colPosGroup]}>포스그룹</Text>
+      <Text style={[commonStyles.headerCell, styles.colCash]}>현금</Text>
+      <Text style={[commonStyles.headerCell, styles.colCardEtc]}>카드 외</Text>
+      <Text style={[commonStyles.headerCell, styles.colTotal]}>총매출</Text>
     </View>
   );
 
-  const renderItem = ({ item }: { item: ListItem }) => {
+  const renderItem = ({ item,index }: { item: ListItem, index: number }) => {
     if (item.type === 'summaryPair') {
       return (
-        <View style={[styles.tableRow, styles.summaryRow]}>
-          <Text style={[styles.cell, styles.colNo]} />
-          <Text style={[styles.cell, styles.colPosGroup, styles.summaryLabelText]}>{item.label}</Text>
-          <View style={styles.colRightSpan}>
-            <Text style={[styles.cell, styles.rightSpanText]} numberOfLines={1} ellipsizeMode="tail">{item.pairText}</Text>
-          </View>
+          <View style={[commonStyles.tableRow, index % 2 === 0 ? commonStyles.tableRowEven : commonStyles.tableRowOdd, styles.summaryRow]}>
+              <Text style={[styles.cell, styles.colNo]} />
+              <Text style={[styles.cell, styles.colPosGroup, styles.summaryLabelText]}>
+                  {item.label}
+              </Text>
+              <View style={styles.colRightSpan}>
+                <Text style={[styles.cell, styles.rightSpanText]} numberOfLines={1} ellipsizeMode="tail">{item.pairText}</Text>
+              </View>
         </View>
       );
     }
@@ -185,9 +190,9 @@ export default function RealtimeSalesScreen() {
         </View>
       </View>
 
-      <View style={styles.sectionDivider} />
+      <View style={commonStyles.sectionDivider} />
 
-      <View style={styles.tableContainer}>
+      <View style={commonStyles.tableContainer}>
         {renderHeader()}
         <FlatList
           data={combinedRows}
@@ -201,15 +206,15 @@ export default function RealtimeSalesScreen() {
 
       {/* Date Picker Modal */}
       <Modal visible={showDatePicker} transparent animationType="slide" onRequestClose={() => setShowDatePicker(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>조회일자 선택</Text>
+        <View style={commonStyles.dateModalOverlay}>
+          <View style={commonStyles.dateModalCard}>
+            <View style={commonStyles.dateModalHeader}>
+              <Text style={commonStyles.dateModalTitle}>조회일자 선택</Text>
               <TouchableOpacity onPress={() => setShowDatePicker(false)}>
-                <Text style={styles.modalClose}>✕</Text>
+                <Text style={commonStyles.modalClose}>✕</Text>
               </TouchableOpacity>
             </View>
-            <View style={styles.modalPickerContainer}>
+            <View style={commonStyles.dateModalPickerContainer}>
               {tempDate && (
                 <DateTimePicker
                   value={tempDate}
@@ -223,15 +228,15 @@ export default function RealtimeSalesScreen() {
                 />
               )}
             </View>
-            <View style={styles.modalActions}>
+            <View style={commonStyles.modalActions}>
               <Pressable
-                style={styles.modalOkButton}
+                style={commonStyles.modalOkButton}
                 onPress={() => {
                   if (tempDate) setSaleDate(formatDate(tempDate));
                   setShowDatePicker(false);
                 }}
               >
-                <Text style={styles.modalOkButtonText}>확인</Text>
+                <Text style={commonStyles.dateModalOkButtonText}>확인</Text>
               </Pressable>
             </View>
           </View>
@@ -239,20 +244,20 @@ export default function RealtimeSalesScreen() {
       </Modal>
 
       <Modal visible={showPosGroupModal} transparent animationType="slide" onRequestClose={() => setShowPosGroupModal(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>포스그룹 선택</Text>
+        <View style={commonStyles.modalOverlay}>
+          <View style={commonStyles.modalContent}>
+            <View style={commonStyles.modalHeader}>
+              <Text style={commonStyles.modalTitle}>포스그룹 선택</Text>
               <TouchableOpacity onPress={() => setShowPosGroupModal(false)}>
-                <Text style={styles.modalClose}>✕</Text>
+                <Text style={commonStyles.modalClose}>✕</Text>
               </TouchableOpacity>
             </View>
             <FlatList
               data={posGroups}
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
-                <TouchableOpacity style={styles.modalItem} onPress={() => { setSelectedPosGroupId(item.id); setShowPosGroupModal(false); }}>
-                  <Text style={styles.modalItemText}>{item.name}</Text>
+                <TouchableOpacity style={commonStyles.modalItem} onPress={() => { setSelectedPosGroupId(item.id); setShowPosGroupModal(false); }}>
+                  <Text style={commonStyles.modalItemText}>{item.name}</Text>
                 </TouchableOpacity>
               )}
             />
@@ -279,8 +284,8 @@ const styles = StyleSheet.create({
   tableHeaderRow: { flexDirection: 'row', backgroundColor: '#f0f3f7', borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#e0e0e0', paddingVertical: 10, paddingHorizontal: 12 },
   headerCell: { fontSize: 13, fontWeight: '700', color: '#333' },
   tableList: { flex: 1 },
-  tableListContent: { 
-    paddingBottom: 12 
+  tableListContent: {
+    paddingBottom: 12
   },
   tableRow: { flexDirection: 'row', alignItems: 'center', borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#eee', paddingVertical: 12 },
   summaryRow: { backgroundColor: '#fff7e6' },
@@ -295,18 +300,7 @@ const styles = StyleSheet.create({
   colCardEtc: { flex: 1, textAlign: 'right' },
   colTotal: { flex: 1.2, textAlign: 'right' },
   colRightSpan: { flex: 2.2, alignItems: 'flex-end' },
-  // Modal
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 },
-  modalCard: { width: '100%', maxWidth: 480, backgroundColor: '#fff', borderRadius: 12, overflow: 'hidden', height: '70%' },
-  modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#eee' },
-  modalTitle: { fontSize: 16, fontWeight: '700', color: '#333' },
-  modalClose: { fontSize: 18, color: '#666' },
   modalPickerContainer: { paddingHorizontal: 16, paddingVertical: 12, alignItems: 'center' },
-  modalActions: { padding: 12, alignItems: 'flex-end' },
-  modalOkButton: { backgroundColor: '#007AFF', borderRadius: 8, paddingHorizontal: 16, paddingVertical: 10 },
-  modalOkButtonText: { color: '#fff', fontWeight: '600', fontSize: 14 },
-  modalItem: { paddingVertical: 15, paddingHorizontal: 20, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#f0f0f0' },
-  modalItemText: { fontSize: 16, color: '#333' },
 });
 
 
