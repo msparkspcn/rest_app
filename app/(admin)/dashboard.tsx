@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useMemo, useState } from 'react';
 import { FlatList, Modal, Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import * as api from "../../services/api/api";
+import {Table} from "../../components/Table";
 
 type StoreRow = {
   no: number;
@@ -87,7 +88,12 @@ export default function DashboardScreen() {
 
   const mainColumns: ColumnDef<StoreRow>[] = useMemo(() => ([
     { key: 'no',       title: 'No',     flex: 0.8, align: 'center' },
-    { key: 'name',     title: '매장명',   flex: 2,   align: 'left'   },
+    { key: 'name',     title: '매장명',   flex: 2,   align: 'left',
+      renderCell: (item) => (
+          <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
+            <Text style={[commonStyles.cell, commonStyles.linkText]}>{item.name}</Text>
+          </Pressable>
+      ),   },
     { key: 'code',     title: '코드',    flex: 1.2, align: 'center' },
     { key: 'posGroup', title: '포스그룹', flex: 1.5, align: 'left'   },
     { key: 'useYn',    title: '사용여부', flex: 1,   align: 'center' },
@@ -98,72 +104,6 @@ export default function DashboardScreen() {
     center: commonStyles.alignCenter,
     right: commonStyles.alignRight,
   } as const;
-
-  const renderHeader = () => (
-    <View style={commonStyles.tableHeaderRow}>
-      {mainColumns.map((col, i) => (
-        <View
-          key={String(col.key)}
-          style={[
-            { flex: col.flex },
-            commonStyles.columnContainer,
-            i < mainColumns.length - 1 && styles.headerCellDivider,
-          ]}
-        >
-          <Text
-            style={[
-              commonStyles.headerCell,
-              alignStyles[col.headerAlign ?? col.align ?? 'left'],
-            ]}
-          >
-            {col.title}
-          </Text>
-        </View>
-      ))}
-    </View>
-  );
-
-  const renderItem = ({ item, index }: { item: StoreRow; index: number }) => (
-    <View style={[commonStyles.tableRow, index % 2 === 0 ? commonStyles.tableRowEven : commonStyles.tableRowOdd]}>
-      {mainColumns.map((col, i) => {
-        const value = col.key === 'useYn' ? (item.useYn === 'Y' ? '운영' : '폐점')
-        : (item as any)[col.key];
-        return (
-          <View
-            key={String(col.key)}
-            style={[
-              { flex: col.flex },
-              commonStyles.columnContainer,
-              i < mainColumns.length - 1 && commonStyles.cellDivider,
-            ]}
-          >
-            {col.key === 'name' ? (
-              <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
-                <Text
-                  style={[
-                    commonStyles.cell,
-                    alignStyles[col.cellAlign ?? col.align ?? 'left'],
-                    styles.linkText,
-                  ]}
-                >
-                  {value}
-                </Text>
-              </Pressable>
-            ) : (
-              <Text
-                style={[
-                  commonStyles.cell,
-                  alignStyles[col.cellAlign ?? col.align ?? 'left'],
-                ]}
-              >
-                {value}
-              </Text>
-            )}
-          </View>
-        );
-      })}
-    </View>
-  );
 
   type ProductRow = { no: number; productCode: string; productName: string };
   const productData: ProductRow[] = useMemo(
@@ -233,7 +173,6 @@ export default function DashboardScreen() {
     <SafeAreaView style={commonStyles.container}>
       <StatusBar style="dark" />
 
-      {/* 상단 필터 영역 */}
       <View style={commonStyles.topBar}>
         <View style={commonStyles.filterRow}>
           <Text style={commonStyles.filterLabel}>운영여부</Text>
@@ -257,21 +196,7 @@ export default function DashboardScreen() {
       </View>
       <View style={commonStyles.sectionDivider} />
 
-      {/* 그리드 영역 */}
-      <View style={commonStyles.tableContainer}>
-        {renderHeader()}
-        <FlatList
-          data={filteredData}
-          keyExtractor={(item) => String(item.no)}
-          renderItem={renderItem}
-          style={styles.tableList}
-          contentContainerStyle={styles.tableListContent}
-          bounces={false}
-          alwaysBounceVertical={false}
-          overScrollMode="never"
-          showsVerticalScrollIndicator
-        />
-      </View>
+      <Table data={filteredData} columns={mainColumns}/>
 
       <View style={commonStyles.sectionDivider} />
 
@@ -334,11 +259,6 @@ const styles = StyleSheet.create({
   tableListContent: {
     backgroundColor: '#fff'
     // paddingBottom: 12,
-  },
-
-  linkText: {
-    color: '#007AFF',
-    textDecorationLine: 'underline',
   },
   storeNamePressable: {
     flex: 2,

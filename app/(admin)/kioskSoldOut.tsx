@@ -1,7 +1,8 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useMemo, useState } from 'react';
-import { FlatList, Modal, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import {commonStyles} from "../../styles/index";
+import {Alert, FlatList, Modal, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import { commonStyles } from '@/styles';
+import {Table} from "../../components/Table";
 
 type StoreOption = { id: string; name: string };
 type ProductRow = { no: number; itemNm: string; useYn: 'Y' | 'N' };
@@ -53,8 +54,20 @@ export default function KioskSoldOutScreen() {
   const mainColumns: ColumnDef<ProductRow>[] = useMemo(() => ([
     { key: 'no',       title: 'No',     flex: 0.3, align: 'center' },
     { key: 'itemNm',     title: '상품명',   flex: 2,   align: 'left'   },
-    { key: 'useYn',    title: '사용여부', flex: 0.5,   align: 'center' },
+    { key: 'useYn',    title: '사용여부', flex: 0.5,   align: 'center',
+      renderCell: (item) => (
+          <Pressable style={commonStyles.columnPressable} onPress={() => updateSoldoutYn() }>
+            <Text style={[commonStyles.cell, commonStyles.linkText]}>
+              {item.useYn === 'Y' ? '출력' : '품절'}
+            </Text>
+          </Pressable>
+      ),
+    },
   ]), []);
+
+  const updateSoldoutYn = () => {
+    Alert.alert('완료', '완료되었습니다.');
+  }
 
   const alignStyles = {
     left: commonStyles.alignLeft,
@@ -111,7 +124,6 @@ export default function KioskSoldOutScreen() {
     <SafeAreaView style={commonStyles.container}>
       <StatusBar style="dark" />
 
-      {/* 상단 필터 영역 */}
       <View style={commonStyles.topBar}>
         <View style={commonStyles.filterRow}>
           <Text style={commonStyles.filterLabel}>매장</Text>
@@ -131,19 +143,7 @@ export default function KioskSoldOutScreen() {
       </View>
       <View style={commonStyles.sectionDivider} />
 
-
-      {/* 그리드 영역 */}
-      <View style={commonStyles.tableContainer}>
-        {renderHeader()}
-        <FlatList
-          data={filteredData}
-          keyExtractor={(item) => String(item.no)}
-          renderItem={renderItem}
-          style={styles.tableList}
-          contentContainerStyle={styles.tableListContent}
-          showsVerticalScrollIndicator
-        />
-      </View>
+      <Table data={filteredData} columns={mainColumns} />
 
       <Modal
         visible={showStoreModal}

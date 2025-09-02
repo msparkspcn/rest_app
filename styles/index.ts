@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 export const commonStyles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#fff',
         // backgroundColor: '#f5f5f5',
       },
       topBar: {
@@ -60,6 +60,7 @@ export const commonStyles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#fff',
         marginTop: 10,
+        marginHorizontal: 10,
         overflow: 'hidden',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
@@ -74,7 +75,6 @@ export const commonStyles = StyleSheet.create({
         borderBottomWidth: StyleSheet.hairlineWidth,
         borderBottomColor: '#e0e0e0',
         paddingVertical: 8,
-        marginHorizontal: 10,
       },
       headerCell: {
         fontSize: 12,
@@ -95,13 +95,14 @@ export const commonStyles = StyleSheet.create({
         borderBottomWidth: StyleSheet.hairlineWidth,
         borderBottomColor: '#eee',
         paddingVertical: 8,
-        paddingHorizontal: 10,
+        // backgroundColor:'red'
       },
       columnContainer: {
         flexDirection: 'row',
         alignItems: 'center', // vertical center
         justifyContent: 'center',
         height: '100%',
+        // backgroundColor:'red'
       },
       cellDivider: {
         borderRightWidth: StyleSheet.hairlineWidth,
@@ -229,7 +230,6 @@ export const commonStyles = StyleSheet.create({
         shadowRadius: 2,
         shadowOffset: { width: 0, height: 1 },
         zIndex: 1,
-        marginVertical: 4,
       },
   dateModalOverlay: {
       flex: 1,
@@ -276,5 +276,9 @@ export const commonStyles = StyleSheet.create({
   headerCellDivider: {
     borderRightWidth: StyleSheet.hairlineWidth,
     borderRightColor: '#b0b0b0',
+  },
+  linkText: {
+    color: '#007AFF',
+    textDecorationLine: 'underline',
   },
 })
