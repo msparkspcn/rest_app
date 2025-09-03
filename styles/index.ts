@@ -111,6 +111,7 @@ export const commonStyles = StyleSheet.create({
       columnPressable: {
         flex: 1,
         justifyContent: 'center',
+        // paddingLeft:10
       },
       alignLeft: {
         textAlign: 'left',
@@ -156,7 +157,7 @@ export const commonStyles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: 20,
+        paddingVertical: 20,
         borderBottomWidth: 1,
         borderBottomColor: '#eee',
       },
@@ -219,7 +220,6 @@ export const commonStyles = StyleSheet.create({
         borderRightWidth: StyleSheet.hairlineWidth,
         borderRightColor: '#eee',
         paddingRight: 10,
-        marginRight: 10,
       },
     sectionDivider: {
         height: 2,
@@ -268,11 +268,20 @@ export const commonStyles = StyleSheet.create({
       alignItems: 'center'
   },
   modalActions: { padding: 12, alignItems: 'flex-end' },
-  modalOkButton: { backgroundColor: '#007AFF', borderRadius: 8, paddingHorizontal: 16, paddingVertical: 10 },
-  dateModalOkButtonText: { color: '#fff', fontWeight: '600', fontSize: 14 },
+  modalOkButton: {
+      backgroundColor: '#007AFF',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10
+  },
+  dateModalOkButtonText: {
+      color: '#fff',
+    fontWeight: '600',
+    fontSize: 14
+  },
   modalItem: { paddingVertical: 15, paddingHorizontal: 20, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#f0f0f0' },
   modalItemText: { fontSize: 16, color: '#333' },
-
+  modalOkButtonText: { color: '#fff', fontWeight: '600', fontSize: 14 },
   headerCellDivider: {
     borderRightWidth: StyleSheet.hairlineWidth,
     borderRightColor: '#b0b0b0',
@@ -280,5 +289,30 @@ export const commonStyles = StyleSheet.create({
   linkText: {
     color: '#007AFF',
     textDecorationLine: 'underline',
+  },
+  modalTableList: {
+    flex: 1,
+    marginTop: 2,
+    backgroundColor: '#fff'
+  },
+  modalTableListContent: {
+    paddingBottom: 8,
+    backgroundColor: '#fff'
+  },
+  selectArrow: {
+    fontSize: 12,
+    color: '#666',
+  },
+  selectInput: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flex: 1,
   },
 })

@@ -18,15 +18,17 @@ type TableProps<T> = {
     columns: ColumnDef<T>[];
     onRowPress?: (item: T) => void;
     isModal?: boolean; // 모달 내부에 사용되는지 여부
+    listHeader?: React.ReactNode
+    listFooter?: React.ReactNode
 };
 
 const alignStyles = {
-    left: commonStyles.alignLeft,
+    left: { ...commonStyles.alignLeft, paddingLeft: 10 },
     center: commonStyles.alignCenter,
-    right: commonStyles.alignRight,
+    right: { textAlign: 'right' },
 } as const;
 
-export function Table<T>({ data, columns, onRowPress, isModal }: TableProps<T>) {
+export function Table<T>({ data, columns, onRowPress, isModal, listHeader, listFooter }: TableProps<T>) {
     const renderHeader = () => (
         <View style={isModal ? commonStyles.modalTableHeaderRow : commonStyles.tableHeaderRow}>
             {columns.map((col, i) => (
@@ -34,7 +36,7 @@ export function Table<T>({ data, columns, onRowPress, isModal }: TableProps<T>) 
                     key={String(col.key)}
                     style={[
                         { flex: col.flex },
-                        commonStyles.columnContainer,
+                        isModal ? commonStyles.modalHeaderContainer : commonStyles.columnContainer,
                         i < columns.length - 1 &&
                         (isModal ? commonStyles.modalHeaderCellDivider : commonStyles.headerCellDivider),
                     ]}
@@ -68,6 +70,7 @@ export function Table<T>({ data, columns, onRowPress, isModal }: TableProps<T>) 
                         ) : (
                             <Text
                                 style={[
+                                    {flex:1},
                                     isModal ? commonStyles.modalCell : commonStyles.cell,
                                     alignStyles[col.cellAlign ?? col.align ?? 'left'],
                                 ]}
@@ -85,16 +88,19 @@ export function Table<T>({ data, columns, onRowPress, isModal }: TableProps<T>) 
         }
         return rowContent;
     };
+    console.log("isModal:"+isModal)
 
     return (
-        <View style={isModal ? styles.modalTableContainer : commonStyles.tableContainer}>
+        <View style={isModal ? commonStyles.modalTableContainer : commonStyles.tableContainer}>
             {renderHeader()}
             <FlatList
                 data={data}
                 keyExtractor={(item: T, index) => (item as any).no ? String((item as any).no) : String(index)}
                 renderItem={renderItem}
-                style={isModal ? styles.modalTableList : styles.tableList}
-                contentContainerStyle={isModal ? styles.modalTableListContent : styles.tableListContent}
+                ListHeaderComponent={listHeader}
+                ListFooterComponent={listFooter}
+                style={isModal ? commonStyles.modalTableList : styles.tableList}
+                contentContainerStyle={isModal ? commonStyles.modalTableListContent : styles.tableListContent}
                 bounces={false}
                 alwaysBounceVertical={false}
                 overScrollMode="never"
@@ -107,13 +113,4 @@ export function Table<T>({ data, columns, onRowPress, isModal }: TableProps<T>) 
 const styles = StyleSheet.create({
     tableList: { flex: 1, backgroundColor: '#fff' },
     tableListContent: { backgroundColor: '#fff' },
-    modalTableContainer: {
-        flex: 1,
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: '#e0e0e0',
-        overflow: 'hidden',
-        backgroundColor: '#fff'
-    },
-    modalTableList: { flex: 1, marginTop: 2, backgroundColor: '#fff' },
-    modalTableListContent: { paddingBottom: 8, backgroundColor: '#fff' },
 });

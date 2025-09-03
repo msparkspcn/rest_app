@@ -6,10 +6,10 @@ import { FlatList, Modal, Pressable, SafeAreaView, StyleSheet, Text, View } from
 import * as api from "../../services/api/api";
 import {Table} from "../../components/Table";
 
-type StoreRow = {
+type CornerRow = {
   no: number;
-  name: string;
-  code: string;
+  cornerNm: string;
+  cornerCd: string;
   posGroup: string;
   useYn: 'Y' | 'N';
 };
@@ -20,7 +20,7 @@ export default function DashboardScreen() {
   const [operateFilter, setOperateFilter] = useState<OperateFilter>('전체');
   const [submittedFilter, setSubmittedFilter] = useState<OperateFilter>('전체');
   const [isDetailVisible, setIsDetailVisible] = useState(false);
-  const [selectedStore, setSelectedStore] = useState<StoreRow | null>(null);
+  const [selectedCorner, setSelectedCorner] = useState<CornerRow | null>(null);
 
   useEffect(() => {
     console.log('api 테스트1')
@@ -40,13 +40,13 @@ export default function DashboardScreen() {
   }
 
   // 테스트 데이터 생성
-  const baseData: StoreRow[] = useMemo(() => {
-    const rows: StoreRow[] = [];
+  const baseData: CornerRow[] = useMemo(() => {
+    const rows: CornerRow[] = [];
     for (let i = 1; i <= 30; i += 1) {
       rows.push({
         no: i,
-        name: `매장 ${i.toString().padStart(2, '0')}`,
-        code: `S${(1000 + i).toString()}`,
+        cornerNm: `매장 ${i.toString().padStart(2, '0')}`,
+        cornerCd: `S${(1000 + i).toString()}`,
         posGroup: `그룹 ${((i % 5) + 1).toString()}`,
         useYn: i % 3 === 0 ? 'N' : 'Y',
       });
@@ -65,10 +65,8 @@ export default function DashboardScreen() {
     //api 호출 처리 필요
   };
 
-  // 전역 푸터 사용으로 지역 초기화 핸들러는 현재 미사용입니다.
-
-  const openDetail = (store: StoreRow) => {
-    setSelectedStore(store);
+  const openDetail = (store: CornerRow) => {
+    setSelectedCorner(store);
     setIsDetailVisible(true);
   };
 
@@ -86,89 +84,48 @@ export default function DashboardScreen() {
     cellAlign?: Align;
   };
 
-  const mainColumns: ColumnDef<StoreRow>[] = useMemo(() => ([
+  const mainColumns: ColumnDef<CornerRow>[] = useMemo(() => ([
     { key: 'no',       title: 'No',     flex: 0.8, align: 'center' },
-    { key: 'name',     title: '매장명',   flex: 2,   align: 'left',
+    { key: 'cornerNm',     title: '매장명',   flex: 2,   align: 'left',
       renderCell: (item) => (
           <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
-            <Text style={[commonStyles.cell, commonStyles.linkText]}>{item.name}</Text>
+            <Text style={[commonStyles.cell, commonStyles.linkText,{paddingLeft:10}]}>{item.cornerNm}</Text>
           </Pressable>
       ),   },
-    { key: 'code',     title: '코드',    flex: 1.2, align: 'center' },
+    { key: 'cornerCd',     title: '코드',    flex: 1.2, align: 'center' },
     { key: 'posGroup', title: '포스그룹', flex: 1.5, align: 'left'   },
-    { key: 'useYn',    title: '사용여부', flex: 1,   align: 'center' },
+    { key: 'useYn',    title: '사용여부', flex: 1,   align: 'center',
+      renderCell: (item) => (
+          <Text style={[commonStyles.cell, {textAlign:'center'}]}>
+            {item.useYn ==='Y' ? '운영' : '폐점'}
+          </Text>
+      )
+    },
   ]), []);
 
-  const alignStyles = {
-    left: commonStyles.alignLeft,
-    center: commonStyles.alignCenter,
-    right: commonStyles.alignRight,
-  } as const;
-
-  type ProductRow = { no: number; productCode: string; productName: string };
-  const productData: ProductRow[] = useMemo(
+  type ItemRow = { no: number; itemCd: string; itemName: string };
+  const itemData: ItemRow[] = useMemo(
     () => Array.from({ length: 205 }).map((_, index) => ({
       no: index + 1,
-      productCode: `P${1001 + index}`,
-      productName: `상품 ${index + 1}`,
+      itemCd: `P${1001 + index}`,
+      itemName: `상품 ${index + 1}`,
     })),
     []
   );
 
-  const productColumns: ColumnDef<ProductRow>[] = useMemo(() => ([
-    { key: 'no',          title: 'No',     flex: 0.7, align: 'center' },
-    { key: 'productCode', title: '상품코드',  flex: 1.4, align: 'left' },
-    { key: 'productName', title: '상품명',   flex: 2.2, align: 'left'   },
+  const itemColumns: ColumnDef<ItemRow>[] = useMemo(() => ([
+    { key: 'no',          title: 'No',     flex: 0.4, align: 'center' },
+    { key: 'itemCd', title: '상품코드',  flex: 1.8, align: 'left' },
+    { key: 'itemName', title: '상품명',   flex: 2.2, align: 'left'   },
   ]), []);
 
-  const renderProductHeader = () => (
-    <View style={commonStyles.modalTableHeaderRow}>
-      {productColumns.map((col, i) => (
-        <View
-          key={String(col.key)}
-          style={[
-            { flex: col.flex },
-            styles.modalHeaderContainer,
-            i < productColumns.length - 1 && styles.modalHeaderCellDivider,
-          ]}
-        >
-          <Text
-            style={[
-              commonStyles.modalHeaderCell,
-              alignStyles[col.headerAlign ?? col.align ?? 'left'],
-            ]}
-          >
-            {col.title}
-          </Text>
+  const CornerNmRow = () => {
+    return (
+        <View style={{ borderBottomWidth: 1, borderBottomColor: '#ccc' }}>
+          <Text style={styles.modalCornerNm}>{selectedCorner?.cornerNm}</Text>
         </View>
-      ))}
-    </View>
-  );
-
-  const renderProductItem = ({ item, index }: { item: ProductRow; index: number }) => (
-    <View style={[commonStyles.modalTableRow, index % 2 === 0 ? commonStyles.tableRowEven : commonStyles.tableRowOdd]}>
-      {productColumns.map((col, i) => (
-        <View
-          key={String(col.key)}
-          style={[
-            { flex: col.flex },
-            commonStyles.modalColumnContainer,
-            i < productColumns.length - 1 && commonStyles.modalCellDivider,
-          ]}
-        >
-          <Text
-            style={[
-              commonStyles.modalCell,
-              alignStyles[col.cellAlign ?? col.align ?? 'left'],
-            ]}
-          >
-            {(item as any)[col.key]}
-          </Text>
-        </View>
-      ))}
-    </View>
-  );
-
+    );
+  };
   return (
     <SafeAreaView style={commonStyles.container}>
       <StatusBar style="dark" />
@@ -200,9 +157,6 @@ export default function DashboardScreen() {
 
       <View style={commonStyles.sectionDivider} />
 
-      {/* 전역 레이아웃의 푸터를 사용합니다. */}
-
-      {/* 상세 모달 */}
       <Modal visible={isDetailVisible} animationType="fade" transparent>
         <View style={commonStyles.modalOverlay}>
           <View style={commonStyles.modalCard}>
@@ -213,24 +167,7 @@ export default function DashboardScreen() {
               </Pressable>
             </View>
 
-            <View style={styles.modalTableContainer}>
-              {renderProductHeader()}
-              {selectedStore && (
-                <Text style={styles.modalStoreName}>{selectedStore.name}</Text>
-              )}
-
-              <FlatList
-                data={productData}
-                keyExtractor={(item) => String(item.no)}
-                renderItem={renderProductItem}
-                style={styles.modalTableList}
-                contentContainerStyle={styles.modalTableListContent}
-                bounces={false}
-                alwaysBounceVertical={false}
-                overScrollMode="never"
-                showsVerticalScrollIndicator
-              />
-            </View>
+            <Table data={itemData} columns={itemColumns} isModal={true} listHeader={CornerNmRow}/>
           </View>
         </View>
       </Modal>
@@ -263,22 +200,7 @@ const styles = StyleSheet.create({
   storeNamePressable: {
     flex: 2,
   },
-  colNo: {
-    flex: 0.7,
-  },
-  colName: {
-    flex: 2,
-  },
-  colCode: {
-    flex: 1.2,
-  },
-  colPosGroup: {
-    flex: 1.5,
-  },
-  colUseYn: {
-    flex: 1,
-  },
-  modalStoreName: {
+  modalCornerNm: {
     fontSize: 14,
     color: '#555',
     paddingHorizontal: 10,
@@ -299,18 +221,5 @@ const styles = StyleSheet.create({
   modalTableListContent: {
     paddingBottom: 8,
     backgroundColor: '#fff'
-  },
-  modalTableContainer: {
-    flex:1,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#e0e0e0',
-    overflow: 'hidden',
-    backgroundColor: '#fff'
-  },
-  modalHeaderContainer: {
-    flexDirection: 'row',
-    alignItems: 'center', // vertical center
-    justifyContent: 'center',
-    height: '100%',
   },
 });

@@ -83,7 +83,8 @@ export default function RealtimeSalesScreen() {
   const renderItem = ({ item,index }: { item: ListItem, index: number }) => {
     if (item.type === 'summaryPair') {
       return (
-          <View style={[commonStyles.tableRow, index % 2 === 0 ? commonStyles.tableRowEven : commonStyles.tableRowOdd, styles.summaryRow]}>
+          <View style={[commonStyles.tableRow, index % 2 === 0 ? commonStyles.tableRowEven :
+              commonStyles.tableRowOdd, styles.summaryRow]}>
               <Text style={[styles.cell, styles.colNo]} />
               <Text style={[styles.cell, styles.colPosGroup, styles.summaryLabelText]}>
                   {item.label}

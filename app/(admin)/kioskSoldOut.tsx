@@ -57,7 +57,7 @@ export default function KioskSoldOutScreen() {
     { key: 'useYn',    title: '사용여부', flex: 0.5,   align: 'center',
       renderCell: (item) => (
           <Pressable style={commonStyles.columnPressable} onPress={() => updateSoldoutYn() }>
-            <Text style={[commonStyles.cell, commonStyles.linkText]}>
+            <Text style={[commonStyles.cell, commonStyles.linkText, {textAlign:'center'}]}>
               {item.useYn === 'Y' ? '출력' : '품절'}
             </Text>
           </Pressable>
@@ -134,7 +134,7 @@ export default function KioskSoldOutScreen() {
             <Text style={[styles.selectText, !selectedStoreId && styles.placeholderText]}>
               {stores.find((s) => s.id === selectedStoreId)?.name || '선택'}
             </Text>
-            <Text style={styles.selectArrow}>▼</Text>
+            <Text style={commonStyles.selectArrow}>▼</Text>
           </TouchableOpacity>
           <Pressable style={commonStyles.searchButton} onPress={onSearch}>
             <Text style={commonStyles.searchButtonText}>조회</Text>
@@ -153,8 +153,8 @@ export default function KioskSoldOutScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>매장 선택</Text>
+            <View style={commonStyles.modalHeader}>
+              <Text style={commonStyles.modalTitle}>매장 선택</Text>
               <TouchableOpacity onPress={() => setShowStoreModal(false)}>
                 <Text style={styles.modalClose}>✕</Text>
               </TouchableOpacity>
@@ -202,10 +202,7 @@ const styles = StyleSheet.create({
   placeholderText: {
     color: '#999',
   },
-  selectArrow: {
-    fontSize: 12,
-    color: '#666',
-  },
+
   headerCell: {
     fontSize: 13,
     fontWeight: '700',
@@ -250,19 +247,7 @@ const styles = StyleSheet.create({
     width: '80%',
     maxHeight: '80%',
   },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-  },
+
   modalClose: {
     fontSize: 20,
     color: '#666',

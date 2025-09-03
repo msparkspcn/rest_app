@@ -91,7 +91,7 @@ export default function UsersScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.form}>
-          <View style={styles.formRow}> 
+          <View style={styles.formRow}>
             <Text style={styles.formLabel}>소속구분</Text>
             <TextInput
               style={[styles.formInput, styles.readonlyInput]}
@@ -187,17 +187,7 @@ const styles = StyleSheet.create({
   filterRowSpacing: {
     marginBottom: 10,
   },
-  pageTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#333',
-  },
-  filterLabel: {
-    fontSize: 14,
-    color: '#555',
-    marginRight: 8,
-    width: 50,
-  },
+
   input: {
     flex: 1,
     height: 40,
@@ -271,74 +261,5 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 18,
   },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    alignSelf: 'flex-start',
-  },
-  statusText: {
-    fontSize: 12,
-    color: '#fff',
-    fontWeight: '500',
-  },
-  // Modal styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  modalCard: {
-    width: '100%',
-    maxWidth: 520,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#eee',
-  },
-  modalTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#333',
-  },
-  modalClose: {
-    fontSize: 18,
-    color: '#666',
-  },
-  modalBody: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 8,
-  },
-  userPickRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#eee',
-  },
-  userPickInfo: {
-    flexDirection: 'column',
-    gap: 2,
-  },
-  userPickName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-  },
-  userPickEmail: {
-    fontSize: 12,
-    color: '#666',
-  },
+
 });

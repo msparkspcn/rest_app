@@ -13,12 +13,13 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import {commonStyles} from "../../styles/index";
 
 export default function RegisterScreen() {
   const [step, setStep] = useState(1);
   const [termsAgreed, setTermsAgreed] = useState(false);
   const [privacyAgreed, setPrivacyAgreed] = useState(false);
-  
+
   // 회원가입 폼 데이터
   const [name, setName] = useState('');
   const [id, setId] = useState('');
@@ -84,7 +85,7 @@ export default function RegisterScreen() {
   if (hasLetters) charTypeCount++;
   if (hasNumbers) charTypeCount++;
   if (hasSymbols) charTypeCount++;
-  
+
   if(charTypeCount <2) {
     Alert.alert('오류', '비밀번호 입력규칙을 확인해주세요.');
     return;
@@ -93,7 +94,7 @@ export default function RegisterScreen() {
 
     // 여기에 실제 회원가입 로직을 구현하세요
     console.log('회원가입 시도:', { name, id, password, termsAgreed, privacyAgreed });
-    
+
     Alert.alert(
       '회원가입 완료',
       '회원가입이 완료되었습니다. 로그인해주세요.',
@@ -131,10 +132,10 @@ export default function RegisterScreen() {
       Alert.alert('오류', '아이디를 입력해주세요.');
       return;
     }
-    
+
     // 여기에 실제 아이디 중복체크 로직을 구현하세요
     console.log('아이디 중복체크:', id);
-    
+
     // 임시로 성공으로 처리
     setIsIdChecked(true);
     Alert.alert('확인', '사용 가능한 아이디입니다.');
@@ -143,13 +144,13 @@ export default function RegisterScreen() {
   // 약관동의 화면
   if (step === 1) {
     return (
-      <KeyboardAvoidingView 
-        style={styles.container} 
+      <KeyboardAvoidingView
+        style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <StatusBar style="dark" />
-        
-        <ScrollView 
+
+        <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
@@ -162,8 +163,8 @@ export default function RegisterScreen() {
 
             <View style={styles.termsContainer}>
               <View style={styles.termItem}>
-                <TouchableOpacity 
-                  style={styles.checkboxContainer} 
+                <TouchableOpacity
+                  style={styles.checkboxContainer}
                   onPress={handleTermsToggle}
                 >
                   <View style={[styles.checkbox, termsAgreed && styles.checkboxChecked]}>
@@ -180,8 +181,8 @@ export default function RegisterScreen() {
               </View>
 
               <View style={styles.termItem}>
-                <TouchableOpacity 
-                  style={styles.checkboxContainer} 
+                <TouchableOpacity
+                  style={styles.checkboxContainer}
                   onPress={handlePrivacyToggle}
                 >
                   <View style={[styles.checkbox, privacyAgreed && styles.checkboxChecked]}>
@@ -201,8 +202,8 @@ export default function RegisterScreen() {
               </View>
             </View>
 
-            <TouchableOpacity 
-              style={[styles.nextButton, (!termsAgreed || !privacyAgreed) && styles.nextButtonDisabled]} 
+            <TouchableOpacity
+              style={[styles.nextButton, (!termsAgreed || !privacyAgreed) && styles.nextButtonDisabled]}
               onPress={handleNextStep}
               disabled={!termsAgreed || !privacyAgreed}
             >
@@ -220,13 +221,13 @@ export default function RegisterScreen() {
 
   // 회원가입 폼 화면
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
+    <KeyboardAvoidingView
+      style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <StatusBar style="dark" />
-      
-      <ScrollView 
+
+      <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -240,7 +241,7 @@ export default function RegisterScreen() {
           <View style={styles.form}>
             <View style={styles.inputContainer}>
                 <Text style={styles.label}>소속구분</Text>
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.selectInput}
                     onPress={() => setShowDepartmentTypeModal(true)}
                 >
@@ -252,7 +253,7 @@ export default function RegisterScreen() {
             </View>
             <View style={styles.inputContainer}>
                 <Text style={styles.label}>소속</Text>
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.selectInput}
                     onPress={() => setShowDepartmentModal(true)}
                 >
@@ -275,8 +276,8 @@ export default function RegisterScreen() {
                         autoCapitalize="none"
                         autoCorrect={false}
                     />
-                    <TouchableOpacity 
-                        style={[styles.checkButton, isIdChecked && styles.checkButtonSuccess]} 
+                    <TouchableOpacity
+                        style={[styles.checkButton, isIdChecked && styles.checkButtonSuccess]}
                         onPress={handleIdCheck}
                     >
                         <Text style={[styles.checkButtonText, isIdChecked && styles.checkButtonTextSuccess]}>
@@ -285,7 +286,7 @@ export default function RegisterScreen() {
                     </TouchableOpacity>
                 </View>
             </View>
-    
+
 
             <View style={styles.inputContainer}>
               <Text style={styles.label}>비밀번호</Text>
@@ -351,12 +352,12 @@ export default function RegisterScreen() {
         animationType="slide"
         onRequestClose={() => setShowDepartmentTypeModal(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>소속구분 선택</Text>
+        <View style={commonStyles.modalOverlay}>
+          <View style={commonStyles.modalContent}>
+            <View style={commonStyles.modalHeader}>
+              <Text style={commonStyles.modalTitle}>소속구분 선택</Text>
               <TouchableOpacity onPress={() => setShowDepartmentTypeModal(false)}>
-                <Text style={styles.modalClose}>✕</Text>
+                <Text style={commonStyles.modalClose}>✕</Text>
               </TouchableOpacity>
             </View>
             <ScrollView style={styles.modalList}>
@@ -383,8 +384,8 @@ export default function RegisterScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>소속 선택</Text>
+            <View style={commonStyles.modalHeader}>
+              <Text style={commonStyles.modalTitle}>소속 선택</Text>
               <TouchableOpacity onPress={() => setShowDepartmentModal(false)}>
                 <Text style={styles.modalClose}>✕</Text>
               </TouchableOpacity>
@@ -580,25 +581,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+    // padding: 10,
   },
   modalContent: {
     backgroundColor: '#fff',
     borderRadius: 12,
     width: '80%',
     maxHeight: '70%',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
   },
   modalClose: {
     fontSize: 20,

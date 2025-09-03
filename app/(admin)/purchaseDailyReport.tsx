@@ -1,13 +1,17 @@
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { StatusBar } from 'expo-status-bar';
 import React, { useMemo, useState } from 'react';
-import { FlatList, Modal, Platform, Pressable, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Modal, Platform, Pressable, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {commonStyles} from "../../styles/index";
+import {Table} from "../../components/Table";
+import {formattedDate, getTodayString} from "../../utils/DateUtils";
 
-type Row = { date: string; vendor: string; amount: number };
+type PurchaseRow = { date: string; vendor: string; amount: number };
+type PurchaseDetailRow = {itemNm: string, qty: number, price: number, totalAmt: number};
 
 export default function PurchaseDailyReportScreen() {
-  const [fromDate, setFromDate] = useState('2025/08/01');
-  const [toDate, setToDate] = useState('2025/08/04');
+  const [fromPurchaseDt, setPurchaseDt] = useState(getTodayString());
+  const [toPurchaseDt, setToPurchaseDt] = useState(getTodayString());
   const [showFromPicker, setShowFromPicker] = useState(false);
   const [showToPicker, setShowToPicker] = useState(false);
   const [tempFromDate, setTempFromDate] = useState<Date | null>(null);
@@ -29,17 +33,43 @@ export default function PurchaseDailyReportScreen() {
     return new Date(y, (m || 1) - 1, d || 1);
   };
 
-  const baseData: Row[] = useMemo(
+  const baseData: PurchaseRow[] = useMemo(
     () => [
-      { date: '2025/08/01', vendor: '거래처 A', amount: 120000 },
-      { date: '2025/08/01', vendor: '거래처 B', amount: 80000 },
-      { date: '2025/08/02', vendor: '거래처 A', amount: 60000 },
-      { date: '2025/08/03', vendor: '거래처 C', amount: 150000 },
-      { date: '2025/08/04', vendor: '거래처 A', amount: 90000 },
-      { date: '2025/08/04', vendor: '거래처 D', amount: 50000 },
+      { date: '2025/09/01', vendor: '거래처 A', amount: 120000 },
+      { date: '2025/09/01', vendor: '거래처 B', amount: 80000 },
+      { date: '2025/09/02', vendor: '거래처 A', amount: 60000 },
+      { date: '2025/09/03', vendor: '거래처 C', amount: 150000 },
+      { date: '2025/09/04', vendor: '거래처 A', amount: 90000 },
+      { date: '2025/09/04', vendor: '거래처 D', amount: 50000 },
     ],
     []
   );
+  type Align = 'left' | 'center' | 'right';
+  type ColumnDef<T> = {
+    key: keyof T | string;
+    title: string;
+    flex: number;
+    align?: Align;
+    headerAlign?: Align;
+    cellAlign?: Align;
+  };
+  const mainColumns: ColumnDef<PurchaseRow>[] = useMemo(() => ([
+    { key: 'date',       title: '일자',     flex: 1, align: 'center' },
+    { key: 'vendor',     title: '거래처',   flex: 2,   align: 'left',
+      renderCell: (item) => (
+          <Pressable style={commonStyles.columnPressable} onPress={() => openVendorDetail(item.vendor) }>
+            <Text style={[commonStyles.cell, commonStyles.linkText, {paddingLeft:10}]}>
+              {item.vendor}
+            </Text>
+          </Pressable>
+      ),
+    },
+    { key: 'amount',    title: '금액', flex: 1,   align: 'right',
+      renderCell: (item) => (
+          <Text style={[commonStyles.cell, {textAlign:'right', paddingRight:10}]}>{item.amount.toLocaleString()}</Text>
+      )
+    },
+  ]), []);
 
   const filteredData = useMemo(() => {
     const from = submitted.from.replace(/\//g, '');
@@ -53,42 +83,53 @@ export default function PurchaseDailyReportScreen() {
   const totalAmount = useMemo(() => filteredData.reduce((acc, r) => acc + r.amount, 0), [filteredData]);
 
   const onSearch = () => {
-    setSubmitted({ from: fromDate, to: toDate, vendor: vendorQuery });
+    setSubmitted({ from: fromPurchaseDt, to: toPurchaseDt, vendor: vendorQuery });
   };
 
-  const renderHeader = () => (
-    <View style={styles.tableHeaderRow}>
-      <Text style={[styles.headerCell, styles.colDate]}>일자</Text>
-      <Text style={[styles.headerCell, styles.colVendor]}>거래처</Text>
-      <Text style={[styles.headerCell, styles.colAmount]}>금액</Text>
-    </View>
-  );
-
-  const renderItem = ({ item }: { item: Row }) => (
-    <View style={styles.tableRow}>
-      <Text style={[styles.cell, styles.colDate]}>{item.date}</Text>
-      <Pressable style={styles.vendorNamePressable} onPress={() => openVendorDetail(item.vendor)}>
-        <Text style={[styles.cell, styles.colVendor, styles.linkText]}>{item.vendor}</Text>
-      </Pressable>
-      <Text style={[styles.cell, styles.colAmount]}>{item.amount.toLocaleString()}</Text>
-    </View>
-  );
+  const PurchaseDetailColumns: ColumnDef<PurchaseDetailRow>[] = useMemo(() => ([
+    { key: 'itemNm', title: '상품',   flex: 2.2, align: 'left' },
+    { key: 'qty', title: '수량',   flex: 1, align: 'right' },
+    { key: 'price', title: '단가',   flex: 1.5, align: 'right' },
+    { key: 'totalAmt', title: '금액',   flex: 2.2, align: 'right' },
+  ]), []);
 
   const renderFooter = () => (
-    <View style={[styles.tableRow, styles.totalRow]}>
-      <Text style={[styles.cell, styles.colDate, styles.totalText]}>합계</Text>
-      <Text style={[styles.cell, styles.colVendor]} />
-      <Text style={[styles.cell, styles.colAmount, styles.totalText]}>{totalAmount.toLocaleString()}</Text>
+    <View style={[commonStyles.tableRow, styles.totalRow]}>
+      <View style={[{ flex: 3 }, commonStyles.cellDivider,]}>
+        <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.totalText,
+          {fontSize: 13, fontWeight: 'bold'}]}>합계</Text>
+      </View>
+      <View>
+        <Text style={[commonStyles.cell, styles.totalText, {paddingRight:10}]}>{totalAmount.toLocaleString()}</Text>
+      </View>
     </View>
+  );
+
+  const renderDetailFooter = () => (
+      <View style={[commonStyles.modalTableRow, styles.modalTotalRow]}>
+        <View style={[{flex:2.2}, commonStyles.modalCellDivider]}>
+          <Text style={[commonStyles.modalCell,  commonStyles.alignCenter, styles.modalTotalText]}>합계</Text>
+        </View>
+        <View style={[{flex:1}, commonStyles.modalCellDivider]}>
+          <Text style={[commonStyles.modalCell, commonStyles.alignRight,styles.modalTotalText]}>
+            {detailTotalQty.toLocaleString()}
+          </Text>
+        </View>
+        <View style={[{flex:3.7}, commonStyles.modalCellDivider]}>
+          <Text style={[commonStyles.modalCell, commonStyles.alignRight,styles.modalTotalText]}>
+            {detailTotalAmount.toLocaleString()}
+          </Text>
+        </View>
+      </View>
   );
 
   const openFromPicker = () => {
-    setTempFromDate(parseDate(fromDate));
+    setTempFromDate(parseDate(fromPurchaseDt));
     setShowFromPicker(true);
   };
 
   const openToPicker = () => {
-    setTempToDate(parseDate(toDate));
+    setTempToDate(parseDate(toPurchaseDt));
     setShowToPicker(true);
   };
 
@@ -97,7 +138,7 @@ export default function PurchaseDailyReportScreen() {
     setIsDetailVisible(true);
   };
 
-  type DetailRow = { no: number; product: string; qty: number; price: number; amount: number };
+  type DetailRow = { no: number; itemNm: string; qty: number; price: number; totalAmt: number };
   const detailData: DetailRow[] = useMemo(
     () =>
       Array.from({ length: 60 }).map((_, idx) => {
@@ -105,67 +146,42 @@ export default function PurchaseDailyReportScreen() {
         const price = 1200 + (idx % 7) * 300;
         return {
           no: idx + 1,
-          product: `상품 ${idx + 1}`,
+          itemNm: `상품 ${idx + 1}`,
           qty,
           price,
-          amount: qty * price,
+          totalAmt: qty * price,
         };
       }),
     []
-  ); 
-
-  const renderDetailHeader = () => (
-    <View style={styles.modalTableHeaderRow}>
-      <Text style={[styles.modalHeaderCell, styles.modalColProduct]}>상품</Text>
-      <Text style={[styles.modalHeaderCell, styles.modalColQty]}>수량</Text>
-      <Text style={[styles.modalHeaderCell, styles.modalColPrice]}>단가</Text>
-      <Text style={[styles.modalHeaderCell, styles.modalColAmount]}>금액</Text>
-    </View>
-  );
-
-  const renderDetailItem = ({ item }: { item: DetailRow }) => (
-    <View style={styles.modalTableRow}>
-      <Text style={[styles.modalCell, styles.modalColProduct]}>{item.product}</Text>
-      <Text style={[styles.modalCell, styles.modalColQty]}>{item.qty}</Text>
-      <Text style={[styles.modalCell, styles.modalColPrice]}>{item.price.toLocaleString()}</Text>
-      <Text style={[styles.modalCell, styles.modalColAmount]}>{item.amount.toLocaleString()}</Text>
-    </View>
   );
 
   const detailTotalAmount = useMemo(() => {
-    return detailData.reduce((acc, row) => acc + row.amount, 0);
+    return detailData.reduce((acc, row) => acc + row.totalAmt, 0);
+  }, [detailData]);
+  const detailTotalQty = useMemo(() => {
+    return detailData.reduce((acc, row) => acc + row.qty, 0);
   }, [detailData]);
 
-  const renderDetailFooter = () => (
-    <View style={[styles.modalTableRow, styles.modalTotalRow]}>
-      <Text style={[styles.modalCell, styles.modalColProduct, styles.modalTotalText]}>합계</Text>
-      <Text style={[styles.modalCell, styles.modalColQty]} />
-      <Text style={[styles.modalCell, styles.modalColPrice]} />
-      <Text style={[styles.modalCell, styles.modalColAmount, styles.modalTotalText]}>{detailTotalAmount.toLocaleString()}</Text>
-    </View>
-  );
-
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={commonStyles.container}>
       <StatusBar style="dark" />
 
-      {/* 상단 필터 영역 */}
-      <View style={styles.topBar}>
-        <View style={[styles.filterRow, styles.filterRowSpacing]}>
-          <Text style={styles.filterLabel}>조회일자</Text>
-          <TouchableOpacity style={styles.selectInput} onPress={openFromPicker}>
-            <Text style={styles.selectText}>{fromDate}</Text>
-            <Text style={styles.selectArrow}> ▼</Text>
+      <View style={commonStyles.topBar}>
+        <View style={[commonStyles.filterRow, styles.filterRowSpacing]}>
+          <Text style={commonStyles.filterLabel}>조회일자</Text>
+          <TouchableOpacity style={commonStyles.selectInput} onPress={openFromPicker}>
+            <Text style={styles.selectText}>{formattedDate(fromPurchaseDt)}</Text>
+            <Text style={commonStyles.selectArrow}> ▼</Text>
           </TouchableOpacity>
           <Text style={styles.tilde}>~</Text>
-          <TouchableOpacity style={styles.selectInput} onPress={openToPicker}>
-            <Text style={styles.selectText}>{toDate}</Text>
-            <Text style={styles.selectArrow}> ▼</Text>
+          <TouchableOpacity style={commonStyles.selectInput} onPress={openToPicker}>
+            <Text style={styles.selectText}>{formattedDate(toPurchaseDt)}</Text>
+            <Text style={commonStyles.selectArrow}> ▼</Text>
           </TouchableOpacity>
         </View>
 
-        <View style={styles.filterRow}>
-          <Text style={styles.filterLabel}>거래처</Text>
+        <View style={commonStyles.filterRow}>
+          <Text style={commonStyles.filterLabel}>거래처</Text>
           <TextInput
             style={styles.input}
             placeholder="거래처 입력"
@@ -175,39 +191,31 @@ export default function PurchaseDailyReportScreen() {
             returnKeyType="search"
             onSubmitEditing={onSearch}
           />
-          <Pressable style={styles.searchButton} onPress={onSearch}>
-            <Text style={styles.searchButtonText}>조회</Text>
+          <Pressable style={commonStyles.searchButton} onPress={onSearch}>
+            <Text style={commonStyles.searchButtonText}>조회</Text>
           </Pressable>
         </View>
       </View>
 
-      <View style={styles.sectionDivider} />
+      <View style={commonStyles.sectionDivider} />
 
-      {/* 그리드 영역 */}
-      <View style={styles.tableContainer}>
-        {renderHeader()}
-        <FlatList
-          data={filteredData}
-          keyExtractor={(item, idx) => `${item.date}-${item.vendor}-${idx}`}
-          renderItem={renderItem}
-          ListFooterComponent={renderFooter}
-          style={styles.tableList}
-          contentContainerStyle={styles.tableListContent}
-          showsVerticalScrollIndicator
-        />
-      </View>
+      <Table data={filteredData} columns={mainColumns} listFooter={renderFooter}/>
 
       {/* 날짜 선택 모달 - 시작일 */}
-      <Modal visible={showFromPicker} transparent animationType="slide" onRequestClose={() => setShowFromPicker(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>시작일 선택</Text>
+      <Modal
+          visible={showFromPicker}
+          transparent animationType="slide"
+          onRequestClose={() => setShowFromPicker(false)}
+      >
+        <View style={commonStyles.dateModalOverlay}>
+          <View style={commonStyles.dateModalCard}>
+            <View style={commonStyles.dateModalHeader}>
+              <Text style={commonStyles.dateModalTitle}>시작일 선택</Text>
               <TouchableOpacity onPress={() => setShowFromPicker(false)}>
-                <Text style={styles.modalClose}>✕</Text>
+                <Text style={commonStyles.modalClose}>✕</Text>
               </TouchableOpacity>
             </View>
-            <View style={styles.modalPickerContainer}>
+            <View style={commonStyles.dateModalPickerContainer}>
               {tempFromDate && (
                 <DateTimePicker
                   value={tempFromDate}
@@ -221,15 +229,15 @@ export default function PurchaseDailyReportScreen() {
                 />
               )}
             </View>
-            <View style={styles.modalActions}>
+            <View style={commonStyles.modalActions}>
               <Pressable
-                style={styles.modalOkButton}
+                style={commonStyles.modalOkButton}
                 onPress={() => {
-                  if (tempFromDate) setFromDate(formatDate(tempFromDate));
+                  if (tempFromDate) setPurchaseDt(formatDate(tempFromDate));
                   setShowFromPicker(false);
                 }}
               >
-                <Text style={styles.modalOkButtonText}>확인</Text>
+                <Text style={commonStyles.modalOkButtonText}>확인</Text>
               </Pressable>
             </View>
           </View>
@@ -237,16 +245,20 @@ export default function PurchaseDailyReportScreen() {
       </Modal>
 
       {/* 날짜 선택 모달 - 종료일 */}
-      <Modal visible={showToPicker} transparent animationType="slide" onRequestClose={() => setShowToPicker(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>종료일 선택</Text>
+      <Modal
+          visible={showToPicker}
+          transparent animationType="slide"
+          onRequestClose={() => setShowToPicker(false)}
+      >
+        <View style={commonStyles.dateModalOverlay}>
+          <View style={commonStyles.dateModalCard}>
+            <View style={commonStyles.dateModalHeader}>
+              <Text style={commonStyles.dateModalTitle}>종료일 선택</Text>
               <TouchableOpacity onPress={() => setShowToPicker(false)}>
-                <Text style={styles.modalClose}>✕</Text>
+                <Text style={commonStyles.modalClose}>✕</Text>
               </TouchableOpacity>
             </View>
-            <View style={styles.modalPickerContainer}>
+            <View style={commonStyles.dateModalPickerContainer}>
               {tempToDate && (
                 <DateTimePicker
                   value={tempToDate}
@@ -260,44 +272,39 @@ export default function PurchaseDailyReportScreen() {
                 />
               )}
             </View>
-            <View style={styles.modalActions}>
+            <View style={commonStyles.modalActions}>
               <Pressable
-                style={styles.modalOkButton}
+                style={commonStyles.modalOkButton}
                 onPress={() => {
-                  if (tempToDate) setToDate(formatDate(tempToDate));
+                  if (tempToDate) setToPurchaseDt(formatDate(tempToDate));
                   setShowToPicker(false);
                 }}
               >
-                <Text style={styles.modalOkButtonText}>확인</Text>
+                <Text style={commonStyles.modalOkButtonText}>확인</Text>
               </Pressable>
             </View>
           </View>
         </View>
       </Modal>
 
-      {/* 거래처 상세 모달 */}
       <Modal visible={isDetailVisible} transparent animationType="fade" onRequestClose={() => setIsDetailVisible(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <View style={styles.modalHeader}>
+        <View style={commonStyles.modalOverlay}>
+          <View style={commonStyles.modalCard}>
+            <View style={commonStyles.modalHeader}>
             {selectedVendorName && (
-              <Text style={styles.modalTitle}>{selectedVendorName}</Text>
+              <Text style={commonStyles.modalTitle}>{selectedVendorName}</Text>
             )}
-              
+
               <TouchableOpacity onPress={() => setIsDetailVisible(false)}>
-                <Text style={styles.modalClose}>✕</Text>
+                <Text style={commonStyles.modalClose}>✕</Text>
               </TouchableOpacity>
             </View>
-            
-            {renderDetailHeader()}
-            <FlatList
-              data={detailData}
-              keyExtractor={(item) => String(item.no)}
-              renderItem={renderDetailItem}
-              ListFooterComponent={renderDetailFooter}
-              style={styles.modalTableList}
-              contentContainerStyle={styles.modalTableListContent}
-              showsVerticalScrollIndicator
+
+            <Table
+                data={detailData}
+                columns={PurchaseDetailColumns}
+                isModal={true}
+                listFooter={renderDetailFooter}
             />
           </View>
         </View>
@@ -307,29 +314,13 @@ export default function PurchaseDailyReportScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  topBar: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 8,
-    backgroundColor: '#f5f5f5',
-  },
-  filterRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
   filterRowSpacing: {
     marginBottom: 10,
   },
   filterLabel: {
+    minWidth:50,
     fontSize: 14,
     color: '#555',
-    marginRight: 8,
-    width: 50,
   },
   tilde: {
     color: '#666',
@@ -344,90 +335,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     color: '#333',
   },
-  selectInput: {
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    flexGrow: 1,
-    flexBasis: 0,
-  },
   selectText: {
     fontSize: 14,
     color: '#333',
   },
-  selectArrow: {
-    fontSize: 12,
-    color: '#666',
-  },
-  searchButton: {
-    marginLeft: 'auto',
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 24,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  searchButtonGhost: {
-    backgroundColor: 'transparent',
-  },
-  searchButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  sectionDivider: {
-    height: 2,
-    backgroundColor: '#b0b0b0',
-  },
-  tableContainer: {
-    flex: 1,
-    backgroundColor: '#fff',
-    marginHorizontal: 20,
-    marginTop: 10,
-    borderRadius: 12,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  tableHeaderRow: {
-    flexDirection: 'row',
-    backgroundColor: '#f0f3f7',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e0e0e0',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-  },
-  headerCell: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#333',
-  },
-  tableList: {
-    flex: 1,
-  },
-  tableListContent: {
-    paddingHorizontal: 12,
-    paddingBottom: 12,
-  },
-  tableRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#eee',
-    paddingVertical: 12,
-  },
-  cell: {
-    fontSize: 13,
-    color: '#444',
-  },
+
   totalRow: {
     backgroundColor: '#fafafa',
   },
@@ -435,137 +347,13 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#222',
   },
-  colDate: {
-    flex: 1.2,
-  },
-  colVendor: {
-    flex: 2,
-  },
-  colAmount: {
-    flex: 1,
-    textAlign: 'right',
-  },
-  linkText: {
-    color: '#007AFF',
-    textDecorationLine: 'underline',
-  },
-  vendorNamePressable: {
-    flex: 2,
-  },
-  // Modal styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  modalCard: {
-    width: '100%',
-    maxWidth: 480,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    overflow: 'hidden',
-    height: '80%',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#eee',
-  },
-  modalTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#333',
-  },
-  modalClose: {
-    fontSize: 18,
-    color: '#666',
-  },
-  modalPickerContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  modalStoreName: {
-    fontSize: 14,
-    color: '#555',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  modalActions: {
-    padding: 12,
-    alignItems: 'flex-end',
-  },
-  modalOkButton: {
-    backgroundColor: '#007AFF',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-  },
-  modalOkButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  // Modal table styles for detail
-  modalTableHeaderRow: {
-    flexDirection: 'row',
-    backgroundColor: '#f0f3f7',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e0e0e0',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
-  },
-  modalHeaderCell: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#333',
-  },
-  modalTableList: {
-    flex: 1,
-    marginTop: 2,
-  },
-  modalTableListContent: {
-    paddingHorizontal: 12,
-    paddingBottom: 8,
-  },
-  modalTableRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#eee',
-    paddingVertical: 10,
-  },
-  modalCell: {
-    fontSize: 13,
-    color: '#444',
-  },
   modalTotalRow: {
     backgroundColor: '#fafafa',
   },
   modalTotalText: {
     fontWeight: '700',
     color: '#222',
-  },
-  modalColProduct: {
-    flex: 2,
-  },
-  modalColQty: {
-    flex: 0.8,
-  },
-  modalColPrice: {
-    flex: 1.2,
-  },
-  modalColAmount: {
-    flex: 1.2,
-  },
+  }
 });
 
 

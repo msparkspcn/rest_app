@@ -2,6 +2,7 @@ import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/dat
 import { StatusBar } from 'expo-status-bar';
 import React, { useMemo, useState } from 'react';
 import { FlatList, Modal, Platform, Pressable, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {commonStyles} from "../../styles/index";
 
 type Row = { no: number; product: string; qty: number; amount: number };
 
@@ -139,20 +140,20 @@ export default function PurchaseProductReportScreen() {
   );
 
   const renderDetailItem = ({ item }: { item: DetailRow }) => (
-    <View style={styles.modalTableRow}>
-      <Text style={[styles.modalCell, styles.modalColVendor]}>{item.vendor}</Text>
-      <Text style={[styles.modalCell, styles.modalColDate]}>{item.date}</Text>
-      <Text style={[styles.modalCell, styles.modalColQty]}>{item.qty}</Text>
-      <Text style={[styles.modalCell, styles.modalColAmount]}>{item.amount.toLocaleString()}</Text>
+    <View style={commonStyles.modalTableRow}>
+      <Text style={[commonStyles.modalCell, styles.modalColVendor]}>{item.vendor}</Text>
+      <Text style={[commonStyles.modalCell, styles.modalColDate]}>{item.date}</Text>
+      <Text style={[commonStyles.modalCell, styles.modalColQty]}>{item.qty}</Text>
+      <Text style={[commonStyles.modalCell, styles.modalColAmount]}>{item.amount.toLocaleString()}</Text>
     </View>
   );
 
   const renderDetailFooter = () => (
-    <View style={[styles.modalTableRow, styles.modalTotalRow]}>
-      <Text style={[styles.modalCell, styles.modalColVendor, styles.modalTotalText]}>합계</Text>
-      <Text style={[styles.modalCell, styles.modalColDate]} />
-      <Text style={[styles.modalCell, styles.modalColQty, styles.modalTotalText]}>{detailTotals.qty.toLocaleString()}</Text>
-      <Text style={[styles.modalCell, styles.modalColAmount, styles.modalTotalText]}>{detailTotals.amount.toLocaleString()}</Text>
+    <View style={[commonStyles.modalTableRow, styles.modalTotalRow]}>
+      <Text style={[commonStyles.modalCell, styles.modalColVendor, styles.modalTotalText]}>합계</Text>
+      <Text style={[commonStyles.modalCell, styles.modalColDate]} />
+      <Text style={[commonStyles.modalCell, styles.modalColQty, styles.modalTotalText]}>{detailTotals.qty.toLocaleString()}</Text>
+      <Text style={[commonStyles.modalCell, styles.modalColAmount, styles.modalTotalText]}>{detailTotals.amount.toLocaleString()}</Text>
     </View>
   );
 
@@ -210,7 +211,7 @@ export default function PurchaseProductReportScreen() {
       <Modal visible={showFromPicker} transparent animationType="slide" onRequestClose={() => setShowFromPicker(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <View style={styles.modalHeader}>
+            <View style={commonStyles.modalHeader}>
               <Text style={styles.modalTitle}>시작일 선택</Text>
               <TouchableOpacity onPress={() => setShowFromPicker(false)}>
                 <Text style={styles.modalClose}>✕</Text>
@@ -249,7 +250,7 @@ export default function PurchaseProductReportScreen() {
       <Modal visible={showToPicker} transparent animationType="slide" onRequestClose={() => setShowToPicker(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <View style={styles.modalHeader}>
+            <View style={commonStyles.modalHeader}>
               <Text style={styles.modalTitle}>종료일 선택</Text>
               <TouchableOpacity onPress={() => setShowToPicker(false)}>
                 <Text style={styles.modalClose}>✕</Text>
@@ -288,7 +289,7 @@ export default function PurchaseProductReportScreen() {
       <Modal visible={isDetailVisible} transparent animationType="fade" onRequestClose={() => setIsDetailVisible(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <View style={styles.modalHeader}>
+            <View style={commonStyles.modalHeader}>
               {selectedProductName && <Text style={styles.modalTitle}>{selectedProductName}</Text>}
               <TouchableOpacity onPress={() => setIsDetailVisible(false)}>
                 <Text style={styles.modalClose}>✕</Text>
@@ -343,7 +344,6 @@ const styles = StyleSheet.create({
   // Modal styles
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 },
   modalCard: { width: '100%', maxWidth: 480, backgroundColor: '#fff', borderRadius: 12, overflow: 'hidden', height: '80%' },
-  modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#eee' },
   modalTitle: { fontSize: 16, fontWeight: '700', color: '#333' },
   modalClose: { fontSize: 18, color: '#666' },
   modalPickerContainer: { paddingHorizontal: 16, paddingVertical: 12, alignItems: 'center' },
@@ -355,8 +355,6 @@ const styles = StyleSheet.create({
   modalHeaderCell: { fontSize: 13, fontWeight: '700', color: '#333' },
   modalTableList: { flex: 1, marginTop: 2 },
   modalTableListContent: { paddingHorizontal: 12, paddingBottom: 8 },
-  modalTableRow: { flexDirection: 'row', alignItems: 'center', borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#eee', paddingVertical: 10 },
-  modalCell: { fontSize: 13, color: '#444' },
   modalTotalRow: { backgroundColor: '#fafafa' },
   modalTotalText: { fontWeight: '700', color: '#222' },
   modalColVendor: { flex: 1.5 },
