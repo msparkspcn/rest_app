@@ -5,7 +5,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
     FlatList,
     Modal,
-    Platform,
     Pressable,
     SafeAreaView,
     StyleSheet,
@@ -14,10 +13,11 @@ import {
     View
 } from 'react-native';
 import * as api from "../../services/api/api";
-import DateTimePicker, {DateTimePickerEvent} from "@react-native-community/datetimepicker";
-import {formattedDate, formattedDate2, getTodayString} from "../../utils/DateUtils";
+import {formattedDate, ymdToDateWithDay, getTodayYmd, dateToYmd} from "../../utils/DateUtils";
 import {setAuthToken} from "../../services/api/api";
 import {Table} from "../../components/Table";
+import {ColumnDef} from "../../types/table";
+import {DatePickerModal} from "../../components/DatePickerModal";
 
 type SaleRow = {
     saleDtInfo: string;
@@ -45,8 +45,8 @@ export default function SaleReportByPeriod() {
     const [tempDate, setTempDate] = useState<Date | null>(null);
     const [showCornerModal, setShowCornerModal] = useState(false);
     const [selectedCornerCd, setSelectedCornerCd] = useState<string | null>(corners[0]?.id ?? null);
-    const [fromSaleDt, setFromSaleDt] = useState(getTodayString());
-    const [toSaleDt, setToSaleDt] = useState(getTodayString());
+    const [fromSaleDt, setFromSaleDt] = useState(getTodayYmd());
+    const [toSaleDt, setToSaleDt] = useState(getTodayYmd());
     const [currentPickerType, setCurrentPickerType] = useState('from')
     const [selectedSale, setSelectedSale] = useState<SaleRow | null>(null);
     const [saleList, setSaleList] = useState([]);
@@ -107,20 +107,10 @@ export default function SaleReportByPeriod() {
         setIsDetailVisible(false);
     };
 
-    type Align = 'left' | 'center' | 'right';
-    type ColumnDef<T> = {
-        key: keyof T | string;
-        title: string;
-        flex: number;
-        align?: Align;
-        headerAlign?: Align;
-        cellAlign?: Align;
-    };
-
     const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => ([
         { key: 'saleDtInfo',       title: '일자(요일)',     flex: 1, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign:'center', paddingRight:10}]}>{formattedDate2(item.saleDt)}</Text>
+                <Text style={[commonStyles.cell, {textAlign:'center', paddingRight:10}]}>{ymdToDateWithDay(item.saleDt)}</Text>
             )},
         { key: 'cornerNm',     title: '매장명',   flex: 2,   align: 'left',
             renderCell: (item) => (
@@ -161,20 +151,11 @@ export default function SaleReportByPeriod() {
         { key: 'totalAmt', title: '금액',   flex: 2.2, align: 'right' },
     ]), []);
 
-    const parseDate = (s: string) => {
-        const [y, m, d] = s.split('/').map(Number);
-        return new Date(y, (m || 1) - 1, d || 1);
-    };
+
     const openDatePicker = (pickerType: string) => {
-        setTempDate(parseDate(formattedDate(getTodayString())));
+        setTempDate(new Date());
         setCurrentPickerType(pickerType);
         setShowDatePicker(true);
-    };
-    const formatDate = (d: Date) => {
-        const y = d.getFullYear();
-        const m = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        return `${y}${m}${day}`;
     };
 
     const summartRow = useMemo(() => {
@@ -305,54 +286,16 @@ export default function SaleReportByPeriod() {
                     </View>
                 </View>
             </Modal>
-            <Modal
+
+            <DatePickerModal
                 visible={showDatePicker}
-                transparent animationType="slide"
-                onRequestClose={() => setShowDatePicker(false)}
-            >
-                <View style={commonStyles.dateModalOverlay}>
-                    <View style={commonStyles.dateModalCard}>
-                        <View style={commonStyles.dateModalHeader}>
-                            <Text style={commonStyles.dateModalTitle}>조회일자 선택</Text>
-                            <TouchableOpacity onPress={() => setShowDatePicker(false)}>
-                                <Text style={commonStyles.modalClose}>✕</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <View style={commonStyles.dateModalPickerContainer}>
-                            {tempDate && (
-                                <DateTimePicker
-                                    value={tempDate}
-                                    mode="date"
-                                    display={Platform.OS === 'android' ? 'calendar' : 'spinner'}
-                                    onChange={(event: DateTimePickerEvent, date?: Date) => {
-                                        if (event.type === 'set' && date) {
-                                            setTempDate(date);
-                                        }
-                                    }}
-                                />
-                            )}
-                        </View>
-                        <View style={commonStyles.modalActions}>
-                            <Pressable
-                                style={commonStyles.modalOkButton}
-                                onPress={() => {
-                                    if (tempDate) {
-                                        if (currentPickerType === 'from') {
-                                            console.log('tempDate:'+tempDate)
-                                            setFromSaleDt(formatDate(tempDate));
-                                        } else if (currentPickerType === 'to') {
-                                            setToSaleDt(formatDate(tempDate));
-                                        }
-                                    }
-                                    setShowDatePicker(false);
-                                }}
-                            >
-                                <Text style={commonStyles.dateModalOkButtonText}>확인</Text>
-                            </Pressable>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
+                initialDate={tempDate}
+                onClose={() => setShowDatePicker(false)}
+                onConfirm={(date) => {
+                    if (currentPickerType === 'from') setFromSaleDt(dateToYmd(date));
+                    else setToSaleDt(dateToYmd(date));
+                }}
+            />
         </SafeAreaView>
     );
 }
@@ -361,10 +304,6 @@ const styles = StyleSheet.create({
     selectText: {
         fontSize: 16,
         color: '#333',
-    },
-    linkText: {
-        color: '#007AFF',
-        textDecorationLine: 'underline',
     },
     summaryRow: {
         backgroundColor: '#fff7e6'

@@ -4,15 +4,15 @@ import React, { useMemo, useState } from 'react';
 import { Modal, Platform, Pressable, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import {commonStyles} from "../../styles/index";
 import {Table} from "../../components/Table";
-import {formattedDate, getTodayString} from "../../utils/DateUtils";
+import {dateToYmd, formattedDate, getTodayYmd, parseYmdString} from "../../utils/DateUtils";
 import {ColumnDef} from "../../types/table";
 
 type PurchaseRow = { date: string; vendor: string; amount: number };
 type PurchaseDetailRow = {itemNm: string, qty: number, price: number, totalAmt: number};
 
 export default function PurchaseDailyReportScreen() {
-  const [fromPurchaseDt, setPurchaseDt] = useState(getTodayString());
-  const [toPurchaseDt, setToPurchaseDt] = useState(getTodayString());
+  const [fromPurchaseDt, setPurchaseDt] = useState(getTodayYmd());
+  const [toPurchaseDt, setToPurchaseDt] = useState(getTodayYmd());
   const [showFromPicker, setShowFromPicker] = useState(false);
   const [showToPicker, setShowToPicker] = useState(false);
   const [tempFromDate, setTempFromDate] = useState<Date | null>(null);
@@ -21,18 +21,6 @@ export default function PurchaseDailyReportScreen() {
   const [submitted, setSubmitted] = useState({ from: '2025/08/01', to: '2025/08/04', vendor: '' });
   const [isDetailVisible, setIsDetailVisible] = useState(false);
   const [selectedVendorName, setSelectedVendorName] = useState<string | null>(null);
-
-  const formatDate = (d: Date) => {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}/${m}/${day}`;
-  };
-
-  const parseDate = (s: string) => {
-    const [y, m, d] = s.split('/').map(Number);
-    return new Date(y, (m || 1) - 1, d || 1);
-  };
 
   const baseData: PurchaseRow[] = useMemo(
     () => [
@@ -117,12 +105,12 @@ export default function PurchaseDailyReportScreen() {
   );
 
   const openFromPicker = () => {
-    setTempFromDate(parseDate(fromPurchaseDt));
+    setTempFromDate(parseYmdString(fromPurchaseDt));
     setShowFromPicker(true);
   };
 
   const openToPicker = () => {
-    setTempToDate(parseDate(toPurchaseDt));
+    setTempToDate(parseYmdString(toPurchaseDt));
     setShowToPicker(true);
   };
 
@@ -226,7 +214,7 @@ export default function PurchaseDailyReportScreen() {
               <Pressable
                 style={commonStyles.modalOkButton}
                 onPress={() => {
-                  if (tempFromDate) setPurchaseDt(formatDate(tempFromDate));
+                  if (tempFromDate) setPurchaseDt(dateToYmd(tempFromDate));
                   setShowFromPicker(false);
                 }}
               >
@@ -268,7 +256,7 @@ export default function PurchaseDailyReportScreen() {
               <Pressable
                 style={commonStyles.modalOkButton}
                 onPress={() => {
-                  if (tempToDate) setToPurchaseDt(formatDate(tempToDate));
+                  if (tempToDate) setToPurchaseDt(dateToYmd(tempToDate));
                   setShowToPicker(false);
                 }}
               >

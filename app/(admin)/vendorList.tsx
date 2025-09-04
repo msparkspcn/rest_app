@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useMemo, useState } from 'react';
 import { Modal, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View } from 'react-native';
 import {Table} from "../../components/Table";
+import {ColumnDef} from "../../types/table";
 
 type VendorRow = {
   no: number;
@@ -65,16 +66,6 @@ export default function VendorListScreen() {
     { key: 'itemNm', title: '상품명',   flex: 2.2, align: 'left'   },
   ]), []);
 
-  type Align = 'left' | 'center' | 'right';
-  type ColumnDef<T> = {
-    key: keyof T | string;
-    title: string;
-    flex: number;
-    align?: Align;
-    headerAlign?: Align;
-    cellAlign?: Align;
-  };
-
   const mainColumns: ColumnDef<VendorRow>[] = useMemo(() => ([
     { key: 'no',       title: 'No',     flex: 0.3, align: 'center' },
     { key: 'vendor',     title: '거래처',   flex: 2,   align: 'left',
@@ -85,12 +76,6 @@ export default function VendorListScreen() {
       ),   },
     { key: 'status',     title: '상태',    flex: 0.8, align: 'center' },
   ]), []);
-
-  const alignStyles = {
-    left: commonStyles.alignLeft,
-    center: commonStyles.alignCenter,
-    right: commonStyles.alignRight,
-  } as const;
 
   const VendorNmRow = () => {
     return (
@@ -153,7 +138,12 @@ export default function VendorListScreen() {
               </Pressable>
             </View>
 
-            <Table data={detailData} columns={vendorColumns} isModal={true} listHeader={VendorNmRow}/>
+            <Table
+                data={detailData}
+                columns={vendorColumns}
+                isModal={true}
+                listHeader={VendorNmRow}
+            />
           </View>
         </View>
       </Modal>

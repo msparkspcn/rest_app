@@ -1,34 +1,23 @@
-import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { StatusBar } from 'expo-status-bar';
 import React, { useMemo, useState } from 'react';
-import { Modal, Platform, Pressable, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Modal, Pressable, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import {commonStyles} from "../../styles/index";
-import {formattedDate, getTodayString} from "../../utils/DateUtils";
+import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
 import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
+import {DatePickerModal} from "../../components/DatePickerModal";
 
 type PurchaseRow = { no: number; itemNm: string; qty: number; amount: number };
 type PurchaseDetailRow = {vendorNm: string, date: string, qty: number, totalAmt: number};
 export default function PurchaseProductReportScreen() {
-  const [fromPurchaseDt, setFromPurchaseDt] = useState(getTodayString());
-  const [toPurchaseDt, setToPurchaseDt] = useState(getTodayString());
+  const [fromPurchaseDt, setFromPurchaseDt] = useState(getTodayYmd());
+  const [toPurchaseDt, setToPurchaseDt] = useState(getTodayYmd());
   const [productQuery, setProductQuery] = useState('');
   const [isDetailVisible, setIsDetailVisible] = useState(false);
   const [selectedItemNm, setSelectedItemNm] = useState<string | null>(null);
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [currentPickerType, setCurrentPickerType] = useState('from');
     const [tempDate, setTempDate] = useState<Date | null>(null);
-
-  const formatDate = (d: Date) => {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}${m}${day}`;
-  };
-  const parseDate = (s: string) => {
-    const [y, m, d] = s.split('/').map(Number);
-    return new Date(y, (m || 1) - 1, d || 1);
-  };
 
   const baseData: PurchaseRow[] = useMemo(
     () =>
@@ -54,7 +43,7 @@ export default function PurchaseProductReportScreen() {
   const onSearch = () => {};
 
     const openDatePicker = (pickerType: string) => {
-        setTempDate(parseDate(formattedDate(getTodayString())));
+        setTempDate(new Date());
         setCurrentPickerType(pickerType);
         setShowDatePicker(true);
     };
@@ -180,7 +169,7 @@ export default function PurchaseProductReportScreen() {
                     <Text style={styles.selectText}>{formattedDate(fromPurchaseDt)}</Text>
                     <Text style={commonStyles.selectArrow}> ▼</Text>
                 </TouchableOpacity>
-                <Text style={styles.tilde}>~</Text>
+                <Text style={commonStyles.tilde}>~</Text>
                 <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('to')}>
                     <Text style={styles.selectText}>{formattedDate(toPurchaseDt)}</Text>
                     <Text style={commonStyles.selectArrow}> ▼</Text>
@@ -208,73 +197,38 @@ export default function PurchaseProductReportScreen() {
 
         <Table data={filteredData} columns={mainColumns} listFooter={renderFooter}/>
 
+        <DatePickerModal
+            visible={showDatePicker}
+            initialDate={tempDate}
+            onClose={() => setShowDatePicker(false)}
+            onConfirm={(date) => {
+                if (currentPickerType === 'from') setFromPurchaseDt(dateToYmd(date));
+                else setToPurchaseDt(dateToYmd(date));
+            }}
+        />
+
       <Modal
-          visible={showDatePicker}
-          transparent animationType="slide"
-          onRequestClose={() => setShowDatePicker(false)}
+          visible={isDetailVisible}
+          transparent animationType="fade"
+          onRequestClose={() => setIsDetailVisible(false)}
       >
-        <View style={commonStyles.dateModalOverlay}>
-          <View style={commonStyles.dateModalCard}>
-            <View style={commonStyles.dateModalHeader}>
-              <Text style={commonStyles.dateModalTitle}>조회일자 선택</Text>
-              <TouchableOpacity onPress={() => setShowDatePicker(false)}>
-                <Text style={commonStyles.modalClose}>✕</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={commonStyles.dateModalPickerContainer}>
-              {tempDate && (
-                <DateTimePicker
-                  value={tempDate}
-                  mode="date"
-                  display={Platform.OS === 'android' ? 'calendar' : 'spinner'}
-                  onChange={(event: DateTimePickerEvent, date?: Date) => {
-                    if (event.type === 'set' && date) {
-                        setTempDate(date);
-                    }
-                  }}
-                />
-              )}
-            </View>
-            <View style={commonStyles.modalActions}>
-              <Pressable
-                style={commonStyles.modalOkButton}
-                onPress={() => {
-                    if(tempDate) {
-                        if (currentPickerType === 'from') {
-                            console.log('from Date:'+tempDate)
-                            setFromPurchaseDt(formatDate(tempDate));
-                        } else if (currentPickerType === 'to') {
-                            setToPurchaseDt(formatDate(tempDate));
-                        }
-                    }
-                    setShowDatePicker(false);
-                }}
-              >
-                <Text style={commonStyles.modalOkButtonText}>확인</Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      </Modal>
+          <View style={commonStyles.modalOverlay}>
+              <View style={commonStyles.modalCard}>
+                  <View style={commonStyles.modalHeader}>
+                      {selectedItemNm && <Text style={commonStyles.modalTitle}>{selectedItemNm}</Text>}
+                      <TouchableOpacity onPress={() => setIsDetailVisible(false)}>
+                          <Text style={commonStyles.modalClose}>✕</Text>
+                      </TouchableOpacity>
+                  </View>
 
-      <Modal visible={isDetailVisible} transparent animationType="fade" onRequestClose={() => setIsDetailVisible(false)}>
-        <View style={commonStyles.modalOverlay}>
-          <View style={commonStyles.modalCard}>
-            <View style={commonStyles.modalHeader}>
-              {selectedItemNm && <Text style={commonStyles.modalTitle}>{selectedItemNm}</Text>}
-              <TouchableOpacity onPress={() => setIsDetailVisible(false)}>
-                <Text style={commonStyles.modalClose}>✕</Text>
-              </TouchableOpacity>
-            </View>
-
-              <Table
-                  data={detailData}
-                  columns={PurchaseDetailColumns}
-                  isModal={true}
-                  listFooter={renderDetailFooter}
-              />
+                  <Table
+                      data={detailData}
+                      columns={PurchaseDetailColumns}
+                      isModal={true}
+                      listFooter={renderDetailFooter}
+                  />
+              </View>
           </View>
-        </View>
       </Modal>
     </SafeAreaView>
   );
@@ -282,26 +236,10 @@ export default function PurchaseProductReportScreen() {
 
 const styles = StyleSheet.create({
   filterRowSpacing: { marginBottom: 10 },
-  tilde: { color: '#666' },
   input: { flex: 1, height: 40, backgroundColor: '#fff', borderWidth: 1, borderColor: '#ddd', borderRadius: 8, paddingHorizontal: 12, color: '#333' },
-  selectInput: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#ddd', borderRadius: 8, paddingHorizontal: 16, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexGrow: 1, flexBasis: 0 },
   selectText: { fontSize: 14, color: '#333' },
-  headerCell: { fontSize: 13, fontWeight: '700', color: '#333' },
   totalRow: { backgroundColor: '#fafafa' },
   totalText: { fontWeight: '700', color: '#222' },
-  linkText: { color: '#007AFF', textDecorationLine: 'underline' },
-  productNamePressable: { flex: 2 },
-  // Modal styles
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 },
-  modalCard: { width: '100%', maxWidth: 480, backgroundColor: '#fff', borderRadius: 12, overflow: 'hidden', height: '80%' },
-  modalTitle: { fontSize: 16, fontWeight: '700', color: '#333' },
-  modalClose: { fontSize: 18, color: '#666' },
-  modalPickerContainer: { paddingHorizontal: 16, paddingVertical: 12, alignItems: 'center' },
-  modalActions: { padding: 12, alignItems: 'flex-end' },
-  modalOkButton: { backgroundColor: '#007AFF', borderRadius: 8, paddingHorizontal: 16, paddingVertical: 10 },
-  modalOkButtonText: { color: '#fff', fontWeight: '600', fontSize: 14 },
   modalTotalRow: { backgroundColor: '#fafafa' },
   modalTotalText: { fontWeight: '700', color: '#222' },
 });
-
-

@@ -51,6 +51,10 @@ export default function AdminLayout() {
             name="saleReportByPeriod"
             options={{ title: '기간별 매출현황(휴)', headerShown: true }}
         />
+        <Stack.Screen
+            name="saleReportByTimezone"
+            options={{ title: '시간대별 매출현황(휴)', headerShown: true }}
+        />
       </Stack>
       {!hideFooter && (
         <View style={styles.footerWrap}>

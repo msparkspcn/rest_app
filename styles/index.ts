@@ -318,4 +318,7 @@ export const commonStyles = StyleSheet.create({
   modalList: {
     maxHeight: 700,
   },
+  tilde: {
+      color: '#666'
+  },
 })

@@ -1,11 +1,24 @@
 
 
-export function getTodayString()  {
+export function getTodayYmd()  {
     const today = new Date();
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');
     return `${year}${month}${day}`;
+};
+
+
+export function dateToYmd(d: Date) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}${m}${day}`;
+};
+
+export function parseYmdString(s: string) {
+    const [y, m, d] = s.split('/').map(Number);
+    return new Date(y, (m || 1) - 1, d || 1);
 };
 
 export function formattedDate(dateStr:String) {
@@ -14,7 +27,7 @@ export function formattedDate(dateStr:String) {
     return `${dateStr.substring(0, 4)}/${dateStr.substring(4, 6)}/${dateStr.substring(6, 8)}`;
 }
 
-export function formattedDate2(dateStr:String): string {
+export function ymdToDateWithDay(dateStr:String): string {
     const year = parseInt(dateStr.substring(0, 4), 10);
     const month = parseInt(dateStr.substring(4, 6), 10) - 1; // JS Date는 0부터 시작
     const day = parseInt(dateStr.substring(6, 8), 10);

@@ -53,7 +53,7 @@ export default function AdminHomeScreen() {
         { title: '실시간 매출현황(주)', icon: '⚡️', route: '/(admin)/realtimeSales' as Href, roleType: DEP_OP },
         { title: '실시간 매출현황(주)', icon: '⚡️', route: '/(admin)/realtimeSales' as Href, roleType: DEP_G },
         { title: '실시간 매출현황(통합)', icon: '⚡️', route: '/(admin)/realtimeSales' as Href, roleType: DEP_OP },
-        { title: '시간대별 매출현황(휴)', icon: '⏱️', route: '/(admin)/dashboard', roleType: DEP_R },
+        { title: '시간대별 매출현황(휴)', icon: '⏱️', route: '/(admin)/saleReportByTimezone', roleType: DEP_R },
         { title: '시간대별 매출현황(주)', icon: '⏱️', route: '/(admin)/dashboard', roleType: DEP_G},
         { title: '기간별 매출현황(휴)', icon: '🗓️', route: '/(admin)/saleReportByPeriod', roleType: DEP_R },
         { title: '기간별 매출현황(주)', icon: '🗓️', route: '/(admin)/dashboard', roleType: DEP_G },
