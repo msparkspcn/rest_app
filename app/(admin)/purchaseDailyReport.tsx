@@ -5,6 +5,7 @@ import { Modal, Platform, Pressable, SafeAreaView, StyleSheet, Text, TextInput, 
 import {commonStyles} from "../../styles/index";
 import {Table} from "../../components/Table";
 import {formattedDate, getTodayString} from "../../utils/DateUtils";
+import {ColumnDef} from "../../types/table";
 
 type PurchaseRow = { date: string; vendor: string; amount: number };
 type PurchaseDetailRow = {itemNm: string, qty: number, price: number, totalAmt: number};
@@ -44,15 +45,7 @@ export default function PurchaseDailyReportScreen() {
     ],
     []
   );
-  type Align = 'left' | 'center' | 'right';
-  type ColumnDef<T> = {
-    key: keyof T | string;
-    title: string;
-    flex: number;
-    align?: Align;
-    headerAlign?: Align;
-    cellAlign?: Align;
-  };
+
   const mainColumns: ColumnDef<PurchaseRow>[] = useMemo(() => ([
     { key: 'date',       title: '일자',     flex: 1, align: 'center' },
     { key: 'vendor',     title: '거래처',   flex: 2,   align: 'left',
@@ -244,7 +237,6 @@ export default function PurchaseDailyReportScreen() {
         </View>
       </Modal>
 
-      {/* 날짜 선택 모달 - 종료일 */}
       <Modal
           visible={showToPicker}
           transparent animationType="slide"

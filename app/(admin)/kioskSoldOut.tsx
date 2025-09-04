@@ -69,57 +69,6 @@ export default function KioskSoldOutScreen() {
     Alert.alert('완료', '완료되었습니다.');
   }
 
-  const alignStyles = {
-    left: commonStyles.alignLeft,
-    center: commonStyles.alignCenter,
-    right: commonStyles.alignRight,
-  } as const;
-
-  const renderHeader = () => (
-    <View style={commonStyles.tableHeaderRow}>
-      {mainColumns.map((col, i) => (
-          <View
-              key={String(col.key)}
-              style={[
-                { flex: col.flex },
-                commonStyles.columnContainer,
-                i < mainColumns.length - 1 && commonStyles.headerCellDivider,
-              ]}
-          >
-            <Text style={commonStyles.headerCell}>{col.title}</Text>
-          </View>
-      ))}
-    </View>
-  );
-
-  const renderItem = ({ item, index }: { item: ProductRow, index: number }) => (
-      <View style={[commonStyles.tableRow, index % 2 === 0 ? commonStyles.tableRowEven : commonStyles.tableRowOdd]}>
-        {mainColumns.map((col, i) => {
-          const value = col.key === 'useYn' ? (item.useYn === 'Y' ? '출력' : '품절')
-              : (item as any)[col.key];
-          return (
-              <View
-                  key={String(col.key)}
-                  style={[
-                    { flex: col.flex },
-                    commonStyles.columnContainer,
-                    i < mainColumns.length - 1 && commonStyles.cellDivider,
-                  ]}
-              >
-                <Text
-                    style={[
-                      commonStyles.cell,
-                      alignStyles[col.cellAlign ?? col.align ?? 'left']
-                    ]}
-                >
-                  {value}
-                </Text>
-              </View>
-          );
-        })}
-    </View>
-  );
-
   return (
     <SafeAreaView style={commonStyles.container}>
       <StatusBar style="dark" />
@@ -151,8 +100,8 @@ export default function KioskSoldOutScreen() {
         animationType="slide"
         onRequestClose={() => setShowStoreModal(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+        <View style={commonStyles.modalOverlay}>
+          <View style={commonStyles.modalContent}>
             <View style={commonStyles.modalHeader}>
               <Text style={commonStyles.modalTitle}>매장 선택</Text>
               <TouchableOpacity onPress={() => setShowStoreModal(false)}>
@@ -162,7 +111,7 @@ export default function KioskSoldOutScreen() {
             <FlatList
               data={stores}
               keyExtractor={(item) => item.id}
-              style={styles.modalList}
+              style={commonStyles.modalList}
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={styles.modalItem}
@@ -202,17 +151,10 @@ const styles = StyleSheet.create({
   placeholderText: {
     color: '#999',
   },
-
   headerCell: {
     fontSize: 13,
     fontWeight: '700',
     color: '#333',
-  },
-  tableList: {
-    flex: 1,
-  },
-  tableListContent: {
-    paddingBottom: 12,
   },
   tableRow: {
     flexDirection: 'row',
@@ -225,36 +167,12 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#444',
   },
-  colNo: {
-    flex: 0.3,
-    backgroundColor:'red'
-  },
-  colName: {
-    flex: 2,
-  },
-  colUseYn: {
-    flex: 0.5,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    width: '80%',
-    maxHeight: '80%',
-  },
 
   modalClose: {
     fontSize: 20,
     color: '#666',
   },
-  modalList: {
-    maxHeight: 700,
-  },
+
   modalItem: {
     paddingVertical: 13,
     paddingHorizontal: 20,
@@ -266,5 +184,3 @@ const styles = StyleSheet.create({
     color: '#333',
   },
 });
-
-

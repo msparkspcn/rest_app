@@ -157,7 +157,7 @@ export const commonStyles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingVertical: 20,
+        padding:20,
         borderBottomWidth: 1,
         borderBottomColor: '#eee',
       },
@@ -314,5 +314,8 @@ export const commonStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     flex: 1,
+  },
+  modalList: {
+    maxHeight: 700,
   },
 })

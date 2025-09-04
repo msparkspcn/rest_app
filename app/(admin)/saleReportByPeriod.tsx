@@ -33,7 +33,6 @@ type SaleData = {
     cornerNm: string;
 }
 
-type OperateFilter = '전체' | '운영' | '폐점';
 type CornerOption = { id: string; name: string };
 
 export default function SaleReportByPeriod() {
@@ -41,7 +40,6 @@ export default function SaleReportByPeriod() {
         () => Array.from({ length: 12 }).map((_, i) => ({ id: `S${100 + i}`, name: `매장 ${i + 1}` })),
         []
     );
-    const [submittedFilter, setSubmittedFilter] = useState<OperateFilter>('전체');
     const [isDetailVisible, setIsDetailVisible] = useState(false);
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempDate, setTempDate] = useState<Date | null>(null);
@@ -230,7 +228,6 @@ export default function SaleReportByPeriod() {
         <SafeAreaView style={commonStyles.container}>
             <StatusBar style="dark" />
 
-            {/* 상단 필터 영역 */}
             <View style={commonStyles.topBar}>
                 <View style={commonStyles.filterRow}>
                     <Text style={commonStyles.filterLabel}>조회일자</Text>

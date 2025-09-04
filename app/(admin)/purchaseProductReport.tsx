@@ -1,43 +1,44 @@
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { StatusBar } from 'expo-status-bar';
 import React, { useMemo, useState } from 'react';
-import { FlatList, Modal, Platform, Pressable, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Modal, Platform, Pressable, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import {commonStyles} from "../../styles/index";
+import {formattedDate, getTodayString} from "../../utils/DateUtils";
+import {Table} from "../../components/Table";
+import {ColumnDef} from "../../types/table";
 
-type Row = { no: number; product: string; qty: number; amount: number };
-
+type PurchaseRow = { no: number; itemNm: string; qty: number; amount: number };
+type PurchaseDetailRow = {vendorNm: string, date: string, qty: number, totalAmt: number};
 export default function PurchaseProductReportScreen() {
-  const [fromDate, setFromDate] = useState('2025/08/01');
-  const [toDate, setToDate] = useState('2025/08/04');
-  const [showFromPicker, setShowFromPicker] = useState(false);
-  const [showToPicker, setShowToPicker] = useState(false);
-  const [tempFromDate, setTempFromDate] = useState<Date | null>(null);
-  const [tempToDate, setTempToDate] = useState<Date | null>(null);
+  const [fromPurchaseDt, setFromPurchaseDt] = useState(getTodayString());
+  const [toPurchaseDt, setToPurchaseDt] = useState(getTodayString());
   const [productQuery, setProductQuery] = useState('');
-  const [submitted, setSubmitted] = useState({ from: '2025/08/01', to: '2025/08/04', product: '' });
   const [isDetailVisible, setIsDetailVisible] = useState(false);
-  const [selectedProductName, setSelectedProductName] = useState<string | null>(null);
+  const [selectedItemNm, setSelectedItemNm] = useState<string | null>(null);
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    const [currentPickerType, setCurrentPickerType] = useState('from');
+    const [tempDate, setTempDate] = useState<Date | null>(null);
 
   const formatDate = (d: Date) => {
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
-    return `${y}/${m}/${day}`;
+    return `${y}${m}${day}`;
   };
   const parseDate = (s: string) => {
     const [y, m, d] = s.split('/').map(Number);
     return new Date(y, (m || 1) - 1, d || 1);
   };
 
-  const baseData: Row[] = useMemo(
+  const baseData: PurchaseRow[] = useMemo(
     () =>
-      Array.from({ length: 50 }).map((_, idx) => {
+      Array.from({ length: 20 }).map((_, idx) => {
         const qty = ((idx % 5) + 1) * 2;
         const price = 1000 + (idx % 7) * 250;
         return {
           no: idx + 1,
-          product: `상품 ${idx + 1}`,
-          qty,
+          itemNm: `상품 ${idx + 1}`,
+          qty: qty,
           amount: qty * price,
         };
       }),
@@ -45,73 +46,79 @@ export default function PurchaseProductReportScreen() {
   );
 
   const filteredData = useMemo(() => {
-    const q = submitted.product.trim();
-    return baseData.filter(r => (q.length === 0 ? true : r.product.includes(q)));
-  }, [baseData, submitted]);
+    return baseData
+  }, [baseData]);
 
   const totalAmount = useMemo(() => filteredData.reduce((acc, r) => acc + r.amount, 0), [filteredData]);
 
-  const onSearch = () => {
-    setSubmitted({ from: fromDate, to: toDate, product: productQuery });
-  };
+  const onSearch = () => {};
 
-  const openFromPicker = () => {
-    setTempFromDate(parseDate(fromDate));
-    setShowFromPicker(true);
-  };
-  const openToPicker = () => {
-    setTempToDate(parseDate(toDate));
-    setShowToPicker(true);
-  };
+    const openDatePicker = (pickerType: string) => {
+        setTempDate(parseDate(formattedDate(getTodayString())));
+        setCurrentPickerType(pickerType);
+        setShowDatePicker(true);
+    };
 
-  const renderHeader = () => (
-    <View style={styles.tableHeaderRow}>
-      <Text style={[styles.headerCell, styles.colNo]}>No</Text>
-      <Text style={[styles.headerCell, styles.colProduct]}>상품명</Text>
-      <Text style={[styles.headerCell, styles.colQty]}>수량</Text>
-      <Text style={[styles.headerCell, styles.colAmount]}>금액</Text>
-    </View>
-  );
+    const mainColumns: ColumnDef<PurchaseRow>[] = useMemo(() => ([
+        { key: 'no',       title: 'No',     flex: 0.5, align: 'center' },
+        { key: 'itemNm',       title: '상품명',     flex: 1.2, align: 'right',
+            renderCell: (item) => (
+                <Pressable style={commonStyles.columnPressable} onPress={() => openProductDetail(item.itemNm) }>
+                    <Text style={[commonStyles.cell, commonStyles.linkText, {paddingLeft:10}]}>
+                        {item.itemNm}
+                    </Text>
+                </Pressable>
+            ),
+        },
+        { key: 'qty',     title: '수량',   flex: 0.5,   align: 'right',
+            renderCell: (item) => (
+                <Text style={[commonStyles.cell, {textAlign:'right', paddingRight:10}]}>{item.amount.toLocaleString()}</Text>
+            )
+        },
+        { key: 'amount',    title: '금액', flex: 0.8,   align: 'right',
+            renderCell: (item) => (
+                <Text style={[commonStyles.cell, {textAlign:'right', paddingRight:10}]}>{item.amount.toLocaleString()}</Text>
+            )
+        },
+    ]), []);
 
-  const renderItem = ({ item }: { item: Row }) => (
-    <View style={styles.tableRow}>
-      <Text style={[styles.cell, styles.colNo]}>{item.no}</Text>
-      <Pressable style={styles.productNamePressable} onPress={() => openProductDetail(item.product)}>
-        <Text style={[styles.cell, styles.colProduct, styles.linkText]}>{item.product}</Text>
-      </Pressable>
-      <Text style={[styles.cell, styles.colQty]}>{item.qty}</Text>
-      <Text style={[styles.cell, styles.colAmount]}>{item.amount.toLocaleString()}</Text>
-    </View>
-  );
+    const totalQty = useMemo(() => filteredData.reduce((acc, r) => acc + r.qty, 0), [filteredData]);
 
   const renderFooter = () => (
-    <View style={[styles.tableRow, styles.totalRow]}>
-      <Text style={[styles.cell, styles.colNo, styles.totalText]}>합계</Text>
-      <Text style={[styles.cell, styles.colProduct]} />
-      <Text style={[styles.cell, styles.colQty]} />
-      <Text style={[styles.cell, styles.colAmount, styles.totalText]}>{totalAmount.toLocaleString()}</Text>
+    <View style={[commonStyles.tableRow, styles.totalRow]}>
+        <View style={[{flex: 1.7}, commonStyles.cell, styles.totalText]}>
+            <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.totalText]}>합계</Text>
+        </View>
+        <View style={{flex:0.5}}>
+            <Text style={[commonStyles.cell, commonStyles.alignRight, styles.totalText,{paddingRight:10}]}>
+                {totalQty}
+            </Text>
+        </View>
+        <View style={{flex: 0.8}}>
+            <Text style={[commonStyles.cell, commonStyles.alignRight, styles.totalText,{paddingRight:10}]}>
+                {totalAmount.toLocaleString()}
+            </Text>
+        </View>
     </View>
   );
 
   const openProductDetail = (productName: string) => {
-    setSelectedProductName(productName);
+    setSelectedItemNm(productName);
     setIsDetailVisible(true);
   };
 
-  type DetailRow = { no: number; vendor: string; date: string; qty: number; amount: number };
-  const detailData: DetailRow[] = useMemo(
+
+  const detailData: PurchaseDetailRow[] = useMemo(
     () =>
-      Array.from({ length: 80 }).map((_, idx) => {
+      Array.from({ length: 10 }).map((_, idx) => {
         const qty = (idx % 4) + 1;
-        const price = 1500 + (idx % 5) * 400;
-        const amount = qty * price;
+        const totalAmt = qty * 10000;
         const day = (idx % 4) + 1;
         return {
-          no: idx + 1,
-          vendor: `거래처 ${((idx % 6) + 1).toString().padStart(2, '0')}`,
-          date: `2025/08/0${day}`,
-          qty,
-          amount,
+            vendorNm: `거래처 ${((idx % 6) + 1).toString().padStart(2, '0')}`,
+            date: `2025/08/0${day}`,
+            qty:qty,
+            totalAmt:totalAmt,
         };
       }),
     []
@@ -122,7 +129,7 @@ export default function PurchaseProductReportScreen() {
       detailData.reduce(
         (acc, r) => {
           acc.qty += r.qty;
-          acc.amount += r.amount;
+          acc.amount += r.totalAmt;
           return acc;
         },
         { qty: 0, amount: 0 }
@@ -130,181 +137,142 @@ export default function PurchaseProductReportScreen() {
     [detailData]
   );
 
-  const renderDetailHeader = () => (
-    <View style={styles.modalTableHeaderRow}>
-      <Text style={[styles.modalHeaderCell, styles.modalColVendor]}>거래처</Text>
-      <Text style={[styles.modalHeaderCell, styles.modalColDate]}>일자</Text>
-      <Text style={[styles.modalHeaderCell, styles.modalColQty]}>수량</Text>
-      <Text style={[styles.modalHeaderCell, styles.modalColAmount]}>금액</Text>
-    </View>
-  );
+    const PurchaseDetailColumns: ColumnDef<PurchaseDetailRow>[] = useMemo(() => ([
+        { key: 'vendorNm', title: '거래처',   flex: 2, align: 'center' },
+        { key: 'date', title: '일자',   flex: 1.2, align: 'center' },
+        { key: 'qty', title: '수량',   flex: 0.5, align: 'center',
+            renderCell: (item) => (
+                <Text style={[commonStyles.cell,{textAlign:'right'}]}>{item.qty.toLocaleString()}</Text>
+            )
+        },
+        { key: 'totalAmt', title: '금액',   flex: 1.5, align: 'right',
+            renderCell: (item) => (
+                <Text style={[commonStyles.cell,{textAlign:'right'}]}>{item.totalAmt.toLocaleString()}</Text>
+            )
+        },
+    ]), []);
 
-  const renderDetailItem = ({ item }: { item: DetailRow }) => (
-    <View style={commonStyles.modalTableRow}>
-      <Text style={[commonStyles.modalCell, styles.modalColVendor]}>{item.vendor}</Text>
-      <Text style={[commonStyles.modalCell, styles.modalColDate]}>{item.date}</Text>
-      <Text style={[commonStyles.modalCell, styles.modalColQty]}>{item.qty}</Text>
-      <Text style={[commonStyles.modalCell, styles.modalColAmount]}>{item.amount.toLocaleString()}</Text>
-    </View>
-  );
 
-  const renderDetailFooter = () => (
+    const renderDetailFooter = () => (
     <View style={[commonStyles.modalTableRow, styles.modalTotalRow]}>
-      <Text style={[commonStyles.modalCell, styles.modalColVendor, styles.modalTotalText]}>합계</Text>
-      <Text style={[commonStyles.modalCell, styles.modalColDate]} />
-      <Text style={[commonStyles.modalCell, styles.modalColQty, styles.modalTotalText]}>{detailTotals.qty.toLocaleString()}</Text>
-      <Text style={[commonStyles.modalCell, styles.modalColAmount, styles.modalTotalText]}>{detailTotals.amount.toLocaleString()}</Text>
-    </View>
+        <View style={{flex:3.2}}>
+            <Text style={[commonStyles.modalCell, commonStyles.alignCenter, styles.modalTotalText]}>합계</Text>
+        </View>
+        <View style={{flex:0.5}}>
+            <Text style={[commonStyles.modalCell, commonStyles.alignRight, styles.modalTotalText]}>{detailTotals.qty.toLocaleString()}</Text>
+        </View>
+        <View style={{flex:1.5}}>
+            <Text style={[commonStyles.modalCell, commonStyles.alignRight, styles.modalTotalText]}>
+                {detailTotals.amount.toLocaleString()}
+            </Text>
+        </View>
+      </View>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="dark" />
+    <SafeAreaView style={commonStyles.container}>
+        <StatusBar style="dark" />
 
-      <View style={styles.topBar}>
-        <View style={[styles.filterRow, styles.filterRowSpacing]}>
-          <Text style={styles.filterLabel}>조회일자</Text>
-          <TouchableOpacity style={styles.selectInput} onPress={openFromPicker}>
-            <Text style={styles.selectText}>{fromDate}</Text>
-            <Text style={styles.selectArrow}> ▼</Text>
-          </TouchableOpacity>
-          <Text style={styles.tilde}>~</Text>
-          <TouchableOpacity style={styles.selectInput} onPress={openToPicker}>
-            <Text style={styles.selectText}>{toDate}</Text>
-            <Text style={styles.selectArrow}> ▼</Text>
-          </TouchableOpacity>
+        <View style={commonStyles.topBar}>
+            <View style={[commonStyles.filterRow, styles.filterRowSpacing]}>
+                <Text style={commonStyles.filterLabel}>조회일자</Text>
+                <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('from')}>
+                    <Text style={styles.selectText}>{formattedDate(fromPurchaseDt)}</Text>
+                    <Text style={commonStyles.selectArrow}> ▼</Text>
+                </TouchableOpacity>
+                <Text style={styles.tilde}>~</Text>
+                <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('to')}>
+                    <Text style={styles.selectText}>{formattedDate(toPurchaseDt)}</Text>
+                    <Text style={commonStyles.selectArrow}> ▼</Text>
+                </TouchableOpacity>
+            </View>
+
+            <View style={commonStyles.filterRow}>
+              <Text style={commonStyles.filterLabel}>상품명</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="상품명 입력"
+                placeholderTextColor="#999"
+                value={productQuery}
+                onChangeText={setProductQuery}
+                returnKeyType="search"
+                onSubmitEditing={onSearch}
+              />
+              <Pressable style={commonStyles.searchButton} onPress={onSearch}>
+                <Text style={commonStyles.searchButtonText}>조회</Text>
+              </Pressable>
+            </View>
         </View>
 
-        <View style={styles.filterRow}>
-          <Text style={styles.filterLabel}>상품명</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="상품명 입력"
-            placeholderTextColor="#999"
-            value={productQuery}
-            onChangeText={setProductQuery}
-            returnKeyType="search"
-            onSubmitEditing={onSearch}
-          />
-          <Pressable style={styles.searchButton} onPress={onSearch}>
-            <Text style={styles.searchButtonText}>조회</Text>
-          </Pressable>
-        </View>
-      </View>
+        <View style={commonStyles.sectionDivider} />
 
-      <View style={styles.sectionDivider} />
+        <Table data={filteredData} columns={mainColumns} listFooter={renderFooter}/>
 
-      <View style={styles.tableContainer}>
-        {renderHeader()}
-        <FlatList
-          data={filteredData}
-          keyExtractor={(item) => String(item.no)}
-          renderItem={renderItem}
-          ListFooterComponent={renderFooter}
-          style={styles.tableList}
-          contentContainerStyle={styles.tableListContent}
-          showsVerticalScrollIndicator
-        />
-      </View>
-
-      {/* From Picker */}
-      <Modal visible={showFromPicker} transparent animationType="slide" onRequestClose={() => setShowFromPicker(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <View style={commonStyles.modalHeader}>
-              <Text style={styles.modalTitle}>시작일 선택</Text>
-              <TouchableOpacity onPress={() => setShowFromPicker(false)}>
-                <Text style={styles.modalClose}>✕</Text>
+      <Modal
+          visible={showDatePicker}
+          transparent animationType="slide"
+          onRequestClose={() => setShowDatePicker(false)}
+      >
+        <View style={commonStyles.dateModalOverlay}>
+          <View style={commonStyles.dateModalCard}>
+            <View style={commonStyles.dateModalHeader}>
+              <Text style={commonStyles.dateModalTitle}>조회일자 선택</Text>
+              <TouchableOpacity onPress={() => setShowDatePicker(false)}>
+                <Text style={commonStyles.modalClose}>✕</Text>
               </TouchableOpacity>
             </View>
-            <View style={styles.modalPickerContainer}>
-              {tempFromDate && (
+            <View style={commonStyles.dateModalPickerContainer}>
+              {tempDate && (
                 <DateTimePicker
-                  value={tempFromDate}
+                  value={tempDate}
                   mode="date"
                   display={Platform.OS === 'android' ? 'calendar' : 'spinner'}
                   onChange={(event: DateTimePickerEvent, date?: Date) => {
                     if (event.type === 'set' && date) {
-                      setTempFromDate(date);
+                        setTempDate(date);
                     }
                   }}
                 />
               )}
             </View>
-            <View style={styles.modalActions}>
+            <View style={commonStyles.modalActions}>
               <Pressable
-                style={styles.modalOkButton}
+                style={commonStyles.modalOkButton}
                 onPress={() => {
-                  if (tempFromDate) setFromDate(formatDate(tempFromDate));
-                  setShowFromPicker(false);
+                    if(tempDate) {
+                        if (currentPickerType === 'from') {
+                            console.log('from Date:'+tempDate)
+                            setFromPurchaseDt(formatDate(tempDate));
+                        } else if (currentPickerType === 'to') {
+                            setToPurchaseDt(formatDate(tempDate));
+                        }
+                    }
+                    setShowDatePicker(false);
                 }}
               >
-                <Text style={styles.modalOkButtonText}>확인</Text>
+                <Text style={commonStyles.modalOkButtonText}>확인</Text>
               </Pressable>
             </View>
           </View>
         </View>
       </Modal>
 
-      {/* To Picker */}
-      <Modal visible={showToPicker} transparent animationType="slide" onRequestClose={() => setShowToPicker(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <View style={commonStyles.modalHeader}>
-              <Text style={styles.modalTitle}>종료일 선택</Text>
-              <TouchableOpacity onPress={() => setShowToPicker(false)}>
-                <Text style={styles.modalClose}>✕</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.modalPickerContainer}>
-              {tempToDate && (
-                <DateTimePicker
-                  value={tempToDate}
-                  mode="date"
-                  display={Platform.OS === 'android' ? 'calendar' : 'spinner'}
-                  onChange={(event: DateTimePickerEvent, date?: Date) => {
-                    if (event.type === 'set' && date) {
-                      setTempToDate(date);
-                    }
-                  }}
-                />
-              )}
-            </View>
-            <View style={styles.modalActions}>
-              <Pressable
-                style={styles.modalOkButton}
-                onPress={() => {
-                  if (tempToDate) setToDate(formatDate(tempToDate));
-                  setShowToPicker(false);
-                }}
-              >
-                <Text style={styles.modalOkButtonText}>확인</Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* 상품 상세 모달 */}
       <Modal visible={isDetailVisible} transparent animationType="fade" onRequestClose={() => setIsDetailVisible(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
+        <View style={commonStyles.modalOverlay}>
+          <View style={commonStyles.modalCard}>
             <View style={commonStyles.modalHeader}>
-              {selectedProductName && <Text style={styles.modalTitle}>{selectedProductName}</Text>}
+              {selectedItemNm && <Text style={commonStyles.modalTitle}>{selectedItemNm}</Text>}
               <TouchableOpacity onPress={() => setIsDetailVisible(false)}>
-                <Text style={styles.modalClose}>✕</Text>
+                <Text style={commonStyles.modalClose}>✕</Text>
               </TouchableOpacity>
             </View>
-            {renderDetailHeader()}
-            <FlatList
-              data={detailData}
-              keyExtractor={(item) => String(item.no)}
-              renderItem={renderDetailItem}
-              ListFooterComponent={renderDetailFooter}
-              style={styles.modalTableList}
-              contentContainerStyle={styles.modalTableListContent}
-              showsVerticalScrollIndicator
-            />
+
+              <Table
+                  data={detailData}
+                  columns={PurchaseDetailColumns}
+                  isModal={true}
+                  listFooter={renderDetailFooter}
+              />
           </View>
         </View>
       </Modal>
@@ -313,32 +281,14 @@ export default function PurchaseProductReportScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
-  topBar: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8, backgroundColor: '#f5f5f5' },
-  filterRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   filterRowSpacing: { marginBottom: 10 },
-  filterLabel: { fontSize: 14, color: '#555', marginRight: 8, width: 50 },
   tilde: { color: '#666' },
   input: { flex: 1, height: 40, backgroundColor: '#fff', borderWidth: 1, borderColor: '#ddd', borderRadius: 8, paddingHorizontal: 12, color: '#333' },
   selectInput: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#ddd', borderRadius: 8, paddingHorizontal: 16, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexGrow: 1, flexBasis: 0 },
   selectText: { fontSize: 14, color: '#333' },
-  selectArrow: { fontSize: 12, color: '#666' },
-  searchButton: { marginLeft: 'auto', backgroundColor: '#007AFF', paddingHorizontal: 24, paddingVertical: 10, borderRadius: 8 },
-  searchButtonText: { color: '#fff', fontWeight: '600', fontSize: 14 },
-  sectionDivider: { height: 2, backgroundColor: '#b0b0b0' },
-  tableContainer: { flex: 1, backgroundColor: '#fff', marginHorizontal: 20, marginTop: 10, borderRadius: 12, overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 6, elevation: 2 },
-  tableHeaderRow: { flexDirection: 'row', backgroundColor: '#f0f3f7', borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#e0e0e0', paddingVertical: 10, paddingHorizontal: 12 },
   headerCell: { fontSize: 13, fontWeight: '700', color: '#333' },
-  tableList: { flex: 1 },
-  tableListContent: { paddingHorizontal: 12, paddingBottom: 12 },
-  tableRow: { flexDirection: 'row', alignItems: 'center', borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#eee', paddingVertical: 12 },
-  cell: { fontSize: 13, color: '#444' },
   totalRow: { backgroundColor: '#fafafa' },
   totalText: { fontWeight: '700', color: '#222' },
-  colNo: { flex: 0.8 },
-  colProduct: { flex: 2 },
-  colQty: { flex: 1 },
-  colAmount: { flex: 1.2, textAlign: 'right' },
   linkText: { color: '#007AFF', textDecorationLine: 'underline' },
   productNamePressable: { flex: 2 },
   // Modal styles
@@ -350,17 +300,8 @@ const styles = StyleSheet.create({
   modalActions: { padding: 12, alignItems: 'flex-end' },
   modalOkButton: { backgroundColor: '#007AFF', borderRadius: 8, paddingHorizontal: 16, paddingVertical: 10 },
   modalOkButtonText: { color: '#fff', fontWeight: '600', fontSize: 14 },
-  // Modal table styles
-  modalTableHeaderRow: { flexDirection: 'row', backgroundColor: '#f0f3f7', borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#e0e0e0', paddingVertical: 8, paddingHorizontal: 12, borderTopLeftRadius: 8, borderTopRightRadius: 8 },
-  modalHeaderCell: { fontSize: 13, fontWeight: '700', color: '#333' },
-  modalTableList: { flex: 1, marginTop: 2 },
-  modalTableListContent: { paddingHorizontal: 12, paddingBottom: 8 },
   modalTotalRow: { backgroundColor: '#fafafa' },
   modalTotalText: { fontWeight: '700', color: '#222' },
-  modalColVendor: { flex: 1.5 },
-  modalColDate: { flex: 1.2 },
-  modalColQty: { flex: 0.8 },
-  modalColAmount: { flex: 1.2 },
 });
 
 

@@ -2,7 +2,7 @@ import { commonStyles } from '@/styles';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useMemo, useState } from 'react';
-import { FlatList, Modal, Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import * as api from "../../services/api/api";
 import {Table} from "../../components/Table";
 
