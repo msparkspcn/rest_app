@@ -1,26 +1,25 @@
-import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { StatusBar } from 'expo-status-bar';
 import React, { useMemo, useState } from 'react';
-import { Modal, Platform, Pressable, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Modal, Pressable, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import {commonStyles} from "../../styles/index";
 import {Table} from "../../components/Table";
-import {dateToYmd, formattedDate, getTodayYmd, parseYmdString} from "../../utils/DateUtils";
+import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
 import {ColumnDef} from "../../types/table";
+import {DatePickerModal} from "../../components/DatePickerModal";
 
 type PurchaseRow = { date: string; vendor: string; amount: number };
 type PurchaseDetailRow = {itemNm: string, qty: number, price: number, totalAmt: number};
 
 export default function PurchaseDailyReportScreen() {
-  const [fromPurchaseDt, setPurchaseDt] = useState(getTodayYmd());
+  const [fromPurchaseDt, setFromPurchaseDt] = useState(getTodayYmd());
   const [toPurchaseDt, setToPurchaseDt] = useState(getTodayYmd());
-  const [showFromPicker, setShowFromPicker] = useState(false);
-  const [showToPicker, setShowToPicker] = useState(false);
-  const [tempFromDate, setTempFromDate] = useState<Date | null>(null);
-  const [tempToDate, setTempToDate] = useState<Date | null>(null);
   const [vendorQuery, setVendorQuery] = useState('');
   const [submitted, setSubmitted] = useState({ from: '2025/08/01', to: '2025/08/04', vendor: '' });
   const [isDetailVisible, setIsDetailVisible] = useState(false);
   const [selectedVendorName, setSelectedVendorName] = useState<string | null>(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [currentPickerType, setCurrentPickerType] = useState('from');
+  const [tempDate, setTempDate] = useState<Date | null>(null);
 
   const baseData: PurchaseRow[] = useMemo(
     () => [
@@ -104,14 +103,10 @@ export default function PurchaseDailyReportScreen() {
       </View>
   );
 
-  const openFromPicker = () => {
-    setTempFromDate(parseYmdString(fromPurchaseDt));
-    setShowFromPicker(true);
-  };
-
-  const openToPicker = () => {
-    setTempToDate(parseYmdString(toPurchaseDt));
-    setShowToPicker(true);
+  const openDatePicker = (pickerType: string) => {
+    setTempDate(new Date());
+    setCurrentPickerType(pickerType);
+    setShowDatePicker(true);
   };
 
   const openVendorDetail = (vendorName: string) => {
@@ -150,12 +145,12 @@ export default function PurchaseDailyReportScreen() {
       <View style={commonStyles.topBar}>
         <View style={[commonStyles.filterRow, styles.filterRowSpacing]}>
           <Text style={commonStyles.filterLabel}>조회일자</Text>
-          <TouchableOpacity style={commonStyles.selectInput} onPress={openFromPicker}>
+          <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('from')}>
             <Text style={styles.selectText}>{formattedDate(fromPurchaseDt)}</Text>
             <Text style={commonStyles.selectArrow}> ▼</Text>
           </TouchableOpacity>
           <Text style={styles.tilde}>~</Text>
-          <TouchableOpacity style={commonStyles.selectInput} onPress={openToPicker}>
+          <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('to')}>
             <Text style={styles.selectText}>{formattedDate(toPurchaseDt)}</Text>
             <Text style={commonStyles.selectArrow}> ▼</Text>
           </TouchableOpacity>
@@ -182,90 +177,15 @@ export default function PurchaseDailyReportScreen() {
 
       <Table data={filteredData} columns={mainColumns} listFooter={renderFooter}/>
 
-      {/* 날짜 선택 모달 - 시작일 */}
-      <Modal
-          visible={showFromPicker}
-          transparent animationType="slide"
-          onRequestClose={() => setShowFromPicker(false)}
-      >
-        <View style={commonStyles.dateModalOverlay}>
-          <View style={commonStyles.dateModalCard}>
-            <View style={commonStyles.dateModalHeader}>
-              <Text style={commonStyles.dateModalTitle}>시작일 선택</Text>
-              <TouchableOpacity onPress={() => setShowFromPicker(false)}>
-                <Text style={commonStyles.modalClose}>✕</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={commonStyles.dateModalPickerContainer}>
-              {tempFromDate && (
-                <DateTimePicker
-                  value={tempFromDate}
-                  mode="date"
-                  display={Platform.OS === 'android' ? 'calendar' : 'spinner'}
-                  onChange={(event: DateTimePickerEvent, date?: Date) => {
-                    if (event.type === 'set' && date) {
-                      setTempFromDate(date);
-                    }
-                  }}
-                />
-              )}
-            </View>
-            <View style={commonStyles.modalActions}>
-              <Pressable
-                style={commonStyles.modalOkButton}
-                onPress={() => {
-                  if (tempFromDate) setPurchaseDt(dateToYmd(tempFromDate));
-                  setShowFromPicker(false);
-                }}
-              >
-                <Text style={commonStyles.modalOkButtonText}>확인</Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      <Modal
-          visible={showToPicker}
-          transparent animationType="slide"
-          onRequestClose={() => setShowToPicker(false)}
-      >
-        <View style={commonStyles.dateModalOverlay}>
-          <View style={commonStyles.dateModalCard}>
-            <View style={commonStyles.dateModalHeader}>
-              <Text style={commonStyles.dateModalTitle}>종료일 선택</Text>
-              <TouchableOpacity onPress={() => setShowToPicker(false)}>
-                <Text style={commonStyles.modalClose}>✕</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={commonStyles.dateModalPickerContainer}>
-              {tempToDate && (
-                <DateTimePicker
-                  value={tempToDate}
-                  mode="date"
-                  display={Platform.OS === 'android' ? 'calendar' : 'spinner'}
-                  onChange={(event: DateTimePickerEvent, date?: Date) => {
-                    if (event.type === 'set' && date) {
-                      setTempToDate(date);
-                    }
-                  }}
-                />
-              )}
-            </View>
-            <View style={commonStyles.modalActions}>
-              <Pressable
-                style={commonStyles.modalOkButton}
-                onPress={() => {
-                  if (tempToDate) setToPurchaseDt(dateToYmd(tempToDate));
-                  setShowToPicker(false);
-                }}
-              >
-                <Text style={commonStyles.modalOkButtonText}>확인</Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      <DatePickerModal
+          visible={showDatePicker}
+          initialDate={tempDate}
+          onClose={() => setShowDatePicker(false)}
+          onConfirm={(date) => {
+            if (currentPickerType === 'from') setFromPurchaseDt(dateToYmd(date));
+            else setToPurchaseDt(dateToYmd(date));
+          }}
+      />
 
       <Modal visible={isDetailVisible} transparent animationType="fade" onRequestClose={() => setIsDetailVisible(false)}>
         <View style={commonStyles.modalOverlay}>
