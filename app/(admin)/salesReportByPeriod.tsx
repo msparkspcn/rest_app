@@ -35,7 +35,7 @@ type SaleData = {
 
 type CornerOption = { id: string; name: string };
 
-export default function SaleReportByPeriod() {
+export default function SalesReportByPeriod() {
     const corners: CornerOption[] = useMemo(
         () => Array.from({ length: 12 }).map((_, i) => ({ id: `S${100 + i}`, name: `매장 ${i + 1}` })),
         []
@@ -158,7 +158,7 @@ export default function SaleReportByPeriod() {
         setShowDatePicker(true);
     };
 
-    const summartRow = useMemo(() => {
+    const summaryRow = useMemo(() => {
         const totalQty = productData.reduce((sum, item) => sum + item.qty, 0);
         const totalAmt = productData.reduce((sum, item) => sum + item.totalAmt, 0);
         return {
@@ -189,7 +189,7 @@ export default function SaleReportByPeriod() {
                     ]}
                 >
                     <Text style={[commonStyles.modalCell, alignStyles['left']]}>
-                        {summartRow.totalQty.toLocaleString()}
+                        {summaryRow.totalQty.toLocaleString()}
                     </Text>
                 </View>
                 <View
@@ -199,7 +199,7 @@ export default function SaleReportByPeriod() {
                     ]}
                 >
                     <Text style={[commonStyles.modalCell, alignStyles['right']]}>
-                        {summartRow.totalAmt.toLocaleString()}
+                        {summaryRow.totalAmt.toLocaleString()}
                     </Text>
                 </View>
             </View>

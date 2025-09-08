@@ -138,17 +138,27 @@ export default function PurchaseProductReportScreen() {
 
     const PurchaseDetailColumns: ColumnDef<PurchaseDetailRow>[] = useMemo(() => ([
         {key: 'vendorNm', title: '거래처', flex: 2, align: 'center'},
-        {key: 'date', title: '일자', flex: 1.2, align: 'center'},
+        {key: 'date', title: '일자', flex: 1.2, align: 'center',
+            renderCell: (item) => (
+                <Text style={[commonStyles.cell, {textAlign: 'center'}]}>
+                    {item.date.toLocaleString()}
+                </Text>
+            )
+        },
         {
             key: 'qty', title: '수량', flex: 0.5, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign: 'right'}]}>{item.qty.toLocaleString()}</Text>
+                <Text style={[commonStyles.cell, {textAlign: 'right'}]}>
+                    {item.qty.toLocaleString()}
+                </Text>
             )
         },
         {
             key: 'totalAmt', title: '금액', flex: 1.5, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign: 'right'}]}>{item.totalAmt.toLocaleString()}</Text>
+                <Text style={[commonStyles.cell, {textAlign: 'right'}]}>
+                    {item.totalAmt.toLocaleString()}
+                </Text>
             )
         },
     ]), []);

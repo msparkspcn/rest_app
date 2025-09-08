@@ -157,6 +157,14 @@ export const commonStyles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
+        paddingVertical:20,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+      },
+      listModalHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
         padding:20,
         borderBottomWidth: 1,
         borderBottomColor: '#eee',
@@ -321,4 +329,7 @@ export const commonStyles = StyleSheet.create({
   tilde: {
       color: '#666'
   },
+  filterRowSpacing: {
+    marginBottom: 10
+  }
 })

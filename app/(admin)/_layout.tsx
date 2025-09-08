@@ -48,12 +48,20 @@ export default function AdminLayout() {
           options={{ title: '실시간 매출현황(휴)', headerShown: true }}
         />
         <Stack.Screen
-            name="saleReportByPeriod"
+            name="salesReportByPeriod"
             options={{ title: '기간별 매출현황(휴)', headerShown: true }}
         />
         <Stack.Screen
             name="saleReportByTimezone"
             options={{ title: '시간대별 매출현황(휴)', headerShown: true }}
+        />
+        <Stack.Screen
+            name="monthlySalesReport"
+            options={{ title: '월 매출현황(휴)', headerShown: true }}
+        />
+        <Stack.Screen
+            name="realtimeSalesBySalesOrg"
+            options={{ title: '시설별 실시간 매출(통합)', headerShown: true }}
         />
       </Stack>
       {!hideFooter && (

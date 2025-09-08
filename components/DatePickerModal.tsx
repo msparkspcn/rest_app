@@ -16,14 +16,16 @@ interface DatePickerModal {
     onClose: () => void;
     onConfirm: (date: Date) => void;
     title?: string;
+    pickerMode?: PickerMode
 }
-
+type PickerMode = 'date' | 'month';
 export const DatePickerModal: React.FC<DatePickerModal> = ({
     visible,
     initialDate,
     onClose,
     onConfirm,
     title = '조회일자 선택',
+    pickerMode = 'date',
 }) => {
     const [tempDate, setTempDate] = React.useState<Date>(initialDate);
 
@@ -55,7 +57,13 @@ export const DatePickerModal: React.FC<DatePickerModal> = ({
                                 display={Platform.OS === 'android' ? 'calendar' : 'spinner'}
                                 onChange={(event: DateTimePickerEvent, date?: Date) => {
                                     if (event.type === 'set' && date) {
-                                        setTempDate(date);
+                                        if (pickerMode === 'month') {
+                                            const y = date.getFullYear();
+                                            const m = date.getMonth();
+                                            setTempDate(new Date(y, m, 1));
+                                        } else {
+                                            setTempDate(date);
+                                        }
                                     }
                                 }}
                             />

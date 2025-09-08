@@ -8,6 +8,13 @@ export function getTodayYmd()  {
     return `${year}${month}${day}`;
 };
 
+export function getTodayYm()  {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    return `${year}${month}`;
+};
+
 
 export function dateToYmd(d: Date) {
     const y = d.getFullYear();
@@ -15,6 +22,12 @@ export function dateToYmd(d: Date) {
     const day = String(d.getDate()).padStart(2, '0');
     return `${y}${m}${day}`;
 };
+
+export function dateToYm(d: Date) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    return `${y}${m}`;
+}
 
 export function parseYmdString(s: string) {
     const [y, m, d] = s.split('/').map(Number);
@@ -25,6 +38,12 @@ export function formattedDate(dateStr:String) {
     console.log('dateStr:'+dateStr)
     if (!dateStr || dateStr.length !== 8) return '';
     return `${dateStr.substring(0, 4)}/${dateStr.substring(4, 6)}/${dateStr.substring(6, 8)}`;
+}
+
+export function formattedMonth(dateStr:String) {
+    console.log('dateStr:'+dateStr)
+    if (!dateStr || dateStr.length !== 6) return '';
+    return `${dateStr.substring(0, 4)}/${dateStr.substring(4, 6)}`;
 }
 
 export function ymdToDateWithDay(dateStr:String): string {

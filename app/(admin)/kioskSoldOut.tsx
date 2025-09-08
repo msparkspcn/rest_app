@@ -102,7 +102,7 @@ export default function KioskSoldOutScreen() {
       >
         <View style={commonStyles.modalOverlay}>
           <View style={commonStyles.modalContent}>
-            <View style={commonStyles.modalHeader}>
+            <View style={commonStyles.listModalHeader}>
               <Text style={commonStyles.modalTitle}>매장 선택</Text>
               <TouchableOpacity onPress={() => setShowStoreModal(false)}>
                 <Text style={styles.modalClose}>✕</Text>
