@@ -63,6 +63,18 @@ export default function AdminLayout() {
             name="realtimeSalesBySalesOrg"
             options={{ title: '시설별 실시간 매출(통합)', headerShown: true }}
         />
+        <Stack.Screen
+            name="realtimeSalesByCorner"
+            options={{ title: '실시간 매장매출현황(휴)', headerShown: true }}
+        />
+        <Stack.Screen
+            name="cornerStockReport"
+            options={{ title: '매장 재고현황(휴)', headerShown: true }}
+        />
+        <Stack.Screen
+            name="warehouseStockReport"
+            options={{ title: '창고 재고현황(휴)', headerShown: true }}
+        />
       </Stack>
       {!hideFooter && (
         <View style={styles.footerWrap}>

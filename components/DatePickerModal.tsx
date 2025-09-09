@@ -7,7 +7,7 @@ import {
     Pressable,
     Platform,
 } from 'react-native';
-import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import DateTimePicker, {DateTimePickerEvent} from '@react-native-community/datetimepicker';
 import {commonStyles} from "../styles/index";
 
 interface DatePickerModal {
@@ -18,15 +18,16 @@ interface DatePickerModal {
     title?: string;
     pickerMode?: PickerMode
 }
+
 type PickerMode = 'date' | 'month';
 export const DatePickerModal: React.FC<DatePickerModal> = ({
-    visible,
-    initialDate,
-    onClose,
-    onConfirm,
-    title = '조회일자 선택',
-    pickerMode = 'date',
-}) => {
+                                                               visible,
+                                                               initialDate,
+                                                               onClose,
+                                                               onConfirm,
+                                                               title = '조회일자 선택',
+                                                               pickerMode = 'date',
+                                                           }) => {
     const [tempDate, setTempDate] = React.useState<Date>(initialDate);
 
     React.useEffect(() => {

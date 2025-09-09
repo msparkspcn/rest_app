@@ -229,7 +229,7 @@ export default function SalesReportByPeriod() {
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                     <Pressable style={commonStyles.searchButton} onPress={onSearch}>
-                        <Text style={commonStyles.searchButtonText}>조회</Text>
+                        <Text style={commonStyles.searchButtonText}>{Const.SEARCH}</Text>
                     </Pressable>
                 </View>
             </View>

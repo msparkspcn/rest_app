@@ -5,9 +5,9 @@ import React, { useMemo, useState } from 'react';
 import { Modal, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View } from 'react-native';
 import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
+import Const from "../../constants/Const";
 
 type VendorRow = {
-  no: number;
   vendor: string;
   status: '등록' | '취소';
 };
@@ -23,7 +23,6 @@ export default function VendorListScreen() {
 
   const baseData: VendorRow[] = useMemo(() => {
     return Array.from({ length: 20 }).map((_, index) => ({
-      no: index + 1,
       vendor: `거래처 ${String(index + 1).padStart(2, '0')}`,
       status: index % 2 === 0 ? '등록' : '취소',
     }));
@@ -49,11 +48,10 @@ export default function VendorListScreen() {
     setIsDetailVisible(false);
   };
 
-  type VendorDetailRow = { no: number; itemCd: string; itemNm: string };
+  type VendorDetailRow = { itemCd: string; itemNm: string };
   const detailData: VendorDetailRow[] = useMemo(
     () =>
       Array.from({ length: 120 }).map((_, index) => ({
-        no: index + 1,
         itemCd: `C${1000 + index}`,
         itemNm: `명칭 ${index + 1}`,
       })),
@@ -61,13 +59,21 @@ export default function VendorListScreen() {
   );
 
   const vendorColumns: ColumnDef<VendorDetailRow>[] = useMemo(() => ([
-    { key: 'no', title: 'No',     flex: 0.7, align: 'center' },
+    { key: 'no', title: 'No',     flex: 0.7, align: 'center',
+      renderCell: (_item, index) => (
+          <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
+      ),
+    },
     { key: 'itemCd', title: '상품코드',  flex: 1.4, align: 'left' },
     { key: 'itemNm', title: '상품명',   flex: 2.2, align: 'left'   },
   ]), []);
 
   const mainColumns: ColumnDef<VendorRow>[] = useMemo(() => ([
-    { key: 'no',       title: 'No',     flex: 0.3, align: 'center' },
+    { key: 'no',       title: 'No',     flex: 0.3, align: 'center' ,
+      renderCell: (_item, index) => (
+          <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
+      ),
+    },
     { key: 'vendor',     title: '거래처',   flex: 2,   align: 'left',
       renderCell: (item) => (
           <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
@@ -90,7 +96,7 @@ export default function VendorListScreen() {
       <StatusBar style="dark" />
 
       <View style={commonStyles.topBar}>
-        <View style={[commonStyles.filterRow, styles.filterRowSpacing]}>
+        <View style={commonStyles.filterRowFront}>
           <Text style={commonStyles.filterLabel}>거래처</Text>
           <TextInput
             style={styles.input}
@@ -119,7 +125,7 @@ export default function VendorListScreen() {
             ))}
           </View>
           <Pressable style={commonStyles.searchButton} onPress={onSearch}>
-            <Text style={commonStyles.searchButtonText}>조회</Text>
+            <Text style={commonStyles.searchButtonText}>{Const.SEARCH}</Text>
           </Pressable>
         </View>
       </View>
@@ -152,10 +158,6 @@ export default function VendorListScreen() {
 }
 
 const styles = StyleSheet.create({
-  filterRowSpacing: {
-    marginBottom: 10,
-  },
-
   input: {
     flex: 1,
     height: 40,

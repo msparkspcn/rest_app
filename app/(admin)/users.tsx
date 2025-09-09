@@ -173,20 +173,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
-  topBar: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 8,
-    backgroundColor: '#f5f5f5',
-  },
-  filterRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  filterRowSpacing: {
-    marginBottom: 10,
-  },
 
   input: {
     flex: 1,
@@ -198,22 +184,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     color: '#333',
   },
-  searchButton: {
-    marginLeft: 'auto',
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  searchButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  sectionDivider: {
-    height: 2,
-    backgroundColor: '#b0b0b0',
-  },
+
   scrollContent: {
     // flex: 1,
     justifyContent: 'center',

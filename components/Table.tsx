@@ -10,7 +10,7 @@ type ColumnDef<T> = {
     align?: Align;
     headerAlign?: Align;
     cellAlign?: Align;
-    renderCell?: (item: T) => React.ReactNode;
+    renderCell?: (item: T, index?: number) => React.ReactNode;
 };
 
 type TableProps<T> = {
@@ -66,7 +66,7 @@ export function Table<T>({ data, columns, onRowPress, isModal, listHeader, listF
                         ]}
                     >
                         {col.renderCell ? (
-                            col.renderCell(item)
+                            col.renderCell(item, index)
                         ) : (
                             <Text
                                 style={[

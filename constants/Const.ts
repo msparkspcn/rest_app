@@ -1,0 +1,21 @@
+export default {
+    NO: "No.",
+    CORNER_NM: "매장명",
+    SALE_AMT: "매출금액",
+    COMP_RATIO: "구성비",
+    MONTH_TOTAL_AMT: "당월누계",
+    ITEM_NM: "상품명",
+    QTY: "수량",
+    SEARCH_DT: "조회일자",
+    VENDOR: "거래처",
+    SEARCH_COND: "조회기준",
+    SEARCH: "조회",
+    GI_QTY: "입고",
+    GO_QTY: "출고",
+    CUR_STOCK_QTY: "현재고",
+    TOTAL_STOCK_QTY: "전재고",
+    SALE: "판매",
+    USE_YN: "사용여부",
+    ITEM_CD: "상품코드",
+    CORNER_ITEM_NM: "매장 취급상품"
+}

@@ -6,8 +6,9 @@ import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
 import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
+import Const from "../../constants/Const";
 
-type PurchaseRow = { no: number; itemNm: string; qty: number; amount: number };
+type PurchaseRow = { itemNm: string; qty: number; amount: number };
 type PurchaseDetailRow = { vendorNm: string, date: string, qty: number, totalAmt: number };
 export default function PurchaseProductReportScreen() {
     const [fromPurchaseDt, setFromPurchaseDt] = useState(getTodayYmd());
@@ -25,7 +26,6 @@ export default function PurchaseProductReportScreen() {
                 const qty = ((idx % 5) + 1) * 2;
                 const price = 1000 + (idx % 7) * 250;
                 return {
-                    no: idx + 1,
                     itemNm: `상품 ${idx + 1}`,
                     qty: qty,
                     amount: qty * price,
@@ -50,7 +50,11 @@ export default function PurchaseProductReportScreen() {
     };
 
     const mainColumns: ColumnDef<PurchaseRow>[] = useMemo(() => ([
-        {key: 'no', title: 'No', flex: 0.5, align: 'center'},
+        {key: 'no', title: 'No', flex: 0.5, align: 'center',
+            renderCell: (_item, index) => (
+                <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
+            ),
+        },
         {
             key: 'itemNm', title: '상품명', flex: 1.2, align: 'right',
             renderCell: (item) => (
@@ -186,7 +190,7 @@ export default function PurchaseProductReportScreen() {
             <StatusBar style="dark"/>
 
             <View style={commonStyles.topBar}>
-                <View style={[commonStyles.filterRow, styles.filterRowSpacing]}>
+                <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>조회일자</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('from')}>
                         <Text style={styles.selectText}>{formattedDate(fromPurchaseDt)}</Text>
@@ -211,7 +215,7 @@ export default function PurchaseProductReportScreen() {
                         onSubmitEditing={onSearch}
                     />
                     <Pressable style={commonStyles.searchButton} onPress={onSearch}>
-                        <Text style={commonStyles.searchButtonText}>조회</Text>
+                        <Text style={commonStyles.searchButtonText}>{Const.SEARCH}</Text>
                     </Pressable>
                 </View>
             </View>
@@ -258,7 +262,6 @@ export default function PurchaseProductReportScreen() {
 }
 
 const styles = StyleSheet.create({
-    filterRowSpacing: {marginBottom: 10},
     input: {
         flex: 1,
         height: 40,

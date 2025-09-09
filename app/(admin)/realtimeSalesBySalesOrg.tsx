@@ -6,9 +6,11 @@ import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
 import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
+import {Ionicons} from "@expo/vector-icons";
+import Const from "../../constants/Const";
 
 type SaleRow = {
-    no:number;
+    no: number;
     cornerNm: string;
     todaySaleAmt: number;
     yedaySaleAmt: number;
@@ -20,9 +22,19 @@ type SaleDetailRow = {
     no: number;
     itemNm: string;
     qty: number;
-    price: number;
     totalAmt: number;
+    monthQty: number;
+    monthAmt: number;
+    yearAmt: number;
 }
+
+type CornerRow = {
+    no: number;
+    cornerNm: string;
+    cornerCd: string;
+    posGroup: string;
+    useYn: 'Y' | 'N';
+};
 
 type PosGroup = { id: string; name: string };
 
@@ -39,6 +51,7 @@ export default function RealtimeSalesBySalesOrgScreen() {
     const [showPosGroupModal, setShowPosGroupModal] = useState(false);
     const [isDetailVisible, setIsDetailVisible] = useState(false);
     const [detailChecked, setDetailChecked] = useState(false);
+    const [selectedCorner, setSelectedCorner] = useState<CornerRow | null>(null);
     const baseData: SaleRow[] = useMemo(
         () =>
             Array.from({length: 10}).map((_, idx) => {
@@ -70,13 +83,13 @@ export default function RealtimeSalesBySalesOrgScreen() {
             yedaySaleAmt: acc.yedaySaleAmt + cur.yedaySaleAmt,
             monthSaleAmt: acc.monthSaleAmt + cur.monthSaleAmt,
             yearSaleAmt: acc.yearSaleAmt + cur.yearSaleAmt,
-        }), { no: 0, cornerNm: "합계", todaySaleAmt: 0, yedaySaleAmt: 0, monthSaleAmt: 0, yearSaleAmt: 0 });
+        }), {no: 0, cornerNm: "합계", todaySaleAmt: 0, yedaySaleAmt: 0, monthSaleAmt: 0, yearSaleAmt: 0});
     };
 
     const filteredData = useMemo((): SaleRow[] => {
         return detailChecked
-            ? baseData                // ✅ 상세보기 ON → 점포별 리스트
-            : [aggregateSales(baseData)]; // ✅ 상세보기 OFF → 합계 1줄
+            ? baseData
+            : [aggregateSales(baseData)];
     }, [baseData, detailChecked]);
 
     const onSearch = () => {
@@ -88,8 +101,14 @@ export default function RealtimeSalesBySalesOrgScreen() {
         setShowDatePicker(true);
     };
 
-    const openDetail = (posGroup: string) => {
+    const openDetail = (store: CornerRow) => {
+        setSelectedCorner(store);
+        setIsDetailVisible(true);
     }
+
+    const closeDetail = () => {
+        setIsDetailVisible(false);
+    };
 
 
     const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => {
@@ -140,9 +159,14 @@ export default function RealtimeSalesBySalesOrgScreen() {
                     flex: 1.5,
                     align: 'center',
                     renderCell: (item) => (
-                        <Text style={[commonStyles.cell, {textAlign: 'left', paddingLeft: 10}]}>
-                            {item.cornerNm}
-                        </Text>
+                        <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
+                            <Text style={[commonStyles.cell, commonStyles.linkText, {
+                                textAlign: 'left',
+                                paddingLeft: 10
+                            }]}>
+                                {item.cornerNm}
+                            </Text>
+                        </Pressable>
                     )
                 },
                 ...commonCols
@@ -156,49 +180,126 @@ export default function RealtimeSalesBySalesOrgScreen() {
         () =>
             Array.from({length: 10}).map((_, idx) => {
                 const qty = (idx % 4) + 1;
-                const totalAmt = qty * 10000;
+                const totalAmt = qty * 100;
                 return {
-                    no: idx+1,
+                    no: idx + 1,
                     itemNm: `상품명 ${((idx % 6) + 1).toString().padStart(2, '0')}`,
                     qty: qty,
-                    price: qty * 10,
-                    totalAmt: totalAmt,
+                    totalAmt: qty * 10,
+                    monthAmt: totalAmt * 10,
+                    monthQty: totalAmt,
+                    yearAmt: totalAmt * 10,
                 };
             }),
         []
     );
 
-const SaleDetailColumns: ColumnDef<SaleDetailRow>[] = useMemo(() => ([
-        {key: 'itemNm', title: '상품명', flex: 2, align: 'center'},
-        {key: 'itemNm', title: '상품명', flex: 2, align: 'center'},
+    const SaleDetailColumns: ColumnDef<SaleDetailRow>[] = useMemo(() => ([
+        {key: 'itemNm', title: '상품명', flex: 1, align: 'center'},
         {
-            key: 'qty', title: '수량', flex: 0.5, align: 'center',
+            key: 'qty', title: '수량', flex: 0.6, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign: 'right'}]}>{item.qty.toLocaleString()}</Text>
+                <Text style={[styles.cell, {textAlign: 'right'}]}>{item.qty.toLocaleString()}</Text>
             )
         },
         {
-            key: 'price', title: '단가', flex: 1.5, align: 'right',
+            key: 'price', title: '금액', flex: 0.6, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign: 'right'}]}>{item.price.toLocaleString()}</Text>
+                <Text style={[styles.cell, {textAlign: 'right'}]}>{item.totalAmt.toLocaleString()}</Text>
             )
         },
         {
-            key: 'totalAmt', title: '금액', flex: 1.5, align: 'right',
+            key: 'monthQty', title: '월누계수량', flex: 0.9, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign: 'right'}]}>{item.totalAmt.toLocaleString()}</Text>
+                <Text style={[styles.cell, {textAlign: 'right'}]}>{item.monthQty.toLocaleString()}</Text>
+            )
+        },
+        {
+            key: 'monthAmt', title: '월누계금액', flex: 1.5, align: 'right',
+            renderCell: (item) => (
+                <Text style={[styles.cell, {textAlign: 'right'}]}>{item.monthAmt.toLocaleString()}</Text>
+            )
+        },
+        {
+            key: 'yearAmt', title: '년누계금액', flex: 1.5, align: 'right',
+            renderCell: (item) => (
+                <Text style={[styles.cell, {textAlign: 'right'}]}>{item.yearAmt.toLocaleString()}</Text>
             )
         },
     ]), []);
+    const summaryRow = useMemo(() => {
+        const totalSaleAmt = detailData.reduce((sum, item) => sum + item.totalAmt, 0);
+        const totalQty = detailData.reduce((sum, item) => sum + item.qty, 0);
+        const totalAmt = detailData.reduce((sum, item) => sum + item.totalAmt, 0);
+        const totalMonthAmt = detailData.reduce((sum, item) => sum + item.monthAmt, 0);
+        const totalMonthQty = detailData.reduce((sum, item) => sum + item.monthQty, 0);
+        const totalYearAmt = detailData.reduce((sum, item) => sum + item.yearAmt, 0);
+        return {
+            totalQty: totalQty,
+            totalAmt: totalAmt,
+            totalSaleAmt: totalSaleAmt,
+            totalMonthAmt: totalMonthAmt,
+            totalMonthQty: totalMonthQty,
+            totalYearAmt: totalYearAmt,
+        };
+    }, [detailData]);
 
-
+    const CornerNmRow = () => {
+        return (
+            <View style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                borderBottomWidth: 1,
+                borderBottomColor: '#ccc'
+            }}>
+                <Text style={styles.subTitle}>{selectedCorner?.cornerNm}</Text>
+                <Text style={styles.subTitle}>(단위:천원)</Text>
+            </View>
+        );
+    };
+    const renderDetailFooterRow = () => {
+        return (
+            <View style={[commonStyles.modalTableRow, styles.summaryRow]}>
+                <View style={{flex: 1}}>
+                    <Text style={[commonStyles.modalCell, {textAlign: 'center', fontSize: 13, fontWeight: 'bold'}]}>
+                        합계
+                    </Text>
+                </View>
+                <View style={{flex: 0.6}}>
+                    <Text style={[commonStyles.modalCell, {textAlign: 'right', paddingRight: 5}]}>
+                        {summaryRow.totalQty.toLocaleString()}
+                    </Text>
+                </View>
+                <View style={{flex: 0.6}}>
+                    <Text style={[commonStyles.modalCell, {textAlign: 'right', paddingRight: 2}]}>
+                        {summaryRow.totalAmt.toLocaleString()}
+                    </Text>
+                </View>
+                <View style={{flex: 0.9}}>
+                    <Text style={[commonStyles.modalCell, {textAlign: 'right'}]}>
+                        {summaryRow.totalMonthQty.toLocaleString()}
+                    </Text>
+                </View>
+                <View style={{flex: 1.5}}>
+                    <Text style={[commonStyles.modalCell, {textAlign: 'right'}]}>
+                        {summaryRow.totalMonthAmt.toLocaleString()}
+                    </Text>
+                </View>
+                <View style={{flex: 1.5}}>
+                    <Text style={[commonStyles.modalCell, {textAlign: 'right'}]}>
+                        {summaryRow.totalYearAmt.toLocaleString()}
+                    </Text>
+                </View>
+            </View>
+        )
+    }
 
     return (
         <SafeAreaView style={commonStyles.container}>
             <StatusBar style="dark"/>
 
             <View style={commonStyles.topBar}>
-                <View style={[commonStyles.filterRow, styles.filterRowSpacing]}>
+                <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>사업장</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowPosGroupModal(true)}>
                         <Text
@@ -206,7 +307,7 @@ const SaleDetailColumns: ColumnDef<SaleDetailRow>[] = useMemo(() => ([
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
-                <View style={[commonStyles.filterRow, styles.filterRowSpacing]}>
+                <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>조회일자</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={openDatePicker}>
                         <Text style={styles.selectText}>{formattedDate(saleDate)}</Text>
@@ -216,25 +317,49 @@ const SaleDetailColumns: ColumnDef<SaleDetailRow>[] = useMemo(() => ([
                 <View style={commonStyles.filterRow}>
                     <Text style={commonStyles.filterLabel}>상세보기</Text>
                     <TouchableOpacity
-                        style={styles.checkboxContainer}
+                        style={commonStyles.checkboxContainer}
                         onPress={handleCheckbox}
                     >
-                        <View style={[styles.checkbox, detailChecked && styles.checkboxChecked]}>
-                            {detailChecked && <Text style={styles.checkmark}>✓</Text>}
+                        <View style={[commonStyles.checkbox, detailChecked && commonStyles.checkboxChecked]}>
+                            {detailChecked && <Text style={commonStyles.checkmark}>✓</Text>}
                         </View>
                     </TouchableOpacity>
                     <Pressable style={commonStyles.searchButton} onPress={onSearch}>
-                        <Text style={commonStyles.searchButtonText}>조회</Text>
+                        <Text style={commonStyles.searchButtonText}>{Const.SEARCH}</Text>
                     </Pressable>
                 </View>
             </View>
 
             <View style={commonStyles.sectionDivider}/>
 
-            <Text style={{textAlign:'right', paddingHorizontal:10, paddingTop:10}}>(단위:천원)</Text>
+            <Text style={{textAlign: 'right', paddingHorizontal: 10, paddingTop: 10}}>(단위:천원)</Text>
             <Table
                 data={filteredData}
                 columns={mainColumns}
+                listFooter={
+                    detailChecked
+                        ? () => (
+                            <View style={[commonStyles.tableRow, styles.summaryRow]}>
+                                <Text style={[commonStyles.cell, styles.summaryLabelText, {
+                                    flex: 1.5,
+                                    textAlign: 'center'
+                                }]}>합계</Text>
+                                <Text style={[commonStyles.cell, {flex: 1, textAlign: 'right', paddingRight: 5}]}>
+                                    {aggregateSales(baseData).yedaySaleAmt.toLocaleString()}
+                                </Text>
+                                <Text style={[commonStyles.cell, {flex: 1, textAlign: 'right', paddingRight: 5}]}>
+                                    {aggregateSales(baseData).todaySaleAmt.toLocaleString()}
+                                </Text>
+                                <Text style={[commonStyles.cell, {flex: 1, textAlign: 'right', paddingRight: 5}]}>
+                                    {aggregateSales(baseData).monthSaleAmt.toLocaleString()}
+                                </Text>
+                                <Text style={[commonStyles.cell, {flex: 1, textAlign: 'right', paddingRight: 10}]}>
+                                    {aggregateSales(baseData).yearSaleAmt.toLocaleString()}
+                                </Text>
+                            </View>
+                        )
+                        : undefined
+                }
             />
 
             <DatePickerModal
@@ -272,47 +397,51 @@ const SaleDetailColumns: ColumnDef<SaleDetailRow>[] = useMemo(() => ([
                     </View>
                 </View>
             </Modal>
+
+            <Modal visible={isDetailVisible} animationType="fade" transparent>
+                <View style={commonStyles.modalOverlay}>
+                    <View style={commonStyles.modalCard}>
+                        <View style={commonStyles.modalHeader}>
+                            <Text style={commonStyles.modalTitle}>상품매출현황</Text>
+                            <Pressable onPress={closeDetail} hitSlop={8}>
+                                <Ionicons name="close" size={20} color="#333"/>
+                            </Pressable>
+
+                        </View>
+                        <CornerNmRow/>
+                        <Table
+                            data={detailData}
+                            columns={SaleDetailColumns}
+                            isModal={true}
+                            listFooter={() => renderDetailFooterRow()}
+                        />
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    filterRowSpacing: {marginBottom: 10},
-    selectText: {fontSize: 14, color: '#333'},
-    tableList: {flex: 1},
-    tableListContent: {paddingBottom: 12},
-    tableRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: '#eee',
-        paddingVertical: 12
+    selectText: {
+        fontSize: 14, color: '#333'
     },
-    summaryRow: {backgroundColor: '#fff7e6'},
-    summaryLabelText: {fontWeight: '700', color: '#333'},
-    cell: {fontSize: 13, color: '#444'},
-    rightSpanText: {textAlign: 'right'},
-    checkboxContainer: {
-        marginRight: 12,
-        marginTop: 2,
+    summaryRow: {
+        backgroundColor: '#fff7e6'
     },
-    checkbox: {
-        width: 20,
-        height: 20,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 4,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#fff',
+    summaryLabelText: {
+        fontWeight: '700',
+        color: '#333'
     },
-    checkboxChecked: {
-        backgroundColor: '#007AFF',
-        borderColor: '#007AFF',
+    cell: {
+        fontSize: 11,
+        color: '#444',
+        width: '100%'
     },
-    checkmark: {
-        color: '#fff',
-        fontSize: 16,
+    subTitle: {
+        fontSize: 14,
+        fontWeight: '700',
+        paddingVertical: 10,
     },
 });
 

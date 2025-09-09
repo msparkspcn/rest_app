@@ -1,234 +1,240 @@
-import { StyleSheet } from 'react-native';
+import {StyleSheet} from 'react-native';
 
 export const commonStyles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
         // backgroundColor: '#f5f5f5',
-      },
-      topBar: {
+    },
+    topBar: {
         paddingHorizontal: 10,
         paddingTop: 12,
         paddingBottom: 8,
         backgroundColor: '#f5f5f5',
-      },
-      filterRow: {
+    },
+    filterRow: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 12,
-      },
-      filterLabel: {
-        minWidth:50,
+    },
+    filterRowFront: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        marginBottom: 5
+    },
+    filterLabel: {
+        minWidth: 50,
         fontSize: 14,
         color: '#555',
-      },
-      segmented: {
+    },
+    segmented: {
         flexDirection: 'row',
         backgroundColor: '#e8e8e8',
         borderRadius: 8,
         padding: 4,
-      },
-      segmentItem: {
+    },
+    segmentItem: {
         paddingVertical: 8,
         paddingHorizontal: 14,
         borderRadius: 6,
-      },
-      segmentItemActive: {
+    },
+    segmentItemActive: {
         backgroundColor: '#007AFF',
-      },
-      segmentText: {
+    },
+    segmentText: {
         fontSize: 14,
         color: '#333',
-      },
-      segmentTextActive: {
+    },
+    segmentTextActive: {
         color: '#fff',
         fontWeight: '600',
-      },
-      searchButton: {
+    },
+    searchButton: {
         marginLeft: 'auto',
         backgroundColor: '#007AFF',
         paddingHorizontal: 28,
         paddingVertical: 10,
         borderRadius: 8,
-      },
-      searchButtonText: {
+    },
+    searchButtonText: {
         color: '#fff',
         fontWeight: '600',
         fontSize: 14,
-      },
-      tableContainer: {
+    },
+    tableContainer: {
         flex: 1,
         backgroundColor: '#fff',
         marginTop: 10,
         marginHorizontal: 10,
         overflow: 'hidden',
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: {width: 0, height: 2},
         shadowOpacity: 0.08,
         elevation: 2,
         borderWidth: StyleSheet.hairlineWidth,
         borderColor: '#e0e0e0',
-      },
-      tableHeaderRow: {
+    },
+    tableHeaderRow: {
         flexDirection: 'row',
         backgroundColor: '#f0f3f7',
         borderBottomWidth: StyleSheet.hairlineWidth,
         borderBottomColor: '#e0e0e0',
         paddingVertical: 8,
-      },
-      headerCell: {
+    },
+    headerCell: {
         fontSize: 12,
         fontWeight: '700',
         color: '#333',
-        width:'100%',
+        width: '100%',
         textAlign: 'center',
-      },
-      tableRowEven: {
+    },
+    tableRowEven: {
         backgroundColor: '#ffffff',
-      },
-      tableRowOdd: {
+    },
+    tableRowOdd: {
         backgroundColor: '#fafafa',
-      },
-      tableRow: {
+    },
+    tableRow: {
         flexDirection: 'row',
         alignItems: 'center',
         borderBottomWidth: StyleSheet.hairlineWidth,
         borderBottomColor: '#eee',
         paddingVertical: 8,
         // backgroundColor:'red'
-      },
-      columnContainer: {
+    },
+    columnContainer: {
         flexDirection: 'row',
         alignItems: 'center', // vertical center
         justifyContent: 'center',
         height: '100%',
         // backgroundColor:'red'
-      },
-      cellDivider: {
+    },
+    cellDivider: {
         borderRightWidth: StyleSheet.hairlineWidth,
         borderRightColor: '#eee',
-      },
-      columnPressable: {
+    },
+    columnPressable: {
         flex: 1,
         justifyContent: 'center',
         // paddingLeft:10
-      },
-      alignLeft: {
+    },
+    alignLeft: {
         textAlign: 'left',
-      },
-      alignCenter: {
+    },
+    alignCenter: {
         textAlign: 'center',
-      },
-      alignRight: {
+    },
+    alignRight: {
         textAlign: 'right',
-      },
-      cell: {
+    },
+    cell: {
         fontSize: 12,
         color: '#444',
         width: '100%'
-      },
-      modalOverlay: {
+    },
+    modalOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0,0,0,0.5)',
         justifyContent: 'center',
         alignItems: 'center',
         padding: 10,
-      },
-      modalContent: {
+    },
+    modalContent: {
         backgroundColor: '#fff',
         borderRadius: 12,
         width: '80%',
         maxHeight: '80%',
-      },
-      modalCard: {
+    },
+    modalCard: {
         width: '100%',
         maxWidth: 640,
         backgroundColor: '#fff',
         padding: 10,
         height: '80%',
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: {width: 0, height: 2},
         shadowOpacity: 0.08,
         elevation: 2,
         borderWidth: StyleSheet.hairlineWidth,
         borderColor: '#e0e0e0',
-      },
-      modalHeader: {
+    },
+    modalHeader: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingVertical:20,
+        paddingVertical: 20,
         borderBottomWidth: 1,
         borderBottomColor: '#eee',
-      },
-      listModalHeader: {
+    },
+    listModalHeader: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding:20,
+        padding: 20,
         borderBottomWidth: 1,
         borderBottomColor: '#eee',
-      },
-      modalTitle: {
+    },
+    modalTitle: {
         fontSize: 18,
         fontWeight: '700',
         color: '#333',
-      },
-      modalTableHeaderRow: {
+    },
+    modalTableHeaderRow: {
         flexDirection: 'row',
         backgroundColor: '#f0f3f7',
         borderBottomWidth: StyleSheet.hairlineWidth,
         borderBottomColor: '#e0e0e0',
         paddingVertical: 8,
         paddingHorizontal: 10,
-      },
-      modalHeaderCell: {
+    },
+    modalHeaderCell: {
         fontSize: 13,
         fontWeight: '700',
         color: '#333',
-      },
-      modalTableRow: {
+    },
+    modalTableRow: {
         flexDirection: 'row',
         alignItems: 'center',
         borderBottomWidth: StyleSheet.hairlineWidth,
         borderBottomColor: '#eee',
         paddingVertical: 8,
         paddingHorizontal: 10,
-      },
-      modalCell: {
+    },
+    modalCell: {
         fontSize: 12,
         color: '#444',
-      },
-      modalTableContainer: {
-        flex:1,
+    },
+    modalTableContainer: {
+        flex: 1,
         borderWidth: StyleSheet.hairlineWidth,
         borderColor: '#e0e0e0',
         overflow: 'hidden',
         backgroundColor: '#fff'
-      },
-      modalHeaderContainer: {
+    },
+    modalHeaderContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         height: '100%',
-      },
-      modalHeaderCellDivider: {
+    },
+    modalHeaderCellDivider: {
         borderRightWidth: StyleSheet.hairlineWidth,
         borderRightColor: '#b0b0b0',
         paddingRight: 10,
         marginRight: 10,
-      },
-      modalColumnContainer: {
+    },
+    modalColumnContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         height: '100%',
-      },
+    },
 
-      modalCellDivider: {
+    modalCellDivider: {
         borderRightWidth: StyleSheet.hairlineWidth,
         borderRightColor: '#eee',
         paddingRight: 10,
-      },
+    },
     sectionDivider: {
         height: 2,
         backgroundColor: '#b0b0b0',
@@ -236,100 +242,127 @@ export const commonStyles = StyleSheet.create({
         shadowColor: '#000',
         shadowOpacity: 0.08,
         shadowRadius: 2,
-        shadowOffset: { width: 0, height: 1 },
+        shadowOffset: {width: 0, height: 1},
         zIndex: 1,
-      },
-  dateModalOverlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: 20
-  },
-  dateModalCard: {
-      width: '100%',
-      maxWidth: 480,
-      backgroundColor: '#fff',
-      borderRadius: 12,
-      overflow: 'hidden',
-      height: '40%'
-  },
-  dateModalHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingHorizontal: 16,
-      paddingVertical: 12,
-      borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: '#eee'
-  },
-  dateModalTitle: {
-      fontSize: 16,
-      fontWeight: '700',
-      color: '#333'
-  },
-  modalClose: {
-      fontSize: 18,
-      color: '#666'
-  },
-  dateModalPickerContainer: {
-      alignItems: 'center'
-  },
-  modalActions: { padding: 12, alignItems: 'flex-end' },
-  modalOkButton: {
-      backgroundColor: '#007AFF',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 10
-  },
-  dateModalOkButtonText: {
-      color: '#fff',
-    fontWeight: '600',
-    fontSize: 14
-  },
-  modalItem: { paddingVertical: 15, paddingHorizontal: 20, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#f0f0f0' },
-  modalItemText: { fontSize: 16, color: '#333' },
-  modalOkButtonText: { color: '#fff', fontWeight: '600', fontSize: 14 },
-  headerCellDivider: {
-    borderRightWidth: StyleSheet.hairlineWidth,
-    borderRightColor: '#b0b0b0',
-  },
-  linkText: {
-    color: '#007AFF',
-    textDecorationLine: 'underline',
-  },
-  modalTableList: {
-    flex: 1,
-    marginTop: 2,
-    backgroundColor: '#fff'
-  },
-  modalTableListContent: {
-    paddingBottom: 8,
-    backgroundColor: '#fff'
-  },
-  selectArrow: {
-    fontSize: 12,
-    color: '#666',
-  },
-  selectInput: {
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    flex: 1,
-  },
-  modalList: {
-    maxHeight: 700,
-  },
-  tilde: {
-      color: '#666'
-  },
-  filterRowSpacing: {
-    marginBottom: 10
-  }
+    },
+    dateModalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20
+    },
+    dateModalCard: {
+        width: '100%',
+        maxWidth: 480,
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        overflow: 'hidden',
+        height: '40%'
+    },
+    dateModalHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: '#eee'
+    },
+    dateModalTitle: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#333'
+    },
+    modalClose: {
+        fontSize: 18,
+        color: '#666'
+    },
+    dateModalPickerContainer: {
+        alignItems: 'center'
+    },
+    modalActions: {padding: 12, alignItems: 'flex-end'},
+    modalOkButton: {
+        backgroundColor: '#007AFF',
+        borderRadius: 8,
+        paddingHorizontal: 16,
+        paddingVertical: 10
+    },
+    dateModalOkButtonText: {
+        color: '#fff',
+        fontWeight: '600',
+        fontSize: 14
+    },
+    modalItem: {
+        paddingVertical: 15,
+        paddingHorizontal: 20,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: '#f0f0f0'
+    },
+    modalItemText: {fontSize: 16, color: '#333'},
+    modalOkButtonText: {color: '#fff', fontWeight: '600', fontSize: 14},
+    headerCellDivider: {
+        borderRightWidth: StyleSheet.hairlineWidth,
+        borderRightColor: '#b0b0b0',
+    },
+    linkText: {
+        color: '#007AFF',
+        textDecorationLine: 'underline',
+    },
+    modalTableList: {
+        flex: 1,
+        marginTop: 2,
+        backgroundColor: '#fff'
+    },
+    modalTableListContent: {
+        paddingBottom: 8,
+        backgroundColor: '#fff'
+    },
+    selectArrow: {
+        fontSize: 12,
+        color: '#666',
+    },
+    selectInput: {
+        backgroundColor: '#fff',
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flex: 1,
+    },
+    modalList: {
+        maxHeight: 700,
+    },
+    tilde: {
+        color: '#666'
+    },
+    filterRowSpacing: {
+        marginBottom: 10
+    },
+    checkboxContainer: {
+        marginRight: 12,
+        marginTop: 2,
+    },
+    checkbox: {
+        width: 20,
+        height: 20,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 4,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+    },
+    checkboxChecked: {
+        backgroundColor: '#007AFF',
+        borderColor: '#007AFF',
+    },
+    checkmark: {
+        color: '#fff',
+        fontSize: 16,
+    },
 })

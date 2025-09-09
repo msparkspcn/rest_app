@@ -6,6 +6,7 @@ import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
 import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
+import Const from "../../constants/Const";
 
 type SaleRow = { tmzonDiv: string; totalAmt: number, billCnt: number };
 type ListItem = {
@@ -121,7 +122,7 @@ export default function SalesReportByTimezoneScreen() {
       <StatusBar style="dark" />
 
       <View style={commonStyles.topBar}>
-        <View style={[commonStyles.filterRow, styles.filterRowSpacing]}>
+        <View style={commonStyles.filterRowFront}>
           <Text style={commonStyles.filterLabel}>조회일자</Text>
           <TouchableOpacity style={commonStyles.selectInput} onPress={openDatePicker}>
             <Text style={styles.selectText}>{formattedDate(saleDate)}</Text>
@@ -135,7 +136,7 @@ export default function SalesReportByTimezoneScreen() {
             <Text style={commonStyles.selectArrow}> ▼</Text>
           </TouchableOpacity>
           <Pressable style={commonStyles.searchButton} onPress={onSearch}>
-            <Text style={commonStyles.searchButtonText}>조회</Text>
+            <Text style={commonStyles.searchButtonText}>{Const.SEARCH}</Text>
           </Pressable>
         </View>
       </View>
@@ -192,7 +193,6 @@ export default function SalesReportByTimezoneScreen() {
 }
 
 const styles = StyleSheet.create({
-  filterRowSpacing: { marginBottom: 10 },
   selectText: { fontSize: 14, color: '#333' },
   tableList: { flex: 1 },
   tableListContent: {paddingBottom: 12},

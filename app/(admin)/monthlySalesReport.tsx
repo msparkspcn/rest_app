@@ -22,6 +22,7 @@ import {setAuthToken} from "../../services/api/api";
 import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
+import Const from "../../constants/Const";
 
 type SaleRow = {
     cmpCd: string;
@@ -112,7 +113,7 @@ export default function MonthlySalesReport() {
     // 전역 푸터 사용으로 지역 초기화 핸들러는 현재 미사용입니다.
 
     const openDetail = (sale: SaleRow, type: DetailType) => {
-        console.log('openDetail type:'+type)
+        console.log('openDetail type:' + type)
         setSelectedSale(sale);
         setDetailType(type);
         setIsDetailVisible(true);
@@ -226,7 +227,7 @@ export default function MonthlySalesReport() {
     ]), []);
 
     const monthDetailData: MonthlyDetailRow[] = useMemo(
-        () => Array.from({ length: 3 }).map((_, index) => ({
+        () => Array.from({length: 3}).map((_, index) => ({
             saleMonth: `2025/0${index + 7}`, // 예: 7월, 8월, 9월
             qty: (index + 1) * 5,
             totalAmt: (index + 1) * 10000,
@@ -237,22 +238,26 @@ export default function MonthlySalesReport() {
     );
 
     const MonthlyDetailColumns: ColumnDef<MonthlyDetailRow>[] = useMemo(() => [
-        { key: 'saleMonth', title: '매출년월', flex: 2, align: 'center' },
+        {key: 'saleMonth', title: '매출년월', flex: 2, align: 'center'},
         {
             key: 'qty', title: '수량', flex: 1, align: 'right',
-            renderCell: (item) => <Text style={[commonStyles.cell, { textAlign: 'right' }]}>{item.qty.toLocaleString()}</Text>
+            renderCell: (item) => <Text
+                style={[commonStyles.cell, {textAlign: 'right'}]}>{item.qty.toLocaleString()}</Text>
         },
         {
             key: 'totalAmt', title: '총매출', flex: 2, align: 'right',
-            renderCell: (item) => <Text style={[commonStyles.cell, { textAlign: 'right' }]}>{item.totalAmt.toLocaleString()}</Text>
+            renderCell: (item) => <Text
+                style={[commonStyles.cell, {textAlign: 'right'}]}>{item.totalAmt.toLocaleString()}</Text>
         },
         {
             key: 'vatAmt', title: '부가세', flex: 1.5, align: 'right',
-            renderCell: (item) => <Text style={[commonStyles.cell, { textAlign: 'right' }]}>{item.vatAmt.toLocaleString()}</Text>
+            renderCell: (item) => <Text
+                style={[commonStyles.cell, {textAlign: 'right'}]}>{item.vatAmt.toLocaleString()}</Text>
         },
         {
             key: 'netSaleAmt', title: '순매출', flex: 2, align: 'right',
-            renderCell: (item) => <Text style={[commonStyles.cell, { textAlign: 'right' }]}>{item.netSaleAmt.toLocaleString()}</Text>
+            renderCell: (item) => <Text
+                style={[commonStyles.cell, {textAlign: 'right'}]}>{item.netSaleAmt.toLocaleString()}</Text>
         }
     ], []);
 
@@ -260,8 +265,8 @@ export default function MonthlySalesReport() {
     const detailColumns = detailType === 'daily' ? DailyDetailColumns : MonthlyDetailColumns;
 
     const renderDetailFooterRow = (type: DetailType) => {
-        console.log("DetailType:"+JSON.stringify(type));
-        if(type === 'daily') {
+        console.log("DetailType:" + JSON.stringify(type));
+        if (type === 'daily') {
             return (
                 <View style={[commonStyles.modalTableRow, styles.summaryRow]}>
                     <View style={{flex: 2}}>
@@ -270,12 +275,12 @@ export default function MonthlySalesReport() {
                         </Text>
                     </View>
                     <View style={{flex: 2}}>
-                        <Text style={[commonStyles.modalCell, {textAlign: 'right', paddingRight:5}]}>
+                        <Text style={[commonStyles.modalCell, {textAlign: 'right', paddingRight: 5}]}>
                             {summaryRow.totalSaleAmt.toLocaleString()}
                         </Text>
                     </View>
                     <View style={{flex: 1.5}}>
-                        <Text style={[commonStyles.modalCell, {textAlign: 'right', paddingRight:2}]}>
+                        <Text style={[commonStyles.modalCell, {textAlign: 'right', paddingRight: 2}]}>
                             {summaryRow.totalVatAmt.toLocaleString()}
                         </Text>
                     </View>
@@ -289,28 +294,28 @@ export default function MonthlySalesReport() {
         } else if (type === 'monthly') {
             return (
                 <View style={[commonStyles.modalTableRow, styles.summaryRow]}>
-                    <View style={{ flex: 2 }}>
-                        <Text style={[commonStyles.modalCell, { textAlign: 'center', fontSize: 13, fontWeight: 'bold' }]}>
+                    <View style={{flex: 2}}>
+                        <Text style={[commonStyles.modalCell, {textAlign: 'center', fontSize: 13, fontWeight: 'bold'}]}>
                             합계
                         </Text>
                     </View>
-                    <View style={{ flex: 1 }}>
-                        <Text style={[commonStyles.modalCell, { textAlign: 'right', paddingRight: 5 }]}>
+                    <View style={{flex: 1}}>
+                        <Text style={[commonStyles.modalCell, {textAlign: 'right', paddingRight: 5}]}>
                             {monthlySummaryRow.totalQty.toLocaleString()}
                         </Text>
                     </View>
-                    <View style={{ flex: 2 }}>
-                        <Text style={[commonStyles.modalCell, { textAlign: 'right', paddingRight: 5 }]}>
+                    <View style={{flex: 2}}>
+                        <Text style={[commonStyles.modalCell, {textAlign: 'right', paddingRight: 5}]}>
                             {monthlySummaryRow.totalAmt.toLocaleString()}
                         </Text>
                     </View>
-                    <View style={{ flex: 1.5 }}>
-                        <Text style={[commonStyles.modalCell, { textAlign: 'right', paddingRight: 2 }]}>
+                    <View style={{flex: 1.5}}>
+                        <Text style={[commonStyles.modalCell, {textAlign: 'right', paddingRight: 2}]}>
                             {monthlySummaryRow.totalVatAmt.toLocaleString()}
                         </Text>
                     </View>
-                    <View style={{ flex: 2 }}>
-                        <Text style={[commonStyles.modalCell, { textAlign: 'right' }]}>
+                    <View style={{flex: 2}}>
+                        <Text style={[commonStyles.modalCell, {textAlign: 'right'}]}>
                             {monthlySummaryRow.totalNetSaleAmt.toLocaleString()}
                         </Text>
                     </View>
@@ -349,7 +354,7 @@ export default function MonthlySalesReport() {
             totalVatAmt: totalVatAmt,
             totalNetSaleAmt: totalNetSaleAmt,
         };
-    },[monthDetailData]);
+    }, [monthDetailData]);
 
 
     const totalAmt = useMemo(() => saleList.reduce((acc, r) => acc + r.monthSaleAmt, 0), [saleList]);
@@ -361,7 +366,7 @@ export default function MonthlySalesReport() {
             <StatusBar style="dark"/>
 
             <View style={commonStyles.topBar}>
-                <View style={[commonStyles.filterRow, commonStyles.filterRowSpacing]}>
+                <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>조회월</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('from')}>
                         <Text style={styles.selectText}>{formattedMonth(fromSaleDt)}</Text>
@@ -381,7 +386,7 @@ export default function MonthlySalesReport() {
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                     <Pressable style={commonStyles.searchButton} onPress={onSearch}>
-                        <Text style={commonStyles.searchButtonText}>조회</Text>
+                        <Text style={commonStyles.searchButtonText}>{Const.SEARCH}</Text>
                     </Pressable>
                 </View>
             </View>

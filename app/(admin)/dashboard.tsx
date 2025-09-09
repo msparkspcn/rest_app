@@ -5,9 +5,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import * as api from "../../services/api/api";
 import {Table} from "../../components/Table";
+import Const from "../../constants/Const";
 
 type CornerRow = {
-  no: number;
   cornerNm: string;
   cornerCd: string;
   posGroup: string;
@@ -44,7 +44,6 @@ export default function DashboardScreen() {
     const rows: CornerRow[] = [];
     for (let i = 1; i <= 30; i += 1) {
       rows.push({
-        no: i,
         cornerNm: `매장 ${i.toString().padStart(2, '0')}`,
         cornerCd: `S${(1000 + i).toString()}`,
         posGroup: `그룹 ${((i % 5) + 1).toString()}`,
@@ -57,6 +56,8 @@ export default function DashboardScreen() {
   const filteredData = useMemo(() => {
     if (submittedFilter === '전체') return baseData;
     if (submittedFilter === '운영') return baseData.filter(r => r.useYn === 'Y');
+
+
     return baseData.filter(r => r.useYn === 'N');
   }, [baseData, submittedFilter]);
 
@@ -85,8 +86,12 @@ export default function DashboardScreen() {
   };
 
   const mainColumns: ColumnDef<CornerRow>[] = useMemo(() => ([
-    { key: 'no',       title: 'No',     flex: 0.8, align: 'center' },
-    { key: 'cornerNm',     title: '매장명',   flex: 2,   align: 'left',
+    { key: 'no',       title: 'No',     flex: 0.8, align: 'center',
+      renderCell: (_item, index) => (
+          <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
+      ),
+    },
+    { key: 'cornerNm',     title: Const.CORNER_NM,   flex: 2,   align: 'left',
       renderCell: (item) => (
           <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
             <Text style={[commonStyles.cell, commonStyles.linkText,{paddingLeft:10}]}>{item.cornerNm}</Text>
@@ -94,7 +99,7 @@ export default function DashboardScreen() {
       ),   },
     { key: 'cornerCd',     title: '코드',    flex: 1.2, align: 'center' },
     { key: 'posGroup', title: '포스그룹', flex: 1.5, align: 'left'   },
-    { key: 'useYn',    title: '사용여부', flex: 1,   align: 'center',
+    { key: 'useYn',    title: Const.USE_YN, flex: 1,   align: 'center',
       renderCell: (item) => (
           <Text style={[commonStyles.cell, {textAlign:'center'}]}>
             {item.useYn ==='Y' ? '운영' : '폐점'}
@@ -103,10 +108,9 @@ export default function DashboardScreen() {
     },
   ]), []);
 
-  type ItemRow = { no: number; itemCd: string; itemName: string };
+  type ItemRow = { itemCd: string; itemName: string };
   const itemData: ItemRow[] = useMemo(
     () => Array.from({ length: 205 }).map((_, index) => ({
-      no: index + 1,
       itemCd: `P${1001 + index}`,
       itemName: `상품 ${index + 1}`,
     })),
@@ -114,9 +118,13 @@ export default function DashboardScreen() {
   );
 
   const itemColumns: ColumnDef<ItemRow>[] = useMemo(() => ([
-    { key: 'no',          title: 'No',     flex: 0.4, align: 'center' },
-    { key: 'itemCd', title: '상품코드',  flex: 1.8, align: 'left' },
-    { key: 'itemName', title: '상품명',   flex: 2.2, align: 'left'   },
+    { key: 'no',          title: Const.NO,     flex: 0.4, align: 'center',
+      renderCell: (_item, index) => (
+          <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
+      ),
+    },
+    { key: 'itemCd', title: Const.ITEM_CD,  flex: 1.8, align: 'left' },
+    { key: 'itemName', title: Const.ITEM_NM,   flex: 2.2, align: 'left'   },
   ]), []);
 
   const CornerNmRow = () => {
@@ -147,7 +155,7 @@ export default function DashboardScreen() {
             ))}
           </View>
           <Pressable style={commonStyles.searchButton} onPress={onSearch}>
-            <Text style={commonStyles.searchButtonText}>조회</Text>
+            <Text style={commonStyles.searchButtonText}>{Const.SEARCH}</Text>
           </Pressable>
         </View>
       </View>
@@ -161,13 +169,18 @@ export default function DashboardScreen() {
         <View style={commonStyles.modalOverlay}>
           <View style={commonStyles.modalCard}>
             <View style={commonStyles.modalHeader}>
-              <Text style={commonStyles.modalTitle}>매장 취급상품</Text>
+              <Text style={commonStyles.modalTitle}>{Const.CORNER_ITEM_NM}</Text>
               <Pressable onPress={closeDetail} hitSlop={8}>
                 <Ionicons name="close" size={20} color="#333" />
               </Pressable>
             </View>
 
-            <Table data={itemData} columns={itemColumns} isModal={true} listHeader={CornerNmRow}/>
+            <Table
+                data={itemData}
+                columns={itemColumns}
+                isModal={true}
+                listHeader={CornerNmRow}
+            />
           </View>
         </View>
       </Modal>

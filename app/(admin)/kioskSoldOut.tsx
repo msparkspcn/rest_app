@@ -3,9 +3,10 @@ import React, { useMemo, useState } from 'react';
 import {Alert, FlatList, Modal, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import { commonStyles } from '@/styles';
 import {Table} from "../../components/Table";
+import Const from "../../constants/Const";
 
 type StoreOption = { id: string; name: string };
-type ProductRow = { no: number; itemNm: string; useYn: 'Y' | 'N' };
+type ProductRow = { itemNm: string; useYn: 'Y' | 'N' };
 
 export default function KioskSoldOutScreen() {
   const stores: StoreOption[] = useMemo(
@@ -20,7 +21,6 @@ export default function KioskSoldOutScreen() {
   const productData: ProductRow[] = useMemo(
     () =>
       Array.from({ length: 60 }).map((_, index) => ({
-        no: index + 1,
         itemNm: `상품 ${index + 1}`,
         useYn: index % 3 === 0 ? 'N' : 'Y',
       })),
@@ -52,7 +52,11 @@ export default function KioskSoldOutScreen() {
     cellAlign?: Align;
   };
   const mainColumns: ColumnDef<ProductRow>[] = useMemo(() => ([
-    { key: 'no',       title: 'No',     flex: 0.3, align: 'center' },
+    { key: 'no',       title: 'No',     flex: 0.3, align: 'center',
+      renderCell: (_item, index) => (
+          <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
+      ),
+    },
     { key: 'itemNm',     title: '상품명',   flex: 2,   align: 'left'   },
     { key: 'useYn',    title: '사용여부', flex: 0.5,   align: 'center',
       renderCell: (item) => (
@@ -86,7 +90,7 @@ export default function KioskSoldOutScreen() {
             <Text style={commonStyles.selectArrow}>▼</Text>
           </TouchableOpacity>
           <Pressable style={commonStyles.searchButton} onPress={onSearch}>
-            <Text style={commonStyles.searchButtonText}>조회</Text>
+            <Text style={commonStyles.searchButtonText}>{Const.SEARCH}</Text>
           </Pressable>
         </View>
       </View>

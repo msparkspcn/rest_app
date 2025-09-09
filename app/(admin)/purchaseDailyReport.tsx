@@ -6,6 +6,7 @@ import {Table} from "../../components/Table";
 import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
 import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
+import Const from "../../constants/Const";
 
 type PurchaseRow = { date: string; vendor: string; amount: number };
 type PurchaseDetailRow = { itemNm: string, qty: number, price: number, totalAmt: number };
@@ -164,13 +165,13 @@ export default function PurchaseDailyReportScreen() {
             <StatusBar style="dark"/>
 
             <View style={commonStyles.topBar}>
-                <View style={[commonStyles.filterRow, styles.filterRowSpacing]}>
+                <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>조회일자</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('from')}>
                         <Text style={styles.selectText}>{formattedDate(fromPurchaseDt)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
-                    <Text style={styles.tilde}>~</Text>
+                    <Text style={commonStyles.tilde}>~</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('to')}>
                         <Text style={styles.selectText}>{formattedDate(toPurchaseDt)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
@@ -189,7 +190,7 @@ export default function PurchaseDailyReportScreen() {
                         onSubmitEditing={onSearch}
                     />
                     <Pressable style={commonStyles.searchButton} onPress={onSearch}>
-                        <Text style={commonStyles.searchButtonText}>조회</Text>
+                        <Text style={commonStyles.searchButtonText}>{Const.SEARCH}</Text>
                     </Pressable>
                 </View>
             </View>
@@ -236,16 +237,10 @@ export default function PurchaseDailyReportScreen() {
 }
 
 const styles = StyleSheet.create({
-    filterRowSpacing: {
-        marginBottom: 10,
-    },
     filterLabel: {
         minWidth: 50,
         fontSize: 14,
         color: '#555',
-    },
-    tilde: {
-        color: '#666',
     },
     input: {
         flex: 1,
