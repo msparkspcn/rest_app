@@ -18,6 +18,7 @@ import {setAuthToken} from "../../services/api/api";
 import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
+import Const from "../../constants/Const";
 
 type SaleRow = {
     saleDtInfo: string;

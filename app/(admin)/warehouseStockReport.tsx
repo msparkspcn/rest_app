@@ -1,6 +1,7 @@
 import {StatusBar} from 'expo-status-bar';
 import React, {useMemo, useState} from 'react';
 import {
+    Modal,
     Pressable,
     SafeAreaView,
     StyleSheet,
@@ -18,6 +19,7 @@ import Const from "../../constants/Const";
 import ListModal from "../../components/ListModal";
 
 type StockRow = {
+    cornerNm: string;
     itemNm: string;
     giQty: number;
     goQty: number;
@@ -26,33 +28,49 @@ type StockRow = {
     curStockQty: number;
 };
 
-type PosGroup = { id: string; name: string };
-type SearchCond = { id: string; name: string };
-type Corner = { id: string; name: string};
+type StockDetailRow = {
+    cornerNm: string;
+    stockDt: string;
+    totalStockQty: number;
+    giQty: number;
+    saleQty: number;
+    curStockQty: number;
+}
+
+type Vendor = { id: string; name: string };
+type ItemClass = {
+    id: string;
+    name: string;
+}
 
 export default function WarehouseStockReportScreen() {
-    const [saleDate, setSaleDate] = useState(getTodayYmd());
+    const [fromSaleDt, setFromSaleDt] = useState(getTodayYmd());
+    const [toSaleDt, setToSaleDt] = useState(getTodayYmd());
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempDate, setTempDate] = useState<Date | null>(null);
+    const [currentPickerType, setCurrentPickerType] = useState('from')
 
-    const posGroups: PosGroup[] = useMemo(
+    const vendors: Vendor[] = useMemo(
         () => Array.from({length: 6}).map((_, i) => ({id: `G${i + 1}`, name: `거래처 ${i + 1}`})),
         []
     );
-    const corners: Corner[] = useMemo(
-        () => Array.from({length: 6}).map((_, i) => ({id: `G${i + 1}`, name: `매장 ${i + 1}`})),
+    const itemClasses: ItemClass[] = useMemo(
+        () => Array.from({length: 6}).map((_, i) => ({id: `G${i + 1}`, name: `상품분류 ${i + 1}`})),
         []
     );
 
-    const searchCond: SearchCond[] = [{ id: "realtime", name: "실시간 기준" },
-        { id: "closing", name: "영업 마감 기준" }]
-    const [selectedPosGroupId, setSelectedPosGroupId] = useState<string | null>(posGroups[0]?.id ?? null);
-    const [showPosGroupModal, setShowPosGroupModal] = useState(false);
-    const [showCornerModal, setShowCornerModal] = useState(false);
-    const [showSearchCond, setShowSearchCond] = useState(false);
+    const [selectedVendorId, setSelectedVendorId] = useState<string | null>(vendors[0]?.id ?? null);
+    const [showVendorModal, setShowVendorModal] = useState(false);
+    const [showItemClassModal, setShowItemClassModal] = useState(false);
     const [vendorQuery, setVendorQuery] = useState('');
-    const [selectedSearchCond, setSelectedSearchCond] = useState<string | null>(searchCond[0]?.id ?? null);
-    const [selectedCorner, setSelectedCorner] = useState<string | null>(corners[0]?.id ?? null);
+    const [selectedItemClass, setSelectedItemClass] = useState<string | null>(itemClasses[0]?.id ?? null);
+    const [showExistStockChecked, setShowExistStockChecked] = useState(false);
+    const [isDetailVisible, setIsDetailVisible] = useState(false);
+    const [selectedItem, setSelectedItem] = useState<StockRow | null>(null);
+
+    const handleCheckbox = () => {
+        setShowExistStockChecked(!showExistStockChecked)
+    }
     const baseData: StockRow[] = useMemo(
         () =>
             Array.from({length: 15}).map((_, idx) => {
@@ -61,6 +79,7 @@ export default function WarehouseStockReportScreen() {
                 const goQty = 30 + (idx % 5);
                 const curStockQty = totalStockQty + giQty - goQty;
                 return {
+                    cornerNm: '파스쿠찌',
                     itemNm: `상품 ${((idx % 6) + 1)}`,
                     giQty: giQty,
                     totalStockQty: totalStockQty,
@@ -75,14 +94,71 @@ export default function WarehouseStockReportScreen() {
         return baseData;
     }, [baseData]);
 
+    const detailData: StockDetailRow[] = useMemo(
+        () =>
+            Array.from({length: 10}).map((_, idx) => {
+                const qty = (idx % 4) + 1;
+                return {
+                    cornerNm: '파스쿠찌',
+                    stockDt: `2025/09/0${idx + 1}`,
+                    totalStockQty: qty,
+                    giQty: qty,
+                    saleQty: qty,
+                    curStockQty: qty
+                };
+            }),
+        []
+    );
+
+    const StockDetailColumns: ColumnDef<StockDetailRow>[] = useMemo(() => ([
+        {key: 'stockDt', title: Const.DATE, flex: 2, align: 'center',
+            renderCell: (item) => (
+                <Text style={[commonStyles.cell, {textAlign: 'center'}]}>{item.stockDt}</Text>
+            )
+        },
+        {
+            key: 'totalStockQty', title: Const.TOTAL_STOCK_QTY, flex: 1, align: 'center',
+            renderCell: (item) => (
+                <Text style={[commonStyles.cell, {textAlign: 'right'}]}>{item.totalStockQty.toLocaleString()}</Text>
+            )
+        },
+        {
+            key: 'giQty', title: Const.GI_QTY, flex: 1.5, align: 'right',
+            renderCell: (item) => (
+                <Text style={[commonStyles.cell, {textAlign: 'right'}]}>{item.giQty.toLocaleString()}</Text>
+            )
+        },
+        {
+            key: 'saleQty', title: Const.SALE, flex: 1, align: 'right',
+            renderCell: (item) => (
+                <Text style={[commonStyles.cell, {textAlign: 'right'}]}>{item.saleQty.toLocaleString()}</Text>
+            )
+        },
+        {
+            key: 'curStockQty', title: Const.CUR_STOCK_QTY, flex: 1, align: 'right',
+            renderCell: (item) => (
+                <Text style={[commonStyles.cell, {textAlign: 'right'}]}>{item.curStockQty.toLocaleString()}</Text>
+            )
+        },
+    ]), []);
+
     const onSearch = () => {
         // 데모: 현재는 선택 값만으로 필터링 적용
     };
 
-    const openDatePicker = () => {
+    const openDatePicker = (pickerType: string) => {
         setTempDate(new Date());
+        setCurrentPickerType(pickerType);
         setShowDatePicker(true);
     };
+
+    const openDetail = (
+        item: StockRow
+    ) => {
+        console.log('item:' + JSON.stringify(item))
+        setSelectedItem(item)
+        setIsDetailVisible(true);
+    }
 
     const mainColumns: ColumnDef<StockRow>[] = useMemo(() => ([
         {key: 'no', title: Const.NO, flex: 1, align: 'center',
@@ -93,9 +169,11 @@ export default function WarehouseStockReportScreen() {
         {
             key: 'itemNm', title: Const.ITEM_NM, flex: 1, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {paddingLeft: 10}]}>
-                    {item.itemNm}
-                </Text>
+                <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
+                    <Text style={[commonStyles.cell, commonStyles.linkText, {paddingLeft: 10}]}>
+                        {item.itemNm}
+                    </Text>
+                </Pressable>
             ),
         },
         {
@@ -137,6 +215,55 @@ export default function WarehouseStockReportScreen() {
         },
     ]), [])
 
+    const CornerNmRow = () => {
+        return (
+            <View style={{ borderBottomWidth: 1, borderBottomColor: '#ccc' }}>
+                <Text style={styles.modalCornerNm}>{selectedItem?.cornerNm} 매장재고현황</Text>
+            </View>
+        );
+    };
+
+    const detailTotalStockQty = useMemo(() => {
+        return detailData.reduce((acc, row) => acc + row.totalStockQty, 0);
+    }, [detailData]);
+    const detailTotalGiQty = useMemo(() => {
+        return detailData.reduce((acc, row) => acc + row.giQty, 0);
+    }, [detailData]);
+    const detailTotalSaleQty = useMemo(() => {
+        return detailData.reduce((acc, row) => acc + row.saleQty, 0);
+    }, [detailData]);
+    const detailTotalCurStockQty = useMemo(() => {
+        return detailData.reduce((acc, row) => acc + row.curStockQty, 0);
+    }, [detailData]);
+
+    const renderDetailFooter = () => (
+        <View style={[commonStyles.modalTableRow, styles.modalTotalRow]}>
+            <View style={{flex: 2}}>
+                <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.modalTotalText]}>합계</Text>
+            </View>
+            <View style={{flex: 1}}>
+                <Text style={[commonStyles.cell, commonStyles.alignRight, styles.modalTotalText]}>
+                    {detailTotalStockQty.toLocaleString()}
+                </Text>
+            </View>
+            <View style={{flex: 1}}>
+                <Text style={[commonStyles.cell, commonStyles.alignRight, styles.modalTotalText]}>
+                    {detailTotalGiQty.toLocaleString()}
+                </Text>
+            </View>
+            <View style={{flex: 1}}>
+                <Text style={[commonStyles.cell, commonStyles.alignRight, styles.modalTotalText]}>
+                    {detailTotalSaleQty.toLocaleString()}
+                </Text>
+            </View>
+            <View style={{flex: 1}}>
+                <Text style={[commonStyles.cell, commonStyles.alignRight, styles.modalTotalText]}>
+                    {detailTotalCurStockQty.toLocaleString()}
+                </Text>
+            </View>
+        </View>
+    );
+
     return (
         <SafeAreaView style={commonStyles.container}>
             <StatusBar style="dark"/>
@@ -144,32 +271,21 @@ export default function WarehouseStockReportScreen() {
             <View style={commonStyles.topBar}>
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>조회일자</Text>
-                    <TouchableOpacity style={commonStyles.selectInput} onPress={openDatePicker}>
-                        <Text style={styles.selectText}>{formattedDate(saleDate)}</Text>
+                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('from')}>
+                        <Text style={styles.selectText}>{formattedDate(fromSaleDt)}</Text>
+                        <Text style={commonStyles.selectArrow}> ▼</Text>
+                    </TouchableOpacity>
+                    <Text>-</Text>
+                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('to')}>
+                        <Text style={styles.selectText}>{formattedDate(toSaleDt)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={commonStyles.filterRowFront}>
-                    <Text style={commonStyles.filterLabel}>매장</Text>
-                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowCornerModal(true)}>
+                    <Text style={commonStyles.filterLabel}>{Const.ITEM_CLASS}</Text>
+                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowItemClassModal(true)}>
                         <Text
-                            style={styles.selectText}>{corners.find(g => g.id === selectedCorner)?.name || '선택'}</Text>
-                        <Text style={commonStyles.selectArrow}> ▼</Text>
-                    </TouchableOpacity>
-                </View>
-                <View style={commonStyles.filterRowFront}>
-                    <Text style={commonStyles.filterLabel}>{Const.VENDOR}</Text>
-                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowPosGroupModal(true)}>
-                        <Text
-                            style={styles.selectText}>{posGroups.find(g => g.id === selectedPosGroupId)?.name || '선택'}</Text>
-                        <Text style={commonStyles.selectArrow}> ▼</Text>
-                    </TouchableOpacity>
-                </View>
-                <View style={commonStyles.filterRowFront}>
-                    <Text style={commonStyles.filterLabel}>{Const.SEARCH_COND}</Text>
-                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowSearchCond(true)}>
-                        <Text
-                            style={styles.selectText}>{searchCond.find(g => g.id === selectedSearchCond)?.name || '선택'}</Text>
+                            style={styles.selectText}>{itemClasses.find(g => g.id === selectedItemClass)?.name || '선택'}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -183,10 +299,31 @@ export default function WarehouseStockReportScreen() {
                         returnKeyType="search"
                         onSubmitEditing={onSearch}
                     />
+                </View>
+                <View style={commonStyles.filterRowFront}>
+                    <Text style={commonStyles.filterLabel}>{Const.VENDOR}</Text>
+                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowVendorModal(true)}>
+                        <Text
+                            style={styles.selectText}>{vendors.find(g => g.id === selectedVendorId)?.name || '선택'}</Text>
+                        <Text style={commonStyles.selectArrow}> ▼</Text>
+                    </TouchableOpacity>
+                </View>
+                <View style={commonStyles.filterRowFront}>
+                    <Text style={commonStyles.filterLabel}>{Const.SHOW_EXIST_STOCK_LIST}</Text>
+                    <TouchableOpacity
+                        style={commonStyles.checkboxContainer}
+                        onPress={handleCheckbox}
+                    >
+                        <View style={[commonStyles.checkbox, showExistStockChecked && commonStyles.checkboxChecked]}>
+                            {showExistStockChecked && <Text style={commonStyles.checkmark}>✓</Text>}
+                        </View>
+                    </TouchableOpacity>
                     <Pressable style={commonStyles.searchButton} onPress={onSearch}>
                         <Text style={commonStyles.searchButtonText}>{Const.SEARCH}</Text>
                     </Pressable>
                 </View>
+
+
             </View>
 
             <View style={commonStyles.sectionDivider}/>
@@ -200,63 +337,68 @@ export default function WarehouseStockReportScreen() {
                 visible={showDatePicker}
                 initialDate={tempDate}
                 onClose={() => setShowDatePicker(false)}
-                onConfirm={(date) => setSaleDate(dateToYmd(date))}
-            />
-
-            <ListModal
-                visible={showCornerModal}
-                title="매장 선택"
-                data={corners}
-                onClose={() => setShowCornerModal(false)}
-                onSelect={(item) => {
-                    setSelectedCorner(item.id);
-                    setShowCornerModal(false);
+                onConfirm={(date) => {
+                    if (currentPickerType === 'from') setFromSaleDt(dateToYmd(date));
+                    else setToSaleDt(dateToYmd(date));
                 }}
             />
 
             <ListModal
-                visible={showPosGroupModal}
+                visible={showItemClassModal}
+                title="상품분류 선택"
+                data={itemClasses}
+                onClose={() => setShowItemClassModal(false)}
+                onSelect={(item) => {
+                    setSelectedItemClass(item.id);
+                    setShowItemClassModal(false);
+                }}
+            />
+
+            <ListModal
+                visible={showVendorModal}
                 title="거래처 선택"
-                data={posGroups}
-                onClose={() => setShowPosGroupModal(false)}
+                data={vendors}
+                onClose={() => setShowVendorModal(false)}
                 onSelect={(item) => {
-                    setSelectedPosGroupId(item.id);
-                    setShowPosGroupModal(false);
+                    setSelectedVendorId(item.id);
+                    setShowVendorModal(false);
                 }}
             />
 
-            <ListModal
-                visible={showSearchCond}
-                title="조회기준 선택"
-                data={searchCond}
-                onClose={() => setShowSearchCond(false)}
-                onSelect={(item) => {
-                    setSelectedSearchCond(item.id);
-                    setShowSearchCond(false);
-                }}
-            />
+            <Modal
+                visible={isDetailVisible}
+                transparent animationType="fade"
+                onRequestClose={() => setIsDetailVisible(false)}
+            >
+                <View style={commonStyles.modalOverlay}
+                      pointerEvents="box-none">
+                    <View style={commonStyles.modalCard}>
+                        <View style={commonStyles.modalHeader}>
+                            <Text style={commonStyles.modalTitle}>{selectedItem?.itemNm}</Text>
+                            <TouchableOpacity onPress={() => setIsDetailVisible(false)}>
+                                <Text style={commonStyles.modalClose}>✕</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <Table
+                            data={detailData}
+                            columns={StockDetailColumns}
+                            isModal={true}
+                            listHeader={CornerNmRow}
+                            listFooter={renderDetailFooter}
+                        />
+                    </View>
+                </View>
+            </Modal>
 
         </SafeAreaView>
     );
-}
+};
 
 const styles = StyleSheet.create({
     selectText: {fontSize: 14, color: '#333'},
     tableList: {flex: 1},
-    tableListContent: {paddingBottom: 12},
-    tableRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: '#eee',
-        paddingVertical: 12
-    },
-    summaryRow: {backgroundColor: '#fff7e6'},
-    summaryLabelText: {fontWeight: '700', color: '#333'},
     cell: {fontSize: 13, color: '#444'},
-    rightSpanText: {textAlign: 'right'},
-    totalRow: {backgroundColor: '#fafafa'},
-    totalText: {fontWeight: '700', color: '#222'},
     input: {
         flex: 1,
         backgroundColor: '#fff',
@@ -267,6 +409,19 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         color: '#333',
     },
+    modalCornerNm: {
+        fontSize: 14,
+        color: '#555',
+        paddingHorizontal: 10,
+        paddingVertical: 8,
+    },
+    modalTotalRow: {
+        backgroundColor: '#fafafa',
+    },
+    modalTotalText: {
+        fontWeight: '700',
+        color: '#222',
+    }
 });
 
 

@@ -7,11 +7,17 @@ import { useUser } from '../contexts/UserContext';
 type AdminFooterProps = {
   onReset?: () => void;
   onLogoutPress?: () => void;
+  onHome?: () => void;
 };
 
-export default function AdminFooter({ onReset, onLogoutPress }: AdminFooterProps) {
+export default function AdminFooter({ onReset, onLogoutPress, onHome }: AdminFooterProps) {
   const { logout } = useUser();
-  const handleHome = () => router.push('/');
+  const handleHome = () => {
+    if(onHome) {
+      console.log('home home')
+      onHome()
+    }
+  }
   const handleReset = () => onReset && onReset();
   const handleLogout = () => {
     logout();

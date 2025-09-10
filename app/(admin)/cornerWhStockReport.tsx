@@ -1,8 +1,6 @@
 import {StatusBar} from 'expo-status-bar';
 import React, {useMemo, useState} from 'react';
 import {
-    FlatList,
-    Modal,
     Pressable,
     SafeAreaView,
     StyleSheet,
@@ -23,8 +21,7 @@ type StockRow = {
     itemNm: string;
     giQty: number;
     saleQty: number;
-    // cornerNm: string;
-    totalStockQty: number;
+    whStockQty: number;
     curStockQty: number;
 };
 
@@ -32,7 +29,7 @@ type Vendor = { id: string; name: string };
 type SearchCond = { id: string; name: string };
 type Corner = { id: string; name: string};
 
-export default function CornerStockReportScreen() {
+export default function CornerWhStockReportScreen() {
     const [saleDate, setSaleDate] = useState(getTodayYmd());
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempDate, setTempDate] = useState<Date | null>(null);
@@ -65,7 +62,7 @@ export default function CornerStockReportScreen() {
                 return {
                     itemNm: `상품 ${((idx % 6) + 1)}`,
                     giQty: giQty,
-                    totalStockQty: totalStockQty,
+                    whStockQty: 0,
                     saleQty: saleQty,
                     curStockQty: curStockQty,
                 };
@@ -101,15 +98,6 @@ export default function CornerStockReportScreen() {
             ),
         },
         {
-            key: 'totalStockQty', title: Const.TOTAL_STOCK_QTY, flex: 1, align: 'center',
-            renderCell: (item) => (
-                <Text style={[commonStyles.cell, {
-                    textAlign: 'right',
-                    paddingRight: 10
-                }]}>{item.totalStockQty.toLocaleString()}</Text>
-            )
-        },
-        {
             key: 'giQty', title: Const.GI_QTY, flex: 1, align: 'center',
             renderCell: (item) => (
                 <Text style={[commonStyles.cell, {
@@ -135,6 +123,16 @@ export default function CornerStockReportScreen() {
                     paddingRight: 10,
                     color: item.curStockQty < 0 ? 'red' : 'black',
                 }]}>{item.curStockQty.toLocaleString()}</Text>
+            )
+        },
+        {
+            key: 'whStockQty', title: Const.WH_STOCK_QTY, flex: 1, align: 'center',
+            renderCell: (item) => (
+                <Text style={[commonStyles.cell, {
+                    textAlign: 'right',
+                    paddingRight: 10,
+                    color: item.whStockQty < 0 ? 'red' : 'black',
+                }]}>{item.whStockQty.toLocaleString()}</Text>
             )
         },
     ]), [])

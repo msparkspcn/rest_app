@@ -144,10 +144,7 @@ export default function RegisterScreen() {
   // 약관동의 화면
   if (step === 1) {
     return (
-      <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
+      <View style={styles.container}>
         <StatusBar style="dark" />
 
         <ScrollView
@@ -174,11 +171,21 @@ export default function RegisterScreen() {
                 <Text style={styles.termText}>이용약관에 동의합니다 (필수)</Text>
               </View>
 
-              <View style={styles.termContent}>
-                <Text style={styles.termContentText}>
-                  제1조 (목적) 이 약관은 SR Mobile(이하 &lsquo;회사&rsquo;)이 제공하는 서비스의 이용과 관련하여 회사와 회원과의 권리, 의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.
-                </Text>
-              </View>
+
+                <View style={styles.termContent}>
+                  <ScrollView
+                      contentContainerStyle={styles.scrollContent}
+                      keyboardShouldPersistTaps="handled"
+                      showsVerticalScrollIndicator={false}
+                  >
+                    <Text style={styles.termContentText}>
+                      제1조 (목적) 이 약관은 SR Mobile(이하 &lsquo;회사&rsquo;)이 제공하는 서비스의 이용과 관련하여 회사와 회원과의 권리, 의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.
+                      제2조 (목적) 이 약관은 SR Mobile(이하 &lsquo;회사&rsquo;)이 제공하는 서비스의 이용과 관련하여 회사와 회
+                    </Text>
+                  </ScrollView>
+                </View>
+
+
 
               <View style={styles.termItem}>
                 <TouchableOpacity
@@ -193,12 +200,18 @@ export default function RegisterScreen() {
               </View>
 
               <View style={styles.termContent}>
-                <Text style={styles.termContentText}>
-                  1. 수집하는 개인정보 항목: 이름, 이메일 주소{'\n'}
-                  2. 개인정보의 수집 및 이용목적: 회원가입 및 서비스 제공{'\n'}
-                  3. 개인정보의 보유 및 이용기간: 회원탈퇴 시까지{'\n'}
-                  4. 동의 거부권 및 거부에 따른 불이익: 동의 거부 시 회원가입이 제한됩니다.
-                </Text>
+                <ScrollView
+                    contentContainerStyle={styles.scrollContent}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                >
+                  <Text style={styles.termContentText}>
+                    1. 수집하는 개인정보 항목: 이름, 이메일 주소{'\n'}
+                    2. 개인정보의 수집 및 이용목적: 회원가입 및 서비스 제공{'\n'}
+                    3. 개인정보의 보유 및 이용기간: 회원탈퇴 시까지{'\n'}
+                    4. 동의 거부권 및 거부에 따른 불이익: 동의 거부 시 회원가입이 제한됩니다.
+                  </Text>
+                </ScrollView>
               </View>
             </View>
 
@@ -215,7 +228,7 @@ export default function RegisterScreen() {
             </TouchableOpacity>
           </View>
         </ScrollView>
-      </KeyboardAvoidingView>
+      </View>
     );
   }
 
@@ -476,9 +489,9 @@ const styles = StyleSheet.create({
   termContent: {
     backgroundColor: '#f8f8f8',
     padding: 16,
-    borderRadius: 8,
     marginBottom: 20,
     marginLeft: 32,
+    maxHeight: 150,
   },
   termContentText: {
     fontSize: 14,

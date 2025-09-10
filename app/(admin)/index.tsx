@@ -2,6 +2,7 @@ import { router, Href } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useMemo, useState } from 'react';
 import {
+  Modal,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -11,12 +12,15 @@ import {
 } from 'react-native';
 import { DEP_G, DEP_OP, DEP_R } from '../../constants/RoleTypes';
 import { useUser } from '../../contexts/UserContext';
+import TeamsOfService from "./teamsOfService";
+import {commonStyles} from "../../styles/index";
 
 type MenuChild = { title: string; icon: string; route: Href; roleType: string };
 type MenuGroup = { key: string; title: string; icon: string; children: MenuChild[] };
 // DEP_OP: 운영업체, DEP_R: 휴게소, DEP_G: 주유소
 export default function AdminHomeScreen() {
   const { user } = useUser();
+  const [isTOSOpen, setIsTOSOpen] = useState(false);
   console.log('user:'+JSON.stringify(user))
 
   const menuGroups = useMemo((): MenuGroup[] => [
@@ -77,7 +81,7 @@ export default function AdminHomeScreen() {
         { title: '실시간 재고현황(주)', icon: '📝', route: '/(admin)/dashboard', roleType: DEP_G },
         { title: '매장 재고현황(휴)', icon: '📝', route: '/(admin)/cornerStockReport', roleType: DEP_R },
         { title: '창고 재고현황(휴)',  icon: '📊', route: '/(admin)/warehouseStockReport', roleType: DEP_R },
-        { title: '매장 창고 재고현황(휴)',  icon: '📊', route: '/(admin)/dashboard', roleType: DEP_R },
+        { title: '매장 창고 재고현황(휴)',  icon: '📊', route: '/(admin)/cornerWhStockReport', roleType: DEP_R },
       ],
     },
     {
@@ -181,7 +185,10 @@ export default function AdminHomeScreen() {
       </ScrollView>
       <View style={styles.footerContainer}>
           <View style={styles.footerLinks}>
-            <TouchableOpacity onPress={() => console.log('이용약관')}>
+            <TouchableOpacity onPress={() => {
+              console.log('이용약관')
+              setIsTOSOpen(true);
+            }}>
               <Text style={styles.footerLinkText}>이용약관/개인정보처리방침</Text>
             </TouchableOpacity>
           </View>
@@ -189,6 +196,14 @@ export default function AdminHomeScreen() {
             COPYRIGHT 2025 Secta9ine. ALL RIGHTS RESERVED.
           </Text>
         </View>
+
+      <Modal visible={isTOSOpen} transparent>
+        <View style={commonStyles.modalOverlay}>
+          <View style={styles.modalTosContent}>
+            <TeamsOfService type="check" onClose={()=>setIsTOSOpen(false)}/>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -403,5 +418,10 @@ const styles = StyleSheet.create({
   copyrightText: {
     fontSize: 10,
     color: '#999',
+  },
+  modalTosContent: {
+    backgroundColor: '#fff',
+    width: '90%',
+    height: '85%',
   },
 });

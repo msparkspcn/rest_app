@@ -5,6 +5,7 @@ export default {
     COMP_RATIO: "구성비",
     MONTH_TOTAL_AMT: "당월누계",
     ITEM_NM: "상품명",
+    ITEM_CLASS: "상품분류",
     QTY: "수량",
     SEARCH_DT: "조회일자",
     VENDOR: "거래처",
@@ -14,8 +15,12 @@ export default {
     GO_QTY: "출고",
     CUR_STOCK_QTY: "현재고",
     TOTAL_STOCK_QTY: "전재고",
+    WH_STOCK_QTY: "창고재고",
     SALE: "판매",
     USE_YN: "사용여부",
     ITEM_CD: "상품코드",
-    CORNER_ITEM_NM: "매장 취급상품"
+    CORNER_ITEM_NM: "매장 취급상품",
+    TEST_TOS_CONTENTS: "제1조 (목적) 이 약관은 SR Mobile(이하 &lsquo;회사&rsquo;)이 제공하는 서비스의 이용과 관련하여 회사와 회원과의 권리, 의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.",
+    SHOW_EXIST_STOCK_LIST: "재고존재 내역만 출력",
+    DATE: "일자",
 }
