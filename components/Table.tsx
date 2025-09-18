@@ -30,7 +30,8 @@ const alignStyles = {
 
 export function Table<T>({ data, columns, onRowPress, isModal, listHeader, listFooter }: TableProps<T>) {
     const renderHeader = () => (
-        <View style={isModal ? commonStyles.modalTableHeaderRow : commonStyles.tableHeaderRow}>
+        <View style={isModal ? commonStyles.modalTableHeaderRow :
+            commonStyles.tableHeaderRow}>
             {columns.map((col, i) => (
                 <View
                     key={String(col.key)}

@@ -145,7 +145,7 @@ export default function SalesReportByPeriod() {
     );
 
     const productColumns: ColumnDef<ProductSaleRow>[] = useMemo(() => ([
-        { key: 'no',          title: 'No',     flex: 0.7, align: 'center' },
+        { key: 'no',          title: Const.NO,     flex: 0.7, align: 'center' },
         { key: 'itemNm', title: '상품명',   flex: 2.2, align: 'left' },
         { key: 'qty', title: '수량',   flex: 1, align: 'right' },
         { key: 'price', title: '단가',   flex: 1.5, align: 'right' },

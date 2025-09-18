@@ -187,7 +187,7 @@ export default function RealtimeSalesByCornerScreen() {
     }, [detailData]);
 
     const SaleDetailColumns: ColumnDef<SaleDetailRow>[] = useMemo(() => ([
-        {key: 'no', title: 'No', flex: 0.5, align: 'center'},
+        {key: 'no', title: Const.NO, flex: 0.5, align: 'center'},
         {key: 'itemNm', title: Const.ITEM_NM, flex: 2, align: 'center'},
         {
             key: 'qty', title: Const.QTY, flex: 1, align: 'center',

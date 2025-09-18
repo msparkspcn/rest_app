@@ -73,14 +73,14 @@ export const commonStyles = StyleSheet.create({
         shadowOpacity: 0.08,
         elevation: 2,
         borderWidth: StyleSheet.hairlineWidth,
-        borderColor: '#e0e0e0',
+        borderColor: '#eee',
     },
     tableHeaderRow: {
         flexDirection: 'row',
         backgroundColor: '#f0f3f7',
         borderBottomWidth: StyleSheet.hairlineWidth,
         borderBottomColor: '#e0e0e0',
-        paddingVertical: 8,
+        minHeight: 30
     },
     headerCell: {
         fontSize: 12,
@@ -100,19 +100,19 @@ export const commonStyles = StyleSheet.create({
         alignItems: 'center',
         borderBottomWidth: StyleSheet.hairlineWidth,
         borderBottomColor: '#eee',
-        paddingVertical: 8,
-        // backgroundColor:'red'
+        minHeight: 30,
     },
     columnContainer: {
         flexDirection: 'row',
-        alignItems: 'center', // vertical center
+        alignItems: 'center',
         justifyContent: 'center',
         height: '100%',
-        // backgroundColor:'red'
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: '#eee'
     },
     cellDivider: {
         borderRightWidth: StyleSheet.hairlineWidth,
-        borderRightColor: '#eee',
+        borderRightColor: '#aaa',
     },
     columnPressable: {
         flex: 1,
@@ -131,7 +131,7 @@ export const commonStyles = StyleSheet.create({
     cell: {
         fontSize: 12,
         color: '#444',
-        width: '100%'
+        width: '100%',
     },
     modalOverlay: {
         flex: 1,

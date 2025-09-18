@@ -86,7 +86,7 @@ export default function DashboardScreen() {
   };
 
   const mainColumns: ColumnDef<CornerRow>[] = useMemo(() => ([
-    { key: 'no',       title: 'No',     flex: 0.8, align: 'center',
+    { key: 'no',       title: Const.NO,     flex: 0.8, align: 'center',
       renderCell: (_item, index) => (
           <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
       ),

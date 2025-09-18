@@ -367,7 +367,7 @@ export default function RegisterScreen() {
       >
         <View style={commonStyles.modalOverlay}>
           <View style={commonStyles.modalContent}>
-            <View style={commonStyles.modalHeader}>
+            <View style={commonStyles.listModalHeader}>
               <Text style={commonStyles.modalTitle}>소속구분 선택</Text>
               <TouchableOpacity onPress={() => setShowDepartmentTypeModal(false)}>
                 <Text style={commonStyles.modalClose}>✕</Text>

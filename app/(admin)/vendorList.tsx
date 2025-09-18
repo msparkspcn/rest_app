@@ -59,7 +59,7 @@ export default function VendorListScreen() {
   );
 
   const vendorColumns: ColumnDef<VendorDetailRow>[] = useMemo(() => ([
-    { key: 'no', title: 'No',     flex: 0.7, align: 'center',
+    { key: 'no', title: Const.NO,     flex: 0.7, align: 'center',
       renderCell: (_item, index) => (
           <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
       ),
@@ -69,7 +69,7 @@ export default function VendorListScreen() {
   ]), []);
 
   const mainColumns: ColumnDef<VendorRow>[] = useMemo(() => ([
-    { key: 'no',       title: 'No',     flex: 0.3, align: 'center' ,
+    { key: 'no',       title: Const.NO,     flex: 0.3, align: 'center' ,
       renderCell: (_item, index) => (
           <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
       ),

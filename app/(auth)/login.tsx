@@ -19,27 +19,27 @@ export default function LoginScreen() {
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
   const [autoLogin, setAutoLogin] = useState(false);
-  const [selectedRoleType, setSelectedRoleType] = useState(DEP_R); // 기본값: 휴게소
+  const [selectedRoleType, setSelectedRoleType] = useState(DEP_G); // 기본값: 휴게소
 
   const handleLogin = () => {
     if (!id) {
       Alert.alert('오류', '아이디를 입력해주세요.');
       return;
-    } 
+    }
     if (!password) {
       Alert.alert('오류', '비밀번호가 일치하지 않습니다.');
       return;
     }
-    
+
     // 여기에 실제 로그인 로직을 구현하세요
     console.log('로그인 시도:', { id, password, autoLogin });
-    
+
     // 자동로그인 설정 저장
     if (autoLogin) {
       // AsyncStorage나 다른 저장소에 자동로그인 정보 저장
       console.log('자동로그인 설정 저장됨');
     }
-    
+
     // 임시로 사용자 정보 설정 (실제로는 서버에서 받아와야 함)
     // roleType은 실제 로그인 시 서버에서 받아와야 합니다
     const userData = {
@@ -47,9 +47,9 @@ export default function LoginScreen() {
       name: '관리자',
       roleType: selectedRoleType
     };
-    
+
     login(userData);
-    
+
     // 로그인 성공 시 홈화면으로 이동
     router.replace('/(admin)');
   };
@@ -63,12 +63,12 @@ export default function LoginScreen() {
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
+    <KeyboardAvoidingView
+      style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <StatusBar style="dark" />
-      
+
       <View style={styles.content}>
         <View style={styles.header}>
           <Text style={styles.title}>SR Mobile</Text>
@@ -84,7 +84,7 @@ export default function LoginScreen() {
               placeholder="ID"
               keyboardType="default"
               autoCapitalize="none"
-              autoCorrect={false} 
+              autoCorrect={false}
             />
           </View>
 
@@ -97,13 +97,13 @@ export default function LoginScreen() {
               secureTextEntry
               autoCapitalize="none"
               autoCorrect={false}
-            /> 
+            />
           </View>
 
           <View style={styles.roleContainer}>
             <Text style={styles.roleLabel}>권한 선택 (테스트용)</Text>
             <View style={styles.roleButtons}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={[styles.roleButton, selectedRoleType === DEP_OP && styles.roleButtonActive]}
                 onPress={() => setSelectedRoleType(DEP_OP)}
               >
@@ -111,7 +111,7 @@ export default function LoginScreen() {
                   운영업체
                 </Text>
               </TouchableOpacity>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={[styles.roleButton, selectedRoleType === DEP_R && styles.roleButtonActive]}
                 onPress={() => setSelectedRoleType(DEP_R)}
               >
@@ -119,7 +119,7 @@ export default function LoginScreen() {
                   휴게소
                 </Text>
               </TouchableOpacity>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={[styles.roleButton, selectedRoleType === DEP_G && styles.roleButtonActive]}
                 onPress={() => setSelectedRoleType(DEP_G)}
               >
@@ -131,8 +131,8 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.autoLoginContainer}>
-            <TouchableOpacity 
-              style={styles.checkboxContainer} 
+            <TouchableOpacity
+              style={styles.checkboxContainer}
               onPress={toggleAutoLogin}
             >
               <View style={[styles.checkbox, autoLogin && styles.checkboxChecked]}>
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   autoLoginContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-   
+
     marginBottom: 16,
   },
   checkboxContainer: {
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 24,
   },
-  registerText: { 
+  registerText: {
     fontSize: 16,
     color: '#666',
   },

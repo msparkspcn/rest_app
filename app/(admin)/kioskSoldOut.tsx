@@ -52,7 +52,7 @@ export default function KioskSoldOutScreen() {
     cellAlign?: Align;
   };
   const mainColumns: ColumnDef<ProductRow>[] = useMemo(() => ([
-    { key: 'no',       title: 'No',     flex: 0.3, align: 'center',
+    { key: 'no',       title: Const.NO,     flex: 0.3, align: 'center',
       renderCell: (_item, index) => (
           <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
       ),

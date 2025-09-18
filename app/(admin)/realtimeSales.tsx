@@ -85,7 +85,7 @@ export default function RealtimeSalesScreen() {
     }
 
     const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => ([
-        {key: 'no', title: 'No', flex: 1, align: 'center',
+        {key: 'no', title: Const.NO, flex: 0.5, align: 'center',
             renderCell: (_item, index) => (
                 <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
             ),
@@ -100,9 +100,27 @@ export default function RealtimeSalesScreen() {
                 </Pressable>
             ),
         },
-        {key: 'cashAmt', title: '현금', flex: 1, align: 'center'},
-        {key: 'etcAmt', title: '카드 외', flex: 1, align: 'center'},
-        {key: 'totalAmt', title: '총매출', flex: 1, align: 'center'},
+        {key: 'cashAmt', title: '현금', flex: 1, align: 'center',
+            renderCell: (item) => (
+                <Text style={[commonStyles.cell, {textAlign: 'right',paddingRight: 10}]}>
+                    {item.cashAmt.toLocaleString()}
+                </Text>
+            )
+        },
+        {key: 'etcAmt', title: '카드 외', flex: 1, align: 'center',
+            renderCell: (item) => (
+                <Text style={[commonStyles.cell, {textAlign: 'right',paddingRight: 10}]}>
+                    {item.etcAmt.toLocaleString()}
+                </Text>
+            )
+        },
+        {key: 'totalAmt', title: '총매출', flex: 1.2, align: 'center',
+            renderCell: (item) => (
+                <Text style={[commonStyles.cell, {textAlign: 'right',paddingRight: 10}]}>
+                    {item.totalAmt.toLocaleString()}
+                </Text>
+            )
+        },
     ]), [])
 
     const totalValues = useMemo(() => {
