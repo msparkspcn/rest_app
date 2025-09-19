@@ -66,7 +66,7 @@ export default function PurchaseProductReportScreen() {
             ),
         },
         {
-            key: 'qty', title: '수량', flex: 0.5, align: 'right',
+            key: 'qty', title: Const.QTY, flex: 0.5, align: 'right',
             renderCell: (item) => (
                 <Text style={[commonStyles.cell, {
                     textAlign: 'right',
@@ -150,9 +150,9 @@ export default function PurchaseProductReportScreen() {
             )
         },
         {
-            key: 'qty', title: '수량', flex: 0.5, align: 'center',
+            key: 'qty', title: Const.QTY, flex: 0.5, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign: 'right'}]}>
+                <Text style={[commonStyles.cell, commonStyles.numberCell]}>
                     {item.qty.toLocaleString()}
                 </Text>
             )
@@ -160,7 +160,7 @@ export default function PurchaseProductReportScreen() {
         {
             key: 'totalAmt', title: '금액', flex: 1.5, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign: 'right'}]}>
+                <Text style={[commonStyles.cell, commonStyles.numberCell]}>
                     {item.totalAmt.toLocaleString()}
                 </Text>
             )
@@ -175,10 +175,12 @@ export default function PurchaseProductReportScreen() {
             </View>
             <View style={{flex: 0.5}}>
                 <Text
-                    style={[commonStyles.modalCell, commonStyles.alignRight, styles.modalTotalText]}>{detailTotals.qty.toLocaleString()}</Text>
+                    style={[commonStyles.modalCell, commonStyles.numberCell, styles.modalTotalText]}>
+                    {detailTotals.qty.toLocaleString()}
+                </Text>
             </View>
             <View style={{flex: 1.5}}>
-                <Text style={[commonStyles.modalCell, commonStyles.alignRight, styles.modalTotalText]}>
+                <Text style={[commonStyles.modalCell, commonStyles.numberCell, styles.modalTotalText]}>
                     {detailTotals.amount.toLocaleString()}
                 </Text>
             </View>
@@ -206,7 +208,7 @@ export default function PurchaseProductReportScreen() {
                 <View style={commonStyles.filterRow}>
                     <Text style={commonStyles.filterLabel}>상품명</Text>
                     <TextInput
-                        style={styles.input}
+                        style={commonStyles.input}
                         placeholder="상품명 입력"
                         placeholderTextColor="#999"
                         value={productQuery}

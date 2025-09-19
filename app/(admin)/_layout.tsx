@@ -63,6 +63,10 @@ export default function AdminLayout() {
                     options={{title: '기간별 매출현황(휴)', headerShown: true}}
                 />
                 <Stack.Screen
+                    name="salesReportByPeriodG"
+                    options={{title: '기간별 매출현황(주)', headerShown: true}}
+                />
+                <Stack.Screen
                     name="saleReportByTimezone"
                     options={{title: '시간대별 매출현황(휴)', headerShown: true}}
                 />
@@ -79,12 +83,20 @@ export default function AdminLayout() {
                     options={{title: '시설별 실시간 매출(통합)', headerShown: true}}
                 />
                 <Stack.Screen
+                    name="realtimeSalesBySalesOrgG"
+                    options={{title: '시설별 실시간 매출(통합)', headerShown: true}}
+                />
+                <Stack.Screen
                     name="realtimeSalesByCorner"
                     options={{title: '실시간 매장매출현황(휴)', headerShown: true}}
                 />
                 <Stack.Screen
                     name="cornerStockReport"
                     options={{title: '매장 재고현황(휴)', headerShown: true}}
+                />
+                <Stack.Screen
+                    name="cornerStockReportG"
+                    options={{title: '재고현황(주)', headerShown: true}}
                 />
                 <Stack.Screen
                     name="warehouseStockReport"

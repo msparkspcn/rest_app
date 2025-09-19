@@ -171,7 +171,7 @@ export default function DashboardScreen() {
             <View style={commonStyles.modalHeader}>
               <Text style={commonStyles.modalTitle}>{Const.CORNER_ITEM_NM}</Text>
               <Pressable onPress={closeDetail} hitSlop={8}>
-                <Ionicons name="close" size={20} color="#333" />
+                <Ionicons name="close" size={24} color="#333" />
               </Pressable>
             </View>
 

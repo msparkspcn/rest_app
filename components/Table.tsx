@@ -30,19 +30,17 @@ const alignStyles = {
 
 export function Table<T>({ data, columns, onRowPress, isModal, listHeader, listFooter }: TableProps<T>) {
     const renderHeader = () => (
-        <View style={isModal ? commonStyles.modalTableHeaderRow :
-            commonStyles.tableHeaderRow}>
+        <View style={commonStyles.tableHeaderRow}>
             {columns.map((col, i) => (
                 <View
                     key={String(col.key)}
                     style={[
                         { flex: col.flex },
-                        isModal ? commonStyles.modalHeaderContainer : commonStyles.columnContainer,
-                        i < columns.length - 1 &&
-                        (isModal ? commonStyles.modalHeaderCellDivider : commonStyles.headerCellDivider),
+                        commonStyles.columnContainer,
+                        commonStyles.headerCellDivider,
                     ]}
                 >
-                    <Text style={isModal ? commonStyles.modalHeaderCell : commonStyles.headerCell}>
+                    <Text style={commonStyles.headerCell}>
                         {col.title}
                     </Text>
                 </View>
@@ -53,7 +51,7 @@ export function Table<T>({ data, columns, onRowPress, isModal, listHeader, listF
     const renderItem = ({ item, index }: { item: T; index: number }) => {
         const rowContent = (
             <View style={[
-                isModal ? commonStyles.modalTableRow : commonStyles.tableRow,
+                commonStyles.tableRow,
                 index % 2 === 0 ? commonStyles.tableRowEven : commonStyles.tableRowOdd,
             ]}>
                 {columns.map((col, i) => (
@@ -61,9 +59,7 @@ export function Table<T>({ data, columns, onRowPress, isModal, listHeader, listF
                         key={String(col.key)}
                         style={[
                             { flex: col.flex },
-                            commonStyles.columnContainer,
-                            i < columns.length - 1 &&
-                            (isModal ? commonStyles.modalCellDivider : commonStyles.cellDivider),
+                            commonStyles.columnContainer
                         ]}
                     >
                         {col.renderCell ? (
@@ -72,7 +68,7 @@ export function Table<T>({ data, columns, onRowPress, isModal, listHeader, listF
                             <Text
                                 style={[
                                     {flex:1},
-                                    isModal ? commonStyles.modalCell : commonStyles.cell,
+                                    commonStyles.cell,
                                     alignStyles[col.cellAlign ?? col.align ?? 'left'],
                                 ]}
                             >
@@ -100,7 +96,6 @@ export function Table<T>({ data, columns, onRowPress, isModal, listHeader, listF
                 renderItem={renderItem}
                 ListHeaderComponent={listHeader}
                 ListFooterComponent={listFooter}
-                style={isModal ? commonStyles.modalTableList : styles.tableList}
                 contentContainerStyle={isModal ? commonStyles.modalTableListContent : styles.tableListContent}
                 bounces={false}
                 alwaysBounceVertical={false}
@@ -112,6 +107,5 @@ export function Table<T>({ data, columns, onRowPress, isModal, listHeader, listF
 }
 
 const styles = StyleSheet.create({
-    tableList: { flex: 1, backgroundColor: '#fff' },
     tableListContent: { backgroundColor: '#fff' },
 });

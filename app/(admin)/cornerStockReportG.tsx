@@ -1,6 +1,8 @@
 import {StatusBar} from 'expo-status-bar';
 import React, {useMemo, useState} from 'react';
 import {
+    FlatList,
+    Modal,
     Pressable,
     SafeAreaView,
     StyleSheet,
@@ -20,8 +22,9 @@ import ListModal from "../../components/ListModal";
 type StockRow = {
     itemNm: string;
     giQty: number;
-    saleQty: number;
-    whStockQty: number;
+    goQty: number;
+    // cornerNm: string;
+    totalStockQty: number;
     curStockQty: number;
 };
 
@@ -29,41 +32,33 @@ type Vendor = { id: string; name: string };
 type SearchCond = { id: string; name: string };
 type Corner = { id: string; name: string};
 
-export default function CornerWhStockReportScreen() {
+export default function CornerStockReportScreen() {
     const [saleDate, setSaleDate] = useState(getTodayYmd());
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempDate, setTempDate] = useState<Date | null>(null);
-
-    const vendors: Vendor[] = useMemo(
-        () => Array.from({length: 6}).map((_, i) => ({id: `G${i + 1}`, name: `거래처 ${i + 1}`})),
-        []
-    );
+    const [fromSaleDt, setFromSaleDt] = useState(getTodayYmd());
+    const [toSaleDt, setToSaleDt] = useState(getTodayYmd());
+    const [currentPickerType, setCurrentPickerType] = useState('from');
     const corners: Corner[] = useMemo(
         () => Array.from({length: 6}).map((_, i) => ({id: `G${i + 1}`, name: `매장 ${i + 1}`})),
         []
     );
-
-    const searchCond: SearchCond[] = [{ id: "realtime", name: "실시간 기준" },
-        { id: "closing", name: "영업 마감 기준" }]
-    const [selectedVendorId, setSelectedVendorId] = useState<string | null>(vendors[0]?.id ?? null);
-    const [showVendorModal, setShowVendorModal] = useState(false);
-    const [showCornerModal, setShowCornerModal] = useState(false);
-    const [showSearchCond, setShowSearchCond] = useState(false);
     const [vendorQuery, setVendorQuery] = useState('');
-    const [selectedSearchCond, setSelectedSearchCond] = useState<string | null>(searchCond[0]?.id ?? null);
-    const [selectedCorner, setSelectedCorner] = useState<string | null>(corners[0]?.id ?? null);
+    const [selectedStock, setSelectedStock] = useState<string | null>(corners[0]?.id ?? null);
+    const [isDetailVisible, setIsDetailVisible] = useState(false);
+
     const baseData: StockRow[] = useMemo(
         () =>
             Array.from({length: 15}).map((_, idx) => {
                 const giQty = 7 + (idx % 5);
                 const totalStockQty = 20 + (idx % 7);
-                const saleQty = 30 + (idx % 5);
-                const curStockQty = totalStockQty + giQty - saleQty;
+                const goQty = 30 + (idx % 5);
+                const curStockQty = totalStockQty + giQty - goQty;
                 return {
                     itemNm: `상품 ${((idx % 6) + 1)}`,
                     giQty: giQty,
-                    whStockQty: 0,
-                    saleQty: saleQty,
+                    totalStockQty: totalStockQty,
+                    goQty: goQty,
                     curStockQty: curStockQty,
                 };
             }),
@@ -78,24 +73,41 @@ export default function CornerWhStockReportScreen() {
         // 데모: 현재는 선택 값만으로 필터링 적용
     };
 
-    const openDatePicker = () => {
+    const openDatePicker = (pickerType: string) => {
         setTempDate(new Date());
+        setCurrentPickerType(pickerType);
         setShowDatePicker(true);
     };
 
+    const openDetail = (stock: StockRow) => {
+        setSelectedStock(stock);
+        setIsDetailVisible(true);
+    };
+
     const mainColumns: ColumnDef<StockRow>[] = useMemo(() => ([
-        {key: 'no', title: Const.NO, flex: 1, align: 'center',
+        {key: 'no', title: Const.NO, flex: 0.5, align: 'center',
             renderCell: (_item, index) => (
                 <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
             ),
         },
         {
-            key: 'itemNm', title: Const.ITEM_NM, flex: 1, align: 'center',
+            key: 'itemNm', title: Const.ITEM_NM, flex: 1.5, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {paddingLeft: 10}]}>
-                    {item.itemNm}
-                </Text>
+                <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
+                    <Text style={[commonStyles.cell, commonStyles.linkText,{paddingLeft: 10}]}>
+                        {item.itemNm}
+                    </Text>
+                </Pressable>
             ),
+        },
+        {
+            key: 'totalStockQty', title: Const.TOTAL_STOCK_QTY, flex: 1, align: 'center',
+            renderCell: (item) => (
+                <Text style={[commonStyles.cell, {
+                    textAlign: 'right',
+                    paddingRight: 10
+                }]}>{item.totalStockQty.toLocaleString()}</Text>
+            )
         },
         {
             key: 'giQty', title: Const.GI_QTY, flex: 1, align: 'center',
@@ -107,12 +119,12 @@ export default function CornerWhStockReportScreen() {
             )
         },
         {
-            key: 'saleQty', title: Const.SALE, flex: 1, align: 'center',
+            key: 'goQty', title: Const.GO_QTY, flex: 1, align: 'center',
             renderCell: (item) => (
                 <Text style={[commonStyles.cell, {
                     textAlign: 'right',
                     paddingRight: 10
-                }]}>{item.saleQty.toLocaleString()}</Text>
+                }]}>{item.goQty.toLocaleString()}</Text>
             )
         },
         {
@@ -125,16 +137,6 @@ export default function CornerWhStockReportScreen() {
                 }]}>{item.curStockQty.toLocaleString()}</Text>
             )
         },
-        {
-            key: 'whStockQty', title: Const.WH_STOCK_QTY, flex: 1, align: 'center',
-            renderCell: (item) => (
-                <Text style={[commonStyles.cell, {
-                    textAlign: 'right',
-                    paddingRight: 10,
-                    color: item.whStockQty < 0 ? 'red' : 'black',
-                }]}>{item.whStockQty.toLocaleString()}</Text>
-            )
-        },
     ]), [])
 
     return (
@@ -144,32 +146,13 @@ export default function CornerWhStockReportScreen() {
             <View style={commonStyles.topBar}>
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>조회일자</Text>
-                    <TouchableOpacity style={commonStyles.selectInput} onPress={openDatePicker}>
-                        <Text style={styles.selectText}>{formattedDate(saleDate)}</Text>
+                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('from')}>
+                        <Text style={styles.selectText}>{formattedDate(fromSaleDt)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
-                </View>
-                <View style={commonStyles.filterRowFront}>
-                    <Text style={commonStyles.filterLabel}>매장</Text>
-                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowCornerModal(true)}>
-                        <Text
-                            style={styles.selectText}>{corners.find(g => g.id === selectedCorner)?.name || '선택'}</Text>
-                        <Text style={commonStyles.selectArrow}> ▼</Text>
-                    </TouchableOpacity>
-                </View>
-                <View style={commonStyles.filterRowFront}>
-                    <Text style={commonStyles.filterLabel}>{Const.VENDOR}</Text>
-                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowVendorModal(true)}>
-                        <Text
-                            style={styles.selectText}>{vendors.find(g => g.id === selectedVendorId)?.name || '선택'}</Text>
-                        <Text style={commonStyles.selectArrow}> ▼</Text>
-                    </TouchableOpacity>
-                </View>
-                <View style={commonStyles.filterRowFront}>
-                    <Text style={commonStyles.filterLabel}>{Const.SEARCH_COND}</Text>
-                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowSearchCond(true)}>
-                        <Text
-                            style={styles.selectText}>{searchCond.find(g => g.id === selectedSearchCond)?.name || '선택'}</Text>
+                    <Text>-</Text>
+                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('to')}>
+                        <Text style={styles.selectText}>{formattedDate(toSaleDt)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -200,45 +183,14 @@ export default function CornerWhStockReportScreen() {
                 visible={showDatePicker}
                 initialDate={tempDate}
                 onClose={() => setShowDatePicker(false)}
-                onConfirm={(date) => setSaleDate(dateToYmd(date))}
-            />
-
-            <ListModal
-                visible={showCornerModal}
-                title="매장 선택"
-                data={corners}
-                onClose={() => setShowCornerModal(false)}
-                onSelect={(item) => {
-                    setSelectedCorner(item.id);
-                    setShowCornerModal(false);
+                onConfirm={(date) => {
+                    if (currentPickerType === 'from') setFromSaleDt(dateToYmd(date));
+                    else setToSaleDt(dateToYmd(date));
                 }}
             />
-
-            <ListModal
-                visible={showVendorModal}
-                title="거래처 선택"
-                data={vendors}
-                onClose={() => setShowVendorModal(false)}
-                onSelect={(item) => {
-                    setSelectedVendorId(item.id);
-                    setShowVendorModal(false);
-                }}
-            />
-
-            <ListModal
-                visible={showSearchCond}
-                title="조회기준 선택"
-                data={searchCond}
-                onClose={() => setShowSearchCond(false)}
-                onSelect={(item) => {
-                    setSelectedSearchCond(item.id);
-                    setShowSearchCond(false);
-                }}
-            />
-
         </SafeAreaView>
     );
-}
+};
 
 const styles = StyleSheet.create({
     selectText: {fontSize: 14, color: '#333'},

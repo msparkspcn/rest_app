@@ -224,23 +224,22 @@ export default function RealtimeSalesScreen() {
                                     flexDirection: 'row',
                                     justifyContent: 'space-between',
                                     borderWidth: StyleSheet.hairlineWidth,
-                                    borderColor: '#eee',
+                                    // borderBottomWidth: StyleSheet.hairlineWidth,
+                                    borderColor: '#aaa',
                                     minHeight: 30,
                                     backgroundColor: '#fff7e6'
                             }}>
                                 {row.type === 'summaryPair' ? (
                                     <>
                                         <View
-                                            style={[{
+                                            style={{
                                                 flex: 1.5,
                                                 justifyContent: 'center',
                                                 alignItems: 'flex-start',
-                                                borderWidth: StyleSheet.hairlineWidth,
-                                                borderColor: '#eee',
-                                                paddingLeft: 5
-                                            },
-                                                commonStyles.cellDivider
-                                            ]}
+                                                paddingLeft: 10,
+                                                borderRightWidth: StyleSheet.hairlineWidth,
+                                                borderColor: '#aaa',
+                                            }}
                                         >
                                             <Text style={[styles.cell, styles.summaryLabelText]}>
                                                 {row.label}
@@ -250,6 +249,7 @@ export default function RealtimeSalesScreen() {
                                             style={{
                                                 flex: 3,
                                                 justifyContent: 'center',
+                                                paddingLeft: 10,
                                                 paddingRight: 10,
                                             }}
                                         >
@@ -260,37 +260,38 @@ export default function RealtimeSalesScreen() {
                                     </>
                                 ) : (
                                     <>
-                                        <View style={[{
+                                        <View style={{
                                             flex: 1.5,
                                             justifyContent: 'center',
                                             alignItems: 'flex-start',
-                                            borderWidth: StyleSheet.hairlineWidth,
-                                            borderColor: '#eee',
-                                            paddingLeft: 5
-                                        }, commonStyles.cellDivider]}>
+                                            borderRightWidth: StyleSheet.hairlineWidth,
+                                            borderColor: '#aaa',
+                                            paddingLeft: 10,
+                                            paddingRight: 5,
+                                        }}>
                                             <Text style={[styles.cell, styles.summaryLabelText]}>
                                                 {row.label}
                                             </Text>
                                         </View>
-                                        <View style={[{
+                                        <View style={{
                                             flex: 2,
-                                            paddingRight: 10,
                                             justifyContent: 'center',
-                                            alignItems: 'flex-end'
-                                        },commonStyles.cellDivider]}>
-                                            <Text style={[
-                                                styles.cell,
-                                                styles.rightSpanText,
-                                            ]}>
+                                            alignItems: 'flex-end',
+                                            paddingLeft: 10,
+                                            borderRightWidth: StyleSheet.hairlineWidth,
+                                            paddingRight: 10,
+                                            borderColor: '#aaa',
+                                        }}>
+                                            <Text style={[styles.cell, styles.rightSpanText]}>
                                                 {row.saleQty.toLocaleString()}
                                             </Text>
                                         </View>
-                                        <View style={[{
+                                        <View style={{
                                             flex: 1,
-                                            paddingRight: 10,
                                             justifyContent: 'center',
-                                            alignItems: 'flex-end'
-                                        }]}>
+                                            alignItems: 'flex-end',
+                                            paddingRight: 10
+                                        }}>
                                             <Text style={[
                                                 styles.cell,
                                                 styles.rightSpanText
@@ -298,7 +299,6 @@ export default function RealtimeSalesScreen() {
                                                 {row.totalAmt.toLocaleString()}
                                             </Text>
                                         </View>
-
                                     </>
                                 )}
                             </View>

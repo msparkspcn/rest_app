@@ -59,13 +59,13 @@ export default function VendorListScreen() {
   );
 
   const vendorColumns: ColumnDef<VendorDetailRow>[] = useMemo(() => ([
-    { key: 'no', title: Const.NO,     flex: 0.7, align: 'center',
+    { key: 'no', title: Const.NO,     flex: 0.5, align: 'center',
       renderCell: (_item, index) => (
           <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
       ),
     },
-    { key: 'itemCd', title: '상품코드',  flex: 1.4, align: 'left' },
-    { key: 'itemNm', title: '상품명',   flex: 2.2, align: 'left'   },
+    { key: 'itemCd', title: '상품코드',  flex: 1.5, align: 'left'},
+    { key: 'itemNm', title: '상품명',   flex: 2.2, align: 'left'},
   ]), []);
 
   const mainColumns: ColumnDef<VendorRow>[] = useMemo(() => ([
@@ -85,7 +85,7 @@ export default function VendorListScreen() {
 
   const VendorNmRow = () => {
     return (
-        <View style={{ borderBottomWidth: 1, borderBottomColor: '#ccc' }}>
+        <View style={{ borderWidth: StyleSheet.hairlineWidth, borderColor: '#aaa' }}>
           <Text style={styles.modalStoreName}>{selectedVendor?.vendor}</Text>
         </View>
     );
@@ -99,7 +99,7 @@ export default function VendorListScreen() {
         <View style={commonStyles.filterRowFront}>
           <Text style={commonStyles.filterLabel}>거래처</Text>
           <TextInput
-            style={styles.input}
+            style={commonStyles.input}
             placeholder="거래처 입력"
             placeholderTextColor="#999"
             value={vendorQuery}
@@ -140,7 +140,7 @@ export default function VendorListScreen() {
             <View style={commonStyles.modalHeader}>
               <Text style={commonStyles.modalTitle}>거래처 상세</Text>
               <Pressable onPress={closeDetail} hitSlop={8}>
-                <Ionicons name="close" size={20} color="#333" />
+                <Ionicons name="close" size={24} color="#333" />
               </Pressable>
             </View>
 
@@ -158,17 +158,6 @@ export default function VendorListScreen() {
 }
 
 const styles = StyleSheet.create({
-  input: {
-    flex: 1,
-    height: 40,
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    color: '#333',
-  },
-
   tableList: {
     flex: 1,
     backgroundColor: '#fff'

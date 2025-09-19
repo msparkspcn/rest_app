@@ -29,13 +29,14 @@ export const commonStyles = StyleSheet.create({
         color: '#555',
     },
     segmented: {
+        height: 35,
         flexDirection: 'row',
         backgroundColor: '#e8e8e8',
         borderRadius: 8,
-        padding: 4,
+        padding:4
     },
     segmentItem: {
-        paddingVertical: 8,
+        paddingVertical: 6,
         paddingHorizontal: 14,
         borderRadius: 6,
     },
@@ -51,10 +52,11 @@ export const commonStyles = StyleSheet.create({
         fontWeight: '600',
     },
     searchButton: {
+        minHeight: 35,
         marginLeft: 'auto',
         backgroundColor: '#007AFF',
         paddingHorizontal: 28,
-        paddingVertical: 10,
+        justifyContent: 'center',
         borderRadius: 8,
     },
     searchButtonText: {
@@ -99,7 +101,7 @@ export const commonStyles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: '#eee',
+        borderBottomColor: '#aaa',
         minHeight: 30,
     },
     columnContainer: {
@@ -108,7 +110,7 @@ export const commonStyles = StyleSheet.create({
         justifyContent: 'center',
         height: '100%',
         borderWidth: StyleSheet.hairlineWidth,
-        borderColor: '#eee'
+        borderColor: '#aaa'
     },
     cellDivider: {
         borderRightWidth: StyleSheet.hairlineWidth,
@@ -132,6 +134,10 @@ export const commonStyles = StyleSheet.create({
         fontSize: 12,
         color: '#444',
         width: '100%',
+    },
+    numberCell: {
+        paddingRight:10,
+        textAlign: 'right'
     },
     modalOverlay: {
         flex: 1,
@@ -185,21 +191,21 @@ export const commonStyles = StyleSheet.create({
         backgroundColor: '#f0f3f7',
         borderBottomWidth: StyleSheet.hairlineWidth,
         borderBottomColor: '#e0e0e0',
-        paddingVertical: 8,
-        paddingHorizontal: 10,
+        minHeight: 30
     },
     modalHeaderCell: {
-        fontSize: 13,
+        fontSize: 12,
         fontWeight: '700',
         color: '#333',
+        width: '100%',
+        textAlign: 'center',
     },
     modalTableRow: {
         flexDirection: 'row',
         alignItems: 'center',
         borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: '#eee',
-        paddingVertical: 8,
-        paddingHorizontal: 10,
+        borderBottomColor: '#aaa',
+        minHeight: 30,
     },
     modalCell: {
         fontSize: 12,
@@ -208,7 +214,7 @@ export const commonStyles = StyleSheet.create({
     modalTableContainer: {
         flex: 1,
         borderWidth: StyleSheet.hairlineWidth,
-        borderColor: '#e0e0e0',
+        borderColor: '#aaa',
         overflow: 'hidden',
         backgroundColor: '#fff'
     },
@@ -217,23 +223,25 @@ export const commonStyles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         height: '100%',
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: '#aaa'
     },
     modalHeaderCellDivider: {
         borderRightWidth: StyleSheet.hairlineWidth,
         borderRightColor: '#b0b0b0',
-        paddingRight: 10,
-        marginRight: 10,
     },
     modalColumnContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         height: '100%',
+        // borderWidth: StyleSheet.hairlineWidth,
+        // borderColor: '#aaa'
     },
 
     modalCellDivider: {
         borderRightWidth: StyleSheet.hairlineWidth,
-        borderRightColor: '#eee',
-        paddingRight: 10,
+        borderRightColor: '#aaa',
+        // paddingRight: 10,
     },
     sectionDivider: {
         height: 2,
@@ -303,7 +311,7 @@ export const commonStyles = StyleSheet.create({
     modalOkButtonText: {color: '#fff', fontWeight: '600', fontSize: 14},
     headerCellDivider: {
         borderRightWidth: StyleSheet.hairlineWidth,
-        borderRightColor: '#b0b0b0',
+        borderRightColor: '#b0b0b0'
     },
     linkText: {
         color: '#007AFF',
@@ -311,7 +319,6 @@ export const commonStyles = StyleSheet.create({
     },
     modalTableList: {
         flex: 1,
-        marginTop: 2,
         backgroundColor: '#fff'
     },
     modalTableListContent: {
@@ -323,12 +330,13 @@ export const commonStyles = StyleSheet.create({
         color: '#666',
     },
     selectInput: {
+        height: 35,
         backgroundColor: '#fff',
         borderWidth: 1,
         borderColor: '#ddd',
         borderRadius: 8,
         paddingHorizontal: 16,
-        paddingVertical: 10,
+        paddingVertical: 6,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -364,5 +372,15 @@ export const commonStyles = StyleSheet.create({
     checkmark: {
         color: '#fff',
         fontSize: 16,
+    },
+    input: {
+        flex: 1,
+        height: 35,
+        backgroundColor: '#fff',
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
+        paddingHorizontal: 12,
+        color: '#333',
     },
 })

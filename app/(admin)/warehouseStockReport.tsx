@@ -119,25 +119,25 @@ export default function WarehouseStockReportScreen() {
         {
             key: 'totalStockQty', title: Const.TOTAL_STOCK_QTY, flex: 1, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign: 'right'}]}>{item.totalStockQty.toLocaleString()}</Text>
+                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.totalStockQty.toLocaleString()}</Text>
             )
         },
         {
             key: 'giQty', title: Const.GI_QTY, flex: 1.5, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign: 'right'}]}>{item.giQty.toLocaleString()}</Text>
+                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.giQty.toLocaleString()}</Text>
             )
         },
         {
             key: 'saleQty', title: Const.SALE, flex: 1, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign: 'right'}]}>{item.saleQty.toLocaleString()}</Text>
+                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.saleQty.toLocaleString()}</Text>
             )
         },
         {
             key: 'curStockQty', title: Const.CUR_STOCK_QTY, flex: 1, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign: 'right'}]}>{item.curStockQty.toLocaleString()}</Text>
+                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.curStockQty.toLocaleString()}</Text>
             )
         },
     ]), []);
@@ -239,25 +239,27 @@ export default function WarehouseStockReportScreen() {
     const renderDetailFooter = () => (
         <View style={[commonStyles.modalTableRow, styles.modalTotalRow]}>
             <View style={{flex: 2}}>
-                <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.modalTotalText]}>합계</Text>
-            </View>
-            <View style={{flex: 1}}>
-                <Text style={[commonStyles.cell, commonStyles.alignRight, styles.modalTotalText]}>
-                    {detailTotalStockQty.toLocaleString()}
+                <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.modalTotalText]}>
+                    합계
                 </Text>
             </View>
             <View style={{flex: 1}}>
-                <Text style={[commonStyles.cell, commonStyles.alignRight, styles.modalTotalText]}>
+                <Text style={[commonStyles.cell, commonStyles.numberCell, styles.modalTotalText]}>
+                    {detailTotalStockQty.toLocaleString()}
+                </Text>
+            </View>
+            <View style={{flex: 1.5}}>
+                <Text style={[commonStyles.cell, commonStyles.numberCell, styles.modalTotalText]}>
                     {detailTotalGiQty.toLocaleString()}
                 </Text>
             </View>
             <View style={{flex: 1}}>
-                <Text style={[commonStyles.cell, commonStyles.alignRight, styles.modalTotalText]}>
+                <Text style={[commonStyles.cell, commonStyles.numberCell, styles.modalTotalText]}>
                     {detailTotalSaleQty.toLocaleString()}
                 </Text>
             </View>
             <View style={{flex: 1}}>
-                <Text style={[commonStyles.cell, commonStyles.alignRight, styles.modalTotalText]}>
+                <Text style={[commonStyles.cell, commonStyles.numberCell, styles.modalTotalText]}>
                     {detailTotalCurStockQty.toLocaleString()}
                 </Text>
             </View>
@@ -292,7 +294,7 @@ export default function WarehouseStockReportScreen() {
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>{Const.ITEM_NM}</Text>
                     <TextInput
-                        style={styles.input}
+                        style={commonStyles.input}
                         placeholderTextColor="#999"
                         value={vendorQuery}
                         onChangeText={setVendorQuery}

@@ -178,7 +178,7 @@ export default function CornerStockReportScreen() {
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>{Const.ITEM_NM}</Text>
                     <TextInput
-                        style={styles.input}
+                        style={commonStyles.input}
                         placeholderTextColor="#999"
                         value={vendorQuery}
                         onChangeText={setVendorQuery}

@@ -165,7 +165,7 @@ export default function SalesReportByTimezoneScreen() {
                     </TouchableOpacity>
                 </View>
                 <View style={commonStyles.filterRow}>
-                    <Text style={commonStyles.filterLabel}>매장그룹</Text>
+                    <Text style={commonStyles.filterLabel}>{Const.STORE_GROUP}</Text>
                     <View style={commonStyles.segmented}>
                         {storeGroups.map((option) => (
                             <Pressable
@@ -195,24 +195,36 @@ export default function SalesReportByTimezoneScreen() {
                         {summaryRows.map(row => (
                             <View key={row.key} style={{
                                 flexDirection: 'row',
-                                paddingTop:2,
-                                paddingBottom: 4,
+                                borderWidth: StyleSheet.hairlineWidth,
+                                borderColor: '#aaa',
+                                minHeight: 30,
                                 backgroundColor: '#fff7e6',
                                 alignItems:'center'
                             }}>
-                                <Text style={[
-                                    styles.summaryLabelText,
-                                    { flex: 0.8,},
-                                    commonStyles.cellDivider,
-                                ]}>
-                                    {row.label}
-                                </Text>
-                                <View style={[
-                                    { flex: 1},
-                                    commonStyles.cellDivider,
-                                ]}>
-                                    <Text style={[
-                                        styles.cell,
+                                <View
+                                    style={{
+                                        flex: 0.8,
+                                        justifyContent: ' center',
+                                        alignItems: 'center',
+                                        borderRightWidth: StyleSheet.hairlineWidth,
+                                        borderColor: '#aaa',
+                                        paddingVertical: 5,
+                                    }}>
+                                    <Text style={styles.summaryLabelText}>{row.label}</Text>
+                                </View>
+
+                                <View
+                                    style={{
+                                        flex: 1,
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        borderRightWidth: StyleSheet.hairlineWidth,
+                                        borderColor: '#aaa',
+                                        paddingVertical: 10,
+                                        // backgroundColor:'red'
+                                    }}
+                                >
+                                    <Text style={[styles.cell,
                                         {
                                             paddingRight: 10,
                                             textAlign: 'right'

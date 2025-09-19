@@ -30,7 +30,6 @@ export default function SettingsScreen() {
           text: '로그아웃',
           style: 'destructive',
           onPress: () => {
-            // 여기에 로그아웃 로직을 구현하세요
             console.log('로그아웃');
             router.replace('/(auth)/login');
           },
@@ -139,7 +138,7 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
-      
+
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <Text style={styles.title}>설정</Text>
@@ -149,14 +148,14 @@ export default function SettingsScreen() {
         {settingsSections.map((section, sectionIndex) => (
           <View key={sectionIndex} style={styles.section}>
             <Text style={styles.sectionTitle}>{section.title}</Text>
-            
+
             {section.items.map((item, itemIndex) => (
               <View key={itemIndex} style={styles.settingItem}>
                 <View style={styles.settingContent}>
                   <Text style={styles.settingTitle}>{item.title}</Text>
                   <Text style={styles.settingSubtitle}>{item.subtitle}</Text>
                 </View>
-                
+
                 {item.type === 'switch' && (
                   <Switch
                     value={item.value}
@@ -165,13 +164,13 @@ export default function SettingsScreen() {
                     thumbColor={item.value ? '#fff' : '#fff'}
                   />
                 )}
-                
+
                 {item.type === 'action' && (
                   <TouchableOpacity onPress={item.onPress}>
                     <Text style={styles.actionText}>›</Text>
                   </TouchableOpacity>
                 )}
-                
+
                 {item.type === 'info' && (
                   <Text style={styles.infoText}>{item.subtitle}</Text>
                 )}
@@ -182,11 +181,11 @@ export default function SettingsScreen() {
 
         <View style={styles.dangerSection}>
           <Text style={styles.sectionTitle}>위험한 작업</Text>
-          
+
           <TouchableOpacity style={styles.dangerButton} onPress={handleLogout}>
             <Text style={styles.dangerButtonText}>로그아웃</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteAccount}>
             <Text style={styles.deleteButtonText}>계정 삭제</Text>
           </TouchableOpacity>

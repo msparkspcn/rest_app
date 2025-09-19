@@ -109,28 +109,19 @@ export default function RealtimeSalesByCornerScreen() {
         {
             key: 'dayCompRatio', title: Const.COMP_RATIO, flex: 1, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {
-                    textAlign: 'right',
-                    paddingRight: 10
-                }]}>{item.dayCompRatio.toLocaleString()}</Text>
+                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.dayCompRatio.toLocaleString()}</Text>
             )
         },
         {
             key: 'monthSaleAmt', title: Const.MONTH_TOTAL_AMT, flex: 1, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {
-                    textAlign: 'right',
-                    paddingRight: 10
-                }]}>{item.monthSaleAmt.toLocaleString()}</Text>
+                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.monthSaleAmt.toLocaleString()}</Text>
             )
         },
         {
             key: 'monthCompRatio', title: Const.COMP_RATIO, flex: 1, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {
-                    textAlign: 'right',
-                    paddingRight: 10
-                }]}>{item.monthCompRatio.toLocaleString()}</Text>
+                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.monthCompRatio.toLocaleString()}</Text>
             )
         },
     ]), [])
@@ -146,16 +137,10 @@ export default function RealtimeSalesByCornerScreen() {
                     {fontSize: 13, fontWeight: 'bold'}]}>합계</Text>
             </View>
             <View style={{flex: 2}}>
-                <Text style={[commonStyles.cell, styles.totalText, {
-                    textAlign: 'right',
-                    paddingRight: 10
-                }]}>{totalSaleAmt.toLocaleString()}</Text>
+                <Text style={[commonStyles.cell, styles.totalText, commonStyles.numberCell]}>{totalSaleAmt.toLocaleString()}</Text>
             </View>
             <View style={{flex: 2}}>
-                <Text style={[commonStyles.cell, styles.totalText, {
-                    textAlign: 'right',
-                    paddingRight: 10
-                }]}>{totalMonthSaleAmt.toLocaleString()}</Text>
+                <Text style={[commonStyles.cell, styles.totalText, commonStyles.numberCell]}>{totalMonthSaleAmt.toLocaleString()}</Text>
             </View>
         </View>
     );
@@ -192,19 +177,19 @@ export default function RealtimeSalesByCornerScreen() {
         {
             key: 'qty', title: Const.QTY, flex: 1, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign: 'right'}]}>{item.qty.toLocaleString()}</Text>
+                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.qty.toLocaleString()}</Text>
             )
         },
         {
             key: 'totalAmt', title: '금액', flex: 1.5, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign: 'right'}]}>{item.totalAmt.toLocaleString()}</Text>
+                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.totalAmt.toLocaleString()}</Text>
             )
         },
         {
             key: 'compRatio', title: Const.COMP_RATIO, flex: 1, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign: 'right'}]}>{item.totalAmt.toLocaleString()}</Text>
+                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.totalAmt.toLocaleString()}</Text>
             )
         },
     ]), []);
@@ -218,17 +203,17 @@ export default function RealtimeSalesByCornerScreen() {
                     </Text>
                 </View>
                 <View style={{flex: 1}}>
-                    <Text style={[commonStyles.modalCell, {textAlign: 'right', paddingRight: 5}]}>
+                    <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
                         {summaryRow.totalQty.toLocaleString()}
                     </Text>
                 </View>
                 <View style={{flex: 1.5}}>
-                    <Text style={[commonStyles.modalCell, {textAlign: 'right', paddingRight: 2}]}>
+                    <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
                         {summaryRow.totalSaleAmt.toLocaleString()}
                     </Text>
                 </View>
                 <View style={{flex: 1}}>
-                    <Text style={[commonStyles.modalCell, {textAlign: 'right'}]}>
+                    <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
                         {summaryRow.totalCompRatio.toLocaleString()}
                     </Text>
                 </View>

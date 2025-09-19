@@ -15,13 +15,16 @@ import { useUser } from '../../contexts/UserContext';
 import TeamsOfService from "./teamsOfService";
 import {commonStyles} from "../../styles/index";
 
-type MenuChild = { title: string; icon: string; route: Href; roleType: string };
+type MenuChild = { title: string; icon: string; route: Href; userRoleType: string };
 type MenuGroup = { key: string; title: string; icon: string; children: MenuChild[] };
 // DEP_OP: 운영업체, DEP_R: 휴게소, DEP_G: 주유소
 export default function AdminHomeScreen() {
   const { user } = useUser();
   const [isTOSOpen, setIsTOSOpen] = useState(false);
   console.log('user:'+JSON.stringify(user))
+  if(user==null) {
+
+  }
 
   const menuGroups = useMemo((): MenuGroup[] => [
     {
@@ -29,11 +32,11 @@ export default function AdminHomeScreen() {
       title: '마스터',
       icon: '📁',
       children: [
-        { title: '사용자 정보수정', icon: '👤', route: '/(admin)/users', roleType: 'all_except_001' },
-        { title: '매장현황(휴)', icon: '🏬', route: '/(admin)/dashboard', roleType: DEP_R },
-        { title: '거래처현황(휴)', icon: '🏬', route: '/(admin)/vendorList', roleType: DEP_R },
-        { title: '거래처현황(주)', icon: '🏬', route: '/(admin)/vendorList', roleType: DEP_G },
-        { title: '키오스크품절관리(휴)', icon: '🛑', route: '/(admin)/kioskSoldOut', roleType: DEP_R },
+        { title: '사용자 정보수정', icon: '👤', route: '/(admin)/users', userRoleType: 'all_except_001' },
+        { title: '매장현황(휴)', icon: '🏬', route: '/(admin)/dashboard', userRoleType: DEP_R },
+        { title: '거래처현황(휴)', icon: '🏬', route: '/(admin)/vendorList', userRoleType: DEP_R },
+        { title: '거래처현황(주)', icon: '🏬', route: '/(admin)/vendorList', userRoleType: DEP_G },
+        { title: '키오스크품절관리(휴)', icon: '🛑', route: '/(admin)/kioskSoldOut', userRoleType: DEP_R },
       ],
     },
     {
@@ -41,10 +44,10 @@ export default function AdminHomeScreen() {
       title: '매입',
       icon: '🧾',
       children: [
-        { title: '일자별 매입현황(휴)', icon: '📝', route: '/(admin)/purchaseDailyReport', roleType: DEP_R },
-        { title: '일자별 매입현황(통합)', icon: '📝', route: '/(admin)/purchaseDailyReport', roleType: DEP_OP },
-        { title: '일자별 매입현황(주)', icon: '📝', route: '/(admin)/purchaseDailyReportG', roleType: DEP_G },
-        { title: '상품별 매입현황(휴)',  icon: '📄', route: '/(admin)/purchaseProductReport' as Href, roleType: DEP_R },
+        { title: '일자별 매입현황(휴)', icon: '📝', route: '/(admin)/purchaseDailyReport', userRoleType: DEP_R },
+        { title: '일자별 매입현황(통합)', icon: '📝', route: '/(admin)/purchaseDailyReport', userRoleType: DEP_OP },
+        { title: '일자별 매입현황(주)', icon: '📝', route: '/(admin)/purchaseDailyReportG', userRoleType: DEP_G },
+        { title: '상품별 매입현황(휴)',  icon: '📄', route: '/(admin)/purchaseProductReport' as Href, userRoleType: DEP_R },
       ],
     },
     {
@@ -52,23 +55,23 @@ export default function AdminHomeScreen() {
       title: '매출',
       icon: '💸',
       children: [
-        { title: '실시간 매장매출현황(휴)', icon: '⚡️', route: '/(admin)/realtimeSales' as Href, roleType: DEP_OP },
-        { title: '실시간 매출현황(휴)', icon: '⚡️', route: '/(admin)/realtimeSales' as Href, roleType: DEP_R },
-        { title: '실시간 매출현황(주)', icon: '⚡️', route: '/(admin)/realtimeSales' as Href, roleType: DEP_OP },
-        { title: '실시간 매출현황(주)', icon: '⚡️', route: '/(admin)/realtimeSalesG' as Href, roleType: DEP_G },
-        { title: '실시간 매출현황(통합)', icon: '⚡️', route: '/(admin)/realtimeSales' as Href, roleType: DEP_OP },
-        { title: '시간대별 매출현황(휴)', icon: '⏱️', route: '/(admin)/saleReportByTimezone', roleType: DEP_R },
-        { title: '시간대별 매출현황(주)', icon: '⏱️', route: '/(admin)/saleReportByTimezoneG', roleType: DEP_G},
-        { title: '기간별 매출현황(휴)', icon: '🗓️', route: '/(admin)/salesReportByPeriod', roleType: DEP_R },
-        { title: '기간별 매출현황(주)', icon: '🗓️', route: '/(admin)/dashboard', roleType: DEP_G },
-        { title: '기간별 매출현황(통합)', icon: '🗓️', route: '/(admin)/dashboard', roleType: DEP_OP },
-        { title: '시간대별 매출현황(통합)', icon: '🗓️', route: '/(admin)/dashboard', roleType: DEP_OP },
-        { title: '기간별모바일주문현황(휴)', icon: '🗓️', route: '/(admin)/dashboard', roleType: DEP_OP },
-        { title: '실시간 매출현황(통합비율)', icon: '🗓️', route: '/(admin)/dashboard', roleType: DEP_OP },
-        { title: '월 매출현황(휴)', icon: '📅', route: '/(admin)/monthlySalesReport', roleType: DEP_R },
-        { title: '시설별 실시간 매출(통합)', icon: '🏗️', route: '/(admin)/dashboard', roleType: DEP_G },
-        { title: '시설별 실시간 매출(통합)', icon: '🏗️', route: '/(admin)/realtimeSalesBySalesOrg', roleType: DEP_R },
-        { title: '실시간 매장매출현황(휴)', icon: '🏪', route: '/(admin)/realtimeSalesByCorner', roleType: DEP_R },
+        { title: '실시간 매장매출현황(휴)', icon: '⚡️', route: '/(admin)/realtimeSales' as Href, userRoleType: DEP_OP },
+        { title: '실시간 매출현황(휴)', icon: '⚡️', route: '/(admin)/realtimeSales' as Href, userRoleType: DEP_R },
+        { title: '실시간 매출현황(주)', icon: '⚡️', route: '/(admin)/realtimeSales' as Href, userRoleType: DEP_OP },
+        { title: '실시간 매출현황(주)', icon: '⚡️', route: '/(admin)/realtimeSalesG' as Href, userRoleType: DEP_G },
+        { title: '실시간 매출현황(통합)', icon: '⚡️', route: '/(admin)/realtimeSales' as Href, userRoleType: DEP_OP },
+        { title: '시간대별 매출현황(휴)', icon: '⏱️', route: '/(admin)/saleReportByTimezone', userRoleType: DEP_R },
+        { title: '시간대별 매출현황(주)', icon: '⏱️', route: '/(admin)/saleReportByTimezoneG', userRoleType: DEP_G},
+        { title: '기간별 매출현황(휴)', icon: '🗓️', route: '/(admin)/salesReportByPeriod', userRoleType: DEP_R },
+        { title: '기간별 매출현황(주)', icon: '🗓️', route: '/(admin)/salesReportByPeriodG', userRoleType: DEP_G },
+        { title: '기간별 매출현황(통합)', icon: '🗓️', route: '/(admin)/dashboard', userRoleType: DEP_OP },
+        { title: '시간대별 매출현황(통합)', icon: '🗓️', route: '/(admin)/dashboard', userRoleType: DEP_OP },
+        { title: '기간별모바일주문현황(휴)', icon: '🗓️', route: '/(admin)/dashboard', userRoleType: DEP_OP },
+        { title: '실시간 매출현황(통합비율)', icon: '🗓️', route: '/(admin)/dashboard', userRoleType: DEP_OP },
+        { title: '월 매출현황(휴)', icon: '📅', route: '/(admin)/monthlySalesReport', userRoleType: DEP_R },
+        { title: '시설별 실시간 매출(통합)', icon: '🏗️', route: '/(admin)/realtimeSalesBySalesOrgG', userRoleType: DEP_G },
+        { title: '시설별 실시간 매출(통합)', icon: '🏗️', route: '/(admin)/realtimeSalesBySalesOrg', userRoleType: DEP_R },
+        { title: '실시간 매장매출현황(휴)', icon: '🏪', route: '/(admin)/realtimeSalesByCorner', userRoleType: DEP_R },
       ],
     },
     {
@@ -76,12 +79,12 @@ export default function AdminHomeScreen() {
       title: '재고',
       icon: '📦',
       children: [
-        { title: '재고현황(통합)', icon: '📝', route: '/(admin)/dashboard', roleType: DEP_OP },
-        { title: '재고현황(주)', icon: '📝', route: '/(admin)/dashboard', roleType: DEP_G },
-        { title: '실시간 재고현황(주)', icon: '📝', route: '/(admin)/dashboard', roleType: DEP_G },
-        { title: '매장 재고현황(휴)', icon: '📝', route: '/(admin)/cornerStockReport', roleType: DEP_R },
-        { title: '창고 재고현황(휴)',  icon: '📊', route: '/(admin)/warehouseStockReport', roleType: DEP_R },
-        { title: '매장 창고 재고현황(휴)',  icon: '📊', route: '/(admin)/cornerWhStockReport', roleType: DEP_R },
+        { title: '재고현황(통합)', icon: '📝', route: '/(admin)/dashboard', userRoleType: DEP_OP },
+        { title: '재고현황(주)', icon: '📝', route: '/(admin)/cornerStockReportG', userRoleType: DEP_G },
+        { title: '실시간 재고현황(주)', icon: '📝', route: '/(admin)/dashboard', userRoleType: DEP_G },
+        { title: '매장 재고현황(휴)', icon: '📝', route: '/(admin)/cornerStockReport', userRoleType: DEP_R },
+        { title: '창고 재고현황(휴)',  icon: '📊', route: '/(admin)/warehouseStockReport', userRoleType: DEP_R },
+        { title: '매장 창고 재고현황(휴)',  icon: '📊', route: '/(admin)/cornerWhStockReport', userRoleType: DEP_R },
       ],
     },
     {
@@ -89,27 +92,27 @@ export default function AdminHomeScreen() {
       title: 'TLG',
       icon: '📦',
       children: [
-        { title: 'TLG현황(통합)', icon: '📝', route: '/(admin)/dashboard', roleType: DEP_OP },
-        { title: 'TLG현황(통합)', icon: '📝', route: '/(admin)/dashboard', roleType: DEP_G },
+        { title: 'TLG현황(통합)', icon: '📝', route: '/(admin)/dashboard', userRoleType: DEP_OP },
+        { title: 'TLG현황(통합)', icon: '📝', route: '/(admin)/dashboard', userRoleType: DEP_G },
       ],
     },
     ], []);
 
   const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
 
-  // 사용자의 roleType에 따라 메뉴를 필터링
+  // 사용자의 userRoleType에 따라 메뉴를 필터링
   const filteredMenuGroups = useMemo(() => {
     if (!user) return [];
 
     return menuGroups.map(group => ({
       ...group,
       children: group.children.filter(item => {
-        // roleType이 비어있으면 모든 사용자에게 표시
-        if (item.roleType === '') return true;
+        // userRoleType이 비어있으면 모든 사용자에게 표시
+        if (item.userRoleType === '') return true;
         // all_except_001인 경우 001이 아닌 모든 사용자에게 표시
-        if (item.roleType === 'all_except_001') return user.roleType !== DEP_OP;
-        // 사용자의 roleType과 일치하는 메뉴만 표시
-        return item.roleType === user.roleType;
+        if (item.userRoleType === 'all_except_001') return user.userRoleType !== DEP_OP;
+        // 사용자의 userRoleType과 일치하는 메뉴만 표시
+        return item.userRoleType === user.userRoleType;
       })
     })).filter(group => group.children.length > 0); // 자식 메뉴가 없는 그룹은 제거
   }, [user, menuGroups]);
@@ -122,9 +125,14 @@ export default function AdminHomeScreen() {
 
   const handleLogout = () => {
     // 여기에 로그아웃 로직을 구현하세요
-    console.log('로그아웃');
-    logout();
-    router.replace('/(auth)/login');
+    console.log('로그아웃3');
+    try {
+      router.replace('/(auth)/login');
+      logout();
+    } catch (err) {
+      console.error('로그아웃 에러:',err)
+    }
+
   };
 
   const handleMenuPress = (route: Href) => {
@@ -137,7 +145,7 @@ export default function AdminHomeScreen() {
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <Text style={styles.welcomeText}>관리자님, 환영합니다!</Text>
+          <Text style={styles.welcomeText}>{user?.userNm ?? '관리자'}}님, 환영합니다!</Text>
           <Text style={styles.subtitle}>관리자 패널에 오신 것을 환영합니다</Text>
         </View>
 

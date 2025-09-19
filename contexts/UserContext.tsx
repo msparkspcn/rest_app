@@ -1,9 +1,9 @@
 import React, { createContext, ReactNode, useContext, useState } from 'react';
 
 interface User {
-  id: string;
-  name: string;
-  roleType: string; // '001': 운영업체, '002': 휴게소, '004': 주유소
+  userId: string;
+  userNm: string;
+  userRoleType: string; // '001': 운영업체, '002': 휴게소, '004': 주유소
 }
 
 interface UserContextType {

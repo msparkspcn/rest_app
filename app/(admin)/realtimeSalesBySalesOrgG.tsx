@@ -36,32 +36,22 @@ type CornerRow = {
     useYn: 'Y' | 'N';
 };
 
-type PosGroup = { id: string; name: string };
-
 export default function RealtimeSalesBySalesOrgScreen() {
     const [saleDate, setSaleDate] = useState(getTodayYmd());
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempDate, setTempDate] = useState<Date | null>(null);
 
-    const posGroups: PosGroup[] = useMemo(
-        () => Array.from({length: 6}).map((_, i) => ({id: `G${i + 1}`, name: `그룹 ${i + 1}`})),
-        []
-    );
-    const [selectedPosGroupId, setSelectedPosGroupId] = useState<string | null>(posGroups[0]?.id ?? null);
-    const [showPosGroupModal, setShowPosGroupModal] = useState(false);
-    const [isDetailVisible, setIsDetailVisible] = useState(false);
     const [detailChecked, setDetailChecked] = useState(false);
-    const [selectedCorner, setSelectedCorner] = useState<CornerRow | null>(null);
     const baseData: SaleRow[] = useMemo(
         () =>
-            Array.from({length: 10}).map((_, idx) => {
+            Array.from({length: 2}).map((_, idx) => {
                 const todaySaleAmt = 10000 + (idx % 5) * 3000;
                 const yedaySaleAmt = 20000 + (idx % 7) * 2500;
                 const monthSaleAmt = 1000 * (idx % 4);
                 const yearSaleAmt = 1000 * (idx % 4);
                 return {
                     no: idx + 1,
-                    cornerNm: `그룹 ${((idx % 6) + 1)}`,
+                    cornerNm: idx % 2 === 0 ? '주유소' : '충전소',
                     todaySaleAmt,
                     yedaySaleAmt,
                     monthSaleAmt,
@@ -99,15 +89,6 @@ export default function RealtimeSalesBySalesOrgScreen() {
     const openDatePicker = () => {
         setTempDate(new Date());
         setShowDatePicker(true);
-    };
-
-    const openDetail = (store: CornerRow) => {
-        setSelectedCorner(store);
-        setIsDetailVisible(true);
-    }
-
-    const closeDetail = () => {
-        setIsDetailVisible(false);
     };
 
 
@@ -159,14 +140,12 @@ export default function RealtimeSalesBySalesOrgScreen() {
                     flex: 1.5,
                     align: 'center',
                     renderCell: (item) => (
-                        <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
-                            <Text style={[commonStyles.cell, commonStyles.linkText, {
-                                textAlign: 'left',
-                                paddingLeft: 10
-                            }]}>
-                                {item.cornerNm}
-                            </Text>
-                        </Pressable>
+                        <Text style={[commonStyles.cell, {
+                            textAlign: 'left',
+                            paddingLeft: 10
+                        }]}>
+                            {item.cornerNm}
+                        </Text>
                     )
                 },
                 ...commonCols
@@ -194,39 +173,6 @@ export default function RealtimeSalesBySalesOrgScreen() {
         []
     );
 
-    const SaleDetailColumns: ColumnDef<SaleDetailRow>[] = useMemo(() => ([
-        {key: 'itemNm', title: '상품명', flex: 1, align: 'center'},
-        {
-            key: 'qty', title: Const.QTY, flex: 0.6, align: 'center',
-            renderCell: (item) => (
-                <Text style={[styles.cell, commonStyles.numberCell]}>{item.qty.toLocaleString()}</Text>
-            )
-        },
-        {
-            key: 'price', title: '금액', flex: 0.6, align: 'right',
-            renderCell: (item) => (
-                <Text style={[styles.cell, commonStyles.numberCell]}>{item.totalAmt.toLocaleString()}</Text>
-            )
-        },
-        {
-            key: 'monthQty', title: '월누계수량', flex: 0.9, align: 'right',
-            renderCell: (item) => (
-                <Text style={[styles.cell, commonStyles.numberCell]}>{item.monthQty.toLocaleString()}</Text>
-            )
-        },
-        {
-            key: 'monthAmt', title: '월누계금액', flex: 1.5, align: 'right',
-            renderCell: (item) => (
-                <Text style={[styles.cell, commonStyles.numberCell]}>{item.monthAmt.toLocaleString()}</Text>
-            )
-        },
-        {
-            key: 'yearAmt', title: '년누계금액', flex: 1.5, align: 'right',
-            renderCell: (item) => (
-                <Text style={[styles.cell, commonStyles.numberCell]}>{item.yearAmt.toLocaleString()}</Text>
-            )
-        },
-    ]), []);
     const summaryRow = useMemo(() => {
         const totalSaleAmt = detailData.reduce((sum, item) => sum + item.totalAmt, 0);
         const totalQty = detailData.reduce((sum, item) => sum + item.qty, 0);
@@ -244,69 +190,12 @@ export default function RealtimeSalesBySalesOrgScreen() {
         };
     }, [detailData]);
 
-    const CornerNmRow = () => {
-        return (
-            <View style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                borderBottomWidth: 1,
-                borderBottomColor: '#ccc'
-            }}>
-                <Text style={styles.subTitle}>{selectedCorner?.cornerNm}</Text>
-                <Text style={styles.subTitle}>(단위:천원)</Text>
-            </View>
-        );
-    };
-    const renderDetailFooterRow = () => {
-        return (
-            <View style={[commonStyles.modalTableRow, styles.summaryRow]}>
-                <View style={{flex: 1}}>
-                    <Text style={[commonStyles.modalCell, {textAlign: 'center', fontSize: 13, fontWeight: 'bold'}]}>
-                        합계
-                    </Text>
-                </View>
-                <View style={{flex: 0.6}}>
-                    <Text style={[commonStyles.modalCell, {textAlign: 'right', paddingRight: 5}]}>
-                        {summaryRow.totalQty.toLocaleString()}
-                    </Text>
-                </View>
-                <View style={{flex: 0.6}}>
-                    <Text style={[commonStyles.modalCell, {textAlign: 'right', paddingRight: 2}]}>
-                        {summaryRow.totalAmt.toLocaleString()}
-                    </Text>
-                </View>
-                <View style={{flex: 0.9}}>
-                    <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
-                        {summaryRow.totalMonthQty.toLocaleString()}
-                    </Text>
-                </View>
-                <View style={{flex: 1.5}}>
-                    <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
-                        {summaryRow.totalMonthAmt.toLocaleString()}
-                    </Text>
-                </View>
-                <View style={{flex: 1.5}}>
-                    <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
-                        {summaryRow.totalYearAmt.toLocaleString()}
-                    </Text>
-                </View>
-            </View>
-        )
-    }
 
     return (
         <SafeAreaView style={commonStyles.container}>
             <StatusBar style="dark"/>
 
             <View style={commonStyles.topBar}>
-                <View style={commonStyles.filterRowFront}>
-                    <Text style={commonStyles.filterLabel}>사업장</Text>
-                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowPosGroupModal(true)}>
-                        <Text
-                            style={styles.selectText}>{posGroups.find(g => g.id === selectedPosGroupId)?.name || '선택'}</Text>
-                        <Text style={commonStyles.selectArrow}> ▼</Text>
-                    </TouchableOpacity>
-                </View>
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>조회일자</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={openDatePicker}>
@@ -340,19 +229,58 @@ export default function RealtimeSalesBySalesOrgScreen() {
                     detailChecked
                         ? () => (
                             <View style={[commonStyles.tableRow, styles.summaryRow]}>
-                                <Text style={[commonStyles.cell, styles.summaryLabelText, {
+                                <View style={{
                                     flex: 1.5,
-                                    textAlign: 'center'
-                                }]}>합계</Text>
-                                <Text style={[commonStyles.cell, {flex: 1, textAlign: 'right', paddingRight: 5}]}>
-                                    {aggregateSales(baseData).yedaySaleAmt.toLocaleString()}
-                                </Text>
-                                <Text style={[commonStyles.cell, {flex: 1, textAlign: 'right', paddingRight: 5}]}>
-                                    {aggregateSales(baseData).todaySaleAmt.toLocaleString()}
-                                </Text>
-                                <Text style={[commonStyles.cell, {flex: 1, textAlign: 'right', paddingRight: 5}]}>
-                                    {aggregateSales(baseData).monthSaleAmt.toLocaleString()}
-                                </Text>
+                                    paddingHorizontal: 7.5,
+                                    justifyContent: 'center',
+                                    borderRightWidth: StyleSheet.hairlineWidth,
+                                    borderRightColor: '#aaa',
+                                    height: '100%',
+                                }}>
+                                    <Text style={[commonStyles.cell, styles.summaryLabelText,
+                                        {textAlign:'center'}]}>합계</Text>
+                                </View>
+                                <View style={{
+                                    flex: 1,
+                                    paddingRight: 11,
+                                    justifyContent: 'center',
+                                    borderRightWidth: StyleSheet.hairlineWidth,
+                                    borderRightColor: '#aaa',
+                                    height: '100%',
+                                }}>
+                                    <Text style={[commonStyles.cell,
+                                        {textAlign: 'right',}]}
+                                    >
+                                        {aggregateSales(baseData).yedaySaleAmt.toLocaleString()}
+                                    </Text>
+                                </View>
+
+                                <View style={{
+                                    flex: 1,
+                                    justifyContent: 'center',
+                                    borderRightWidth: StyleSheet.hairlineWidth,
+                                    borderRightColor: '#aaa',
+                                    paddingRight: 10,
+                                    height: '100%',
+                                }}>
+                                    <Text style={[commonStyles.cell, {textAlign: 'right'}]}>
+                                        {aggregateSales(baseData).todaySaleAmt.toLocaleString()}
+                                    </Text>
+                                </View>
+
+                                <View style={{
+                                    flex: 1,
+                                    justifyContent: 'center',
+                                    paddingRight: 10,
+                                    borderRightWidth: StyleSheet.hairlineWidth,
+                                    borderRightColor: '#aaa',
+                                    height: '100%',
+                                }}>
+                                    <Text style={[commonStyles.cell, {textAlign: 'right'}]}>
+                                        {aggregateSales(baseData).monthSaleAmt.toLocaleString()}
+                                    </Text>
+                                </View>
+
                                 <Text style={[commonStyles.cell, {flex: 1, textAlign: 'right', paddingRight: 10}]}>
                                     {aggregateSales(baseData).yearSaleAmt.toLocaleString()}
                                 </Text>
@@ -368,56 +296,6 @@ export default function RealtimeSalesBySalesOrgScreen() {
                 onClose={() => setShowDatePicker(false)}
                 onConfirm={(date) => setSaleDate(dateToYmd(date))}
             />
-
-            <Modal visible={showPosGroupModal} transparent animationType="slide"
-                   onRequestClose={() => setShowPosGroupModal(false)}>
-                <View style={commonStyles.modalOverlay}>
-                    <View style={commonStyles.modalContent}>
-                        <View style={commonStyles.listModalHeader}>
-                            <Text style={commonStyles.modalTitle}>사업장 선택</Text>
-                            <TouchableOpacity onPress={() => setShowPosGroupModal(false)}>
-                                <Text style={commonStyles.modalClose}>✕</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <FlatList
-                            data={posGroups}
-                            keyExtractor={(item) => item.id}
-                            renderItem={({item}) => (
-                                <TouchableOpacity
-                                    style={commonStyles.modalItem}
-                                    onPress={() => {
-                                        setSelectedPosGroupId(item.id);
-                                        setShowPosGroupModal(false);
-                                    }}
-                                >
-                                    <Text style={commonStyles.modalItemText}>{item.name}</Text>
-                                </TouchableOpacity>
-                            )}
-                        />
-                    </View>
-                </View>
-            </Modal>
-
-            <Modal visible={isDetailVisible} animationType="fade" transparent>
-                <View style={commonStyles.modalOverlay}>
-                    <View style={commonStyles.modalCard}>
-                        <View style={commonStyles.modalHeader}>
-                            <Text style={commonStyles.modalTitle}>상품매출현황</Text>
-                            <Pressable onPress={closeDetail} hitSlop={8}>
-                                <Ionicons name="close" size={24} color="#333"/>
-                            </Pressable>
-
-                        </View>
-                        <CornerNmRow/>
-                        <Table
-                            data={detailData}
-                            columns={SaleDetailColumns}
-                            isModal={true}
-                            listFooter={() => renderDetailFooterRow()}
-                        />
-                    </View>
-                </View>
-            </Modal>
         </SafeAreaView>
     );
 }
@@ -427,6 +305,8 @@ const styles = StyleSheet.create({
         fontSize: 14, color: '#333'
     },
     summaryRow: {
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: '#aaa',
         backgroundColor: '#fff7e6'
     },
     summaryLabelText: {

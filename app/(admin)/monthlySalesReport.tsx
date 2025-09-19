@@ -138,7 +138,7 @@ export default function MonthlySalesReport() {
             key: 'monthSaleAmt', title: '매출금액', flex: 2, align: 'left',
             renderCell: (item) => (
                 <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item, 'monthly')}>
-                    <Text style={[commonStyles.cell, commonStyles.linkText, {textAlign: 'right', paddingRight: 10}]}>
+                    <Text style={[commonStyles.cell, commonStyles.linkText, commonStyles.numberCell]}>
                         {item.monthSaleAmt.toLocaleString()}
                     </Text>
                 </Pressable>
@@ -147,19 +147,15 @@ export default function MonthlySalesReport() {
         {
             key: 'monthVatAmt', title: '부가세', flex: 1.5, align: 'left',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {
-                    textAlign: 'right',
-                    paddingRight: 10
-                }]}>{item.monthVatAmt.toLocaleString()}</Text>
+                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.monthVatAmt.toLocaleString()}</Text>
             ),
         },
         {
             key: 'monthSaleAmt', title: '순매출', flex: 2, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {
-                    textAlign: 'right',
-                    paddingRight: 10
-                }]}>{item.monthSaleAmt.toLocaleString()}</Text>
+                <Text style={[commonStyles.cell, commonStyles.numberCell]}>
+                    {item.monthSaleAmt.toLocaleString()}
+                </Text>
             )
         },
     ]), []);
@@ -203,7 +199,7 @@ export default function MonthlySalesReport() {
         {
             key: 'saleAmt', title: '매출금액', flex: 2, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign: 'right'}]}>
+                <Text style={[commonStyles.cell, commonStyles.numberCell]}>
                     {item.saleAmt.toLocaleString()}
                 </Text>
             )
@@ -211,7 +207,7 @@ export default function MonthlySalesReport() {
         {
             key: 'vatAmt', title: '부가세', flex: 1.5, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign: 'right'}]}>
+                <Text style={[commonStyles.cell, commonStyles.numberCell]}>
                     {item.vatAmt.toLocaleString()}
                 </Text>
             )
@@ -219,7 +215,7 @@ export default function MonthlySalesReport() {
         {
             key: 'netSaleAmt', title: '순매출', flex: 2, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign: 'right'}]}>
+                <Text style={[commonStyles.cell, commonStyles.numberCell]}>
                     {item.netSaleAmt.toLocaleString()}
                 </Text>
             )
@@ -240,24 +236,24 @@ export default function MonthlySalesReport() {
     const MonthlyDetailColumns: ColumnDef<MonthlyDetailRow>[] = useMemo(() => [
         {key: 'saleMonth', title: '매출년월', flex: 2, align: 'center'},
         {
-            key: 'qty', title: '수량', flex: 1, align: 'right',
+            key: 'qty', title: Const.QTY, flex: 1, align: 'right',
             renderCell: (item) => <Text
-                style={[commonStyles.cell, {textAlign: 'right'}]}>{item.qty.toLocaleString()}</Text>
+                style={[commonStyles.cell, commonStyles.numberCell]}>{item.qty.toLocaleString()}</Text>
         },
         {
             key: 'totalAmt', title: '총매출', flex: 2, align: 'right',
             renderCell: (item) => <Text
-                style={[commonStyles.cell, {textAlign: 'right'}]}>{item.totalAmt.toLocaleString()}</Text>
+                style={[commonStyles.cell, commonStyles.numberCell]}>{item.totalAmt.toLocaleString()}</Text>
         },
         {
             key: 'vatAmt', title: '부가세', flex: 1.5, align: 'right',
             renderCell: (item) => <Text
-                style={[commonStyles.cell, {textAlign: 'right'}]}>{item.vatAmt.toLocaleString()}</Text>
+                style={[commonStyles.cell, commonStyles.numberCell]}>{item.vatAmt.toLocaleString()}</Text>
         },
         {
             key: 'netSaleAmt', title: '순매출', flex: 2, align: 'right',
             renderCell: (item) => <Text
-                style={[commonStyles.cell, {textAlign: 'right'}]}>{item.netSaleAmt.toLocaleString()}</Text>
+                style={[commonStyles.cell, commonStyles.numberCell]}>{item.netSaleAmt.toLocaleString()}</Text>
         }
     ], []);
 
@@ -275,17 +271,17 @@ export default function MonthlySalesReport() {
                         </Text>
                     </View>
                     <View style={{flex: 2}}>
-                        <Text style={[commonStyles.modalCell, {textAlign: 'right', paddingRight: 5}]}>
+                        <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
                             {summaryRow.totalSaleAmt.toLocaleString()}
                         </Text>
                     </View>
                     <View style={{flex: 1.5}}>
-                        <Text style={[commonStyles.modalCell, {textAlign: 'right', paddingRight: 2}]}>
+                        <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
                             {summaryRow.totalVatAmt.toLocaleString()}
                         </Text>
                     </View>
                     <View style={{flex: 2}}>
-                        <Text style={[commonStyles.modalCell, {textAlign: 'right'}]}>
+                        <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
                             {summaryRow.totalNetSaleAmt.toLocaleString()}
                         </Text>
                     </View>
@@ -300,22 +296,22 @@ export default function MonthlySalesReport() {
                         </Text>
                     </View>
                     <View style={{flex: 1}}>
-                        <Text style={[commonStyles.modalCell, {textAlign: 'right', paddingRight: 5}]}>
+                        <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
                             {monthlySummaryRow.totalQty.toLocaleString()}
                         </Text>
                     </View>
                     <View style={{flex: 2}}>
-                        <Text style={[commonStyles.modalCell, {textAlign: 'right', paddingRight: 5}]}>
+                        <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
                             {monthlySummaryRow.totalAmt.toLocaleString()}
                         </Text>
                     </View>
                     <View style={{flex: 1.5}}>
-                        <Text style={[commonStyles.modalCell, {textAlign: 'right', paddingRight: 2}]}>
+                        <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
                             {monthlySummaryRow.totalVatAmt.toLocaleString()}
                         </Text>
                     </View>
                     <View style={{flex: 2}}>
-                        <Text style={[commonStyles.modalCell, {textAlign: 'right'}]}>
+                        <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
                             {monthlySummaryRow.totalNetSaleAmt.toLocaleString()}
                         </Text>
                     </View>
@@ -431,7 +427,7 @@ export default function MonthlySalesReport() {
                         <View style={commonStyles.modalHeader}>
                             <Text style={commonStyles.modalTitle}>{selectedSale?.cornerNm}</Text>
                             <Pressable onPress={closeDetail} hitSlop={8}>
-                                <Ionicons name="close" size={20} color="#333"/>
+                                <Ionicons name="close" size={24} color="#333"/>
                             </Pressable>
                         </View>
 

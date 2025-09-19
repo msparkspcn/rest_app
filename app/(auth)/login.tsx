@@ -13,7 +13,13 @@ import {
 } from 'react-native';
 import { DEP_G, DEP_OP, DEP_R } from '../../constants/RoleTypes';
 import { useUser } from '../../contexts/UserContext';
-
+import * as api from "../../services/api/api"
+import Const from "../../constants/Const";
+interface User {
+  userId: string;
+  userNm: string;
+  userRoleType: string; // '001': 운영업체, '002': 휴게소, '004': 주유소
+}
 export default function LoginScreen() {
   const { login } = useUser();
   const [id, setId] = useState('');
@@ -23,11 +29,11 @@ export default function LoginScreen() {
 
   const handleLogin = () => {
     if (!id) {
-      Alert.alert('오류', '아이디를 입력해주세요.');
+      Alert.alert(Const.ERROR, '아이디를 입력해주세요.');
       return;
     }
     if (!password) {
-      Alert.alert('오류', '비밀번호가 일치하지 않습니다.');
+      Alert.alert(Const.ERROR, '비밀번호가 일치하지 않습니다.');
       return;
     }
 
@@ -42,16 +48,44 @@ export default function LoginScreen() {
 
     // 임시로 사용자 정보 설정 (실제로는 서버에서 받아와야 함)
     // roleType은 실제 로그인 시 서버에서 받아와야 합니다
-    const userData = {
-      id: id,
-      name: '관리자',
-      roleType: selectedRoleType
-    };
 
-    login(userData);
+    api.login(id, password)
+        .then(response => {
+          if(response.data.responseBody!=null) {
+            // console.log("response:"+JSON.stringify(response.data.responseBody));
+            if(response.data.responseCode=="200") {
+              console.log("getStoreInfo success data:"+JSON.stringify(response.data));
+              login(response.data.responseBody)
+              router.replace('/(admin)');
+            }
+            else {
+              console.log(Const.ERROR, response.data.responseMessage);
+              if(response.data.responseMessage) {
+                Alert.alert(Const.ERROR, response.data.responseMessage);
+              }
+              else {
+                Alert.alert(Const.ERROR, '비밀번호를 확인해주세요');
+              }
+
+            }
+          }
+          else {
+            console.log("failed :"+JSON.stringify(response.data));
+            Alert.alert(Const.ERROR, response.data.responseMessage);
+          }
+        })
+        .catch(error => console.log("error:"+error))
+
+    // const userData = {
+    //   userId: id,
+    //   userNm: '관리자',
+    //   userRoleType: selectedRoleType
+    // };
+    //
+    // login(userData);
 
     // 로그인 성공 시 홈화면으로 이동
-    router.replace('/(admin)');
+    // router.replace('/(admin)');
   };
 
   const handleRegister = () => {

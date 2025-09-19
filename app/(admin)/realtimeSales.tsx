@@ -189,21 +189,21 @@ export default function RealtimeSalesScreen() {
         },
         {key: 'itemNm', title: '상품명', flex: 2, align: 'center'},
         {
-            key: 'qty', title: '수량', flex: 0.5, align: 'center',
+            key: 'qty', title: Const.QTY, flex: 0.5, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign: 'right'}]}>{item.qty.toLocaleString()}</Text>
+                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.qty.toLocaleString()}</Text>
             )
         },
         {
-            key: 'price', title: '단가', flex: 1, align: 'right',
+            key: 'price', title: Const.PRICE, flex: 1, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign: 'right'}]}>{item.price.toLocaleString()}</Text>
+                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.price.toLocaleString()}</Text>
             )
         },
         {
             key: 'totalAmt', title: '금액', flex: 1.5, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign: 'right'}]}>{item.totalAmt.toLocaleString()}</Text>
+                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.totalAmt.toLocaleString()}</Text>
             )
         },
     ]), []);
