@@ -198,9 +198,14 @@ export default function RealtimeSalesByCornerScreen() {
         return (
             <View style={[commonStyles.modalTableRow, styles.summaryRow]}>
                 <View style={{flex: 2.5}}>
-                    <Text style={[commonStyles.modalCell, {textAlign: 'center', fontSize: 13, fontWeight: 'bold'}]}>
-                        합계
-                    </Text>
+                    <Text
+                        style={[commonStyles.modalCell,
+                            {
+                                textAlign: 'center',
+                                fontSize: 13,
+                                fontWeight: 'bold'
+                            }
+                        ]}>합계</Text>
                 </View>
                 <View style={{flex: 1}}>
                     <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
@@ -319,19 +324,7 @@ export default function RealtimeSalesByCornerScreen() {
 
 const styles = StyleSheet.create({
     selectText: {fontSize: 14, color: '#333'},
-    tableList: {flex: 1},
-    tableListContent: {paddingBottom: 12},
-    tableRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: '#eee',
-        paddingVertical: 12
-    },
     summaryRow: {backgroundColor: '#fff7e6'},
-    summaryLabelText: {fontWeight: '700', color: '#333'},
-    cell: {fontSize: 13, color: '#444'},
-    rightSpanText: {textAlign: 'right'},
     totalRow: {backgroundColor: '#fafafa'},
     totalText: {fontWeight: '700', color: '#222'},
 

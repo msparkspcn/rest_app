@@ -242,31 +242,6 @@ export default function CornerWhStockReportScreen() {
 
 const styles = StyleSheet.create({
     selectText: {fontSize: 14, color: '#333'},
-    tableList: {flex: 1},
-    tableListContent: {paddingBottom: 12},
-    tableRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: '#eee',
-        paddingVertical: 12
-    },
-    summaryRow: {backgroundColor: '#fff7e6'},
-    summaryLabelText: {fontWeight: '700', color: '#333'},
-    cell: {fontSize: 13, color: '#444'},
-    rightSpanText: {textAlign: 'right'},
-    totalRow: {backgroundColor: '#fafafa'},
-    totalText: {fontWeight: '700', color: '#222'},
-    input: {
-        flex: 1,
-        backgroundColor: '#fff',
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-        color: '#333',
-    },
 });
 
 

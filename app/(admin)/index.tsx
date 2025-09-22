@@ -81,7 +81,7 @@ export default function AdminHomeScreen() {
       children: [
         { title: '재고현황(통합)', icon: '📝', route: '/(admin)/dashboard', userRoleType: DEP_OP },
         { title: '재고현황(주)', icon: '📝', route: '/(admin)/cornerStockReportG', userRoleType: DEP_G },
-        { title: '실시간 재고현황(주)', icon: '📝', route: '/(admin)/dashboard', userRoleType: DEP_G },
+        { title: '실시간 재고현황(주)', icon: '📝', route: '/(admin)/realtimeStockReport', userRoleType: DEP_G },
         { title: '매장 재고현황(휴)', icon: '📝', route: '/(admin)/cornerStockReport', userRoleType: DEP_R },
         { title: '창고 재고현황(휴)',  icon: '📊', route: '/(admin)/warehouseStockReport', userRoleType: DEP_R },
         { title: '매장 창고 재고현황(휴)',  icon: '📊', route: '/(admin)/cornerWhStockReport', userRoleType: DEP_R },
@@ -93,7 +93,7 @@ export default function AdminHomeScreen() {
       icon: '📦',
       children: [
         { title: 'TLG현황(통합)', icon: '📝', route: '/(admin)/dashboard', userRoleType: DEP_OP },
-        { title: 'TLG현황(통합)', icon: '📝', route: '/(admin)/dashboard', userRoleType: DEP_G },
+        { title: 'TLG현황(통합)', icon: '📝', route: '/(admin)/tlgReportByPeriod', userRoleType: DEP_G },
       ],
     },
     ], []);

@@ -194,15 +194,6 @@ export default function SalesReportByTimezoneScreen() {
 
 const styles = StyleSheet.create({
   selectText: { fontSize: 14, color: '#333' },
-  tableList: { flex: 1 },
-  tableListContent: {paddingBottom: 12},
-  tableRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: '#eee',
-      paddingVertical: 12
-  },
   summaryRow: { backgroundColor: '#fff7e6' },
   summaryLabelText: { fontWeight: '600',  fontSize:12, color: '#333' },
   cell: { fontSize: 13, color: '#444' },

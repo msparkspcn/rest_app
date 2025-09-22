@@ -27,5 +27,10 @@ export default {
     SHOW_EXIST_STOCK_LIST: "재고존재 내역만 출력",
     DATE: "일자",
     ERROR: '오류',
-    PRICE: '단가'
+    PRICE: '단가',
+    GAUGE: '게이지',
+    GAS_TYPE: '유종',
+    TANK_NO: '탱크\n번호',
+    GAS_AMT: '유량(재고)',
+    TYPE: '구분'
 }

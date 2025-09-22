@@ -209,38 +209,57 @@ export default function SalesReportByPeriod() {
 
     const renderSummaryRow = () => {
         return (
-            <View style={[commonStyles.modalTableRow, styles.summaryRow]}>
+            <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
                 <View
-                    style={{
+                    style={[{
                         flex: 0.7 + 2.2,
-                        paddingLeft: 10,
-                        borderRightWidth: StyleSheet.hairlineWidth,
-                        borderColor: '#aaa',
-                    }}
+                        justifyContent:'center',
+                        borderRightWidth:StyleSheet.hairlineWidth,
+                        borderRightColor: '#aaa',
+                        height:'100%'
+                    }]}
                 >
                     <Text
                         style={[commonStyles.modalCell, commonStyles.alignCenter,
-                            {fontSize: 13, fontWeight: 'bold'}
+                            {fontSize: 13, fontWeight: 'bold',
+                                paddingLeft: 10,
+                            }
                         ]}>합계</Text>
                 </View>
                 <View
                     style={[
-                        { flex: 1,paddingRight: 10, },
+                        { flex: 1.2,
+                            justifyContent:'center',
+                            borderRightWidth:StyleSheet.hairlineWidth,
+                            borderRightColor: '#aaa',
+                            height:'100%'
+                            // backgroundColor:'red'
+                        },
                         // commonStyles.modalColumnContainer,
                         // commonStyles.modalCellDivider,
+                        commonStyles.summaryCell,
                     ]}
                 >
-                    <Text style={[commonStyles.modalCell, alignStyles['left']]}>
+                    <Text style={[
+                        commonStyles.modalCell,
+                        commonStyles.numberCell,{
+
+                    }]}>
                         {summaryRow.totalQty.toLocaleString()}
                     </Text>
                 </View>
                 <View
                     style={[
-                        { flex: 1.5 + 2.2},
-                        alignStyles['right']
+                        { flex: 1.5 + 2,
+                            justifyContent:'center',
+                            borderRightWidth:StyleSheet.hairlineWidth,
+                            borderRightColor: '#aaa',
+                            height:'100%'},
+                        commonStyles.summaryCell,
+
                     ]}
                 >
-                    <Text style={[commonStyles.modalCell, alignStyles['right']]}>
+                    <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
                         {summaryRow.totalAmt.toLocaleString()}
                     </Text>
                 </View>
@@ -334,6 +353,7 @@ const styles = StyleSheet.create({
         color: '#333',
     },
     summaryRow: {
+        height: 30,
         backgroundColor: '#fff7e6'
     },
 });

@@ -63,13 +63,25 @@ export default function PurchaseDailyReportScreen() {
 
     const renderFooter = () => (
         <View style={[commonStyles.tableRow, styles.totalRow]}>
-            <View style={[{flex: 2.2}, commonStyles.cellDivider,]}>
-                <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.totalText,
-                    {fontSize: 13, fontWeight: 'bold'}]}>합계</Text>
+            <View style={{flex: 2.2,
+                justifyContent: 'center',
+                borderRightWidth: StyleSheet.hairlineWidth,
+                borderRightColor: '#aaa',
+                height: '100%',
+            }}>
+                <Text style={[commonStyles.cell, styles.summaryLabelText,
+                    {textAlign:'center'}]}>합계</Text>
             </View>
-            <View style={{flex:3}}>
+            <View style={{flex:3,  justifyContent: 'center', height: '100%'}}>
                 <Text
-                    style={[commonStyles.cell, styles.totalText, {textAlign: 'right', paddingRight: 10}]}>{totalAmount.toLocaleString()}</Text>
+                    style={[
+                        commonStyles.cell,
+                        commonStyles.numberCell,
+                        styles.totalText,
+                    ]}
+                >
+                    {totalAmount.toLocaleString()}
+                </Text>
             </View>
         </View>
     );
@@ -113,17 +125,29 @@ export default function PurchaseDailyReportScreen() {
     ]), []);
 
     const renderDetailFooter = () => (
-        <View style={[commonStyles.modalTableRow, styles.modalTotalRow]}>
-            <View style={{flex: 2.8}}>
-                <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.modalTotalText]}>합계</Text>
+        <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+            <View style={{flex: 3,
+                justifyContent: 'center',
+                borderRightWidth: StyleSheet.hairlineWidth,
+                borderRightColor:'#aaa',
+                height:'100%'
+            }}>
+                <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.modalTotalText]}>
+                    합계
+                </Text>
             </View>
-            <View style={{flex: 2.6}}>
-                <Text style={[commonStyles.cell, commonStyles.alignRight, styles.modalTotalText]}>
+            <View style={{flex: 3,
+                justifyContent:'center',
+                borderRightWidth:StyleSheet.hairlineWidth,
+                borderRightColor: '#aaa',
+                height:'100%'
+            }}>
+                <Text style={[commonStyles.cell, commonStyles.numberCell, styles.modalTotalText]}>
                     {detailTotalQty.toLocaleString()}
                 </Text>
             </View>
-            <View style={{flex: 2.2}}>
-                <Text style={[commonStyles.cell, commonStyles.alignRight, styles.modalTotalText]}>
+            <View style={{flex: 2}}>
+                <Text style={[commonStyles.cell, , commonStyles.numberCell, styles.modalTotalText]}>
                     {detailTotalAmount.toLocaleString()}
                 </Text>
             </View>
@@ -214,15 +238,16 @@ export default function PurchaseDailyReportScreen() {
                 }}
             />
 
-            <Modal visible={isDetailVisible} transparent animationType="fade"
-                   onRequestClose={() => setIsDetailVisible(false)}>
+            <Modal visible={isDetailVisible}
+                   transparent animationType="fade"
+                   onRequestClose={() => setIsDetailVisible(false)}
+            >
                 <View style={commonStyles.modalOverlay}>
                     <View style={commonStyles.modalCard}>
                         <View style={commonStyles.modalHeader}>
                             {selectedVendorName && (
                                 <Text style={commonStyles.modalTitle}>{selectedVendorName}</Text>
                             )}
-
                             <TouchableOpacity onPress={() => setIsDetailVisible(false)}>
                                 <Text style={commonStyles.modalClose}>✕</Text>
                             </TouchableOpacity>
@@ -247,34 +272,34 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#555',
     },
-    input: {
-        flex: 1,
-        height: 40,
-        backgroundColor: '#fff',
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        color: '#333',
-    },
     selectText: {
         fontSize: 14,
         color: '#333',
     },
 
     totalRow: {
+        height: 30,
+        alignItems: 'center',
         backgroundColor: '#fafafa',
     },
     totalText: {
         fontWeight: '700',
         color: '#222',
     },
-    modalTotalRow: {
-        backgroundColor: '#fafafa',
-    },
+
     modalTotalText: {
         fontWeight: '700',
         color: '#222',
+    },
+    summaryLabelText: {
+        fontWeight: '700',
+        color: '#333'
+    },
+    summaryCell: {
+        justifyContent:'center',
+        borderRightWidth:StyleSheet.hairlineWidth,
+        borderRightColor: '#aaa',
+        height:'100%'
     }
 });
 

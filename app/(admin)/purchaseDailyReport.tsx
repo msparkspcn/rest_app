@@ -237,26 +237,10 @@ export default function PurchaseDailyReportScreen() {
 };
 
 const styles = StyleSheet.create({
-    filterLabel: {
-        minWidth: 50,
-        fontSize: 14,
-        color: '#555',
-    },
-    input: {
-        flex: 1,
-        height: 40,
-        backgroundColor: '#fff',
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        color: '#333',
-    },
     selectText: {
         fontSize: 14,
         color: '#333',
     },
-
     totalRow: {
         backgroundColor: '#fafafa',
     },

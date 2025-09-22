@@ -1,7 +1,6 @@
 import {StatusBar} from 'expo-status-bar';
 import React, {useMemo, useState} from 'react';
 import {
-    FlatList,
     Modal,
     Pressable,
     SafeAreaView,
@@ -17,23 +16,27 @@ import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
 import Const from "../../constants/Const";
-import ListModal from "../../components/ListModal";
 
 type StockRow = {
     itemNm: string;
     giQty: number;
     goQty: number;
-    // cornerNm: string;
     totalStockQty: number;
     curStockQty: number;
 };
 
-type Vendor = { id: string; name: string };
-type SearchCond = { id: string; name: string };
+type StockDetailRow = {
+    cornerNm: string;
+    stockDt: string;
+    totalStockQty: number;
+    giQty: number;
+    saleQty: number;
+    curStockQty: number;
+}
+
 type Corner = { id: string; name: string};
 
 export default function CornerStockReportScreen() {
-    const [saleDate, setSaleDate] = useState(getTodayYmd());
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempDate, setTempDate] = useState<Date | null>(null);
     const [fromSaleDt, setFromSaleDt] = useState(getTodayYmd());
@@ -43,9 +46,9 @@ export default function CornerStockReportScreen() {
         () => Array.from({length: 6}).map((_, i) => ({id: `G${i + 1}`, name: `매장 ${i + 1}`})),
         []
     );
-    const [vendorQuery, setVendorQuery] = useState('');
-    const [selectedStock, setSelectedStock] = useState<string | null>(corners[0]?.id ?? null);
+    const [itemNm, setItemNm] = useState('');
     const [isDetailVisible, setIsDetailVisible] = useState(false);
+    const [selectedItem, setSelectedItem] = useState<StockRow | null>(null);
 
     const baseData: StockRow[] = useMemo(
         () =>
@@ -80,7 +83,7 @@ export default function CornerStockReportScreen() {
     };
 
     const openDetail = (stock: StockRow) => {
-        setSelectedStock(stock);
+        setSelectedItem(stock)
         setIsDetailVisible(true);
     };
 
@@ -139,6 +142,118 @@ export default function CornerStockReportScreen() {
         },
     ]), [])
 
+    const detailData: StockDetailRow[] = useMemo(
+        () =>
+            Array.from({length: 10}).map((_, idx) => {
+                const qty = (idx % 4) + 1;
+                return {
+                    cornerNm: '파스쿠찌',
+                    stockDt: `2025/09/0${idx + 1}`,
+                    totalStockQty: qty,
+                    giQty: qty,
+                    saleQty: qty,
+                    curStockQty: qty
+                };
+            }),
+        []
+    );
+
+    const StockDetailColumns: ColumnDef<StockDetailRow>[] = useMemo(() => ([
+        {key: 'stockDt', title: Const.DATE, flex: 2, align: 'center',
+            renderCell: (item) => (
+                <Text style={[commonStyles.cell, {textAlign: 'center'}]}>{item.stockDt}</Text>
+            )
+        },
+        {
+            key: 'totalStockQty', title: Const.TOTAL_STOCK_QTY, flex: 1, align: 'center',
+            renderCell: (item) => (
+                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.totalStockQty.toLocaleString()}</Text>
+            )
+        },
+        {
+            key: 'giQty', title: Const.GI_QTY, flex: 1.5, align: 'right',
+            renderCell: (item) => (
+                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.giQty.toLocaleString()}</Text>
+            )
+        },
+        {
+            key: 'saleQty', title: Const.SALE, flex: 1, align: 'right',
+            renderCell: (item) => (
+                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.saleQty.toLocaleString()}</Text>
+            )
+        },
+        {
+            key: 'curStockQty', title: Const.CUR_STOCK_QTY, flex: 1, align: 'right',
+            renderCell: (item) => (
+                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.curStockQty.toLocaleString()}</Text>
+            )
+        },
+    ]), []);
+
+    const detailTotalStockQty = useMemo(() => {
+        return detailData.reduce((acc, row) => acc + row.totalStockQty, 0);
+    }, [detailData]);
+    const detailTotalGiQty = useMemo(() => {
+        return detailData.reduce((acc, row) => acc + row.giQty, 0);
+    }, [detailData]);
+    const detailTotalSaleQty = useMemo(() => {
+        return detailData.reduce((acc, row) => acc + row.saleQty, 0);
+    }, [detailData]);
+    const detailTotalCurStockQty = useMemo(() => {
+        return detailData.reduce((acc, row) => acc + row.curStockQty, 0);
+    }, [detailData]);
+
+    const renderDetailFooter = () => (
+        <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+            <View style={{flex: 2,
+                justifyContent: 'center',
+                borderRightWidth: StyleSheet.hairlineWidth,
+                borderRightColor:'#aaa',
+                height:'100%'
+            }}>
+                <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.modalTotalText]}>
+                    합계
+                </Text>
+            </View>
+            <View style={{flex: 1,
+                justifyContent: 'center',
+                borderRightWidth: StyleSheet.hairlineWidth,
+                borderRightColor:'#aaa',
+                height:'100%'}}>
+                <Text style={[commonStyles.cell, commonStyles.numberCell, styles.modalTotalText]}>
+                    {detailTotalStockQty.toLocaleString()}
+                </Text>
+            </View>
+            <View style={{flex: 1.5,
+                justifyContent: 'center',
+                borderRightWidth: StyleSheet.hairlineWidth,
+                borderRightColor:'#aaa',
+                height:'100%'}}>
+                <Text style={[commonStyles.cell, commonStyles.numberCell, styles.modalTotalText]}>
+                    {detailTotalGiQty.toLocaleString()}
+                </Text>
+            </View>
+            <View style={{flex: 1,
+                justifyContent: 'center',
+                borderRightWidth: StyleSheet.hairlineWidth,
+                borderRightColor:'#aaa',
+                height:'100%'}}>
+                <Text style={[commonStyles.cell, commonStyles.numberCell, styles.modalTotalText]}>
+                    {detailTotalSaleQty.toLocaleString()}
+                </Text>
+            </View>
+            <View style={{flex: 1,
+                justifyContent: 'center',
+                borderRightWidth: StyleSheet.hairlineWidth,
+                borderRightColor:'#aaa',
+                height:'100%'}}>
+                <Text style={[commonStyles.cell, commonStyles.numberCell, styles.modalTotalText]}>
+                    {detailTotalCurStockQty.toLocaleString()}
+                </Text>
+            </View>
+        </View>
+    );
+
     return (
         <SafeAreaView style={commonStyles.container}>
             <StatusBar style="dark"/>
@@ -161,8 +276,8 @@ export default function CornerStockReportScreen() {
                     <TextInput
                         style={commonStyles.input}
                         placeholderTextColor="#999"
-                        value={vendorQuery}
-                        onChangeText={setVendorQuery}
+                        value={itemNm}
+                        onChangeText={setItemNm}
                         returnKeyType="search"
                         onSubmitEditing={onSearch}
                     />
@@ -188,36 +303,40 @@ export default function CornerStockReportScreen() {
                     else setToSaleDt(dateToYmd(date));
                 }}
             />
+
+            <Modal
+                visible={isDetailVisible}
+                transparent animationType="fade"
+                onRequestClose={() => setIsDetailVisible(false)}
+            >
+                <View style={commonStyles.modalOverlay}
+                      pointerEvents="box-none">
+                    <View style={commonStyles.modalCard}>
+                        <View style={commonStyles.modalHeader}>
+                            <Text style={commonStyles.modalTitle}>{selectedItem?.itemNm}</Text>
+                            <TouchableOpacity onPress={() => setIsDetailVisible(false)}>
+                                <Text style={commonStyles.modalClose}>✕</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <Table
+                            data={detailData}
+                            columns={StockDetailColumns}
+                            isModal={true}
+                            listFooter={renderDetailFooter}
+                        />
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
     selectText: {fontSize: 14, color: '#333'},
-    tableList: {flex: 1},
-    tableListContent: {paddingBottom: 12},
-    tableRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: '#eee',
-        paddingVertical: 12
-    },
-    summaryRow: {backgroundColor: '#fff7e6'},
-    summaryLabelText: {fontWeight: '700', color: '#333'},
-    cell: {fontSize: 13, color: '#444'},
-    rightSpanText: {textAlign: 'right'},
-    totalRow: {backgroundColor: '#fafafa'},
-    totalText: {fontWeight: '700', color: '#222'},
-    input: {
-        flex: 1,
-        backgroundColor: '#fff',
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-        color: '#333',
+    modalTotalText: {
+        fontWeight: '700',
+        color: '#222',
     },
 });
 

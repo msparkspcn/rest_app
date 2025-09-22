@@ -99,12 +99,20 @@ export default function AdminLayout() {
                     options={{title: '재고현황(주)', headerShown: true}}
                 />
                 <Stack.Screen
+                    name="realtimeStockReport"
+                    options={{title: '실시간 재고현황(주)', headerShown: true}}
+                />
+                <Stack.Screen
                     name="warehouseStockReport"
                     options={{title: '창고 재고현황(휴)', headerShown: true}}
                 />
                 <Stack.Screen
                     name="cornerWhStockReport"
                     options={{title: '매장 창고 재고현황(휴)', headerShown: true}}
+                />
+                <Stack.Screen
+                    name="tlgReportByPeriod"
+                    options={{title: '기간별 TLG 현황', headerShown: true}}
                 />
             </Stack>
             {!hideFooter && (

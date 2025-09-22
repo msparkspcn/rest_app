@@ -195,21 +195,6 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 12,
   },
-  headerCellDivider: {
-    borderRightWidth: StyleSheet.hairlineWidth,
-    borderRightColor: '#b0b0b0',
-    paddingRight: 10,
-    marginRight: 10,
-  },
-
-  tableList: {
-    flex: 1,
-    backgroundColor: '#fff'
-  },
-  tableListContent: {
-    backgroundColor: '#fff'
-    // paddingBottom: 12,
-  },
   storeNamePressable: {
     flex: 2,
   },
@@ -218,21 +203,5 @@ const styles = StyleSheet.create({
     color: '#555',
     paddingHorizontal: 10,
     paddingVertical: 8,
-  },
-
-  modalHeaderCellDivider: {
-    borderRightWidth: StyleSheet.hairlineWidth,
-    borderRightColor: '#b0b0b0',
-    paddingRight: 10,
-    marginRight: 10,
-  },
-  modalTableList: {
-    flex: 1,
-    marginTop: 2,
-    backgroundColor: '#fff'
-  },
-  modalTableListContent: {
-    paddingBottom: 8,
-    backgroundColor: '#fff'
   },
 });

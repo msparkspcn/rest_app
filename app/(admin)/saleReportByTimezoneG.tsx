@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useMemo, useState } from 'react';
-import { FlatList, Modal, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { DatePickerModal } from "../../components/DatePickerModal";
 import { Table } from "../../components/Table";
 import Const from "../../constants/Const";
@@ -32,7 +32,6 @@ export default function SalesReportByTimezoneScreen() {
         []
     );
     const [selectedStoreGroupId, setSelectedStoreGroupId] = useState<string | null>(storeGroups[0]?.id ?? null);
-    const [showStoreGroupModal, setShowStoreGroupModal] = useState(false);
     const [registerFilter, setRegisterFilter] = useState<StoreGroup>(storeGroups[0]);
     const baseData: SaleRow[] = useMemo(
         () =>
@@ -254,34 +253,6 @@ export default function SalesReportByTimezoneScreen() {
                 onClose={() => setShowDatePicker(false)}
                 onConfirm={(date) => setSaleDate(dateToYmd(date))}
             />
-            <Modal visible={showStoreGroupModal} transparent animationType="slide"
-                   onRequestClose={() => setShowStoreGroupModal(false)}>
-                <View style={commonStyles.modalOverlay}>
-                    <View style={commonStyles.modalContent}>
-                        <View style={commonStyles.modalHeader}>
-                            <Text style={commonStyles.modalTitle}>포스그룹 선택</Text>
-                            <TouchableOpacity onPress={() => setShowStoreGroupModal(false)}>
-                                <Text style={commonStyles.modalClose}>✕</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <FlatList
-                            data={storeGroups}
-                            keyExtractor={(item) => item.id}
-                            renderItem={({item}) => (
-                                <TouchableOpacity
-                                    style={commonStyles.modalItem}
-                                    onPress={() => {
-                                        setSelectedStoreGroupId(item.id);
-                                        setShowStoreGroupModal(false);
-                                    }}
-                                >
-                                    <Text style={commonStyles.modalItemText}>{item.name}</Text>
-                                </TouchableOpacity>
-                            )}
-                        />
-                    </View>
-                </View>
-            </Modal>
         </SafeAreaView>
     );
 }

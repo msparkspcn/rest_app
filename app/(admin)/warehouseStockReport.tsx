@@ -400,7 +400,6 @@ export default function WarehouseStockReportScreen() {
 const styles = StyleSheet.create({
     selectText: {fontSize: 14, color: '#333'},
     tableList: {flex: 1},
-    cell: {fontSize: 13, color: '#444'},
     input: {
         flex: 1,
         backgroundColor: '#fff',

@@ -51,7 +51,7 @@ export default function VendorListScreen() {
   type VendorDetailRow = { itemCd: string; itemNm: string };
   const detailData: VendorDetailRow[] = useMemo(
     () =>
-      Array.from({ length: 120 }).map((_, index) => ({
+      Array.from({ length: 30 }).map((_, index) => ({
         itemCd: `C${1000 + index}`,
         itemNm: `명칭 ${index + 1}`,
       })),
