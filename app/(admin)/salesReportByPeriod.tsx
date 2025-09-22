@@ -111,7 +111,10 @@ export default function SalesReportByPeriod() {
     const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => ([
         { key: 'saleDtInfo',       title: '일자(요일)',     flex: 1, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign:'center', paddingRight:10}]}>{ymdToDateWithDay(item.saleDt)}</Text>
+                <Text style={[commonStyles.cell,
+                    {textAlign:'center', paddingRight:10}]}>
+                    {ymdToDateWithDay(item.saleDt)}
+                </Text>
             )},
         { key: 'cornerNm',     title: '매장명',   flex: 2,   align: 'left',
             renderCell: (item) => (

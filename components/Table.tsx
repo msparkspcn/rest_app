@@ -1,6 +1,7 @@
 import React from 'react';
 import { FlatList, View, Text, Pressable, StyleSheet } from 'react-native';
 import { commonStyles } from '@/styles';
+import Const from "../constants/Const";
 
 type Align = 'left' | 'center' | 'right';
 type ColumnDef<T> = {
@@ -18,8 +19,9 @@ type TableProps<T> = {
     columns: ColumnDef<T>[];
     onRowPress?: (item: T) => void;
     isModal?: boolean; // 모달 내부에 사용되는지 여부
-    listHeader?: React.ReactNode
-    listFooter?: React.ReactNode
+    listHeader?: React.ReactNode;
+    listFooter?: React.ReactNode;
+    hasSearched?: boolean;
 };
 
 const alignStyles = {
@@ -28,7 +30,15 @@ const alignStyles = {
     right: { textAlign: 'right' },
 } as const;
 
-export function Table<T>({ data, columns, onRowPress, isModal, listHeader, listFooter }: TableProps<T>) {
+export function Table<T>({
+     data,
+     columns,
+     onRowPress,
+     isModal,
+     listHeader,
+     listFooter,
+    hasSearched = false,
+}: TableProps<T>) {
     const renderHeader = () => (
         <View style={commonStyles.tableHeaderRow}>
             {columns.map((col, i) => (
@@ -86,6 +96,7 @@ export function Table<T>({ data, columns, onRowPress, isModal, listHeader, listF
         return rowContent;
     };
     console.log("isModal:"+isModal)
+    console.log("data:"+data)
 
     return (
         <View style={isModal ? commonStyles.modalTableContainer : commonStyles.tableContainer}>
@@ -95,7 +106,14 @@ export function Table<T>({ data, columns, onRowPress, isModal, listHeader, listF
                 keyExtractor={(item: T, index) => (item as any).no ? String((item as any).no) : String(index)}
                 renderItem={renderItem}
                 ListHeaderComponent={listHeader}
-                ListFooterComponent={listFooter}
+                ListFooterComponent={data.length > 0 ? listFooter: null}
+                ListEmptyComponent={
+                    <View style={commonStyles.listEmptyComponent}>
+                        <Text style={{ color: '#888' }}>
+                            {(data === undefined || data==='') ? Const.ENTER_SEARCH_COND_MSG : Const.NO_RESULT_MSG}
+                        </Text>
+                    </View>
+                }
                 contentContainerStyle={isModal ? commonStyles.modalTableListContent : styles.tableListContent}
                 bounces={false}
                 alwaysBounceVertical={false}
@@ -104,7 +122,7 @@ export function Table<T>({ data, columns, onRowPress, isModal, listHeader, listF
             />
         </View>
     );
-}
+};
 
 const styles = StyleSheet.create({
     tableListContent: { backgroundColor: '#fff' },

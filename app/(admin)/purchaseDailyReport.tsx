@@ -21,6 +21,7 @@ export default function PurchaseDailyReportScreen() {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [currentPickerType, setCurrentPickerType] = useState('from');
     const [tempDate, setTempDate] = useState<Date | null>(null);
+    // const [hasSearched, setHasSearched] = useState(false);
 
     const baseData: PurchaseRow[] = useMemo(
         () => [
@@ -58,14 +59,24 @@ export default function PurchaseDailyReportScreen() {
     ]), []);
 
     const renderFooter = () => (
-        <View style={[commonStyles.tableRow, styles.totalRow]}>
-            <View style={[{flex: 3}, commonStyles.cellDivider,]}>
-                <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.totalText,
-                    {fontSize: 13, fontWeight: 'bold'}]}>합계</Text>
+        <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+            <View style={[{flex: 3,
+                justifyContent: 'center',
+                borderRightWidth: StyleSheet.hairlineWidth,
+                borderRightColor: '#aaa',
+                height: '100%'}]}>
+                <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.totalText]}>
+                    합계
+                </Text>
             </View>
-            <View>
-                <Text
-                    style={[commonStyles.cell, styles.totalText, {paddingRight: 10}]}>{totalAmount.toLocaleString()}</Text>
+            <View style={{flex:1,
+                justifyContent: 'center',
+                borderRightWidth: StyleSheet.hairlineWidth,
+                borderRightColor: '#aaa',
+                height: '100%'}}>
+                <Text style={[commonStyles.cell, commonStyles.numberCell, styles.totalText]}>
+                    {totalAmount.toLocaleString()}
+                </Text>
             </View>
         </View>
     );
@@ -83,6 +94,7 @@ export default function PurchaseDailyReportScreen() {
 
     const onSearch = () => {
         setSubmitted({from: fromPurchaseDt, to: toPurchaseDt, vendor: vendorQuery});
+        // setHasSearched(true);
     };
 
     const PurchaseDetailColumns: ColumnDef<PurchaseDetailRow>[] = useMemo(() => ([
@@ -108,17 +120,29 @@ export default function PurchaseDailyReportScreen() {
     ]), []);
 
     const renderDetailFooter = () => (
-        <View style={[commonStyles.modalTableRow, styles.modalTotalRow]}>
-            <View style={{flex: 2.2}}>
+        <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+            <View style={{flex: 2.2,
+                justifyContent: 'center',
+                borderRightWidth: StyleSheet.hairlineWidth,
+                borderRightColor:'#aaa',
+                height:'100%'}}>
                 <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.modalTotalText]}>합계</Text>
             </View>
-            <View style={{flex: 1}}>
-                <Text style={[commonStyles.cell, commonStyles.alignRight, styles.modalTotalText]}>
+            <View style={{flex: 1,
+                justifyContent: 'center',
+                borderRightWidth: StyleSheet.hairlineWidth,
+                borderRightColor:'#aaa',
+                height:'100%'}}>
+                <Text style={[commonStyles.cell, commonStyles.numberCell, styles.modalTotalText]}>
                     {detailTotalQty.toLocaleString()}
                 </Text>
             </View>
-            <View style={{flex: 3.7}}>
-                <Text style={[commonStyles.cell, commonStyles.alignRight, styles.modalTotalText]}>
+            <View style={{flex: 3.7,
+                justifyContent: 'center',
+                borderRightWidth: StyleSheet.hairlineWidth,
+                borderRightColor:'#aaa',
+                height:'100%'}}>
+                <Text style={[commonStyles.cell, commonStyles.numberCell, styles.modalTotalText]}>
                     {detailTotalAmount.toLocaleString()}
                 </Text>
             </View>
@@ -197,7 +221,9 @@ export default function PurchaseDailyReportScreen() {
 
             <View style={commonStyles.sectionDivider}/>
 
-            <Table data={filteredData} columns={mainColumns} listFooter={renderFooter}/>
+            <Table data={filteredData} columns={mainColumns} listFooter={renderFooter}
+                   // hasSearched={hasSearched}
+            />
 
             <DatePickerModal
                 visible={showDatePicker}
@@ -242,6 +268,8 @@ const styles = StyleSheet.create({
         color: '#333',
     },
     totalRow: {
+        height: 30,
+        alignItems: 'center',
         backgroundColor: '#fafafa',
     },
     totalText: {

@@ -47,6 +47,10 @@ export default function AdminLayout() {
                     options={{title: '일자별 매입현황(주)', headerShown: true}}
                 />
                 <Stack.Screen
+                    name="purchaseDailyReportOp"
+                    options={{title: '일자별 매입현황(통합)', headerShown: true}}
+                />
+                <Stack.Screen
                     name="purchaseProductReport"
                     options={{title: '상품별 매입현황(휴)', headerShown: true}}
                 />
@@ -88,6 +92,10 @@ export default function AdminLayout() {
                 />
                 <Stack.Screen
                     name="realtimeSalesByCorner"
+                    options={{title: '실시간 매장매출현황(휴)', headerShown: true}}
+                />
+                <Stack.Screen
+                    name="realtimeSalesByCornerOp"
                     options={{title: '실시간 매장매출현황(휴)', headerShown: true}}
                 />
                 <Stack.Screen

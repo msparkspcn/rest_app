@@ -387,4 +387,11 @@ export const commonStyles = StyleSheet.create({
         // borderRightColor: '#aaa',
         backgroundColor: '#fff7e6'
     },
+    listEmptyComponent: {
+        minHeight:30,
+        justifyContent:'center',
+        alignItems: 'center',
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: '#aaa'
+    }
 })

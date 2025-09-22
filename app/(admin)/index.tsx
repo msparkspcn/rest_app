@@ -45,7 +45,7 @@ export default function AdminHomeScreen() {
       icon: '🧾',
       children: [
         { title: '일자별 매입현황(휴)', icon: '📝', route: '/(admin)/purchaseDailyReport', userRoleType: DEP_R },
-        { title: '일자별 매입현황(통합)', icon: '📝', route: '/(admin)/purchaseDailyReport', userRoleType: DEP_OP },
+        { title: '일자별 매입현황(통합)', icon: '📝', route: '/(admin)/purchaseDailyReportOp', userRoleType: DEP_OP },
         { title: '일자별 매입현황(주)', icon: '📝', route: '/(admin)/purchaseDailyReportG', userRoleType: DEP_G },
         { title: '상품별 매입현황(휴)',  icon: '📄', route: '/(admin)/purchaseProductReport' as Href, userRoleType: DEP_R },
       ],
@@ -55,7 +55,7 @@ export default function AdminHomeScreen() {
       title: '매출',
       icon: '💸',
       children: [
-        { title: '실시간 매장매출현황(휴)', icon: '⚡️', route: '/(admin)/realtimeSales' as Href, userRoleType: DEP_OP },
+        { title: '실시간 매장매출현황(휴)', icon: '⚡️', route: '/(admin)/realtimeSalesByCornerOp' as Href, userRoleType: DEP_OP },
         { title: '실시간 매출현황(휴)', icon: '⚡️', route: '/(admin)/realtimeSales' as Href, userRoleType: DEP_R },
         { title: '실시간 매출현황(주)', icon: '⚡️', route: '/(admin)/realtimeSales' as Href, userRoleType: DEP_OP },
         { title: '실시간 매출현황(주)', icon: '⚡️', route: '/(admin)/realtimeSalesG' as Href, userRoleType: DEP_G },
@@ -145,7 +145,7 @@ export default function AdminHomeScreen() {
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <Text style={styles.welcomeText}>{user?.userNm ?? '관리자'}}님, 환영합니다!</Text>
+          <Text style={styles.welcomeText}>{user?.userNm ?? '관리자'}님, 환영합니다!</Text>
           <Text style={styles.subtitle}>관리자 패널에 오신 것을 환영합니다</Text>
         </View>
 
