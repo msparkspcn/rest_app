@@ -237,28 +237,48 @@ export default function WarehouseStockReportScreen() {
     }, [detailData]);
 
     const renderDetailFooter = () => (
-        <View style={[commonStyles.modalTableRow, styles.modalTotalRow]}>
-            <View style={{flex: 2}}>
+        <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+            <View style={{flex: 2,
+                justifyContent: 'center',
+                borderRightWidth: StyleSheet.hairlineWidth,
+                borderRightColor:'#aaa',
+                height:'100%'}}>
                 <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.modalTotalText]}>
                     합계
                 </Text>
             </View>
-            <View style={{flex: 1}}>
+            <View style={{flex: 1,
+                justifyContent: 'center',
+                borderRightWidth: StyleSheet.hairlineWidth,
+                borderRightColor:'#aaa',
+                height:'100%'}}>
                 <Text style={[commonStyles.cell, commonStyles.numberCell, styles.modalTotalText]}>
                     {detailTotalStockQty.toLocaleString()}
                 </Text>
             </View>
-            <View style={{flex: 1.5}}>
+            <View style={{flex: 1.5,
+                justifyContent: 'center',
+                borderRightWidth: StyleSheet.hairlineWidth,
+                borderRightColor:'#aaa',
+                height:'100%'}}>
                 <Text style={[commonStyles.cell, commonStyles.numberCell, styles.modalTotalText]}>
                     {detailTotalGiQty.toLocaleString()}
                 </Text>
             </View>
-            <View style={{flex: 1}}>
+            <View style={{flex: 1,
+                justifyContent: 'center',
+                borderRightWidth: StyleSheet.hairlineWidth,
+                borderRightColor:'#aaa',
+                height:'100%'}}>
                 <Text style={[commonStyles.cell, commonStyles.numberCell, styles.modalTotalText]}>
                     {detailTotalSaleQty.toLocaleString()}
                 </Text>
             </View>
-            <View style={{flex: 1}}>
+            <View style={{flex: 1,
+                justifyContent: 'center',
+                borderRightWidth: StyleSheet.hairlineWidth,
+                borderRightColor:'#aaa',
+                height:'100%'}}>
                 <Text style={[commonStyles.cell, commonStyles.numberCell, styles.modalTotalText]}>
                     {detailTotalCurStockQty.toLocaleString()}
                 </Text>

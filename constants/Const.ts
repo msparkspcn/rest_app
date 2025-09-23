@@ -36,4 +36,10 @@ export default {
     TOTAL_AMT: '전체 합계',
     ENTER_SEARCH_COND_MSG: '검색조건을 입력해 주십시오.',
     NO_RESULT_MSG: '검색결과가 없습니다.',
+    CASH: '현금',
+    CARD_ETC: '카드 외',
+    SALES_ORG: '사업장',
+    NET_AMT: '과세매출',
+    DUTY_FREE_AMT: '면세매출',
+    TOTAL_SALE_AMT: '총매출'
 }

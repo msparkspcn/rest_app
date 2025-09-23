@@ -57,14 +57,14 @@ export default function AdminHomeScreen() {
       children: [
         { title: '실시간 매장매출현황(휴)', icon: '⚡️', route: '/(admin)/realtimeSalesByCornerOp' as Href, userRoleType: DEP_OP },
         { title: '실시간 매출현황(휴)', icon: '⚡️', route: '/(admin)/realtimeSales' as Href, userRoleType: DEP_R },
-        { title: '실시간 매출현황(주)', icon: '⚡️', route: '/(admin)/realtimeSales' as Href, userRoleType: DEP_OP },
+        { title: '실시간 매출현황(주)', icon: '⚡️', route: '/(admin)/realtimeSalesG2' as Href, userRoleType: DEP_OP },
         { title: '실시간 매출현황(주)', icon: '⚡️', route: '/(admin)/realtimeSalesG' as Href, userRoleType: DEP_G },
-        { title: '실시간 매출현황(통합)', icon: '⚡️', route: '/(admin)/realtimeSales' as Href, userRoleType: DEP_OP },
+        { title: '실시간 매출현황(통합)', icon: '⚡️', route: '/(admin)/realtimeSalesOp' as Href, userRoleType: DEP_OP },
         { title: '시간대별 매출현황(휴)', icon: '⏱️', route: '/(admin)/saleReportByTimezone', userRoleType: DEP_R },
         { title: '시간대별 매출현황(주)', icon: '⏱️', route: '/(admin)/saleReportByTimezoneG', userRoleType: DEP_G},
         { title: '기간별 매출현황(휴)', icon: '🗓️', route: '/(admin)/salesReportByPeriod', userRoleType: DEP_R },
         { title: '기간별 매출현황(주)', icon: '🗓️', route: '/(admin)/salesReportByPeriodG', userRoleType: DEP_G },
-        { title: '기간별 매출현황(통합)', icon: '🗓️', route: '/(admin)/dashboard', userRoleType: DEP_OP },
+        { title: '기간별 매출현황(통합)', icon: '🗓️', route: '/(admin)/salesReportByPeriodOp', userRoleType: DEP_OP },
         { title: '시간대별 매출현황(통합)', icon: '🗓️', route: '/(admin)/dashboard', userRoleType: DEP_OP },
         { title: '기간별모바일주문현황(휴)', icon: '🗓️', route: '/(admin)/dashboard', userRoleType: DEP_OP },
         { title: '실시간 매출현황(통합비율)', icon: '🗓️', route: '/(admin)/dashboard', userRoleType: DEP_OP },
@@ -100,18 +100,18 @@ export default function AdminHomeScreen() {
 
   const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
 
-  // 사용자의 userRoleType에 따라 메뉴를 필터링
+  // 사용자의 userRoleType 따라 메뉴를 필터링
   const filteredMenuGroups = useMemo(() => {
     if (!user) return [];
 
     return menuGroups.map(group => ({
       ...group,
       children: group.children.filter(item => {
-        // userRoleType이 비어있으면 모든 사용자에게 표시
+        // userRoleType 비어있으면 모든 사용자에게 표시
         if (item.userRoleType === '') return true;
         // all_except_001인 경우 001이 아닌 모든 사용자에게 표시
         if (item.userRoleType === 'all_except_001') return user.userRoleType !== DEP_OP;
-        // 사용자의 userRoleType과 일치하는 메뉴만 표시
+        // 사용자의 userRoleType 일치하는 메뉴만 표시
         return item.userRoleType === user.userRoleType;
       })
     })).filter(group => group.children.length > 0); // 자식 메뉴가 없는 그룹은 제거

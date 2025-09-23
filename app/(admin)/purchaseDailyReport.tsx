@@ -21,7 +21,6 @@ export default function PurchaseDailyReportScreen() {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [currentPickerType, setCurrentPickerType] = useState('from');
     const [tempDate, setTempDate] = useState<Date | null>(null);
-    // const [hasSearched, setHasSearched] = useState(false);
 
     const baseData: PurchaseRow[] = useMemo(
         () => [
@@ -94,7 +93,6 @@ export default function PurchaseDailyReportScreen() {
 
     const onSearch = () => {
         setSubmitted({from: fromPurchaseDt, to: toPurchaseDt, vendor: vendorQuery});
-        // setHasSearched(true);
     };
 
     const PurchaseDetailColumns: ColumnDef<PurchaseDetailRow>[] = useMemo(() => ([
@@ -221,9 +219,7 @@ export default function PurchaseDailyReportScreen() {
 
             <View style={commonStyles.sectionDivider}/>
 
-            <Table data={filteredData} columns={mainColumns} listFooter={renderFooter}
-                   // hasSearched={hasSearched}
-            />
+            <Table data={filteredData} columns={mainColumns} listFooter={renderFooter}/>
 
             <DatePickerModal
                 visible={showDatePicker}

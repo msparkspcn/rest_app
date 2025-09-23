@@ -24,7 +24,7 @@ export const commonStyles = StyleSheet.create({
         marginBottom: 5
     },
     filterLabel: {
-        minWidth: 50,
+        minWidth: 70,
         fontSize: 14,
         color: '#555',
     },
@@ -139,6 +139,10 @@ export const commonStyles = StyleSheet.create({
         paddingRight:10,
         textAlign: 'right'
     },
+    numberSmallCell:  {
+        paddingRight:5,
+        textAlign: 'right'
+    },
     modalOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0,0,0,0.5)',
@@ -180,8 +184,13 @@ export const commonStyles = StyleSheet.create({
         borderBottomColor: '#eee',
     },
     modalTitle: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: '700',
+        color: '#333',
+    },
+    modalSmallTitle: {
+        fontSize: 14,
+        // fontWeight: '700',
         color: '#333',
     },
     modalTableHeaderRow: {
@@ -281,7 +290,7 @@ export const commonStyles = StyleSheet.create({
         color: '#333'
     },
     modalClose: {
-        fontSize: 18,
+        fontSize: 20,
         color: '#666'
     },
     dateModalPickerContainer: {
@@ -393,5 +402,15 @@ export const commonStyles = StyleSheet.create({
         alignItems: 'center',
         borderBottomWidth: StyleSheet.hairlineWidth,
         borderBottomColor: '#aaa'
-    }
+    },
+    tableRightBorder: {
+        justifyContent: 'center',
+        borderRightWidth: StyleSheet.hairlineWidth,
+        borderRightColor: '#aaa',
+        height: '100%',
+    },
+    summaryLabelText: {
+        fontWeight: '700',
+        color: '#333'
+    },
 })

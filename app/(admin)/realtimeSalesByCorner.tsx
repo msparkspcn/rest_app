@@ -88,7 +88,7 @@ export default function RealtimeSalesByCornerScreen() {
 
     const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => ([
         {
-            key: 'cornerNm', title: Const.CORNER_NM, flex: 1, align: 'center',
+            key: 'cornerNm', title: Const.CORNER_NM, flex: 1.5, align: 'center',
             renderCell: (item) => (
                 <Text style={[commonStyles.cell, {paddingLeft: 10}]}>
                     {item.cornerNm}
@@ -107,7 +107,7 @@ export default function RealtimeSalesByCornerScreen() {
             )
         },
         {
-            key: 'dayCompRatio', title: Const.COMP_RATIO, flex: 1, align: 'center',
+            key: 'dayCompRatio', title: Const.COMP_RATIO, flex: 0.5, align: 'center',
             renderCell: (item) => (
                 <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.dayCompRatio.toLocaleString()}</Text>
             )
@@ -119,7 +119,7 @@ export default function RealtimeSalesByCornerScreen() {
             )
         },
         {
-            key: 'monthCompRatio', title: Const.COMP_RATIO, flex: 1, align: 'center',
+            key: 'monthCompRatio', title: Const.COMP_RATIO, flex: 0.5, align: 'center',
             renderCell: (item) => (
                 <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.monthCompRatio.toLocaleString()}</Text>
             )
@@ -132,15 +132,32 @@ export default function RealtimeSalesByCornerScreen() {
 
     const renderFooter = () => (
         <View style={[commonStyles.tableRow, styles.totalRow]}>
-            <View style={[{flex: 1}, commonStyles.cellDivider]}>
-                <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.totalText,
-                    {fontSize: 13, fontWeight: 'bold'}]}>합계</Text>
+            <View style={{flex: 1.5,
+                justifyContent: 'center',
+                borderRightWidth: StyleSheet.hairlineWidth,
+                borderRightColor: '#aaa',
+                height: '100%'}}>
+                <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.totalText, {fontSize: 13, fontWeight: 'bold'}]}>
+                    전체 합계
+                </Text>
             </View>
-            <View style={{flex: 2}}>
-                <Text style={[commonStyles.cell, styles.totalText, commonStyles.numberCell]}>{totalSaleAmt.toLocaleString()}</Text>
+            <View style={{flex: 1.5,
+                justifyContent: 'center',
+                borderRightWidth: StyleSheet.hairlineWidth,
+                borderRightColor: '#aaa',
+                height: '100%',}}>
+                <Text style={[commonStyles.cell, styles.totalText, commonStyles.numberCell]}>
+                    {totalSaleAmt.toLocaleString()}
+                </Text>
             </View>
-            <View style={{flex: 2}}>
-                <Text style={[commonStyles.cell, styles.totalText, commonStyles.numberCell]}>{totalMonthSaleAmt.toLocaleString()}</Text>
+            <View style={{flex: 1.5,
+                justifyContent: 'center',
+                borderRightWidth: StyleSheet.hairlineWidth,
+                borderRightColor: '#aaa',
+                height: '100%',}}>
+                <Text style={[commonStyles.cell, styles.totalText, commonStyles.numberCell]}>
+                    {totalMonthSaleAmt.toLocaleString()}
+                </Text>
             </View>
         </View>
     );
@@ -196,8 +213,12 @@ export default function RealtimeSalesByCornerScreen() {
 
     const renderDetailFooterRow = () => {
         return (
-            <View style={[commonStyles.modalTableRow, styles.summaryRow]}>
-                <View style={{flex: 2.5}}>
+            <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+                <View style={{flex: 2.5,
+                    justifyContent: 'center',
+                    borderRightWidth: StyleSheet.hairlineWidth,
+                    borderRightColor:'#aaa',
+                    height:'100%'}}>
                     <Text
                         style={[commonStyles.modalCell,
                             {
@@ -207,17 +228,29 @@ export default function RealtimeSalesByCornerScreen() {
                             }
                         ]}>합계</Text>
                 </View>
-                <View style={{flex: 1}}>
+                <View style={{flex: 1,
+                    justifyContent: 'center',
+                    borderRightWidth: StyleSheet.hairlineWidth,
+                    borderRightColor:'#aaa',
+                    height:'100%'}}>
                     <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
                         {summaryRow.totalQty.toLocaleString()}
                     </Text>
                 </View>
-                <View style={{flex: 1.5}}>
+                <View style={{flex: 1.5,
+                    justifyContent: 'center',
+                    borderRightWidth: StyleSheet.hairlineWidth,
+                    borderRightColor:'#aaa',
+                    height:'100%'}}>
                     <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
                         {summaryRow.totalSaleAmt.toLocaleString()}
                     </Text>
                 </View>
-                <View style={{flex: 1}}>
+                <View style={{flex: 1,
+                    justifyContent: 'center',
+                    borderRightWidth: StyleSheet.hairlineWidth,
+                    borderRightColor:'#aaa',
+                    height:'100%'}}>
                     <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
                         {summaryRow.totalCompRatio.toLocaleString()}
                     </Text>
@@ -325,7 +358,11 @@ export default function RealtimeSalesByCornerScreen() {
 const styles = StyleSheet.create({
     selectText: {fontSize: 14, color: '#333'},
     summaryRow: {backgroundColor: '#fff7e6'},
-    totalRow: {backgroundColor: '#fafafa'},
+    totalRow: {
+        height: 30,
+        alignItems: 'center',
+        backgroundColor: '#fafafa',
+    },
     totalText: {fontWeight: '700', color: '#222'},
 
 });

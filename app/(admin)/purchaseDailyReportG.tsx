@@ -34,7 +34,7 @@ export default function PurchaseDailyReportScreen() {
     );
 
     const mainColumns: ColumnDef<PurchaseRow>[] = useMemo(() => ([
-        {key: 'no', title: Const.NO, flex: 0.7, align: 'center',
+        {key: 'no', title: Const.NO, flex: 0.5, align: 'center',
             renderCell: (_item, index) => (
                 <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
             ),
@@ -51,7 +51,7 @@ export default function PurchaseDailyReportScreen() {
             ),
         },
         {
-            key: 'amount', title: '금액', flex: 1, align: 'right',
+            key: 'amount', title: '금액', flex: 1.5, align: 'right',
             renderCell: (item) => (
                 <Text style={[commonStyles.cell, {
                     textAlign: 'right',
@@ -62,17 +62,13 @@ export default function PurchaseDailyReportScreen() {
     ]), []);
 
     const renderFooter = () => (
-        <View style={[commonStyles.tableRow, styles.totalRow]}>
-            <View style={{flex: 2.2,
-                justifyContent: 'center',
-                borderRightWidth: StyleSheet.hairlineWidth,
-                borderRightColor: '#aaa',
-                height: '100%',
-            }}>
-                <Text style={[commonStyles.cell, styles.summaryLabelText,
-                    {textAlign:'center'}]}>합계</Text>
+        <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+            <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
+                <Text style={[commonStyles.cell, styles.summaryLabelText, {textAlign:'center'}]}>
+                    합계
+                </Text>
             </View>
-            <View style={{flex:3,  justifyContent: 'center', height: '100%'}}>
+            <View style={[{flex:3.5}, commonStyles.tableRightBorder]}>
                 <Text
                     style={[
                         commonStyles.cell,
@@ -126,27 +122,17 @@ export default function PurchaseDailyReportScreen() {
 
     const renderDetailFooter = () => (
         <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-            <View style={{flex: 3,
-                justifyContent: 'center',
-                borderRightWidth: StyleSheet.hairlineWidth,
-                borderRightColor:'#aaa',
-                height:'100%'
-            }}>
+            <View style={[{flex: 3}, commonStyles.tableRightBorder]}>
                 <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.modalTotalText]}>
                     합계
                 </Text>
             </View>
-            <View style={{flex: 3,
-                justifyContent:'center',
-                borderRightWidth:StyleSheet.hairlineWidth,
-                borderRightColor: '#aaa',
-                height:'100%'
-            }}>
+            <View style={[{flex: 3}, commonStyles.tableRightBorder]}>
                 <Text style={[commonStyles.cell, commonStyles.numberCell, styles.modalTotalText]}>
                     {detailTotalQty.toLocaleString()}
                 </Text>
             </View>
-            <View style={{flex: 2}}>
+            <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
                 <Text style={[commonStyles.cell, , commonStyles.numberCell, styles.modalTotalText]}>
                     {detailTotalAmount.toLocaleString()}
                 </Text>

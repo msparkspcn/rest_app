@@ -145,7 +145,7 @@ export default function CornerStockReportScreen() {
     const detailData: StockDetailRow[] = useMemo(
         () =>
             Array.from({length: 10}).map((_, idx) => {
-                const qty = (idx % 4) + 1;
+                const qty = (idx % 3) * 100000;
                 return {
                     cornerNm: '파스쿠찌',
                     stockDt: `2025/09/0${idx + 1}`,
@@ -159,39 +159,39 @@ export default function CornerStockReportScreen() {
     );
 
     const StockDetailColumns: ColumnDef<StockDetailRow>[] = useMemo(() => ([
-        {key: 'stockDt', title: Const.DATE, flex: 2, align: 'center',
+        {key: 'stockDt', title: Const.DATE, flex: 1.5, align: 'center',
             renderCell: (item) => (
                 <Text style={[commonStyles.cell, {textAlign: 'center'}]}>{item.stockDt}</Text>
             )
         },
         {
-            key: 'totalStockQty', title: Const.TOTAL_STOCK_QTY, flex: 1, align: 'center',
+            key: 'totalStockQty', title: Const.TOTAL_STOCK_QTY, flex: 1.1, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.totalStockQty.toLocaleString()}</Text>
+                <Text style={[commonStyles.cell, commonStyles.numberSmallCell]}>{item.totalStockQty.toLocaleString()}</Text>
             )
         },
         {
-            key: 'giQty', title: Const.GI_QTY, flex: 1.5, align: 'right',
+            key: 'giQty', title: Const.GI_QTY, flex: 1, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.giQty.toLocaleString()}</Text>
+                <Text style={[commonStyles.cell, commonStyles.numberSmallCell]}>{item.giQty.toLocaleString()}</Text>
             )
         },
         {
             key: 'saleQty', title: Const.SALE, flex: 1, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.saleQty.toLocaleString()}</Text>
+                <Text style={[commonStyles.cell, commonStyles.numberSmallCell]}>{item.saleQty.toLocaleString()}</Text>
             )
         },
         {
-            key: 'curStockQty', title: Const.CUR_STOCK_QTY, flex: 1, align: 'right',
+            key: 'curStockQty', title: Const.CUR_STOCK_QTY, flex: 1.1, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.curStockQty.toLocaleString()}</Text>
+                <Text style={[commonStyles.cell, commonStyles.numberSmallCell]}>{item.curStockQty.toLocaleString()}</Text>
             )
         },
     ]), []);
 
     const detailTotalStockQty = useMemo(() => {
-        return detailData.reduce((acc, row) => acc + row.totalStockQty, 0);
+        return detailData.reduce((acc, row) => acc, 0);
     }, [detailData]);
     const detailTotalGiQty = useMemo(() => {
         return detailData.reduce((acc, row) => acc + row.giQty, 0);
@@ -200,54 +200,33 @@ export default function CornerStockReportScreen() {
         return detailData.reduce((acc, row) => acc + row.saleQty, 0);
     }, [detailData]);
     const detailTotalCurStockQty = useMemo(() => {
-        return detailData.reduce((acc, row) => acc + row.curStockQty, 0);
+        return detailData.reduce((acc, row) => row.totalStockQty, 0);
     }, [detailData]);
 
     const renderDetailFooter = () => (
         <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-            <View style={{flex: 2,
-                justifyContent: 'center',
-                borderRightWidth: StyleSheet.hairlineWidth,
-                borderRightColor:'#aaa',
-                height:'100%'
-            }}>
+            <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
                 <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.modalTotalText]}>
                     합계
                 </Text>
             </View>
-            <View style={{flex: 1,
-                justifyContent: 'center',
-                borderRightWidth: StyleSheet.hairlineWidth,
-                borderRightColor:'#aaa',
-                height:'100%'}}>
-                <Text style={[commonStyles.cell, commonStyles.numberCell, styles.modalTotalText]}>
+            <View style={[{flex: 1.1}, commonStyles.tableRightBorder]}>
+                <Text style={[commonStyles.cell, commonStyles.numberSmallCell]}>
                     {detailTotalStockQty.toLocaleString()}
                 </Text>
             </View>
-            <View style={{flex: 1.5,
-                justifyContent: 'center',
-                borderRightWidth: StyleSheet.hairlineWidth,
-                borderRightColor:'#aaa',
-                height:'100%'}}>
-                <Text style={[commonStyles.cell, commonStyles.numberCell, styles.modalTotalText]}>
+            <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                <Text style={[commonStyles.cell, commonStyles.numberSmallCell]}>
                     {detailTotalGiQty.toLocaleString()}
                 </Text>
             </View>
-            <View style={{flex: 1,
-                justifyContent: 'center',
-                borderRightWidth: StyleSheet.hairlineWidth,
-                borderRightColor:'#aaa',
-                height:'100%'}}>
-                <Text style={[commonStyles.cell, commonStyles.numberCell, styles.modalTotalText]}>
+            <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                <Text style={[commonStyles.cell, commonStyles.numberSmallCell]}>
                     {detailTotalSaleQty.toLocaleString()}
                 </Text>
             </View>
-            <View style={{flex: 1,
-                justifyContent: 'center',
-                borderRightWidth: StyleSheet.hairlineWidth,
-                borderRightColor:'#aaa',
-                height:'100%'}}>
-                <Text style={[commonStyles.cell, commonStyles.numberCell, styles.modalTotalText]}>
+            <View style={[{flex: 1.1}, commonStyles.tableRightBorder]}>
+                <Text style={[commonStyles.cell, commonStyles.numberSmallCell]}>
                     {detailTotalCurStockQty.toLocaleString()}
                 </Text>
             </View>

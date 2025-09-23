@@ -161,11 +161,11 @@ export default function RegisterScreen() {
             <View style={styles.termsContainer}>
               <View style={styles.termItem}>
                 <TouchableOpacity
-                  style={styles.checkboxContainer}
+                  style={commonStyles.checkboxContainer}
                   onPress={handleTermsToggle}
                 >
-                  <View style={[styles.checkbox, termsAgreed && styles.checkboxChecked]}>
-                    {termsAgreed && <Text style={styles.checkmark}>✓</Text>}
+                  <View style={[commonStyles.checkbox, termsAgreed && commonStyles.checkboxChecked]}>
+                    {termsAgreed && <Text style={commonStyles.checkmark}>✓</Text>}
                   </View>
                 </TouchableOpacity>
                 <Text style={styles.termText}>이용약관에 동의합니다 (필수)</Text>
@@ -189,11 +189,11 @@ export default function RegisterScreen() {
 
               <View style={styles.termItem}>
                 <TouchableOpacity
-                  style={styles.checkboxContainer}
+                  style={commonStyles.checkboxContainer}
                   onPress={handlePrivacyToggle}
                 >
-                  <View style={[styles.checkbox, privacyAgreed && styles.checkboxChecked]}>
-                    {privacyAgreed && <Text style={styles.checkmark}>✓</Text>}
+                  <View style={[commonStyles.checkbox, privacyAgreed && commonStyles.checkboxChecked]}>
+                    {privacyAgreed && <Text style={commonStyles.checkmark}>✓</Text>}
                   </View>
                 </TouchableOpacity>
                 <Text style={styles.termText}>개인정보 수집 및 이용에 동의합니다 (필수)</Text>
@@ -457,28 +457,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     marginBottom: 16,
-  },
-  checkboxContainer: {
-    marginRight: 12,
-    marginTop: 2,
-  },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  checkboxChecked: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
-  },
-  checkmark: {
-    color: '#fff',
-    fontSize: 16,
   },
   termText: {
     fontSize: 16,

@@ -63,12 +63,24 @@ export default function AdminLayout() {
                     options={{title: '실시간 매출현황(주)', headerShown: true}}
                 />
                 <Stack.Screen
+                    name="realtimeSalesG2"
+                    options={{title: '실시간 매출현황(주)', headerShown: true}}
+                />
+                <Stack.Screen
+                    name="realtimeSalesOp"
+                    options={{title: '실시간 매출현황(통합)', headerShown: true}}
+                />
+                <Stack.Screen
                     name="salesReportByPeriod"
                     options={{title: '기간별 매출현황(휴)', headerShown: true}}
                 />
                 <Stack.Screen
                     name="salesReportByPeriodG"
                     options={{title: '기간별 매출현황(주)', headerShown: true}}
+                />
+                <Stack.Screen
+                    name="salesReportByPeriodOp"
+                    options={{title: '기간별 매출현황(통합)', headerShown: true}}
                 />
                 <Stack.Screen
                     name="saleReportByTimezone"

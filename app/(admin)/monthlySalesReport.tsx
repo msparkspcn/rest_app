@@ -62,14 +62,14 @@ export default function MonthlySalesReport() {
     const [toSaleDt, setToSaleDt] = useState(getTodayYm());
     const [currentPickerType, setCurrentPickerType] = useState('from')
     const [selectedSale, setSelectedSale] = useState<SaleRow | null>(null);
-    const [saleList, setSaleList] = useState([]);
+    const [saleList, setSaleList] = useState<[] | null>(null);
     const [detailType, setDetailType] = useState<DetailType>('daily');
 
     useEffect(() => {
         console.log('api 테스트1')
         setAuthToken("1");
         getStoreInfo('5000511001', '1234')
-    })
+    },[])
 
     const getStoreInfo = (userId, password) => {
         api.login(userId, password)
@@ -91,7 +91,7 @@ export default function MonthlySalesReport() {
             fromSaleMonth: "202507",
             salesOrgCd: "8000",
             storCd: "5000511",
-            toSaleMonth: "202508"
+            toSaleMonth: "202510"
         }
         api.restMonthlySale(request)
             .then(result => {
@@ -151,32 +151,33 @@ export default function MonthlySalesReport() {
             ),
         },
         {
-            key: 'monthSaleAmt', title: '순매출', flex: 2, align: 'right',
+            key: 'monthNetSaleAmt', title: '순매출', flex: 2, align: 'right',
             renderCell: (item) => (
                 <Text style={[commonStyles.cell, commonStyles.numberCell]}>
-                    {item.monthSaleAmt.toLocaleString()}
+                    {item.monthNetSaleAmt.toLocaleString()}
                 </Text>
             )
         },
     ]), []);
 
     const renderFooter = () => (
-        <View style={[commonStyles.tableRow, styles.totalRow]}>
-            <View style={[{flex: 2}, commonStyles.cell, styles.totalText]}>
+        <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+            <View style={[{flex: 2},
+                commonStyles.tableRightBorder, commonStyles.cell, styles.totalText]}>
                 <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.totalText]}>전체 합계</Text>
             </View>
-            <View style={{flex: 2}}>
-                <Text style={[commonStyles.cell, commonStyles.alignRight, styles.totalText, {paddingRight: 10}]}>
+            <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
+                <Text style={[commonStyles.cell, commonStyles.numberCell]}>
                     {totalAmt.toLocaleString()}
                 </Text>
             </View>
-            <View style={{flex: 1.5}}>
-                <Text style={[commonStyles.cell, commonStyles.alignRight, styles.totalText, {paddingRight: 10}]}>
+            <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
+                <Text style={[commonStyles.cell, commonStyles.numberCell]}>
                     {totalVatMat.toLocaleString()}
                 </Text>
             </View>
-            <View style={{flex: 2}}>
-                <Text style={[commonStyles.cell, commonStyles.alignRight, styles.totalText, {paddingRight: 10}]}>
+            <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
+                <Text style={[commonStyles.cell, commonStyles.numberCell]}>
                     {totalNetAmt.toLocaleString()}
                 </Text>
             </View>
@@ -234,7 +235,7 @@ export default function MonthlySalesReport() {
     );
 
     const MonthlyDetailColumns: ColumnDef<MonthlyDetailRow>[] = useMemo(() => [
-        {key: 'saleMonth', title: '매출년월', flex: 2, align: 'center'},
+        {key: 'saleMonth', title: '매출년월', flex: 1.5, align: 'center'},
         {
             key: 'qty', title: Const.QTY, flex: 1, align: 'right',
             renderCell: (item) => <Text
@@ -264,23 +265,23 @@ export default function MonthlySalesReport() {
         console.log("DetailType:" + JSON.stringify(type));
         if (type === 'daily') {
             return (
-                <View style={[commonStyles.modalTableRow, styles.summaryRow]}>
-                    <View style={{flex: 2}}>
+                <View style={[commonStyles.modalTableRow, commonStyles.summaryRow]}>
+                    <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
                         <Text style={[commonStyles.modalCell, {textAlign: 'center', fontSize: 13, fontWeight: 'bold'}]}>
                             합계
                         </Text>
                     </View>
-                    <View style={{flex: 2}}>
+                    <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
                         <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
                             {summaryRow.totalSaleAmt.toLocaleString()}
                         </Text>
                     </View>
-                    <View style={{flex: 1.5}}>
+                    <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
                         <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
                             {summaryRow.totalVatAmt.toLocaleString()}
                         </Text>
                     </View>
-                    <View style={{flex: 2}}>
+                    <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
                         <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
                             {summaryRow.totalNetSaleAmt.toLocaleString()}
                         </Text>
@@ -289,28 +290,28 @@ export default function MonthlySalesReport() {
             );
         } else if (type === 'monthly') {
             return (
-                <View style={[commonStyles.modalTableRow, styles.summaryRow]}>
-                    <View style={{flex: 2}}>
+                <View style={[commonStyles.modalTableRow, commonStyles.summaryRow]}>
+                    <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
                         <Text style={[commonStyles.modalCell, {textAlign: 'center', fontSize: 13, fontWeight: 'bold'}]}>
                             합계
                         </Text>
                     </View>
-                    <View style={{flex: 1}}>
+                    <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
                         <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
                             {monthlySummaryRow.totalQty.toLocaleString()}
                         </Text>
                     </View>
-                    <View style={{flex: 2}}>
+                    <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
                         <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
                             {monthlySummaryRow.totalAmt.toLocaleString()}
                         </Text>
                     </View>
-                    <View style={{flex: 1.5}}>
+                    <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
                         <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
                             {monthlySummaryRow.totalVatAmt.toLocaleString()}
                         </Text>
                     </View>
-                    <View style={{flex: 2}}>
+                    <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
                         <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
                             {monthlySummaryRow.totalNetSaleAmt.toLocaleString()}
                         </Text>
@@ -353,9 +354,20 @@ export default function MonthlySalesReport() {
     }, [monthDetailData]);
 
 
-    const totalAmt = useMemo(() => saleList.reduce((acc, r) => acc + r.monthSaleAmt, 0), [saleList]);
-    const totalVatMat = useMemo(() => saleList.reduce((acc, r) => acc + r.monthVatAmt, 0), [saleList]);
-    const totalNetAmt = useMemo(() => saleList.reduce((acc, r) => acc + r.monthNetSaleAmt, 0), [saleList]);
+    const totalAmt = useMemo(
+        () => (saleList ?? []).reduce((acc, r) => acc + r.monthSaleAmt, 0),
+        [saleList]
+    );
+
+    const totalVatMat = useMemo(
+        () => (saleList ?? []).reduce((acc, r) => acc + r.monthVatAmt, 0),
+        [saleList]
+    );
+
+    const totalNetAmt = useMemo(
+        () => (saleList ?? []).reduce((acc, r) => acc + r.monthNetSaleAmt, 0),
+        [saleList]
+    );
 
     return (
         <SafeAreaView style={commonStyles.container}>
@@ -460,9 +472,5 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#333',
     },
-    summaryRow: {
-        backgroundColor: '#fff7e6'
-    },
-    totalRow: {backgroundColor: '#fafafa'},
     totalText: {fontWeight: '700', color: '#222'},
 });

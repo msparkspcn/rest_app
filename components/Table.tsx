@@ -95,8 +95,8 @@ export function Table<T>({
         }
         return rowContent;
     };
-    console.log("isModal:"+isModal)
-    console.log("data:"+data)
+    // console.log("isModal:"+isModal)
+    // console.log("data:"+data)
 
     return (
         <View style={isModal ? commonStyles.modalTableContainer : commonStyles.tableContainer}>
@@ -106,11 +106,11 @@ export function Table<T>({
                 keyExtractor={(item: T, index) => (item as any).no ? String((item as any).no) : String(index)}
                 renderItem={renderItem}
                 ListHeaderComponent={listHeader}
-                ListFooterComponent={data.length > 0 ? listFooter: null}
+                ListFooterComponent={(data ?? []).length > 0 ? listFooter : null}
                 ListEmptyComponent={
                     <View style={commonStyles.listEmptyComponent}>
                         <Text style={{ color: '#888' }}>
-                            {(data === undefined || data==='') ? Const.ENTER_SEARCH_COND_MSG : Const.NO_RESULT_MSG}
+                            {data === null ? Const.ENTER_SEARCH_COND_MSG : Const.NO_RESULT_MSG}
                         </Text>
                     </View>
                 }

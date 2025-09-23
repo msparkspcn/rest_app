@@ -137,7 +137,7 @@ export default function RealtimeSalesBySalesOrgScreen() {
                 {
                     key: 'cornerNm',
                     title: '매장명',
-                    flex: 1.5,
+                    flex: 1.2,
                     align: 'center',
                     renderCell: (item) => (
                         <Text style={[commonStyles.cell, {
@@ -228,62 +228,33 @@ export default function RealtimeSalesBySalesOrgScreen() {
                 listFooter={
                     detailChecked
                         ? () => (
-                            <View style={[commonStyles.tableRow, styles.summaryRow]}>
-                                <View style={{
-                                    flex: 1.5,
-                                    paddingHorizontal: 7.5,
-                                    justifyContent: 'center',
-                                    borderRightWidth: StyleSheet.hairlineWidth,
-                                    borderRightColor: '#aaa',
-                                    height: '100%',
-                                }}>
-                                    <Text style={[commonStyles.cell, styles.summaryLabelText,
+                            <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+                                <View style={[{flex: 1.2}, commonStyles.tableRightBorder]}>
+                                    <Text style={[commonStyles.cell, commonStyles.summaryLabelText,
                                         {textAlign:'center'}]}>합계</Text>
                                 </View>
-                                <View style={{
-                                    flex: 1,
-                                    paddingRight: 11,
-                                    justifyContent: 'center',
-                                    borderRightWidth: StyleSheet.hairlineWidth,
-                                    borderRightColor: '#aaa',
-                                    height: '100%',
-                                }}>
-                                    <Text style={[commonStyles.cell,
-                                        {textAlign: 'right',}]}
-                                    >
+                                <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                                    <Text style={[commonStyles.cell, commonStyles.summaryLabelText, commonStyles.numberCell]}>
                                         {aggregateSales(baseData).yedaySaleAmt.toLocaleString()}
                                     </Text>
                                 </View>
 
-                                <View style={{
-                                    flex: 1,
-                                    justifyContent: 'center',
-                                    borderRightWidth: StyleSheet.hairlineWidth,
-                                    borderRightColor: '#aaa',
-                                    paddingRight: 10,
-                                    height: '100%',
-                                }}>
-                                    <Text style={[commonStyles.cell, {textAlign: 'right'}]}>
+                                <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                                    <Text style={[commonStyles.cell, commonStyles.summaryLabelText, commonStyles.numberCell]}>
                                         {aggregateSales(baseData).todaySaleAmt.toLocaleString()}
                                     </Text>
                                 </View>
 
-                                <View style={{
-                                    flex: 1,
-                                    justifyContent: 'center',
-                                    paddingRight: 10,
-                                    borderRightWidth: StyleSheet.hairlineWidth,
-                                    borderRightColor: '#aaa',
-                                    height: '100%',
-                                }}>
-                                    <Text style={[commonStyles.cell, {textAlign: 'right'}]}>
+                                <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                                    <Text style={[commonStyles.cell, commonStyles.summaryLabelText, commonStyles.numberCell]}>
                                         {aggregateSales(baseData).monthSaleAmt.toLocaleString()}
                                     </Text>
                                 </View>
-
-                                <Text style={[commonStyles.cell, {flex: 1, textAlign: 'right', paddingRight: 10}]}>
-                                    {aggregateSales(baseData).yearSaleAmt.toLocaleString()}
-                                </Text>
+                                <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                                    <Text style={[commonStyles.cell, commonStyles.summaryLabelText, commonStyles.numberCell]}>
+                                        {aggregateSales(baseData).yearSaleAmt.toLocaleString()}
+                                    </Text>
+                                </View>
                             </View>
                         )
                         : undefined
@@ -304,20 +275,7 @@ const styles = StyleSheet.create({
     selectText: {
         fontSize: 14, color: '#333'
     },
-    summaryRow: {
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: '#aaa',
-        backgroundColor: '#fff7e6'
-    },
-    summaryLabelText: {
-        fontWeight: '700',
-        color: '#333'
-    },
-    cell: {
-        fontSize: 11,
-        color: '#444',
-        width: '100%'
-    },
+
     subTitle: {
         fontSize: 14,
         fontWeight: '700',

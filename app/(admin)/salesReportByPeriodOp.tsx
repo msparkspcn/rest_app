@@ -22,8 +22,10 @@ import Const from "../../constants/Const";
 
 type SaleRow = {
     saleDtInfo: string;
-    cornerNm: string;
+    salesOrgCd: string;
+    salesOrgNm: string;
     saleAmt: number;
+    salesOrgType: string;
 };
 
 type SaleData = {
@@ -31,14 +33,16 @@ type SaleData = {
     saleAmt: number;
     totalSaleAmt: number;
     cornerCd: number;
-    cornerNm: string;
+    salesOrgNm: string;
 }
 
 type CornerOption = { id: string; name: string };
 
 export default function SalesReportByPeriod() {
     const corners: CornerOption[] = useMemo(
-        () => Array.from({ length: 12 }).map((_, i) => ({ id: `S${100 + i}`, name: `매장 ${i + 1}` })),
+        () => Array.from({ length: 12 }).map((_, i) => (
+            { id: `S${100 + i}`, name: `주유소 ${i + 1}` }
+        )),
         []
     );
     const [isDetailVisible, setIsDetailVisible] = useState(false);
@@ -56,7 +60,7 @@ export default function SalesReportByPeriod() {
         console.log('api 테스트1')
         setAuthToken("1");
         getStoreInfo('5000511001','1234')
-    })
+    },[])
 
     const getStoreInfo = (userId, password) => {
         api.login(userId, password)
@@ -91,7 +95,27 @@ export default function SalesReportByPeriod() {
                 }
             })
             .catch(error => {console.log("restDailySale error:"+error)});
-    }
+    };
+
+    const renderFooter = () => (
+        <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+            <View style={[{flex: 2.5},commonStyles.tableRightBorder]}>
+                <Text style={[commonStyles.cell, styles.summaryLabelText,
+                    {textAlign:'center'}]}>합계</Text>
+            </View>
+            <View style={[{flex:1.5}, commonStyles.tableRightBorder]}>
+                <Text
+                    style={[
+                        commonStyles.cell,
+                        commonStyles.numberCell,
+                        styles.totalText,
+                    ]}
+                >
+                    {/*{totalAmount.toLocaleString()}*/}
+                </Text>
+            </View>
+        </View>
+    );
 
     const onSearch = () => {
         restDailySale();
@@ -109,20 +133,17 @@ export default function SalesReportByPeriod() {
     };
 
     const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => ([
-        { key: 'saleDtInfo',       title: '일자(요일)',     flex: 1, align: 'center',
-            renderCell: (item) => (
-                <Text style={[commonStyles.cell,
-                    {textAlign:'center', paddingRight:10}]}>
-                    {ymdToDateWithDay(item.saleDt)}
-                </Text>
+        {key: 'no', title: Const.NO, flex: 0.5, align: 'center',
+            renderCell: (item, index) => (
+                <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
             )},
-        { key: 'cornerNm',     title: '매장명',   flex: 2,   align: 'left',
+        { key: 'salesOrgNm', title: '사업소', flex: 2, align: 'left',
             renderCell: (item) => (
                 <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
-                    <Text style={[commonStyles.cell, commonStyles.linkText,{paddingLeft:10}]}>{item.cornerNm}</Text>
+                    <Text style={[commonStyles.cell, commonStyles.linkText,{paddingLeft:10}]}>{item.salesOrgCd}</Text>
                 </Pressable>
             ),   },
-        { key: 'saleAmt', title: '총매출', flex: 1.2, align: 'right',
+        { key: 'saleAmt', title: '총매출', flex: 1.5, align: 'right',
             renderCell: (item) => (
                 <Text style={[commonStyles.cell, {textAlign:'right', paddingRight:10}]}>{item.saleAmt.toLocaleString()}</Text>
             )
@@ -135,24 +156,61 @@ export default function SalesReportByPeriod() {
         right: commonStyles.alignRight,
     } as const;
 
-    type ProductSaleRow = { no: number; itemNm: string, qty: number, price: number, totalAmt: number };
-    const productData: ProductSaleRow[] = useMemo(
-        () => Array.from({ length: 50 }).map((_, index) => ({
-            no: index + 1,
-            itemNm: `상품 ${index + 1}`,
-            qty: index * 10,
-            price: index * 10,
-            totalAmt: index * 10 * 10
+    type SaleDetailRow = {
+        saleDtInfo: string;
+        qty: number;
+        netAmt: number;
+        dutyFreeAmt: number;
+        totalAmt: number
+    };
+    const productData: SaleDetailRow[] = useMemo(
+        () => Array.from({ length: 15 }).map((_, index) => ({
+            saleDtInfo: `상품 ${index + 1}`,
+            netAmt: index * 10,
+            dutyFreeAmt: index * 10,
+            totalAmt: index * 10 * 10,
+            qty: index * 5
         })),
         []
     );
 
-    const productColumns: ColumnDef<ProductSaleRow>[] = useMemo(() => ([
-        { key: 'no',          title: Const.NO,     flex: 0.7, align: 'center' },
-        { key: 'itemNm', title: '상품명',   flex: 2.2, align: 'left' },
-        { key: 'qty', title: Const.QTY,   flex: 1, align: 'right' },
-        { key: 'price', title: Const.PRICE,   flex: 1.5, align: 'right' },
-        { key: 'totalAmt', title: '금액',   flex: 2.2, align: 'right' },
+    const saleDetailColumns: ColumnDef<SaleDetailRow>[] = useMemo(() => ([
+        { key: 'saleDtInfo', title: Const.DATE, flex: 1, align: 'left',
+            renderCell: (item) => (
+                <Text style={[commonStyles.cell,
+                    {textAlign:'center', paddingRight:10}]}>
+                    {ymdToDateWithDay('20250923')}
+                </Text>
+            )
+        },
+        { key: 'qty', title: Const.SALE_QTY, flex: 1, align: 'right',
+            renderCell: (item) => (
+                <Text style={[commonStyles.cell, commonStyles.numberSmallCell]}>
+                    {item.qty.toLocaleString()}
+                </Text>
+            )
+        },
+        { key: 'netAmt', title: Const.NET_AMT, flex: 1, align: 'right',
+            renderCell: (item) => (
+                <Text style={[commonStyles.cell, commonStyles.numberSmallCell]}>
+                    {item.netAmt.toLocaleString()}
+                </Text>
+            )
+        },
+        { key: 'dutyFreeAmt', title: Const.DUTY_FREE_AMT, flex: 1, align: 'right',
+            renderCell: (item) => (
+                <Text style={[commonStyles.cell, commonStyles.numberSmallCell]}>
+                    {item.dutyFreeAmt.toLocaleString()}
+                </Text>
+            )
+        },
+        { key: 'totalAmt', title: Const.TOTAL_SALE_AMT, flex: 1, align: 'right',
+            renderCell: (item) => (
+                <Text style={[commonStyles.cell, commonStyles.numberSmallCell]}>
+                    {item.totalAmt.toLocaleString()}
+                </Text>
+            )
+        },
     ]), []);
 
 
@@ -163,7 +221,7 @@ export default function SalesReportByPeriod() {
     };
 
     const summaryRow = useMemo(() => {
-        const totalQty = productData.reduce((sum, item) => sum + item.qty, 0);
+        const totalQty = productData.reduce((sum, item) => sum + item.dutyFreeAmt, 0);
         const totalAmt = productData.reduce((sum, item) => sum + item.totalAmt, 0);
         return {
             totalQty,
@@ -227,7 +285,7 @@ export default function SalesReportByPeriod() {
                     </TouchableOpacity>
                 </View>
                 <View style={commonStyles.filterRow}>
-                    <Text style={commonStyles.filterLabel}>매장</Text>
+                    <Text style={commonStyles.filterLabel}>{Const.SALES_ORG}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowCornerModal(true)}>
                         <Text style={commonStyles.selectText}>{corners.find(g => g.id === selectedCornerCd)?.name || '선택'}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
@@ -239,7 +297,7 @@ export default function SalesReportByPeriod() {
             </View>
             <View style={commonStyles.sectionDivider} />
 
-            <Table data={saleList} columns={mainColumns}/>
+            <Table data={saleList} columns={mainColumns} listFooter={renderFooter}/>
 
             <View style={commonStyles.sectionDivider} />
 
@@ -275,7 +333,7 @@ export default function SalesReportByPeriod() {
                 <View style={commonStyles.modalOverlay}>
                     <View style={commonStyles.modalCard}>
                         <View style={commonStyles.modalHeader}>
-                            <Text style={commonStyles.modalTitle}>{selectedSale?.cornerNm}</Text>
+                            <Text style={commonStyles.modalTitle}>{selectedSale?.salesOrgCd}</Text>
                             <Pressable onPress={closeDetail} hitSlop={8}>
                                 <Ionicons name="close" size={24} color="#333" />
                             </Pressable>
@@ -283,7 +341,7 @@ export default function SalesReportByPeriod() {
 
                         <Table
                             data={productData}
-                            columns={productColumns}
+                            columns={saleDetailColumns}
                             isModal={true}
                             listHeader={renderSummaryRow}
                         />
@@ -311,5 +369,13 @@ const styles = StyleSheet.create({
     },
     summaryRow: {
         backgroundColor: '#fff7e6'
+    },
+    totalText: {
+        fontWeight: '700',
+        color: '#222',
+    },
+    summaryLabelText: {
+        fontWeight: '700',
+        color: '#333'
     },
 });
