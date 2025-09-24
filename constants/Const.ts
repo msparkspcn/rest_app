@@ -33,6 +33,7 @@ export default {
     TANK_NO: '탱크\n번호',
     GAS_AMT: '유량(재고)',
     TYPE: '구분',
+    TOTAL_AMT_SHORT: '합계',
     TOTAL_AMT: '전체 합계',
     ENTER_SEARCH_COND_MSG: '검색조건을 입력해 주십시오.',
     NO_RESULT_MSG: '검색결과가 없습니다.',
@@ -58,5 +59,5 @@ export default {
     NAME: '이름',
     ID: '아이디',
     PW: '비밀번호',
-
+    VAT: '부가세',
 }

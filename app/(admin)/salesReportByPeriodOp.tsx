@@ -1,7 +1,7 @@
-import { commonStyles } from '@/styles';
-import { Ionicons } from '@expo/vector-icons';
-import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useMemo, useState } from 'react';
+import {commonStyles} from '@/styles';
+import {Ionicons} from '@expo/vector-icons';
+import {StatusBar} from 'expo-status-bar';
+import React, {useEffect, useMemo, useState} from 'react';
 import {
     FlatList,
     Modal,
@@ -40,8 +40,8 @@ type CornerOption = { id: string; name: string };
 
 export default function SalesReportByPeriod() {
     const corners: CornerOption[] = useMemo(
-        () => Array.from({ length: 12 }).map((_, i) => (
-            { id: `S${100 + i}`, name: `주유소 ${i + 1}` }
+        () => Array.from({length: 12}).map((_, i) => (
+            {id: `S${100 + i}`, name: `주유소 ${i + 1}`}
         )),
         []
     );
@@ -59,8 +59,8 @@ export default function SalesReportByPeriod() {
     useEffect(() => {
         console.log('api 테스트1')
         setAuthToken("1");
-        getStoreInfo('5000511001','1234')
-    },[])
+        getStoreInfo('5000511001', '1234')
+    }, [])
 
     const getStoreInfo = (userId, password) => {
         api.login(userId, password)
@@ -70,7 +70,7 @@ export default function SalesReportByPeriod() {
                     console.log('userInfo:' + JSON.stringify(userInfo))
                 }
             })
-            .catch(error => console.log("userInfo error:"+error))
+            .catch(error => console.log("userInfo error:" + error))
             .finally()
     }
 
@@ -94,16 +94,18 @@ export default function SalesReportByPeriod() {
                     setSaleList(saleList);
                 }
             })
-            .catch(error => {console.log("restDailySale error:"+error)});
+            .catch(error => {
+                console.log("restDailySale error:" + error)
+            });
     };
 
     const renderFooter = () => (
         <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-            <View style={[{flex: 2.5},commonStyles.tableRightBorder]}>
+            <View style={[{flex: 2.5}, commonStyles.tableRightBorder]}>
                 <Text style={[commonStyles.cell, styles.summaryLabelText,
-                    {textAlign:'center'}]}>합계</Text>
+                    {textAlign: 'center'}]}>합계</Text>
             </View>
-            <View style={[{flex:1.5}, commonStyles.tableRightBorder]}>
+            <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
                 <Text
                     style={[
                         commonStyles.cell,
@@ -121,7 +123,6 @@ export default function SalesReportByPeriod() {
         restDailySale();
     };
 
-    // 전역 푸터 사용으로 지역 초기화 핸들러는 현재 미사용입니다.
 
     const openDetail = (sale: SaleRow) => {
         setSelectedSale(sale);
@@ -133,19 +134,24 @@ export default function SalesReportByPeriod() {
     };
 
     const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => ([
-        {key: 'no', title: Const.NO, flex: 0.5, align: 'center',
+        {
+            key: 'no', title: Const.NO, flex: 0.5, align: 'center',
             renderCell: (item, index) => (
-                <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
-            )},
-        { key: 'salesOrgNm', title: '사업소', flex: 2, align: 'left',
+                <Text style={[commonStyles.cell, {textAlign: 'center'}]}>{index + 1}</Text>
+            )
+        },
+        {
+            key: 'salesOrgNm', title: '사업소', flex: 2, align: 'left',
             renderCell: (item) => (
                 <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
-                    <Text style={[commonStyles.cell, commonStyles.linkText,{paddingLeft:10}]}>{item.salesOrgCd}</Text>
+                    <Text style={[commonStyles.cell, commonStyles.linkText, {paddingLeft: 10}]}>{item.salesOrgCd}</Text>
                 </Pressable>
-            ),   },
-        { key: 'saleAmt', title: '총매출', flex: 1.5, align: 'right',
+            ),
+        },
+        {
+            key: 'saleAmt', title: '총매출', flex: 1.5, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign:'right', paddingRight:10}]}>{item.saleAmt.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.saleAmt.toLocaleString()}</Text>
             )
         },
     ]), []);
@@ -164,7 +170,7 @@ export default function SalesReportByPeriod() {
         totalAmt: number
     };
     const productData: SaleDetailRow[] = useMemo(
-        () => Array.from({ length: 15 }).map((_, index) => ({
+        () => Array.from({length: 15}).map((_, index) => ({
             saleDtInfo: `상품 ${index + 1}`,
             netAmt: index * 10,
             dutyFreeAmt: index * 10,
@@ -175,36 +181,41 @@ export default function SalesReportByPeriod() {
     );
 
     const saleDetailColumns: ColumnDef<SaleDetailRow>[] = useMemo(() => ([
-        { key: 'saleDtInfo', title: Const.DATE, flex: 1, align: 'left',
+        {
+            key: 'saleDtInfo', title: Const.DATE, flex: 1, align: 'left',
             renderCell: (item) => (
                 <Text style={[commonStyles.cell,
-                    {textAlign:'center', paddingRight:10}]}>
+                    {textAlign: 'center', paddingRight: 10}]}>
                     {ymdToDateWithDay('20250923')}
                 </Text>
             )
         },
-        { key: 'qty', title: Const.SALE_QTY, flex: 1, align: 'right',
+        {
+            key: 'qty', title: Const.SALE_QTY, flex: 1, align: 'right',
             renderCell: (item) => (
                 <Text style={[commonStyles.cell, commonStyles.numberSmallCell]}>
                     {item.qty.toLocaleString()}
                 </Text>
             )
         },
-        { key: 'netAmt', title: Const.NET_AMT, flex: 1, align: 'right',
+        {
+            key: 'netAmt', title: Const.NET_AMT, flex: 1, align: 'right',
             renderCell: (item) => (
                 <Text style={[commonStyles.cell, commonStyles.numberSmallCell]}>
                     {item.netAmt.toLocaleString()}
                 </Text>
             )
         },
-        { key: 'dutyFreeAmt', title: Const.DUTY_FREE_AMT, flex: 1, align: 'right',
+        {
+            key: 'dutyFreeAmt', title: Const.DUTY_FREE_AMT, flex: 1, align: 'right',
             renderCell: (item) => (
                 <Text style={[commonStyles.cell, commonStyles.numberSmallCell]}>
                     {item.dutyFreeAmt.toLocaleString()}
                 </Text>
             )
         },
-        { key: 'totalAmt', title: Const.TOTAL_SALE_AMT, flex: 1, align: 'right',
+        {
+            key: 'totalAmt', title: Const.TOTAL_SALE_AMT, flex: 1, align: 'right',
             renderCell: (item) => (
                 <Text style={[commonStyles.cell, commonStyles.numberSmallCell]}>
                     {item.totalAmt.toLocaleString()}
@@ -234,7 +245,7 @@ export default function SalesReportByPeriod() {
             <View style={[commonStyles.modalTableRow, styles.summaryRow]}>
                 <View
                     style={[
-                        { flex: 0.7 + 2.2 },
+                        {flex: 0.7 + 2.2},
                         commonStyles.modalCellDivider,
                     ]}
                 >
@@ -245,7 +256,7 @@ export default function SalesReportByPeriod() {
                 </View>
                 <View
                     style={[
-                        { flex: 1 },
+                        {flex: 1},
                         commonStyles.modalColumnContainer,
                         commonStyles.modalCellDivider,
                     ]}
@@ -256,7 +267,7 @@ export default function SalesReportByPeriod() {
                 </View>
                 <View
                     style={[
-                        { flex: 1.5 + 2.2},
+                        {flex: 1.5 + 2.2},
                         alignStyles['right']
                     ]}
                 >
@@ -269,7 +280,7 @@ export default function SalesReportByPeriod() {
     };
     return (
         <SafeAreaView style={commonStyles.container}>
-            <StatusBar style="dark" />
+            <StatusBar style="dark"/>
 
             <View style={commonStyles.topBar}>
                 <View style={commonStyles.filterRowFront}>
@@ -287,7 +298,8 @@ export default function SalesReportByPeriod() {
                 <View style={commonStyles.filterRow}>
                     <Text style={commonStyles.filterLabel}>{Const.SALES_ORG}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowCornerModal(true)}>
-                        <Text style={commonStyles.selectText}>{corners.find(g => g.id === selectedCornerCd)?.name || Const.SELECT}</Text>
+                        <Text
+                            style={commonStyles.selectText}>{corners.find(g => g.id === selectedCornerCd)?.name || Const.SELECT}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                     <Pressable style={commonStyles.searchButton} onPress={onSearch}>
@@ -295,11 +307,11 @@ export default function SalesReportByPeriod() {
                     </Pressable>
                 </View>
             </View>
-            <View style={commonStyles.sectionDivider} />
+            <View style={commonStyles.sectionDivider}/>
 
             <Table data={saleList} columns={mainColumns} listFooter={renderFooter}/>
 
-            <View style={commonStyles.sectionDivider} />
+            <View style={commonStyles.sectionDivider}/>
 
             <Modal visible={showCornerModal} animationType="fade" transparent>
                 <View style={commonStyles.modalOverlay}>
@@ -314,7 +326,7 @@ export default function SalesReportByPeriod() {
                             data={corners}
                             keyExtractor={(item) => item.id}
                             style={commonStyles.modalList}
-                            renderItem={({ item }) => (
+                            renderItem={({item}) => (
                                 <TouchableOpacity
                                     style={commonStyles.modalItem}
                                     onPress={() => {
@@ -335,7 +347,7 @@ export default function SalesReportByPeriod() {
                         <View style={commonStyles.modalHeader}>
                             <Text style={commonStyles.modalTitle}>{selectedSale?.salesOrgCd}</Text>
                             <Pressable onPress={closeDetail} hitSlop={8}>
-                                <Ionicons name="close" size={24} color="#333" />
+                                <Ionicons name="close" size={24} color="#333"/>
                             </Pressable>
                         </View>
 

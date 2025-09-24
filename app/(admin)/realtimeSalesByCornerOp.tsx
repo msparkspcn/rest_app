@@ -123,19 +123,19 @@ export default function RealtimeSalesByCornerScreen() {
         {
             key: 'dayCompRatio', title: Const.COMP_RATIO, flex: 0.8, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.dayCompRatio.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.dayCompRatio.toLocaleString()}</Text>
             )
         },
         {
             key: 'monthSaleAmt', title: Const.MONTH_TOTAL_AMT, flex: 1.2, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.monthSaleAmt.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.monthSaleAmt.toLocaleString()}</Text>
             )
         },
         {
             key: 'monthCompRatio', title: Const.COMP_RATIO, flex: 0.8, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.monthCompRatio.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.monthCompRatio.toLocaleString()}</Text>
             )
         },
     ]), [])
@@ -192,19 +192,19 @@ export default function RealtimeSalesByCornerScreen() {
         {
             key: 'qty', title: Const.QTY, flex: 0.6, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.qty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.qty.toLocaleString()}</Text>
             )
         },
         {
             key: 'totalAmt', title: '금액', flex: 1, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.totalAmt.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.totalAmt.toLocaleString()}</Text>
             )
         },
         {
             key: 'compRatio', title: Const.COMP_RATIO, flex: 0.6, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.totalAmt.toLocaleString()}%</Text>
+                <Text style={commonStyles.numberCell}>{item.totalAmt.toLocaleString()}%</Text>
             )
         },
     ]), []);

@@ -27,10 +27,6 @@ export default function AdminLayout() {
                     options={{title: '사용자 관리', headerShown: true}}
                 />
                 <Stack.Screen
-                    name="settings"
-                    options={{title: '설정', headerShown: true}}
-                />
-                <Stack.Screen
                     name="vendorList"
                     options={{title: '거래처 목록', headerShown: true}}
                 />
@@ -71,6 +67,10 @@ export default function AdminLayout() {
                     options={{title: '실시간 매출현황(통합)', headerShown: true}}
                 />
                 <Stack.Screen
+                    name="realtimeSalesRatioOp"
+                    options={{title: '실시간 매출현황(통합비율)', headerShown: true}}
+                />
+                <Stack.Screen
                     name="salesReportByPeriod"
                     options={{title: '기간별 매출현황(휴)', headerShown: true}}
                 />
@@ -91,6 +91,10 @@ export default function AdminLayout() {
                     options={{title: '시간대별 매출현황(주)', headerShown: true}}
                 />
                 <Stack.Screen
+                    name="saleReportByTimezoneOp"
+                    options={{title: '시간대별 매출현황(통합)', headerShown: true}}
+                />
+                <Stack.Screen
                     name="monthlySalesReport"
                     options={{title: '월 매출현황(휴)', headerShown: true}}
                 />
@@ -109,6 +113,10 @@ export default function AdminLayout() {
                 <Stack.Screen
                     name="realtimeSalesByCornerOp"
                     options={{title: '실시간 매장매출현황(휴)', headerShown: true}}
+                />
+                <Stack.Screen
+                    name="mobileOrderReportByPeriod"
+                    options={{title: '기간별 모바일주문현황(휴)', headerShown: true}}
                 />
                 <Stack.Screen
                     name="cornerStockReport"

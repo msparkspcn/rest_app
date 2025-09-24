@@ -11,6 +11,8 @@ import Const from "../../constants/Const";
 type SaleRow = {
     salesOrgNm: string;
     salesOrgCd: string;
+    전주대비: string;
+    전일대비: string;
     totalAmt: number
 };
 type SummaryTotals = {
@@ -34,7 +36,7 @@ type ListItem =
     | { type: 'summaryTotals'; key: string; label: string; totalAmt: number }
     | { type: 'detail'; key: string; no: number; posGroup: string; totalAmt: number };
 type SalesOrg =  {salesOrgCd: string; salesOrgNm: string};
-export default function RealtimeSalesScreen() {
+export default function RealtimeSalesRatio() {
     const [saleDate, setSaleDate] = useState(getTodayYmd());
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempDate, setTempDate] = useState<Date | null>(null);
@@ -65,6 +67,8 @@ export default function RealtimeSalesScreen() {
                 return {
                     salesOrgCd: '',
                     salesOrgNm: `주유소 ${((idx % 6) + 1)}`,
+                    전주대비:'10.0%',
+                    전일대비:'10.0%',
                     totalAmt,
                 };
             }),
@@ -90,22 +94,36 @@ export default function RealtimeSalesScreen() {
     }
 
     const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => ([
-        {key: 'no', title: Const.NO, flex: 0.4, align: 'center',
+        {key: 'no', title: Const.NO, flex: 0.4,
             renderCell: (_item, index) => (
                 <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
             ),
         },
         {
-            key: 'salesOrgNm', title: '사업소', flex: 2, align: 'center',
+            key: 'salesOrgNm', title: '사업소', flex: 2,
             renderCell: (item) => (
                 <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
-                    <Text style={[commonStyles.cell, commonStyles.linkText, {paddingLeft: 10}]}>
+                    <Text style={[commonStyles.cell, {paddingLeft: 10}]}>
                         {item.salesOrgNm}
                     </Text>
                 </Pressable>
             ),
         },
-        {key: 'totalAmt', title: '총매출', flex: 1.2, align: 'center',
+        {key: '전주대비', title: '전주대비', flex: 1.2,
+            renderCell: (item) => (
+                <Text style={commonStyles.numberCell}>
+                    {item.전주대비.toLocaleString()}
+                </Text>
+            )
+        },
+        {key: '전일대비', title: '전일대비', flex: 1.2,
+            renderCell: (item) => (
+                <Text style={commonStyles.numberCell}>
+                    {item.전일대비.toLocaleString()}
+                </Text>
+            )
+        },
+        {key: 'totalAmt', title: '총매출', flex: 1.2,
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>
                     {item.totalAmt.toLocaleString()}
@@ -146,109 +164,12 @@ export default function RealtimeSalesScreen() {
         return [row1, row2, row3];
     }, [totalValues]);
 
-    const detailData: SaleDetailRow[] = useMemo(
-        () =>
-            Array.from({length: 10}).map((_, idx) => {
-                const qty = (idx % 4) + 1;
-                const cashAmt = 100000;
-                const cardAmt = 200000;
-                const etcAmt = 250000;
-                const totalAmt = qty * 10000000;
-                return {
-                    storNm: `포스그룹명 ${((idx % 6) + 1).toString().padStart(2, '0')}`,
-                    cashAmt,
-                    cardAmt,
-                    etcAmt,
-                    totalAmt: totalAmt,
-                };
-            }),
-        []
-    );
-
-    const SaleDetailColumns: ColumnDef<SaleDetailRow>[] = useMemo(() => ([
-        {key: 'no', title: Const.NO, flex: 0.5, align: 'center',
-            renderCell: (_item, index) => (
-                <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
-            ),
-        },
-        {key: 'storNm', title: '포스그룹', flex: 1.5, align: 'center'},
-        {
-            key: 'cashAmt', title: Const.CASH, flex: 1, align: 'center',
-            renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberSmallCell]}>
-                    {item.cashAmt.toLocaleString()}
-                </Text>
-            )
-        },
-        {
-            key: 'etcAmt', title: Const.CARD_ETC, flex: 1, align: 'right',
-            renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberSmallCell]}>
-                    {item.etcAmt.toLocaleString()}
-                </Text>
-            )
-        },
-        {
-            key: 'totalAmt', title: '금액', flex: 1.3, align: 'right',
-            renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberSmallCell]}>
-                    {item.totalAmt.toLocaleString()}
-                </Text>
-            )
-        },
-    ]), []);
-
-    const summaryRow = useMemo(() => {
-        const totalSaleAmt = detailData.reduce((sum, item) => sum + item.totalAmt, 0);
-        const totalCashAmt = detailData.reduce((sum, item) => sum + item.cashAmt, 0);
-        const totalEtcAmt = detailData.reduce((sum, item) => sum + item.cardAmt + item.etcAmt, 0);
-        return {
-            totalCashAmt: totalCashAmt,
-            totalSaleAmt: totalSaleAmt,
-            totalEtcAmt: totalEtcAmt
-        };
-    }, [detailData]);
-
-    const renderDetailFooterRow = () => {
-        return (
-            <View style={[commonStyles.modalTableRow, commonStyles.summaryRow]}>
-                <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
-                    <Text
-                        style={[commonStyles.modalCell,
-                            {
-                                textAlign: 'center',
-                                fontSize: 13,
-                                fontWeight: 'bold'
-                            }
-                        ]}>합계</Text>
-                </View>
-                <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
-                    <Text style={[commonStyles.modalCell, commonStyles.numberSmallCell]}>
-                        {summaryRow.totalCashAmt.toLocaleString()}
-                    </Text>
-                </View>
-                <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
-                    <Text style={[commonStyles.modalCell, commonStyles.numberSmallCell]}>
-                        {summaryRow.totalEtcAmt.toLocaleString()}
-                    </Text>
-                </View>
-                <View style={[{flex: 1.3}, commonStyles.tableRightBorder]}>
-                    <Text style={[commonStyles.modalCell, commonStyles.numberSmallCell]}>
-                        {summaryRow.totalSaleAmt.toLocaleString()}
-                    </Text>
-                </View>
-            </View>
-        )
-    }
-
     const handleVatExcludedToggle = () => {
         setVatExcludedChecked(!vatExcludedChecked);
     };
     const handleDcIncludedToggle = () => {
         setDcIncludedChecked(!dcIncludedChecked)
     }
-
-
 
     return (
         <SafeAreaView style={commonStyles.container}>
@@ -307,10 +228,12 @@ export default function RealtimeSalesScreen() {
                     <View>
                         {summaryRows.map(row => (
                             <View key={row.key} style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-                                <View style={[{flex:0.8}, commonStyles.tableRightBorder]}>
-                                    <Text style={[{paddingLeft:10},styles.cell, styles.summaryLabelText]}>{row.label}</Text>
+                                <View style={[{flex:2.4}, commonStyles.tableRightBorder]}>
+                                    <Text style={[{textAlign:'center'},styles.cell, styles.summaryLabelText]}>
+                                        {row.label}
+                                    </Text>
                                 </View>
-                                <View style={[{ flex: 1 }]}>
+                                <View style={[{ flex: 3.6 }, commonStyles.tableRightBorder]}>
                                     <Text style={commonStyles.numberCell}>
                                         {"pairText" in row ? row.pairText : row.totalAmt.toLocaleString()}
                                     </Text>
@@ -356,34 +279,6 @@ export default function RealtimeSalesScreen() {
                     </View>
                 </View>
             </Modal>
-
-            <Modal
-                visible={isDetailVisible}
-                transparent animationType="fade"
-                onRequestClose={() => setIsDetailVisible(false)}
-            >
-                <View style={commonStyles.modalOverlay}>
-                    <View style={commonStyles.modalCard}>
-                        <View style={commonStyles.modalHeader}>
-                            <View style={{flexDirection:'row',alignItems: 'flex-end'}}>
-                                <Text style={commonStyles.modalTitle}>{selectedSalesOrg?.salesOrgNm}</Text>
-                                <Text style={commonStyles.modalSmallTitle}>  (VAT포함)</Text>
-                            </View>
-
-                            <TouchableOpacity onPress={() => setIsDetailVisible(false)}>
-                                <Text style={commonStyles.modalClose}>✕</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        <Table
-                            data={detailData}
-                            columns={SaleDetailColumns}
-                            isModal={true}
-                            listFooter={renderDetailFooterRow}
-                        />
-                    </View>
-                </View>
-            </Modal>
         </SafeAreaView>
     );
 }
@@ -392,6 +287,7 @@ const styles = StyleSheet.create({
     selectText: {fontSize: 14, color: '#333'},
     summaryLabelText: {fontWeight: '700', color: '#333'},
     cell: {fontSize: 13, color: '#444'},
+    rightSpanText: {textAlign: 'right'},
 });
 
 

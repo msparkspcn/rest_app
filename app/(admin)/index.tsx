@@ -21,7 +21,7 @@ type MenuGroup = { key: string; title: string; icon: string; children: MenuChild
 export default function AdminHomeScreen() {
   const { user } = useUser();
   const [isTOSOpen, setIsTOSOpen] = useState(false);
-  console.log('user:'+JSON.stringify(user))
+  // console.log('user:'+JSON.stringify(user))
   if(user==null) {
 
   }
@@ -65,9 +65,9 @@ export default function AdminHomeScreen() {
         { title: '기간별 매출현황(휴)', icon: '🗓️', route: '/(admin)/salesReportByPeriod', userRoleType: DEP_R },
         { title: '기간별 매출현황(주)', icon: '🗓️', route: '/(admin)/salesReportByPeriodG', userRoleType: DEP_G },
         { title: '기간별 매출현황(통합)', icon: '🗓️', route: '/(admin)/salesReportByPeriodOp', userRoleType: DEP_OP },
-        { title: '시간대별 매출현황(통합)', icon: '🗓️', route: '/(admin)/dashboard', userRoleType: DEP_OP },
-        { title: '기간별모바일주문현황(휴)', icon: '🗓️', route: '/(admin)/dashboard', userRoleType: DEP_OP },
-        { title: '실시간 매출현황(통합비율)', icon: '🗓️', route: '/(admin)/dashboard', userRoleType: DEP_OP },
+        { title: '시간대별 매출현황(통합)', icon: '🗓️', route: '/(admin)/saleReportByTimezoneOp', userRoleType: DEP_OP },
+        { title: '기간별 모바일주문현황(휴)', icon: '🗓️', route: '/(admin)/mobileOrderReportByPeriod', userRoleType: DEP_OP },
+        { title: '실시간 매출현황(통합비율)', icon: '🗓️', route: '/(admin)/realtimeSalesRatioOp', userRoleType: DEP_OP },
         { title: '월 매출현황(휴)', icon: '📅', route: '/(admin)/monthlySalesReport', userRoleType: DEP_R },
         { title: '시설별 실시간 매출(통합)', icon: '🏗️', route: '/(admin)/realtimeSalesBySalesOrgG', userRoleType: DEP_G },
         { title: '시설별 실시간 매출(통합)', icon: '🏗️', route: '/(admin)/realtimeSalesBySalesOrg', userRoleType: DEP_R },

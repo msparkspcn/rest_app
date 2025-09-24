@@ -81,7 +81,7 @@ export default function KioskSoldOutScreen() {
         <View style={commonStyles.filterRow}>
           <Text style={commonStyles.filterLabel}>매장</Text>
           <TouchableOpacity
-            style={styles.selectInput}
+            style={commonStyles.selectInput}
             onPress={() => setShowStoreModal(true)}
           >
             <Text style={[styles.selectText, !selectedStoreId && styles.placeholderText]}>
@@ -109,7 +109,7 @@ export default function KioskSoldOutScreen() {
             <View style={commonStyles.listModalHeader}>
               <Text style={commonStyles.modalTitle}>매장 선택</Text>
               <TouchableOpacity onPress={() => setShowStoreModal(false)}>
-                <Text style={styles.modalClose}>✕</Text>
+                <Text style={commonStyles.modalClose}>✕</Text>
               </TouchableOpacity>
             </View>
             <FlatList
@@ -118,13 +118,13 @@ export default function KioskSoldOutScreen() {
               style={commonStyles.modalList}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  style={styles.modalItem}
+                  style={commonStyles.modalItem}
                   onPress={() => {
                     setSelectedStoreId(item.id);
                     setShowStoreModal(false);
                   }}
                 >
-                  <Text style={styles.modalItemText}>{item.name}</Text>
+                  <Text style={commonStyles.modalItemText}>{item.name}</Text>
                 </TouchableOpacity>
               )}
             />
@@ -136,18 +136,6 @@ export default function KioskSoldOutScreen() {
 }
 
 const styles = StyleSheet.create({
-  selectInput: {
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    flex: 1,
-  },
   selectText: {
     fontSize: 16,
     color: '#333',
@@ -155,36 +143,8 @@ const styles = StyleSheet.create({
   placeholderText: {
     color: '#999',
   },
-  headerCell: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#333',
-  },
-  tableRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#eee',
-    paddingVertical: 12,
-  },
   cell: {
     fontSize: 13,
     color: '#444',
-  },
-
-  modalClose: {
-    fontSize: 20,
-    color: '#666',
-  },
-
-  modalItem: {
-    paddingVertical: 13,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  modalItemText: {
-    fontSize: 16,
-    color: '#333',
   },
 });

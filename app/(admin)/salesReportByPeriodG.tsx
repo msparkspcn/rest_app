@@ -113,7 +113,7 @@ export default function SalesReportByPeriod() {
         restDailySale();
     };
 
-    // 전역 푸터 사용으로 지역 초기화 핸들러는 현재 미사용입니다.
+
 
     const openDetail = (sale: SaleRow) => {
         setSelectedSale(sale);
@@ -137,12 +137,12 @@ export default function SalesReportByPeriod() {
             ),   },
         { key: 'saleQty', title: Const.SALE_QTY, flex: 1.2, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign:'right', paddingRight:10}]}>{item.saleQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.saleQty.toLocaleString()}</Text>
             )
         },
         { key: 'saleAmt', title: '총매출', flex: 1.2, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign:'right', paddingRight:10}]}>{item.saleAmt.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.saleAmt.toLocaleString()}</Text>
             )
         },
     ]), []);
@@ -170,21 +170,21 @@ export default function SalesReportByPeriod() {
         { key: 'itemNm', title: '상품명',   flex: 2.2, align: 'left' },
         { key: 'qty', title: '판매\n수량',   flex: 1.2, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>
+                <Text style={commonStyles.numberCell}>
                     {item.qty.toLocaleString()}
                 </Text>
             )
         },
         { key: 'price', title: Const.PRICE,   flex: 1.5, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>
+                <Text style={commonStyles.numberCell}>
                     {item.price.toLocaleString()}
                 </Text>
             )
         },
         { key: 'totalAmt', title: '금액',   flex: 2, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>
+                <Text style={commonStyles.numberCell}>
                     {item.totalAmt.toLocaleString()}
                 </Text>
             )

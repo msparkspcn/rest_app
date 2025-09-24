@@ -8,7 +8,7 @@ import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
 import Const from "../../constants/Const";
 
-type SaleRow = { tmzonDiv: string; totalAmt: number, billCnt: number };
+type SaleRow = { tmzonDiv: string; totalAmt: number, ratio: number };
 type ListItem = {
     type: "summaryTotals";
     key: string;
@@ -19,10 +19,11 @@ type ListItem = {
 type PosGroup = { id: string; name: string };
 
 export default function SalesReportByTimezoneScreen() {
-    const [saleDate, setSaleDate] = useState(getTodayYmd());
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempDate, setTempDate] = useState<Date | null>(null);
-
+    const [fromSaleDt, setFromSaleDt] = useState(getTodayYmd());
+    const [toSaleDt, setToSaleDt] = useState(getTodayYmd());
+    const [currentPickerType, setCurrentPickerType] = useState('from')
     const posGroups: PosGroup[] = useMemo(
         () => Array.from({length: 6}).map((_, i) => ({id: `G${i + 1}`, name: `그룹 ${i + 1}`})),
         []
@@ -36,7 +37,7 @@ export default function SalesReportByTimezoneScreen() {
                 const tmzonDiv = String(idx + 1).padStart(2, "0") + "시";
                 return {
                     tmzonDiv,
-                    billCnt: idx * 10,
+                    ratio: idx * 10,
                     totalAmt: 10000,
                 };
             }),
@@ -52,8 +53,9 @@ export default function SalesReportByTimezoneScreen() {
         // 데모: 현재는 선택 값만으로 필터링 적용
     };
 
-    const openDatePicker = () => {
+    const openDatePicker = (pickerType: string) => {
         setTempDate(new Date());
+        setCurrentPickerType(pickerType);
         setShowDatePicker(true);
     };
 
@@ -62,13 +64,17 @@ export default function SalesReportByTimezoneScreen() {
         {
             key: 'totalAmt', title: '판매금액', flex: 1, align: 'center',
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.totalAmt.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>
+                    {item.totalAmt.toLocaleString()}
+                </Text>
             )
         },
         {
-            key: 'billCnt', title: '영수건수', flex: 0.5, align: 'center',
+            key: 'ratio', title: '비율', flex: 0.5, align: 'center',
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.billCnt.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>
+                    {item.ratio.toLocaleString()}.0%
+                </Text>
             )
         },
     ]), [])
@@ -98,7 +104,7 @@ export default function SalesReportByTimezoneScreen() {
                 .filter((row) => group.includes(String(row.tmzonDiv).padStart(2, "0")))
                 .reduce(
                     (acc, row) => {
-                        acc.billCnt += row.billCnt;
+                        acc.billCnt += row.ratio;
                         acc.totalAmt += row.totalAmt;
                         return acc;
                     },
@@ -149,14 +155,19 @@ export default function SalesReportByTimezoneScreen() {
 
             <View style={commonStyles.topBar}>
                 <View style={commonStyles.filterRowFront}>
-                    <Text style={commonStyles.filterLabel}>조회일자</Text>
-                    <TouchableOpacity style={commonStyles.selectInput} onPress={openDatePicker}>
-                        <Text style={styles.selectText}>{formattedDate(saleDate)}</Text>
+                    <Text style={commonStyles.filterLabel}>조회기간</Text>
+                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('from')}>
+                        <Text style={styles.selectText}>{formattedDate(fromSaleDt)}</Text>
+                        <Text style={commonStyles.selectArrow}> ▼</Text>
+                    </TouchableOpacity>
+                    <Text>-</Text>
+                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('to')}>
+                        <Text style={styles.selectText}>{formattedDate(toSaleDt)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={commonStyles.filterRow}>
-                    <Text style={commonStyles.filterLabel}>포스그룹</Text>
+                    <Text style={commonStyles.filterLabel}>사업장</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowPosGroupModal(true)}>
                         <Text
                             style={styles.selectText}>{posGroups.find(g => g.id === selectedPosGroupId)?.name || Const.SELECT}</Text>
@@ -182,10 +193,16 @@ export default function SalesReportByTimezoneScreen() {
                                     </Text>
                                 </View>
                                 <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
-                                    <Text style={commonStyles.numberCell}>{row.totalAmt}</Text>
+                                    <Text style={commonStyles.numberCell}>
+                                        {row.totalAmt}
+                                    </Text>
                                 </View>
-                                <View style={[{flex: 0.5}, commonStyles.tableRightBorder]}>
-                                    <Text style={commonStyles.numberCell}>{row.billCnt}</Text>
+                                <View style={[{
+                                    flex: 0.5,
+                                }, commonStyles.tableRightBorder]}>
+                                    <Text style={commonStyles.numberCell}>
+                                        {row.billCnt}
+                                    </Text>
                                 </View>
                             </View>
                         ))}
@@ -197,13 +214,17 @@ export default function SalesReportByTimezoneScreen() {
                 visible={showDatePicker}
                 initialDate={tempDate}
                 onClose={() => setShowDatePicker(false)}
-                onConfirm={(date) => setSaleDate(dateToYmd(date))}
+                onConfirm={(date) => {
+                    if (currentPickerType === 'from') setFromSaleDt(dateToYmd(date));
+                    else setToSaleDt(dateToYmd(date));
+                }}
             />
+
             <Modal visible={showPosGroupModal} transparent animationType="slide"
                    onRequestClose={() => setShowPosGroupModal(false)}>
                 <View style={commonStyles.modalOverlay}>
                     <View style={commonStyles.modalContent}>
-                        <View style={commonStyles.modalHeader}>
+                        <View style={commonStyles.listModalHeader}>
                             <Text style={commonStyles.modalTitle}>포스그룹 선택</Text>
                             <TouchableOpacity onPress={() => setShowPosGroupModal(false)}>
                                 <Text style={commonStyles.modalClose}>✕</Text>
@@ -233,9 +254,9 @@ export default function SalesReportByTimezoneScreen() {
 
 const styles = StyleSheet.create({
     selectText: {fontSize: 14, color: '#333'},
+    summaryRow: {backgroundColor: '#fff7e6'},
     summaryLabelText: {fontWeight: '600', fontSize: 12, color: '#333'},
     cell: {fontSize: 13, color: '#444'},
-    rightSpanText: {textAlign: 'right'},
 });
 
 

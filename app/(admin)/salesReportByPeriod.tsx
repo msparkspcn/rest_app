@@ -56,7 +56,7 @@ export default function SalesReportByPeriod() {
         console.log('api 테스트1')
         setAuthToken("1");
         getStoreInfo('5000511001','1234')
-    })
+    },[])
 
     const getStoreInfo = (userId, password) => {
         api.login(userId, password)
@@ -97,8 +97,6 @@ export default function SalesReportByPeriod() {
         restDailySale();
     };
 
-    // 전역 푸터 사용으로 지역 초기화 핸들러는 현재 미사용입니다.
-
     const openDetail = (sale: SaleRow) => {
         setSelectedSale(sale);
         setIsDetailVisible(true);
@@ -111,12 +109,11 @@ export default function SalesReportByPeriod() {
     const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => ([
         { key: 'saleDtInfo',       title: '일자(요일)',     flex: 1, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell,
-                    {textAlign:'center', paddingRight:10}]}>
+                <Text style={[commonStyles.numberCell, {textAlign:'center'}]}>
                     {ymdToDateWithDay(item.saleDt)}
                 </Text>
             )},
-        { key: 'cornerNm',     title: '매장명',   flex: 2,   align: 'left',
+        { key: 'cornerNm',     title: Const.CORNER_NM,   flex: 2,   align: 'left',
             renderCell: (item) => (
                 <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
                     <Text style={[commonStyles.cell, commonStyles.linkText,{paddingLeft:10}]}>{item.cornerNm}</Text>
@@ -124,7 +121,7 @@ export default function SalesReportByPeriod() {
             ),   },
         { key: 'saleAmt', title: '총매출', flex: 1.2, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign:'right', paddingRight:10}]}>{item.saleAmt.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.saleAmt.toLocaleString()}</Text>
             )
         },
     ]), []);

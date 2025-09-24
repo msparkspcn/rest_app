@@ -53,10 +53,7 @@ export default function PurchaseDailyReportScreen() {
         {
             key: 'amount', title: '금액', flex: 1.5, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {
-                    textAlign: 'right',
-                    paddingRight: 10
-                }]}>{item.amount.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.amount.toLocaleString()}</Text>
             )
         },
     ]), []);
@@ -97,25 +94,25 @@ export default function PurchaseDailyReportScreen() {
         {key: 'itemNm', title: '상품', flex: 2, align: 'left'},
         {key: 'seq', title: '일련\n번호', flex: 1, align: 'left',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.no.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.no.toLocaleString()}</Text>
             )
         },
         {
             key: 'price', title: Const.PRICE, flex: 1.5, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.price.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.price.toLocaleString()}</Text>
             )
         },
         {
             key: 'qty', title: Const.QTY, flex: 1.5, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.qty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.qty.toLocaleString()}</Text>
             )
         },
         {
             key: 'totalAmt', title: '금액', flex: 2, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.totalAmt.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.totalAmt.toLocaleString()}</Text>
             )
         },
     ]), []);

@@ -136,10 +136,16 @@ export const commonStyles = StyleSheet.create({
         width: '100%',
     },
     numberCell: {
+        fontSize: 12,
+        color: '#444',
+        width: '100%',
         paddingRight:10,
         textAlign: 'right'
     },
     numberSmallCell:  {
+        fontSize: 12,
+        color: '#444',
+        width: '100%',
         paddingRight:5,
         textAlign: 'right'
     },
@@ -342,7 +348,7 @@ export const commonStyles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#ddd',
         borderRadius: 8,
-        paddingHorizontal: 16,
+        paddingHorizontal: 8,
         paddingVertical: 6,
         flexDirection: 'row',
         alignItems: 'center',
@@ -391,9 +397,7 @@ export const commonStyles = StyleSheet.create({
         color: '#333',
     },
     summaryRow: {
-        height: 30,
-        // borderRightWidth: StyleSheet.hairlineWidth,
-        // borderRightColor: '#aaa',
+        height: 35,
         backgroundColor: '#fff7e6'
     },
     listEmptyComponent: {

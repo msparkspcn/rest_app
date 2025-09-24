@@ -49,30 +49,19 @@ export default function PurchaseDailyReportScreen() {
         {
             key: 'amount', title: '금액', flex: 1, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {
-                    textAlign: 'right',
-                    paddingRight: 10
-                }]}>{item.amount.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.amount.toLocaleString()}</Text>
             )
         },
     ]), []);
 
     const renderFooter = () => (
         <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-            <View style={[{flex: 3,
-                justifyContent: 'center',
-                borderRightWidth: StyleSheet.hairlineWidth,
-                borderRightColor: '#aaa',
-                height: '100%'}]}>
+            <View style={[{flex: 3}, commonStyles.tableRightBorder]}>
                 <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.totalText]}>
                     합계
                 </Text>
             </View>
-            <View style={{flex:1,
-                justifyContent: 'center',
-                borderRightWidth: StyleSheet.hairlineWidth,
-                borderRightColor: '#aaa',
-                height: '100%'}}>
+            <View style={[{flex:1}, commonStyles.tableRightBorder]}>
                 <Text style={[commonStyles.cell, commonStyles.numberCell, styles.totalText]}>
                     {totalAmount.toLocaleString()}
                 </Text>
@@ -100,46 +89,34 @@ export default function PurchaseDailyReportScreen() {
         {
             key: 'qty', title: Const.QTY, flex: 1, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.qty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.qty.toLocaleString()}</Text>
             )
         },
         {
             key: 'price', title: Const.PRICE, flex: 1.5, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.price.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.price.toLocaleString()}</Text>
             )
         },
         {
             key: 'totalAmt', title: '금액', flex: 2.2, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.totalAmt.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.totalAmt.toLocaleString()}</Text>
             )
         },
     ]), []);
 
     const renderDetailFooter = () => (
         <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-            <View style={{flex: 2.2,
-                justifyContent: 'center',
-                borderRightWidth: StyleSheet.hairlineWidth,
-                borderRightColor:'#aaa',
-                height:'100%'}}>
+            <View style={[{flex: 2.2}, commonStyles.tableRightBorder]}>
                 <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.modalTotalText]}>합계</Text>
             </View>
-            <View style={{flex: 1,
-                justifyContent: 'center',
-                borderRightWidth: StyleSheet.hairlineWidth,
-                borderRightColor:'#aaa',
-                height:'100%'}}>
+            <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
                 <Text style={[commonStyles.cell, commonStyles.numberCell, styles.modalTotalText]}>
                     {detailTotalQty.toLocaleString()}
                 </Text>
             </View>
-            <View style={{flex: 3.7,
-                justifyContent: 'center',
-                borderRightWidth: StyleSheet.hairlineWidth,
-                borderRightColor:'#aaa',
-                height:'100%'}}>
+            <View style={[{flex: 3.7}, commonStyles.tableRightBorder]}>
                 <Text style={[commonStyles.cell, commonStyles.numberCell, styles.modalTotalText]}>
                     {detailTotalAmount.toLocaleString()}
                 </Text>
@@ -263,17 +240,9 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#333',
     },
-    totalRow: {
-        height: 30,
-        alignItems: 'center',
-        backgroundColor: '#fafafa',
-    },
     totalText: {
         fontWeight: '700',
         color: '#222',
-    },
-    modalTotalRow: {
-        backgroundColor: '#fafafa',
     },
     modalTotalText: {
         fontWeight: '700',

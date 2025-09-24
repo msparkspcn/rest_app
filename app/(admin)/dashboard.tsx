@@ -86,20 +86,20 @@ export default function DashboardScreen() {
   };
 
   const mainColumns: ColumnDef<CornerRow>[] = useMemo(() => ([
-    { key: 'no',       title: Const.NO,     flex: 0.8, align: 'center',
+    { key: 'no', title: Const.NO, flex: 0.8, align: 'center',
       renderCell: (_item, index) => (
           <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
       ),
     },
-    { key: 'cornerNm',     title: Const.CORNER_NM,   flex: 2,   align: 'left',
+    { key: 'cornerNm', title: Const.CORNER_NM, flex: 2, align: 'left',
       renderCell: (item) => (
           <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
             <Text style={[commonStyles.cell, commonStyles.linkText,{paddingLeft:10}]}>{item.cornerNm}</Text>
           </Pressable>
       ),   },
-    { key: 'cornerCd',     title: '코드',    flex: 1.2, align: 'center' },
-    { key: 'posGroup', title: '포스그룹', flex: 1.5, align: 'left'   },
-    { key: 'useYn',    title: Const.USE_YN, flex: 1,   align: 'center',
+    { key: 'cornerCd', title: '코드', flex: 1.2, align: 'center'},
+    { key: 'posGroup', title: '포스그룹', flex: 1.5, align: 'left'},
+    { key: 'useYn', title: Const.USE_YN, flex: 1,
       renderCell: (item) => (
           <Text style={[commonStyles.cell, {textAlign:'center'}]}>
             {item.useYn ==='Y' ? '운영' : '폐점'}
@@ -123,13 +123,13 @@ export default function DashboardScreen() {
           <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
       ),
     },
-    { key: 'itemCd', title: Const.ITEM_CD,  flex: 1.8, align: 'left' },
-    { key: 'itemName', title: Const.ITEM_NM,   flex: 2.2, align: 'left'   },
+    { key: 'itemCd', title: Const.ITEM_CD,  flex: 1.8, align: 'left'},
+    { key: 'itemName', title: Const.ITEM_NM,   flex: 2.2, align: 'left'},
   ]), []);
 
   const CornerNmRow = () => {
     return (
-        <View style={{ borderBottomWidth: 1, borderBottomColor: '#ccc' }}>
+        <View style={{ borderWidth: StyleSheet.hairlineWidth, borderColor: '#aaa' }}>
           <Text style={styles.modalCornerNm}>{selectedCorner?.cornerNm}</Text>
         </View>
     );
@@ -189,15 +189,6 @@ export default function DashboardScreen() {
 }
 
 const styles = StyleSheet.create({
-  screenTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 12,
-  },
-  storeNamePressable: {
-    flex: 2,
-  },
   modalCornerNm: {
     fontSize: 14,
     color: '#555',

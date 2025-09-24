@@ -100,19 +100,13 @@ export default function CornerWhStockReportScreen() {
         {
             key: 'giQty', title: Const.GI_QTY, flex: 1, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {
-                    textAlign: 'right',
-                    paddingRight: 10
-                }]}>{item.giQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.giQty.toLocaleString()}</Text>
             )
         },
         {
             key: 'saleQty', title: Const.SALE, flex: 1, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {
-                    textAlign: 'right',
-                    paddingRight: 10
-                }]}>{item.saleQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.saleQty.toLocaleString()}</Text>
             )
         },
         {

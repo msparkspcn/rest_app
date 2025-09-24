@@ -68,19 +68,13 @@ export default function PurchaseProductReportScreen() {
         {
             key: 'qty', title: Const.QTY, flex: 0.5, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {
-                    textAlign: 'right',
-                    paddingRight: 10
-                }]}>{item.qty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.qty.toLocaleString()}</Text>
             )
         },
         {
             key: 'amount', title: '금액', flex: 0.8, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {
-                    textAlign: 'right',
-                    paddingRight: 10
-                }]}>{item.amount.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.amount.toLocaleString()}</Text>
             )
         },
     ]), []);
@@ -152,7 +146,7 @@ export default function PurchaseProductReportScreen() {
         {
             key: 'qty', title: Const.QTY, flex: 0.5, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>
+                <Text style={commonStyles.numberCell}>
                     {item.qty.toLocaleString()}
                 </Text>
             )
@@ -160,7 +154,7 @@ export default function PurchaseProductReportScreen() {
         {
             key: 'totalAmt', title: '금액', flex: 1.5, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>
+                <Text style={commonStyles.numberCell}>
                     {item.totalAmt.toLocaleString()}
                 </Text>
             )
@@ -169,18 +163,20 @@ export default function PurchaseProductReportScreen() {
 
 
     const renderDetailFooter = () => (
-        <View style={[commonStyles.modalTableRow, styles.modalTotalRow]}>
-            <View style={{flex: 3.2}}>
-                <Text style={[commonStyles.modalCell, commonStyles.alignCenter, styles.modalTotalText]}>합계</Text>
+        <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+            <View style={[{flex: 3.2}, commonStyles.tableRightBorder]}>
+                <Text style={[commonStyles.modalCell, commonStyles.alignCenter, styles.modalTotalText]}>
+                    {Const.TOTAL_AMT_SHORT}
+                </Text>
             </View>
-            <View style={{flex: 0.5}}>
+            <View style={[{flex: 0.5}, commonStyles.tableRightBorder]}>
                 <Text
-                    style={[commonStyles.modalCell, commonStyles.numberCell, styles.modalTotalText]}>
+                    style={commonStyles.numberCell}>
                     {detailTotals.qty.toLocaleString()}
                 </Text>
             </View>
-            <View style={{flex: 1.5}}>
-                <Text style={[commonStyles.modalCell, commonStyles.numberCell, styles.modalTotalText]}>
+            <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
+                <Text style={commonStyles.numberCell}>
                     {detailTotals.amount.toLocaleString()}
                 </Text>
             </View>
@@ -264,19 +260,8 @@ export default function PurchaseProductReportScreen() {
 }
 
 const styles = StyleSheet.create({
-    input: {
-        flex: 1,
-        height: 40,
-        backgroundColor: '#fff',
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        color: '#333'
-    },
     selectText: {fontSize: 14, color: '#333'},
     totalRow: {backgroundColor: '#fafafa'},
     totalText: {fontWeight: '700', color: '#222'},
-    modalTotalRow: {backgroundColor: '#fafafa'},
     modalTotalText: {fontWeight: '700', color: '#222'},
 });

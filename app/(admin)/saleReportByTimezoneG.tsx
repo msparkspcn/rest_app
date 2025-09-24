@@ -66,19 +66,13 @@ export default function SalesReportByTimezoneScreen() {
             key: 'totalAmt', title: '판매금액', flex: 1, align: 'center',
             renderCell: (item) => (
                 <Text style={[
-                    commonStyles.cell, {
-                    textAlign: 'right',
-                    paddingRight: 10,
-                }]}>{item.totalAmt.toLocaleString()}</Text>
+                    commonStyles.cell, commonStyles.numberCell]}>{item.totalAmt.toLocaleString()}</Text>
             )
         },
         {
             key: 'billCnt', title: '영수건수', flex: 0.5, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {
-                    textAlign: 'right',
-                    paddingRight: 10
-                }]}>{item.billCnt.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.billCnt.toLocaleString()}</Text>
             )
         },
     ]), [])
@@ -223,21 +217,13 @@ export default function SalesReportByTimezoneScreen() {
                                         // backgroundColor:'red'
                                     }}
                                 >
-                                    <Text style={[styles.cell,
-                                        {
-                                            paddingRight: 10,
-                                            textAlign: 'right'
-                                        },
-                                    ]}>
+                                    <Text style={commonStyles.numberCell}>
                                         {row.totalAmt.toLocaleString()}
                                     </Text>
                                 </View>
 
                                 <View style={{ flex: 0.5 }}>
-                                    <Text style={[
-                                        styles.cell,
-                                        { textAlign: 'right', paddingRight: 10 },
-                                    ]}>
+                                    <Text style={commonStyles.numberCell}>
                                         {row.billCnt.toLocaleString()}
                                     </Text>
                                 </View>
@@ -259,19 +245,17 @@ export default function SalesReportByTimezoneScreen() {
 
 const styles = StyleSheet.create({
     selectText: {fontSize: 14, color: '#333'},
-    tableList: {flex: 1},
-    tableListContent: {paddingBottom: 12},
-    tableRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: '#eee',
-        paddingVertical: 12
+    summaryLabelText: {
+        fontWeight: '600',
+        fontSize: 11,
+        color: '#333',
+        textAlign: 'center'
     },
-    summaryRow: {backgroundColor: '#fff7e6'},
-    summaryLabelText: {fontWeight: '600', fontSize: 11, color: '#333', textAlign: 'center'},
-    cell: {fontSize: 12, color: '#444', width:'100%'},
-    rightSpanText: {textAlign: 'right'},
+    cell: {
+        fontSize: 12,
+        color: '#444',
+        width:'100%'
+    },
 });
 
 

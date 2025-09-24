@@ -116,25 +116,25 @@ export default function RealtimeSalesBySalesOrgScreen() {
             {
                 key: 'yedaySaleAmt', title: '전일매출', flex: 1, align: 'center',
                 renderCell: (item) => (
-                    <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.yedaySaleAmt.toLocaleString()}</Text>
+                    <Text style={commonStyles.numberCell}>{item.yedaySaleAmt.toLocaleString()}</Text>
                 )
             },
             {
                 key: 'todaySaleAmt', title: '당일매출', flex: 1, align: 'center',
                 renderCell: (item) => (
-                    <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.todaySaleAmt.toLocaleString()}</Text>
+                    <Text style={commonStyles.numberCell}>{item.todaySaleAmt.toLocaleString()}</Text>
                 )
             },
             {
                 key: 'monthSaleAmt', title: '월누계매출', flex: 1.1, align: 'center',
                 renderCell: (item) => (
-                    <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.monthSaleAmt.toLocaleString()}</Text>
+                    <Text style={commonStyles.numberCell}>{item.monthSaleAmt.toLocaleString()}</Text>
                 )
             },
             {
                 key: 'yearSaleAmt', title: '년누계', flex: 1.3, align: 'center',
                 renderCell: (item) => (
-                    <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.yearSaleAmt.toLocaleString()}</Text>
+                    <Text style={commonStyles.numberCell}>{item.yearSaleAmt.toLocaleString()}</Text>
                 )
             },
         ];
@@ -143,7 +143,7 @@ export default function RealtimeSalesBySalesOrgScreen() {
             return [
                 {
                     key: 'cornerNm',
-                    title: '매장명',
+                    title: Const.CORNER_NM,
                     flex: 1.3,
                     align: 'center',
                     renderCell: (item) => (

@@ -136,7 +136,7 @@ export default function RealtimeSalesBySalesOrgScreen() {
             return [
                 {
                     key: 'cornerNm',
-                    title: '매장명',
+                    title: Const.CORNER_NM,
                     flex: 1.2,
                     align: 'center',
                     renderCell: (item) => (

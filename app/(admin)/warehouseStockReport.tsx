@@ -119,25 +119,25 @@ export default function WarehouseStockReportScreen() {
         {
             key: 'totalStockQty', title: Const.TOTAL_STOCK_QTY, flex: 1, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.totalStockQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.totalStockQty.toLocaleString()}</Text>
             )
         },
         {
             key: 'giQty', title: Const.GI_QTY, flex: 1.5, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.giQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.giQty.toLocaleString()}</Text>
             )
         },
         {
             key: 'saleQty', title: Const.SALE, flex: 1, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.saleQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.saleQty.toLocaleString()}</Text>
             )
         },
         {
             key: 'curStockQty', title: Const.CUR_STOCK_QTY, flex: 1, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.curStockQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.curStockQty.toLocaleString()}</Text>
             )
         },
     ]), []);
@@ -179,28 +179,19 @@ export default function WarehouseStockReportScreen() {
         {
             key: 'totalStockQty', title: Const.TOTAL_STOCK_QTY, flex: 1, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {
-                    textAlign: 'right',
-                    paddingRight: 10
-                }]}>{item.totalStockQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.totalStockQty.toLocaleString()}</Text>
             )
         },
         {
             key: 'giQty', title: Const.GI_QTY, flex: 1, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {
-                    textAlign: 'right',
-                    paddingRight: 10
-                }]}>{item.giQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.giQty.toLocaleString()}</Text>
             )
         },
         {
             key: 'goQty', title: Const.GO_QTY, flex: 1, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {
-                    textAlign: 'right',
-                    paddingRight: 10
-                }]}>{item.goQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.goQty.toLocaleString()}</Text>
             )
         },
         {

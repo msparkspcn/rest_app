@@ -158,11 +158,6 @@ export default function VendorListScreen() {
 }
 
 const styles = StyleSheet.create({
-  tableList: {
-    flex: 1,
-    backgroundColor: '#fff'
-  },
-
   modalStoreName: {
     fontSize: 14,
     color: '#555',

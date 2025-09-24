@@ -72,7 +72,6 @@ export default function RealtimeSalesScreen() {
     }, [baseData, posGroups, selectedPosGroupId]);
 
     const onSearch = () => {
-        // 데모: 현재는 선택 값만으로 필터링 적용
     };
 
     const openDatePicker = () => {
@@ -102,21 +101,21 @@ export default function RealtimeSalesScreen() {
         },
         {key: 'cashAmt', title: '현금', flex: 1, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign: 'right',paddingRight: 10}]}>
+                <Text style={commonStyles.numberCell}>
                     {item.cashAmt.toLocaleString()}
                 </Text>
             )
         },
         {key: 'etcAmt', title: '카드 외', flex: 1, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign: 'right',paddingRight: 10}]}>
+                <Text style={commonStyles.numberCell}>
                     {item.etcAmt.toLocaleString()}
                 </Text>
             )
         },
         {key: 'totalAmt', title: '총매출', flex: 1.2, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign: 'right',paddingRight: 10}]}>
+                <Text style={commonStyles.numberCell}>
                     {item.totalAmt.toLocaleString()}
                 </Text>
             )
@@ -191,19 +190,19 @@ export default function RealtimeSalesScreen() {
         {
             key: 'qty', title: Const.QTY, flex: 0.5, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.qty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.qty.toLocaleString()}</Text>
             )
         },
         {
             key: 'price', title: Const.PRICE, flex: 1, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.price.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.price.toLocaleString()}</Text>
             )
         },
         {
             key: 'totalAmt', title: '금액', flex: 1.5, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.totalAmt.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.totalAmt.toLocaleString()}</Text>
             )
         },
     ]), []);
@@ -321,16 +320,6 @@ export default function RealtimeSalesScreen() {
 
 const styles = StyleSheet.create({
     selectText: {fontSize: 14, color: '#333'},
-    tableList: {flex: 1},
-    tableListContent: {paddingBottom: 12},
-    tableRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: '#eee',
-        paddingVertical: 12
-    },
-    summaryRow: {backgroundColor: '#fff7e6'},
     summaryLabelText: {fontWeight: '700', color: '#333'},
     cell: {fontSize: 13, color: '#444'},
     rightSpanText: {textAlign: 'right'},

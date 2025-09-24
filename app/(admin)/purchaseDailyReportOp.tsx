@@ -26,7 +26,7 @@ export default function PurchaseDailyReportScreen() {
     const [salesOrgNmQuery, setsalesOrgNmQuery] = useState('');
     const [submitted, setSubmitted] = useState({from: '2025/08/01', to: '2025/08/04', salesOrgNm: ''});
     const [isDetailVisible, setIsDetailVisible] = useState(false);
-    const [selectedsalesOrgNmName, setSelectedsalesOrgNmName] = useState<string | null>(null);
+    const [selectedsalesOrgNm, setSelectedsalesOrgNm] = useState<string | null>(null);
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [currentPickerType, setCurrentPickerType] = useState('from');
     const [tempDate, setTempDate] = useState<Date | null>(null);
@@ -34,7 +34,7 @@ export default function PurchaseDailyReportScreen() {
 
     const salesOrgList: SalesOrg[] = useMemo(
         () => [
-            { salesOrgCd: '', salesOrgNm: '전체' }, // 기본값 추가
+            { salesOrgCd: '', salesOrgNm: '전체' },
             ...Array.from({ length: 6 }).map((_, i) => ({
                 salesOrgCd: `G${i + 1}`,
                 salesOrgNm: `주유소 ${i + 1}`,
@@ -76,7 +76,7 @@ export default function PurchaseDailyReportScreen() {
         {
             key: 'amount', title: '금액', flex: 1, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>
+                <Text style={commonStyles.numberCell}>
                     {item.amount.toLocaleString()}
                 </Text>
             )
@@ -127,7 +127,7 @@ export default function PurchaseDailyReportScreen() {
         {
             key: 'totalAmt', title: '금액', flex: 1.5, align: 'right',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell]}>{item.totalAmt.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.totalAmt.toLocaleString()}</Text>
             )
         },
     ]), []);
@@ -153,8 +153,8 @@ export default function PurchaseDailyReportScreen() {
         setShowDatePicker(true);
     };
 
-    const opensalesOrgNmDetail = (salesOrgNmName: string) => {
-        setSelectedsalesOrgNmName(salesOrgNmName);
+    const opensalesOrgNmDetail = (salesOrgNm: string) => {
+        setSelectedsalesOrgNm(salesOrgNm);
         setIsDetailVisible(true);
     };
 
@@ -258,8 +258,8 @@ export default function PurchaseDailyReportScreen() {
                 <View style={commonStyles.modalOverlay}>
                     <View style={commonStyles.modalCard}>
                         <View style={commonStyles.modalHeader}>
-                            {selectedsalesOrgNmName && (
-                                <Text style={commonStyles.modalTitle}>{selectedsalesOrgNmName}</Text>
+                            {selectedsalesOrgNm && (
+                                <Text style={commonStyles.modalTitle}>{selectedsalesOrgNm}</Text>
                             )}
                             <TouchableOpacity onPress={() => setIsDetailVisible(false)}>
                                 <Text style={commonStyles.modalClose}>✕</Text>
