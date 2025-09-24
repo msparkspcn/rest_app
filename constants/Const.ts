@@ -41,5 +41,22 @@ export default {
     SALES_ORG: '사업장',
     NET_AMT: '과세매출',
     DUTY_FREE_AMT: '면세매출',
-    TOTAL_SALE_AMT: '총매출'
+    TOTAL_SALE_AMT: '총매출',
+    ID_INPUT_MSG: '아이디를 입력해주세요.',
+    PW_INPUT_MSG: '비밀번호가 일치하지 않습니다.',
+    ID_PW_SAVE: '아이디/패스워드 저장',
+    LOGIN: '로그인',
+    NO_ID_MSG: '계정이 없으신가요?',
+    SIGN_UP: '회원가입',
+    NEXT: '다음',
+    DUP_CHECK: '중복체크',
+    AVAILABLE_ID: '사용가능',
+    RETURN_LOGIN_PAGE: '로그인으로 돌아가기',
+    RETURN_TERMS_PAGE: '약관으로 돌아가기',
+    SELECT: '선택',
+    CONFIRM: '확인',
+    NAME: '이름',
+    ID: '아이디',
+    PW: '비밀번호',
+
 }

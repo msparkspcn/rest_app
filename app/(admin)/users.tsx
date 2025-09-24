@@ -11,6 +11,7 @@ import {
   View
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
+import Const from "../../constants/Const";
 
 export default function UsersScreen() {
   const [users, setUsers] = useState(
@@ -101,7 +102,7 @@ export default function UsersScreen() {
           </View>
 
           <View style={styles.formRow}>
-            <Text style={styles.formLabel}>아이디</Text>
+            <Text style={styles.formLabel}>{Const.ID}</Text>
             <TextInput
               style={[styles.formInput, styles.readonlyInput]}
               value={currentUser?.email ?? ''}

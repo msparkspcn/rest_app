@@ -307,7 +307,7 @@ export default function WarehouseStockReportScreen() {
                     <Text style={commonStyles.filterLabel}>{Const.ITEM_CLASS}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowItemClassModal(true)}>
                         <Text
-                            style={styles.selectText}>{itemClasses.find(g => g.id === selectedItemClass)?.name || '선택'}</Text>
+                            style={styles.selectText}>{itemClasses.find(g => g.id === selectedItemClass)?.name || Const.SELECT}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -326,7 +326,7 @@ export default function WarehouseStockReportScreen() {
                     <Text style={commonStyles.filterLabel}>{Const.VENDOR}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowVendorModal(true)}>
                         <Text
-                            style={styles.selectText}>{vendors.find(g => g.id === selectedVendorId)?.name || '선택'}</Text>
+                            style={styles.selectText}>{vendors.find(g => g.id === selectedVendorId)?.name || Const.SELECT}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>

@@ -132,7 +132,7 @@ export default function SalesReportByTimezoneScreen() {
         <View style={commonStyles.filterRow}>
           <Text style={commonStyles.filterLabel}>포스그룹</Text>
           <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowPosGroupModal(true)}>
-            <Text style={styles.selectText}>{posGroups.find(g => g.id === selectedPosGroupId)?.name || '선택'}</Text>
+            <Text style={styles.selectText}>{posGroups.find(g => g.id === selectedPosGroupId)?.name || Const.SELECT}</Text>
             <Text style={commonStyles.selectArrow}> ▼</Text>
           </TouchableOpacity>
           <Pressable style={commonStyles.searchButton} onPress={onSearch}>

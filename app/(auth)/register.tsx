@@ -14,6 +14,7 @@ import {
   View
 } from 'react-native';
 import {commonStyles} from "../../styles/index";
+import Const from "../../constants/Const";
 
 export default function RegisterScreen() {
   const [step, setStep] = useState(1);
@@ -49,7 +50,7 @@ export default function RegisterScreen() {
 
   const handleNextStep = () => {
     if (!termsAgreed || !privacyAgreed) {
-      Alert.alert('오류', '모든 약관에 동의해주세요.');
+      Alert.alert(Const.ERROR, '모든 약관에 동의해주세요.');
       return;
     }
     setStep(2);
@@ -57,22 +58,22 @@ export default function RegisterScreen() {
 
   const handleRegister = () => {
     if (!name || !id || !password || !confirmPassword) {
-      Alert.alert('오류', '모든 필드를 입력해주세요.');
+      Alert.alert(Const.ERROR, '모든 필드를 입력해주세요.');
       return;
     }
 
     if (!isIdChecked) {
-      Alert.alert('오류', '아이디 중복체크를 완료해주세요.');
+      Alert.alert(Const.ERROR, '아이디 중복체크를 완료해주세요.');
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('오류', '비밀번호가 일치하지 않습니다.');
+      Alert.alert(Const.ERROR, '비밀번호가 일치하지 않습니다.');
       return;
     }
 
     if (password.length < 7 || password.length >20) {
-      Alert.alert('오류', '비밀번호 길이를 확인해주세요.');
+      Alert.alert(Const.ERROR, '비밀번호 길이를 확인해주세요.');
       return;
     }
 
@@ -87,7 +88,7 @@ export default function RegisterScreen() {
   if (hasSymbols) charTypeCount++;
 
   if(charTypeCount <2) {
-    Alert.alert('오류', '비밀번호 입력규칙을 확인해주세요.');
+    Alert.alert(Const.ERROR, '비밀번호 입력규칙을 확인해주세요.');
     return;
   }
 
@@ -100,7 +101,7 @@ export default function RegisterScreen() {
       '회원가입이 완료되었습니다. 로그인해주세요.',
       [
         {
-          text: '확인',
+          text: Const.CONFIRM,
           onPress: () => router.replace('/(auth)/login'),
         },
       ]
@@ -129,7 +130,7 @@ export default function RegisterScreen() {
 
   const handleIdCheck = () => {
     if (!id.trim()) {
-      Alert.alert('오류', '아이디를 입력해주세요.');
+      Alert.alert(Const.ERROR, '아이디를 입력해주세요.');
       return;
     }
 
@@ -138,7 +139,7 @@ export default function RegisterScreen() {
 
     // 임시로 성공으로 처리
     setIsIdChecked(true);
-    Alert.alert('확인', '사용 가능한 아이디입니다.');
+    Alert.alert(Const.CONFIRM, '사용 가능한 아이디입니다.');
   };
 
   // 약관동의 화면
@@ -220,11 +221,11 @@ export default function RegisterScreen() {
               onPress={handleNextStep}
               disabled={!termsAgreed || !privacyAgreed}
             >
-              <Text style={styles.nextButtonText}>다음</Text>
+              <Text style={styles.nextButtonText}>{Const.NEXT}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.backButton} onPress={handleBackToLogin}>
-              <Text style={styles.backButtonText}>로그인으로 돌아가기</Text>
+              <Text style={styles.backButtonText}>{Const.RETURN_LOGIN_PAGE}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -259,7 +260,7 @@ export default function RegisterScreen() {
                     onPress={() => setShowDepartmentTypeModal(true)}
                 >
                     <Text style={[styles.selectText, !selectedDepartmentType && styles.placeholderText]}>
-                        {selectedDepartmentType || '선택'}
+                        {selectedDepartmentType || Const.SELECT}
                     </Text>
                     <Text style={styles.selectArrow}>▼</Text>
                 </TouchableOpacity>
@@ -271,13 +272,13 @@ export default function RegisterScreen() {
                     onPress={() => setShowDepartmentModal(true)}
                 >
                     <Text style={[styles.selectText, !selectedDepartment && styles.placeholderText]}>
-                        {selectedDepartment || '선택'}
+                        {selectedDepartment || Const.SELECT}
                     </Text>
                     <Text style={styles.selectArrow}>▼</Text>
                 </TouchableOpacity>
             </View>
             <View style={styles.inputContainer}>
-                <Text style={styles.label}>아이디</Text>
+                <Text style={styles.label}>{Const.ID}</Text>
                 <View style={styles.idInputContainer}>
                     <TextInput
                         style={styles.idInput}
@@ -294,7 +295,7 @@ export default function RegisterScreen() {
                         onPress={handleIdCheck}
                     >
                         <Text style={[styles.checkButtonText, isIdChecked && styles.checkButtonTextSuccess]}>
-                            {isIdChecked ? '사용가능' : '중복체크'}
+                            {isIdChecked ? Const.AVAILABLE_ID : Const.DUP_CHECK }
                         </Text>
                     </TouchableOpacity>
                 </View>
@@ -302,7 +303,7 @@ export default function RegisterScreen() {
 
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>비밀번호</Text>
+              <Text style={styles.label}>{Const.PW}</Text>
               <TextInput
                 style={styles.input}
                 key="passwordInput"
@@ -336,7 +337,7 @@ export default function RegisterScreen() {
             )}
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>이름</Text>
+              <Text style={styles.label}>{Const.NAME}</Text>
               <TextInput
                 style={styles.input}
                 value={name}
@@ -348,11 +349,11 @@ export default function RegisterScreen() {
 
 
             <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
-              <Text style={styles.registerButtonText}>회원가입</Text>
+              <Text style={styles.registerButtonText}>{Const.SIGN_UP}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.backToTermsButton} onPress={handleBackToTerms}>
-              <Text style={styles.backToTermsText}>약관으로 돌아가기</Text>
+              <Text style={styles.backToTermsText}>{Const.RETURN_TERMS_PAGE}</Text>
             </TouchableOpacity>
           </View>
         </View>

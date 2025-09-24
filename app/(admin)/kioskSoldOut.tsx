@@ -85,7 +85,7 @@ export default function KioskSoldOutScreen() {
             onPress={() => setShowStoreModal(true)}
           >
             <Text style={[styles.selectText, !selectedStoreId && styles.placeholderText]}>
-              {stores.find((s) => s.id === selectedStoreId)?.name || '선택'}
+              {stores.find((s) => s.id === selectedStoreId)?.name || Const.SELECT}
             </Text>
             <Text style={commonStyles.selectArrow}>▼</Text>
           </TouchableOpacity>

@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -11,10 +11,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { DEP_G, DEP_OP, DEP_R } from '../../constants/RoleTypes';
 import { useUser } from '../../contexts/UserContext';
 import * as api from "../../services/api/api"
 import Const from "../../constants/Const";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 interface User {
   userId: string;
   userNm: string;
@@ -24,30 +24,34 @@ export default function LoginScreen() {
   const { login } = useUser();
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
-  const [autoLogin, setAutoLogin] = useState(false);
-  const [selectedRoleType, setSelectedRoleType] = useState(DEP_G); // 기본값: 휴게소
+  const [checkedLoginSave, setCheckedLoginSave] = useState(false);
+
+  useEffect(() => {
+    const loadSavedLogin = async () => {
+      const savedLoginSaveYn = await AsyncStorage.getItem('savedLoginSaveYn');
+      if(savedLoginSaveYn=='Y') {
+        const savedId = await AsyncStorage.getItem('userId');
+        const savedPassword = await AsyncStorage.getItem('password');
+        setCheckedLoginSave(true);
+        console.log('저장된 id, pw:'+savedId+", "+savedPassword)
+        if (savedId) setId(savedId);
+        if (savedPassword) setPassword(savedPassword);
+      }
+    };
+    loadSavedLogin();
+  }, []);
 
   const handleLogin = () => {
     if (!id) {
-      Alert.alert(Const.ERROR, '아이디를 입력해주세요.');
+      Alert.alert(Const.ERROR, Const.ID_INPUT_MSG);
       return;
     }
     if (!password) {
-      Alert.alert(Const.ERROR, '비밀번호가 일치하지 않습니다.');
+      Alert.alert(Const.ERROR, Const.PW_INPUT_MSG);
       return;
     }
 
-    // 여기에 실제 로그인 로직을 구현하세요
-    console.log('로그인 시도:', { id, password, autoLogin });
-
-    // 자동로그인 설정 저장
-    if (autoLogin) {
-      // AsyncStorage나 다른 저장소에 자동로그인 정보 저장
-      console.log('자동로그인 설정 저장됨');
-    }
-
-    // 임시로 사용자 정보 설정 (실제로는 서버에서 받아와야 함)
-    // roleType은 실제 로그인 시 서버에서 받아와야 합니다
+    console.log('로그인 시도:', { id, password });
 
     api.login(id, password)
         .then(response => {
@@ -75,25 +79,25 @@ export default function LoginScreen() {
           }
         })
         .catch(error => console.log("error:"+error))
-
-    // const userData = {
-    //   userId: id,
-    //   userNm: '관리자',
-    //   userRoleType: selectedRoleType
-    // };
-    //
-    // login(userData);
-
-    // 로그인 성공 시 홈화면으로 이동
-    // router.replace('/(admin)');
   };
 
   const handleRegister = () => {
     router.push('/(auth)/register');
   };
 
-  const toggleAutoLogin = () => {
-    setAutoLogin(!autoLogin);
+  const saveLoginInfo = async () => {
+    if(!checkedLoginSave) {
+      await AsyncStorage.setItem('savedLoginSaveYn', 'Y');
+      await AsyncStorage.setItem('userId', id);
+      await AsyncStorage.setItem('password', password);
+    }
+    else {
+      await AsyncStorage.setItem('savedLoginSaveYn', 'N');
+      await AsyncStorage.setItem('userId', '');
+      await AsyncStorage.setItem('password', '');
+    }
+    setCheckedLoginSave(!checkedLoginSave);
+
   };
 
   return (
@@ -134,56 +138,26 @@ export default function LoginScreen() {
             />
           </View>
 
-          <View style={styles.roleContainer}>
-            <Text style={styles.roleLabel}>권한 선택 (테스트용)</Text>
-            <View style={styles.roleButtons}>
-              <TouchableOpacity
-                style={[styles.roleButton, selectedRoleType === DEP_OP && styles.roleButtonActive]}
-                onPress={() => setSelectedRoleType(DEP_OP)}
-              >
-                <Text style={[styles.roleButtonText, selectedRoleType === DEP_OP && styles.roleButtonTextActive]}>
-                  운영업체
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.roleButton, selectedRoleType === DEP_R && styles.roleButtonActive]}
-                onPress={() => setSelectedRoleType(DEP_R)}
-              >
-                <Text style={[styles.roleButtonText, selectedRoleType === DEP_R && styles.roleButtonTextActive]}>
-                  휴게소
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.roleButton, selectedRoleType === DEP_G && styles.roleButtonActive]}
-                onPress={() => setSelectedRoleType(DEP_G)}
-              >
-                <Text style={[styles.roleButtonText, selectedRoleType === DEP_G && styles.roleButtonTextActive]}>
-                  주유소
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
           <View style={styles.autoLoginContainer}>
             <TouchableOpacity
               style={styles.checkboxContainer}
-              onPress={toggleAutoLogin}
+              onPress={saveLoginInfo}
             >
-              <View style={[styles.checkbox, autoLogin && styles.checkboxChecked]}>
-                {autoLogin && <Text style={styles.checkmark}>✓</Text>}
+              <View style={[styles.checkbox, checkedLoginSave && styles.checkboxChecked]}>
+                {checkedLoginSave && <Text style={styles.checkmark}>✓</Text>}
               </View>
             </TouchableOpacity>
-            <Text style={styles.autoLoginText}>자동로그인</Text>
+            <Text style={styles.saveLoginInfo}>{Const.ID_PW_SAVE}</Text>
           </View>
 
           <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-            <Text style={styles.loginButtonText}>로그인</Text>
+            <Text style={styles.loginButtonText}>{Const.LOGIN}</Text>
           </TouchableOpacity>
 
           <View style={styles.registerContainer}>
-            <Text style={styles.registerText}>계정이 없으신가요? </Text>
+            <Text style={styles.registerText}>{Const.NO_ID_MSG}</Text>
             <TouchableOpacity onPress={handleRegister}>
-              <Text style={styles.registerLink}>회원가입</Text>
+              <Text style={styles.registerLink}> {Const.SIGN_UP}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -276,7 +250,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
   },
-  autoLoginText: {
+  saveLoginInfo: {
     fontSize: 16,
     color: '#666',
     marginLeft: 8,

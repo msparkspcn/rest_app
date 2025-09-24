@@ -153,7 +153,7 @@ export default function CornerWhStockReportScreen() {
                     <Text style={commonStyles.filterLabel}>매장</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowCornerModal(true)}>
                         <Text
-                            style={styles.selectText}>{corners.find(g => g.id === selectedCorner)?.name || '선택'}</Text>
+                            style={styles.selectText}>{corners.find(g => g.id === selectedCorner)?.name || Const.SELECT}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -161,7 +161,7 @@ export default function CornerWhStockReportScreen() {
                     <Text style={commonStyles.filterLabel}>{Const.VENDOR}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowVendorModal(true)}>
                         <Text
-                            style={styles.selectText}>{vendors.find(g => g.id === selectedVendorId)?.name || '선택'}</Text>
+                            style={styles.selectText}>{vendors.find(g => g.id === selectedVendorId)?.name || Const.SELECT}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -169,7 +169,7 @@ export default function CornerWhStockReportScreen() {
                     <Text style={commonStyles.filterLabel}>{Const.SEARCH_COND}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowSearchCond(true)}>
                         <Text
-                            style={styles.selectText}>{searchCond.find(g => g.id === selectedSearchCond)?.name || '선택'}</Text>
+                            style={styles.selectText}>{searchCond.find(g => g.id === selectedSearchCond)?.name || Const.SELECT}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
