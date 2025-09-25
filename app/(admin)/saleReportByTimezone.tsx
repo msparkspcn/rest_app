@@ -60,13 +60,13 @@ export default function SalesReportByTimezoneScreen() {
     const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => ([
         {key: 'tmzonDiv', title: '시간대', flex: 1, align: 'center'},
         {
-            key: 'totalAmt', title: '판매금액', flex: 1, align: 'center',
+            key: 'totalAmt', title: '판매금액', flex: 1,
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>{item.totalAmt.toLocaleString()}</Text>
             )
         },
         {
-            key: 'billCnt', title: '영수건수', flex: 0.5, align: 'center',
+            key: 'billCnt', title: '영수건수', flex: 0.5,
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>{item.billCnt.toLocaleString()}</Text>
             )
@@ -235,7 +235,6 @@ const styles = StyleSheet.create({
     selectText: {fontSize: 14, color: '#333'},
     summaryLabelText: {fontWeight: '600', fontSize: 12, color: '#333'},
     cell: {fontSize: 13, color: '#444'},
-    rightSpanText: {textAlign: 'right'},
 });
 
 

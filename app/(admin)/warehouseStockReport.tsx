@@ -111,31 +111,31 @@ export default function WarehouseStockReportScreen() {
     );
 
     const StockDetailColumns: ColumnDef<StockDetailRow>[] = useMemo(() => ([
-        {key: 'stockDt', title: Const.DATE, flex: 2, align: 'center',
+        {key: 'stockDt', title: Const.DATE, flex: 2,
             renderCell: (item) => (
                 <Text style={[commonStyles.cell, {textAlign: 'center'}]}>{item.stockDt}</Text>
             )
         },
         {
-            key: 'totalStockQty', title: Const.TOTAL_STOCK_QTY, flex: 1, align: 'center',
+            key: 'totalStockQty', title: Const.TOTAL_STOCK_QTY, flex: 1,
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>{item.totalStockQty.toLocaleString()}</Text>
             )
         },
         {
-            key: 'giQty', title: Const.GI_QTY, flex: 1.5, align: 'right',
+            key: 'giQty', title: Const.GI_QTY, flex: 1.5,
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>{item.giQty.toLocaleString()}</Text>
             )
         },
         {
-            key: 'saleQty', title: Const.SALE, flex: 1, align: 'right',
+            key: 'saleQty', title: Const.SALE, flex: 1,
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>{item.saleQty.toLocaleString()}</Text>
             )
         },
         {
-            key: 'curStockQty', title: Const.CUR_STOCK_QTY, flex: 1, align: 'right',
+            key: 'curStockQty', title: Const.CUR_STOCK_QTY, flex: 1,
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>{item.curStockQty.toLocaleString()}</Text>
             )
@@ -161,13 +161,13 @@ export default function WarehouseStockReportScreen() {
     }
 
     const mainColumns: ColumnDef<StockRow>[] = useMemo(() => ([
-        {key: 'no', title: Const.NO, flex: 1, align: 'center',
+        {key: 'no', title: Const.NO, flex: 0.5,
             renderCell: (_item, index) => (
                 <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
             ),
         },
         {
-            key: 'itemNm', title: Const.ITEM_NM, flex: 1, align: 'center',
+            key: 'itemNm', title: Const.ITEM_NM, flex: 2,
             renderCell: (item) => (
                 <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
                     <Text style={[commonStyles.cell, commonStyles.linkText, {paddingLeft: 10}]}>
@@ -177,31 +177,29 @@ export default function WarehouseStockReportScreen() {
             ),
         },
         {
-            key: 'totalStockQty', title: Const.TOTAL_STOCK_QTY, flex: 1, align: 'center',
+            key: 'totalStockQty', title: Const.TOTAL_STOCK_QTY, flex: 0.7,
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.totalStockQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberSmallCell}>{item.totalStockQty.toLocaleString()}</Text>
             )
         },
         {
-            key: 'giQty', title: Const.GI_QTY, flex: 1, align: 'center',
+            key: 'giQty', title: Const.GI_QTY, flex: 0.5,
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.giQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberSmallCell}>{item.giQty.toLocaleString()}</Text>
             )
         },
         {
-            key: 'goQty', title: Const.GO_QTY, flex: 1, align: 'center',
+            key: 'goQty', title: Const.GO_QTY, flex: 0.5,
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.goQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberSmallCell}>{item.goQty.toLocaleString()}</Text>
             )
         },
         {
-            key: 'curStockQty', title: Const.CUR_STOCK_QTY, flex: 1, align: 'center',
+            key: 'curStockQty', title: Const.CUR_STOCK_QTY, flex: 0.7,
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {
-                    textAlign: 'right',
-                    paddingRight: 10,
-                    color: item.curStockQty < 0 ? 'red' : 'black',
-                }]}>{item.curStockQty.toLocaleString()}</Text>
+                <Text style={[commonStyles.numberSmallCell, {color: item.curStockQty < 0 ? 'red' : 'black'}]}>
+                    {item.curStockQty.toLocaleString()}
+                </Text>
             )
         },
     ]), [])
@@ -229,48 +227,28 @@ export default function WarehouseStockReportScreen() {
 
     const renderDetailFooter = () => (
         <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-            <View style={{flex: 2,
-                justifyContent: 'center',
-                borderRightWidth: StyleSheet.hairlineWidth,
-                borderRightColor:'#aaa',
-                height:'100%'}}>
+            <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
                 <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.modalTotalText]}>
                     합계
                 </Text>
             </View>
-            <View style={{flex: 1,
-                justifyContent: 'center',
-                borderRightWidth: StyleSheet.hairlineWidth,
-                borderRightColor:'#aaa',
-                height:'100%'}}>
-                <Text style={[commonStyles.cell, commonStyles.numberCell, styles.modalTotalText]}>
+            <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                <Text style={[commonStyles.numberCell, {color: detailTotalStockQty < 0 ? 'red' : ''}]}>
                     {detailTotalStockQty.toLocaleString()}
                 </Text>
             </View>
-            <View style={{flex: 1.5,
-                justifyContent: 'center',
-                borderRightWidth: StyleSheet.hairlineWidth,
-                borderRightColor:'#aaa',
-                height:'100%'}}>
-                <Text style={[commonStyles.cell, commonStyles.numberCell, styles.modalTotalText]}>
+            <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
+                <Text style={[commonStyles.numberCell]}>
                     {detailTotalGiQty.toLocaleString()}
                 </Text>
             </View>
-            <View style={{flex: 1,
-                justifyContent: 'center',
-                borderRightWidth: StyleSheet.hairlineWidth,
-                borderRightColor:'#aaa',
-                height:'100%'}}>
-                <Text style={[commonStyles.cell, commonStyles.numberCell, styles.modalTotalText]}>
+            <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                <Text style={[commonStyles.numberCell]}>
                     {detailTotalSaleQty.toLocaleString()}
                 </Text>
             </View>
-            <View style={{flex: 1,
-                justifyContent: 'center',
-                borderRightWidth: StyleSheet.hairlineWidth,
-                borderRightColor:'#aaa',
-                height:'100%'}}>
-                <Text style={[commonStyles.cell, commonStyles.numberCell, styles.modalTotalText]}>
+            <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                <Text style={[commonStyles.numberCell, {color: detailTotalCurStockQty < 0 ? 'red' : ''}]}>
                     {detailTotalCurStockQty.toLocaleString()}
                 </Text>
             </View>
@@ -410,7 +388,6 @@ export default function WarehouseStockReportScreen() {
 
 const styles = StyleSheet.create({
     selectText: {fontSize: 14, color: '#333'},
-    tableList: {flex: 1},
     input: {
         flex: 1,
         backgroundColor: '#fff',

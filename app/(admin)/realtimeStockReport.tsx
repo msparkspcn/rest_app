@@ -94,7 +94,7 @@ export default function RealtimeStockReportScreen() {
         {
             key: 'curStockQty', title: Const.CUR_STOCK_QTY, flex: 1, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, commonStyles.numberCell,
+                <Text style={[commonStyles.numberCell,
                     { color: item.curStockQty < 0 ? 'red' : 'black'}
                 ]}>{item.curStockQty.toLocaleString()}</Text>
             )

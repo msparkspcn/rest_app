@@ -86,12 +86,12 @@ export default function DashboardScreen() {
   };
 
   const mainColumns: ColumnDef<CornerRow>[] = useMemo(() => ([
-    { key: 'no', title: Const.NO, flex: 0.8, align: 'center',
+    { key: 'no', title: Const.NO, flex: 0.6,
       renderCell: (_item, index) => (
           <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
       ),
     },
-    { key: 'cornerNm', title: Const.CORNER_NM, flex: 2, align: 'left',
+    { key: 'cornerNm', title: Const.CORNER_NM, flex: 2,
       renderCell: (item) => (
           <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
             <Text style={[commonStyles.cell, commonStyles.linkText,{paddingLeft:10}]}>{item.cornerNm}</Text>
@@ -118,7 +118,7 @@ export default function DashboardScreen() {
   );
 
   const itemColumns: ColumnDef<ItemRow>[] = useMemo(() => ([
-    { key: 'no',          title: Const.NO,     flex: 0.4, align: 'center',
+    { key: 'no',          title: Const.NO,     flex: 0.4,
       renderCell: (_item, index) => (
           <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
       ),

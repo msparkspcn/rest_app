@@ -50,7 +50,7 @@ export default function PurchaseProductReportScreen() {
     };
 
     const mainColumns: ColumnDef<PurchaseRow>[] = useMemo(() => ([
-        {key: 'no', title: Const.NO, flex: 0.5, align: 'center',
+        {key: 'no', title: Const.NO, flex: 0.5,
             renderCell: (_item, index) => (
                 <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
             ),
@@ -82,17 +82,17 @@ export default function PurchaseProductReportScreen() {
     const totalQty = useMemo(() => filteredData.reduce((acc, r) => acc + r.qty, 0), [filteredData]);
 
     const renderFooter = () => (
-        <View style={[commonStyles.tableRow, styles.totalRow]}>
-            <View style={[{flex: 1.7}, commonStyles.cell, styles.totalText]}>
+        <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+            <View style={[{flex: 1.7}, commonStyles.tableRightBorder, styles.totalText]}>
                 <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.totalText]}>합계</Text>
             </View>
-            <View style={{flex: 0.5}}>
-                <Text style={[commonStyles.cell, commonStyles.alignRight, styles.totalText, {paddingRight: 10}]}>
+            <View style={[{flex: 0.5}, commonStyles.tableRightBorder]}>
+                <Text style={commonStyles.numberCell}>
                     {totalQty}
                 </Text>
             </View>
-            <View style={{flex: 0.8}}>
-                <Text style={[commonStyles.cell, commonStyles.alignRight, styles.totalText, {paddingRight: 10}]}>
+            <View style={[{flex: 0.8}, commonStyles.tableRightBorder]}>
+                <Text style={commonStyles.numberCell}>
                     {totalAmount.toLocaleString()}
                 </Text>
             </View>
@@ -109,7 +109,7 @@ export default function PurchaseProductReportScreen() {
         () =>
             Array.from({length: 10}).map((_, idx) => {
                 const qty = (idx % 4) + 1;
-                const totalAmt = qty * 10000;
+                const totalAmt = qty * 100000;
                 const day = (idx % 4) + 1;
                 return {
                     vendorNm: `거래처 ${((idx % 6) + 1).toString().padStart(2, '0')}`,
@@ -135,8 +135,8 @@ export default function PurchaseProductReportScreen() {
     );
 
     const PurchaseDetailColumns: ColumnDef<PurchaseDetailRow>[] = useMemo(() => ([
-        {key: 'vendorNm', title: '거래처', flex: 2, align: 'center'},
-        {key: 'date', title: '일자', flex: 1.2, align: 'center',
+        {key: 'vendorNm', title: '거래처', flex: 1.5, align: 'center'},
+        {key: 'date', title: '일자', flex: 1.2,
             renderCell: (item) => (
                 <Text style={[commonStyles.cell, {textAlign: 'center'}]}>
                     {item.date.toLocaleString()}
@@ -144,17 +144,17 @@ export default function PurchaseProductReportScreen() {
             )
         },
         {
-            key: 'qty', title: Const.QTY, flex: 0.5, align: 'center',
+            key: 'qty', title: Const.QTY, flex: 0.5,
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>
+                <Text style={commonStyles.numberSmallCell}>
                     {item.qty.toLocaleString()}
                 </Text>
             )
         },
         {
-            key: 'totalAmt', title: '금액', flex: 1.5, align: 'right',
+            key: 'totalAmt', title: '금액', flex: 1,
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>
+                <Text style={commonStyles.numberSmallCell}>
                     {item.totalAmt.toLocaleString()}
                 </Text>
             )
@@ -164,19 +164,19 @@ export default function PurchaseProductReportScreen() {
 
     const renderDetailFooter = () => (
         <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-            <View style={[{flex: 3.2}, commonStyles.tableRightBorder]}>
+            <View style={[{flex: 2.7}, commonStyles.tableRightBorder]}>
                 <Text style={[commonStyles.modalCell, commonStyles.alignCenter, styles.modalTotalText]}>
                     {Const.TOTAL_AMT_SHORT}
                 </Text>
             </View>
             <View style={[{flex: 0.5}, commonStyles.tableRightBorder]}>
                 <Text
-                    style={commonStyles.numberCell}>
+                    style={commonStyles.numberSmallCell}>
                     {detailTotals.qty.toLocaleString()}
                 </Text>
             </View>
-            <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
-                <Text style={commonStyles.numberCell}>
+            <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                <Text style={commonStyles.numberSmallCell}>
                     {detailTotals.amount.toLocaleString()}
                 </Text>
             </View>

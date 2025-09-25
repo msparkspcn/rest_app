@@ -22,6 +22,7 @@ import Const from "../../constants/Const";
 
 type SaleRow = {
     saleDtInfo: string;
+    salesOrgCd: string; //임시
     cornerNm: string;
     saleAmt: number;
 };
@@ -113,10 +114,10 @@ export default function SalesReportByPeriod() {
                     {ymdToDateWithDay(item.saleDt)}
                 </Text>
             )},
-        { key: 'cornerNm',     title: Const.CORNER_NM,   flex: 2,   align: 'left',
+        { key: 'salesOrgCd',     title: Const.CORNER_NM,   flex: 1.8,   align: 'left',
             renderCell: (item) => (
                 <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
-                    <Text style={[commonStyles.cell, commonStyles.linkText,{paddingLeft:10}]}>{item.cornerNm}</Text>
+                    <Text style={[commonStyles.cell, commonStyles.linkText,{paddingLeft:10}]}>{item.salesOrgCd}</Text>
                 </Pressable>
             ),   },
         { key: 'saleAmt', title: '총매출', flex: 1.2, align: 'right',
@@ -126,30 +127,36 @@ export default function SalesReportByPeriod() {
         },
     ]), []);
 
-    const alignStyles = {
-        left: commonStyles.alignLeft,
-        center: commonStyles.alignCenter,
-        right: commonStyles.alignRight,
-    } as const;
-
     type ProductSaleRow = { no: number; itemNm: string, qty: number, price: number, totalAmt: number };
     const productData: ProductSaleRow[] = useMemo(
         () => Array.from({ length: 50 }).map((_, index) => ({
             no: index + 1,
             itemNm: `상품 ${index + 1}`,
-            qty: index * 10,
+            qty: index * 5,
             price: index * 10,
-            totalAmt: index * 10 * 10
+            totalAmt: index * 10 * 10000
         })),
         []
     );
 
     const productColumns: ColumnDef<ProductSaleRow>[] = useMemo(() => ([
-        { key: 'no',          title: Const.NO,     flex: 0.7, align: 'center' },
+        { key: 'no',          title: Const.NO,     flex: 0.5, align: 'center' },
         { key: 'itemNm', title: '상품명',   flex: 2.2, align: 'left' },
-        { key: 'qty', title: Const.QTY,   flex: 1, align: 'right' },
-        { key: 'price', title: Const.PRICE,   flex: 1.5, align: 'right' },
-        { key: 'totalAmt', title: '금액',   flex: 2.2, align: 'right' },
+        { key: 'qty', title: Const.QTY,   flex: 0.8, align: 'right',
+            renderCell: (item) => (
+                <Text style={commonStyles.numberSmallCell}>{item.qty.toLocaleString()}</Text>
+            )
+        },
+        { key: 'price', title: Const.PRICE,   flex: 1, align: 'right',
+            renderCell: (item) => (
+                <Text style={commonStyles.numberSmallCell}>{item.price.toLocaleString()}</Text>
+            )
+        },
+        { key: 'totalAmt', title: '금액',   flex: 1.5, align: 'right',
+            renderCell: (item) => (
+                <Text style={commonStyles.numberSmallCell}>{item.totalAmt.toLocaleString()}</Text>
+            )
+        },
     ]), []);
 
 
@@ -170,36 +177,20 @@ export default function SalesReportByPeriod() {
 
     const renderSummaryRow = () => {
         return (
-            <View style={[commonStyles.modalTableRow, styles.summaryRow]}>
-                <View
-                    style={[
-                        { flex: 0.7 + 2.2 },
-                        commonStyles.modalCellDivider,
-                    ]}
-                >
+            <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+                <View style={[{ flex: 2.7 }, commonStyles.tableRightBorder,]}>
                     <Text
                         style={[commonStyles.modalCell, commonStyles.alignCenter,
                             {fontSize: 13, fontWeight: 'bold'}
                         ]}>합계</Text>
                 </View>
-                <View
-                    style={[
-                        { flex: 1 },
-                        commonStyles.modalColumnContainer,
-                        commonStyles.modalCellDivider,
-                    ]}
-                >
-                    <Text style={[commonStyles.modalCell, alignStyles['left']]}>
+                <View style={[{ flex: 0.8 }, commonStyles.tableRightBorder]}>
+                    <Text style={commonStyles.numberSmallCell}>
                         {summaryRow.totalQty.toLocaleString()}
                     </Text>
                 </View>
-                <View
-                    style={[
-                        { flex: 1.5 + 2.2},
-                        alignStyles['right']
-                    ]}
-                >
-                    <Text style={[commonStyles.modalCell, alignStyles['right']]}>
+                <View style={[{ flex: 2.5}, commonStyles.tableRightBorder]}>
+                    <Text style={commonStyles.numberSmallCell}>
                         {summaryRow.totalAmt.toLocaleString()}
                     </Text>
                 </View>

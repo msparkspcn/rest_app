@@ -140,7 +140,7 @@ export default function PurchaseDailyReportScreen() {
                 </Text>
             </View>
             <View style={[{flex: 3.3}, commonStyles.tableRightBorder]}>
-                <Text style={[commonStyles.cell, commonStyles.numberCell, styles.modalTotalText]}>
+                <Text style={[commonStyles.numberCell, styles.modalTotalText]}>
                     {detailTotalAmount.toLocaleString()}
                 </Text>
             </View>
@@ -285,11 +285,6 @@ const styles = StyleSheet.create({
         color: '#333',
     },
 
-    totalRow: {
-        height: 30,
-        alignItems: 'center',
-        backgroundColor: '#fafafa',
-    },
     totalText: {
         fontWeight: '700',
         color: '#222',

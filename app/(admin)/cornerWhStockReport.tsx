@@ -43,8 +43,10 @@ export default function CornerWhStockReportScreen() {
         []
     );
 
-    const searchCond: SearchCond[] = [{ id: "realtime", name: "실시간 기준" },
-        { id: "closing", name: "영업 마감 기준" }]
+    const searchCond: SearchCond[] = [
+        { id: "realtime", name: "실시간 기준" },
+        { id: "closing", name: "영업 마감 기준" }
+    ]
     const [selectedVendorId, setSelectedVendorId] = useState<string | null>(vendors[0]?.id ?? null);
     const [showVendorModal, setShowVendorModal] = useState(false);
     const [showCornerModal, setShowCornerModal] = useState(false);
@@ -84,13 +86,13 @@ export default function CornerWhStockReportScreen() {
     };
 
     const mainColumns: ColumnDef<StockRow>[] = useMemo(() => ([
-        {key: 'no', title: Const.NO, flex: 1, align: 'center',
+        {key: 'no', title: Const.NO, flex: 0.5,
             renderCell: (_item, index) => (
                 <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
             ),
         },
         {
-            key: 'itemNm', title: Const.ITEM_NM, flex: 1, align: 'center',
+            key: 'itemNm', title: Const.ITEM_NM, flex: 1.5,
             renderCell: (item) => (
                 <Text style={[commonStyles.cell, {paddingLeft: 10}]}>
                     {item.itemNm}
@@ -98,35 +100,31 @@ export default function CornerWhStockReportScreen() {
             ),
         },
         {
-            key: 'giQty', title: Const.GI_QTY, flex: 1, align: 'center',
+            key: 'giQty', title: Const.GI_QTY, flex: 0.5,
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.giQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberSmallCell}>{item.giQty.toLocaleString()}</Text>
             )
         },
         {
-            key: 'saleQty', title: Const.SALE, flex: 1, align: 'center',
+            key: 'saleQty', title: Const.SALE, flex: 0.5,
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.saleQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberSmallCell}>{item.saleQty.toLocaleString()}</Text>
             )
         },
         {
-            key: 'curStockQty', title: Const.CUR_STOCK_QTY, flex: 1, align: 'center',
+            key: 'curStockQty', title: Const.CUR_STOCK_QTY, flex: 0.7,
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {
-                    textAlign: 'right',
-                    paddingRight: 10,
-                    color: item.curStockQty < 0 ? 'red' : 'black',
-                }]}>{item.curStockQty.toLocaleString()}</Text>
+                <Text style={[commonStyles.numberSmallCell, {color: item.curStockQty < 0 ? 'red' : 'black'}]}>
+                    {item.curStockQty.toLocaleString()}
+                </Text>
             )
         },
         {
-            key: 'whStockQty', title: Const.WH_STOCK_QTY, flex: 1, align: 'center',
+            key: 'whStockQty', title: Const.WH_STOCK_QTY, flex: 0.7,
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {
-                    textAlign: 'right',
-                    paddingRight: 10,
-                    color: item.whStockQty < 0 ? 'red' : 'black',
-                }]}>{item.whStockQty.toLocaleString()}</Text>
+                <Text style={[commonStyles.numberSmallCell, {color: item.whStockQty < 0 ? 'red' : 'black'}]}>
+                    {item.whStockQty.toLocaleString()}
+                </Text>
             )
         },
     ]), [])
@@ -170,7 +168,7 @@ export default function CornerWhStockReportScreen() {
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>{Const.ITEM_NM}</Text>
                     <TextInput
-                        style={commonStyles.input}
+                        style={commonStyles.selectInput}
                         placeholderTextColor="#999"
                         value={vendorQuery}
                         onChangeText={setVendorQuery}

@@ -114,27 +114,27 @@ export default function RealtimeSalesBySalesOrgScreen() {
     const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => {
         const commonCols: ColumnDef<SaleRow>[] = [
             {
-                key: 'yedaySaleAmt', title: '전일매출', flex: 1, align: 'center',
+                key: 'yedaySaleAmt', title: '전일매출', flex: 1,
                 renderCell: (item) => (
-                    <Text style={commonStyles.numberCell}>{item.yedaySaleAmt.toLocaleString()}</Text>
+                    <Text style={commonStyles.numberSmallCell}>{item.yedaySaleAmt.toLocaleString()}</Text>
                 )
             },
             {
-                key: 'todaySaleAmt', title: '당일매출', flex: 1, align: 'center',
+                key: 'todaySaleAmt', title: '당일매출', flex: 1,
                 renderCell: (item) => (
-                    <Text style={commonStyles.numberCell}>{item.todaySaleAmt.toLocaleString()}</Text>
+                    <Text style={commonStyles.numberSmallCell}>{item.todaySaleAmt.toLocaleString()}</Text>
                 )
             },
             {
-                key: 'monthSaleAmt', title: '월누계매출', flex: 1.1, align: 'center',
+                key: 'monthSaleAmt', title: '월누계매출', flex: 1.1,
                 renderCell: (item) => (
-                    <Text style={commonStyles.numberCell}>{item.monthSaleAmt.toLocaleString()}</Text>
+                    <Text style={commonStyles.numberSmallCell}>{item.monthSaleAmt.toLocaleString()}</Text>
                 )
             },
             {
-                key: 'yearSaleAmt', title: '년누계', flex: 1.3, align: 'center',
+                key: 'yearSaleAmt', title: '년누계', flex: 1.3,
                 renderCell: (item) => (
-                    <Text style={commonStyles.numberCell}>{item.yearSaleAmt.toLocaleString()}</Text>
+                    <Text style={commonStyles.numberSmallCell}>{item.yearSaleAmt.toLocaleString()}</Text>
                 )
             },
         ];
@@ -145,13 +145,12 @@ export default function RealtimeSalesBySalesOrgScreen() {
                     key: 'cornerNm',
                     title: Const.CORNER_NM,
                     flex: 1.3,
-                    align: 'center',
+
                     renderCell: (item) => (
                         <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
-                            <Text style={[commonStyles.cell, commonStyles.linkText, {
-                                textAlign: 'left',
-                                paddingLeft: 10
-                            }]}>
+                            <Text style={[commonStyles.cell, commonStyles.linkText,
+                                {textAlign: 'left', paddingLeft: 10}]}
+                            >
                                 {item.cornerNm}
                             </Text>
                         </Pressable>
@@ -185,7 +184,7 @@ export default function RealtimeSalesBySalesOrgScreen() {
     const SaleDetailColumns: ColumnDef<SaleDetailRow>[] = useMemo(() => ([
         {key: 'itemNm', title: '상품명', flex: 1, align: 'center'},
         {
-            key: 'qty', title: Const.QTY, flex: 0.6, align: 'center',
+            key: 'qty', title: Const.QTY, flex: 0.6,
             renderCell: (item) => (
                 <Text style={[styles.cell, commonStyles.numberSmallCell]}>
                     {item.qty.toLocaleString()}
@@ -193,7 +192,7 @@ export default function RealtimeSalesBySalesOrgScreen() {
             )
         },
         {
-            key: 'price', title: '금액', flex: 0.6, align: 'right',
+            key: 'price', title: '금액', flex: 0.6,
             renderCell: (item) => (
                 <Text style={[styles.cell, commonStyles.numberSmallCell]}>
                     {item.totalAmt.toLocaleString()}
@@ -201,7 +200,7 @@ export default function RealtimeSalesBySalesOrgScreen() {
             )
         },
         {
-            key: 'monthQty', title: '월누계\n수량', flex: 0.9, align: 'right',
+            key: 'monthQty', title: '월누계\n수량', flex: 0.9,
             renderCell: (item) => (
                 <Text style={[styles.cell, commonStyles.numberSmallCell]}>
                     {item.monthQty.toLocaleString()}
@@ -209,7 +208,7 @@ export default function RealtimeSalesBySalesOrgScreen() {
             )
         },
         {
-            key: 'monthAmt', title: '월누계금액', flex: 1.5, align: 'right',
+            key: 'monthAmt', title: '월누계금액', flex: 1.5,
             renderCell: (item) => (
                 <Text style={[styles.cell, commonStyles.numberSmallCell]}>
                     {item.monthAmt.toLocaleString()}
@@ -217,7 +216,7 @@ export default function RealtimeSalesBySalesOrgScreen() {
             )
         },
         {
-            key: 'yearAmt', title: '년누계금액', flex: 1.5, align: 'right',
+            key: 'yearAmt', title: '년누계금액', flex: 1.5,
             renderCell: (item) => (
                 <Text style={[styles.cell, commonStyles.numberSmallCell]}>
                     {item.yearAmt.toLocaleString()}
@@ -244,10 +243,7 @@ export default function RealtimeSalesBySalesOrgScreen() {
 
     const CornerNmRow = () => {
         return (
-            <View style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-            }}>
+            <View style={{flexDirection: 'row', justifyContent: 'space-between',}}>
                 <Text style={styles.subTitle}>{selectedCorner?.cornerNm}</Text>
                 <Text style={styles.subTitle}>(단위:천원)</Text>
             </View>
@@ -256,59 +252,25 @@ export default function RealtimeSalesBySalesOrgScreen() {
     const renderDetailFooterRow = () => {
         return (
             <View style={[commonStyles.modalTableRow, commonStyles.summaryRow]}>
-                <View style={{flex: 1,
-                    justifyContent: 'center',
-                    borderRightWidth: StyleSheet.hairlineWidth,
-                    borderRightColor:'#aaa',
-                    height:'100%'}}>
+                <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
                     <Text style={[commonStyles.modalCell, {textAlign: 'center', fontSize: 13, fontWeight: 'bold'}]}>
                         합계
                     </Text>
                 </View>
-                <View style={{flex: 0.6,
-                    justifyContent: 'center',
-                    borderRightWidth: StyleSheet.hairlineWidth,
-                    borderRightColor:'#aaa',
-                    height:'100%'}}>
-                    <Text style={[commonStyles.modalCell, commonStyles.numberSmallCell]}>
-                        {summaryRow.totalQty.toLocaleString()}
-                    </Text>
+                <View style={[{flex: 0.6}, commonStyles.tableRightBorder]}>
+                    <Text style={commonStyles.numberSmallCell}>{summaryRow.totalQty.toLocaleString()}</Text>
                 </View>
-                <View style={{flex: 0.6,
-                    justifyContent: 'center',
-                    borderRightWidth: StyleSheet.hairlineWidth,
-                    borderRightColor:'#aaa',
-                    height:'100%'}}>
-                    <Text style={[commonStyles.modalCell, commonStyles.numberSmallCell]}>
-                        {summaryRow.totalAmt.toLocaleString()}
-                    </Text>
+                <View style={[{flex: 0.6}, commonStyles.tableRightBorder]}>
+                    <Text style={commonStyles.numberSmallCell}>{summaryRow.totalAmt.toLocaleString()}</Text>
                 </View>
-                <View style={{flex: 0.9,
-                    justifyContent: 'center',
-                    borderRightWidth: StyleSheet.hairlineWidth,
-                    borderRightColor:'#aaa',
-                    height:'100%'}}>
-                    <Text style={[commonStyles.modalCell, commonStyles.numberSmallCell]}>
-                        {summaryRow.totalMonthQty.toLocaleString()}
-                    </Text>
+                <View style={[{flex: 0.9}, commonStyles.tableRightBorder]}>
+                    <Text style={commonStyles.numberSmallCell}>{summaryRow.totalMonthQty.toLocaleString()}</Text>
                 </View>
-                <View style={{flex: 1.5,
-                    justifyContent: 'center',
-                    borderRightWidth: StyleSheet.hairlineWidth,
-                    borderRightColor:'#aaa',
-                    height:'100%'}}>
-                    <Text style={[commonStyles.modalCell, commonStyles.numberSmallCell]}>
-                        {summaryRow.totalMonthAmt.toLocaleString()}
-                    </Text>
+                <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
+                    <Text style={commonStyles.numberSmallCell}>{summaryRow.totalMonthAmt.toLocaleString()}</Text>
                 </View>
-                <View style={{flex: 1.5,
-                    justifyContent: 'center',
-                    borderRightWidth: StyleSheet.hairlineWidth,
-                    borderRightColor:'#aaa',
-                    height:'100%'}}>
-                    <Text style={[commonStyles.modalCell, commonStyles.numberSmallCell]}>
-                        {summaryRow.totalYearAmt.toLocaleString()}
-                    </Text>
+                <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
+                    <Text style={commonStyles.numberSmallCell}>{summaryRow.totalYearAmt.toLocaleString()}</Text>
                 </View>
             </View>
         )
@@ -360,53 +322,28 @@ export default function RealtimeSalesBySalesOrgScreen() {
                     detailChecked
                         ? () => (
                             <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-                                <View style={{flex: 1.3,
-                                    justifyContent: 'center',
-                                    borderRightWidth: StyleSheet.hairlineWidth,
-                                    borderRightColor:'#aaa',
-                                    height:'100%'
-                                }}>
-                                    <Text style={[commonStyles.cell, styles.summaryLabelText, {
-                                        textAlign: 'center'
-                                    }]}>합계</Text>
+                                <View style={[{flex: 1.3}, commonStyles.tableRightBorder]}>
+                                    <Text style={[commonStyles.cell, commonStyles.summaryLabelText, {textAlign: 'center'}]}>
+                                        합계
+                                    </Text>
                                 </View>
-                                <View style={{flex: 1,
-                                    justifyContent: 'center',
-                                    borderRightWidth: StyleSheet.hairlineWidth,
-                                    borderRightColor:'#aaa',
-                                    height:'100%'
-                                }}>
-                                    <Text style={[commonStyles.cell, commonStyles.numberCell, styles.summaryLabelText]}>
+                                <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                                    <Text style={[commonStyles.numberSmallCell, commonStyles.summaryLabelText]}>
                                         {aggregateSales(baseData).yedaySaleAmt.toLocaleString()}
                                     </Text>
                                 </View>
-                                <View style={{flex: 1,
-                                    justifyContent: 'center',
-                                    borderRightWidth: StyleSheet.hairlineWidth,
-                                    borderRightColor:'#aaa',
-                                    height:'100%'
-                                }}>
-                                    <Text style={[commonStyles.cell, commonStyles.numberCell, styles.summaryLabelText]}>
+                                <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                                    <Text style={[commonStyles.numberSmallCell, commonStyles.summaryLabelText]}>
                                         {aggregateSales(baseData).todaySaleAmt.toLocaleString()}
                                     </Text>
                                 </View>
-                                <View style={{flex: 1.1,
-                                    justifyContent: 'center',
-                                    borderRightWidth: StyleSheet.hairlineWidth,
-                                    borderRightColor:'#aaa',
-                                    height:'100%'
-                                }}>
-                                    <Text style={[commonStyles.cell, commonStyles.numberCell, styles.summaryLabelText]}>
+                                <View style={[{flex: 1.1}, commonStyles.tableRightBorder]}>
+                                    <Text style={[commonStyles.numberSmallCell, commonStyles.summaryLabelText]}>
                                         {aggregateSales(baseData).monthSaleAmt.toLocaleString()}
                                     </Text>
                                 </View>
-                                <View style={{flex: 1.3,
-                                    justifyContent: 'center',
-                                    borderRightWidth: StyleSheet.hairlineWidth,
-                                    borderRightColor:'#aaa',
-                                    height:'100%'
-                                }}>
-                                    <Text style={[commonStyles.cell, commonStyles.numberCell, styles.summaryLabelText]}>
+                                <View style={[{flex: 1.3}, commonStyles.tableRightBorder]}>
+                                    <Text style={[commonStyles.numberSmallCell, commonStyles.summaryLabelText]}>
                                         {aggregateSales(baseData).yearSaleAmt.toLocaleString()}
                                     </Text>
                                 </View>
@@ -479,10 +416,6 @@ export default function RealtimeSalesBySalesOrgScreen() {
 const styles = StyleSheet.create({
     selectText: {
         fontSize: 14, color: '#333'
-    },
-    summaryLabelText: {
-        fontWeight: '700',
-        color: '#333'
     },
     cell: {
         fontSize: 11,

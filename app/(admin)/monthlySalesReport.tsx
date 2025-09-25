@@ -164,23 +164,23 @@ export default function MonthlySalesReport() {
             ),
         },
         {
-            key: 'totalSaleAmt', title: Const.SALE_AMT, flex: 2, align: 'left',
+            key: 'totalSaleAmt', title: Const.SALE_AMT, flex: 2,
             renderCell: (item) => (
                 <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item, 'monthly')}>
-                    <Text style={[commonStyles.cell, commonStyles.linkText, commonStyles.numberCell]}>
+                    <Text style={[commonStyles.numberCell, commonStyles.linkText]}>
                         {item.totalSaleAmt.toLocaleString()}
                     </Text>
                 </Pressable>
             ),
         },
         {
-            key: 'totalVatAmt', title: Const.VAT, flex: 1.5, align: 'left',
+            key: 'totalVatAmt', title: Const.VAT, flex: 1.5,
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>{item.totalVatAmt.toLocaleString()}</Text>
             ),
         },
         {
-            key: 'totalNetSaleAmt', title: '순매출', flex: 2, align: 'right',
+            key: 'totalNetSaleAmt', title: '순매출', flex: 2,
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>
                     {item.totalNetSaleAmt.toLocaleString()}
@@ -253,29 +253,29 @@ export default function MonthlySalesReport() {
     ]), []);
 
     const MonthlyDetailColumns: ColumnDef<MonthlyDetailRow>[] = useMemo(() => [
-        {key: 'saleMonth', title: '매출년월', flex: 1.5, align: 'center',
+        {key: 'saleMonth', title: '매출년월', flex: 1.5,
             renderCell: (item) => <Text
                 style={commonStyles.numberCell}>{formattedMonth(item.saleMonth)}</Text>
         },
         {
-            key: 'monthSaleQty', title: Const.QTY, flex: 1, align: 'right',
+            key: 'monthSaleQty', title: Const.QTY, flex: 1,
             renderCell: (item) => <Text
-                style={[commonStyles.cell, commonStyles.numberSmallCell]}>{item.monthSaleQty.toLocaleString()}</Text>
+                style={commonStyles.numberSmallCell}>{item.monthSaleQty.toLocaleString()}</Text>
         },
         {
-            key: 'monthSaleAmt', title: '총매출', flex: 2, align: 'right',
+            key: 'monthSaleAmt', title: '총매출', flex: 2,
             renderCell: (item) => <Text
-                style={[commonStyles.cell, commonStyles.numberSmallCell]}>{item.monthSaleAmt.toLocaleString()}</Text>
+                style={commonStyles.numberSmallCell}>{item.monthSaleAmt.toLocaleString()}</Text>
         },
         {
-            key: 'monthVatAmt', title: Const.VAT, flex: 1.5, align: 'right',
+            key: 'monthVatAmt', title: Const.VAT, flex: 1.5,
             renderCell: (item) => <Text
-                style={[commonStyles.cell, commonStyles.numberSmallCell]}>{item.monthVatAmt.toLocaleString()}</Text>
+                style={commonStyles.numberSmallCell}>{item.monthVatAmt.toLocaleString()}</Text>
         },
         {
-            key: 'monthNetSaleAmt', title: '순매출', flex: 2, align: 'right',
+            key: 'monthNetSaleAmt', title: '순매출', flex: 2,
             renderCell: (item) => <Text
-                style={[commonStyles.cell, commonStyles.numberSmallCell]}>{item.monthNetSaleAmt.toLocaleString()}</Text>
+                style={commonStyles.numberSmallCell}>{item.monthNetSaleAmt.toLocaleString()}</Text>
         }
     ], []);
 

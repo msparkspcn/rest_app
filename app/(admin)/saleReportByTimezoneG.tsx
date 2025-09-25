@@ -66,7 +66,7 @@ export default function SalesReportByTimezoneScreen() {
             key: 'totalAmt', title: '판매금액', flex: 1, align: 'center',
             renderCell: (item) => (
                 <Text style={[
-                    commonStyles.cell, commonStyles.numberCell]}>{item.totalAmt.toLocaleString()}</Text>
+                    commonStyles.numberCell]}>{item.totalAmt.toLocaleString()}</Text>
             )
         },
         {

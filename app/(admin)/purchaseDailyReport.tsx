@@ -37,7 +37,7 @@ export default function PurchaseDailyReportScreen() {
     const mainColumns: ColumnDef<PurchaseRow>[] = useMemo(() => ([
         {key: 'date', title: '일자', flex: 1, align: 'center'},
         {
-            key: 'vendor', title: '거래처', flex: 2, align: 'left',
+            key: 'vendor', title: '거래처', flex: 2,
             renderCell: (item) => (
                 <Pressable style={commonStyles.columnPressable} onPress={() => openVendorDetail(item.vendor)}>
                     <Text style={[commonStyles.cell, commonStyles.linkText, {paddingLeft: 10}]}>
@@ -47,7 +47,7 @@ export default function PurchaseDailyReportScreen() {
             ),
         },
         {
-            key: 'amount', title: '금액', flex: 1, align: 'right',
+            key: 'amount', title: '금액', flex: 1,
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>{item.amount.toLocaleString()}</Text>
             )
@@ -62,7 +62,7 @@ export default function PurchaseDailyReportScreen() {
                 </Text>
             </View>
             <View style={[{flex:1}, commonStyles.tableRightBorder]}>
-                <Text style={[commonStyles.cell, commonStyles.numberCell, styles.totalText]}>
+                <Text style={commonStyles.numberCell}>
                     {totalAmount.toLocaleString()}
                 </Text>
             </View>
@@ -112,12 +112,12 @@ export default function PurchaseDailyReportScreen() {
                 <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.modalTotalText]}>합계</Text>
             </View>
             <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
-                <Text style={[commonStyles.cell, commonStyles.numberCell, styles.modalTotalText]}>
+                <Text style={[commonStyles.numberCell, styles.modalTotalText]}>
                     {detailTotalQty.toLocaleString()}
                 </Text>
             </View>
             <View style={[{flex: 3.7}, commonStyles.tableRightBorder]}>
-                <Text style={[commonStyles.cell, commonStyles.numberCell, styles.modalTotalText]}>
+                <Text style={[commonStyles.numberCell, styles.modalTotalText]}>
                     {detailTotalAmount.toLocaleString()}
                 </Text>
             </View>

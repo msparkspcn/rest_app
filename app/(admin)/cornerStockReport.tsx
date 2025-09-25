@@ -87,13 +87,13 @@ export default function CornerStockReportScreen() {
     };
 
     const mainColumns: ColumnDef<StockRow>[] = useMemo(() => ([
-        {key: 'no', title: Const.NO, flex: 1, align: 'center',
+        {key: 'no', title: Const.NO, flex: 0.5,
             renderCell: (_item, index) => (
                 <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
             ),
         },
         {
-            key: 'itemNm', title: Const.ITEM_NM, flex: 1, align: 'center',
+            key: 'itemNm', title: Const.ITEM_NM, flex: 2,
             renderCell: (item) => (
                 <Text style={[commonStyles.cell, {paddingLeft: 10}]}>
                     {item.itemNm}
@@ -101,31 +101,29 @@ export default function CornerStockReportScreen() {
             ),
         },
         {
-            key: 'totalStockQty', title: Const.TOTAL_STOCK_QTY, flex: 1, align: 'center',
+            key: 'totalStockQty', title: Const.TOTAL_STOCK_QTY, flex: 0.7,
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>{item.totalStockQty.toLocaleString()}</Text>
             )
         },
         {
-            key: 'giQty', title: Const.GI_QTY, flex: 1, align: 'center',
+            key: 'giQty', title: Const.GI_QTY, flex: 0.5,
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>{item.giQty.toLocaleString()}</Text>
             )
         },
         {
-            key: 'saleQty', title: Const.SALE, flex: 1, align: 'center',
+            key: 'saleQty', title: Const.SALE, flex: 0.5,
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>{item.saleQty.toLocaleString()}</Text>
             )
         },
         {
-            key: 'curStockQty', title: Const.CUR_STOCK_QTY, flex: 1, align: 'center',
+            key: 'curStockQty', title: Const.CUR_STOCK_QTY, flex: 0.7,
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {
-                    textAlign: 'right',
-                    paddingRight: 10,
-                    color: item.curStockQty < 0 ? 'red' : 'black',
-                }]}>{item.curStockQty.toLocaleString()}</Text>
+                <Text style={[commonStyles.numberCell, {color: item.curStockQty < 0 ? 'red' : 'black'}]}>
+                    {item.curStockQty.toLocaleString()}
+                </Text>
             )
         },
     ]), [])
@@ -235,31 +233,6 @@ export default function CornerStockReportScreen() {
 
 const styles = StyleSheet.create({
     selectText: {fontSize: 14, color: '#333'},
-    tableList: {flex: 1},
-    tableListContent: {paddingBottom: 12},
-    tableRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: '#eee',
-        paddingVertical: 12
-    },
-    summaryRow: {backgroundColor: '#fff7e6'},
-    summaryLabelText: {fontWeight: '700', color: '#333'},
-    cell: {fontSize: 13, color: '#444'},
-    rightSpanText: {textAlign: 'right'},
-    totalRow: {backgroundColor: '#fafafa'},
-    totalText: {fontWeight: '700', color: '#222'},
-    input: {
-        flex: 1,
-        backgroundColor: '#fff',
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-        color: '#333',
-    },
 });
 
 

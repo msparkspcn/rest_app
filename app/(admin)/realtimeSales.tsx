@@ -49,7 +49,7 @@ export default function RealtimeSalesScreen() {
 
     const baseData: SaleRow[] = useMemo(
         () =>
-            Array.from({length: 20}).map((_, idx) => {
+            Array.from({length: 80}).map((_, idx) => {
                 const cashAmt = 10000 + (idx % 5) * 3000;
                 const cardAmt = 20000 + (idx % 7) * 2500;
                 const etcAmt = 1000 * (idx % 4);
@@ -84,7 +84,7 @@ export default function RealtimeSalesScreen() {
     }
 
     const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => ([
-        {key: 'no', title: Const.NO, flex: 0.5, align: 'center',
+        {key: 'no', title: Const.NO, flex: 0.5,
             renderCell: (_item, index) => (
                 <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
             ),
@@ -99,14 +99,14 @@ export default function RealtimeSalesScreen() {
                 </Pressable>
             ),
         },
-        {key: 'cashAmt', title: '현금', flex: 1, align: 'center',
+        {key: 'cashAmt', title: '현금', flex: 1,
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>
                     {item.cashAmt.toLocaleString()}
                 </Text>
             )
         },
-        {key: 'etcAmt', title: '카드 외', flex: 1, align: 'center',
+        {key: 'etcAmt', title: '카드 외', flex: 1,
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>
                     {item.etcAmt.toLocaleString()}
@@ -240,15 +240,17 @@ export default function RealtimeSalesScreen() {
                 listHeader={() => (
                     <View>
                         {summaryRows.map(row => (
-                            <View key={row.key} style={{
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
-                                padding: 8,
-                                backgroundColor: '#fff7e6'
-                            }}>
-                                <Text style={[styles.cell, styles.summaryLabelText]}>{row.label}</Text>
-                                {"pairText" in row &&
-                                <Text style={[styles.cell, styles.rightSpanText]}>{row.pairText}</Text>}
+                            <View key={row.key} style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+                                <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
+                                    <Text style={[{textAlign: 'center'}, styles.cell, styles.summaryLabelText]}>
+                                        {row.label}
+                                    </Text>
+                                </View>
+                                <View style={[{ flex: 3.2 }]}>
+                                    <Text style={commonStyles.numberCell}>
+                                        {"pairText" in row ? row.pairText : ''}
+                                    </Text>
+                                </View>
                             </View>
                         ))}
                     </View>

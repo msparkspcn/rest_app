@@ -82,10 +82,10 @@ export const commonStyles = StyleSheet.create({
         backgroundColor: '#f0f3f7',
         borderBottomWidth: StyleSheet.hairlineWidth,
         borderBottomColor: '#e0e0e0',
-        minHeight: 30
+        minHeight: 35
     },
     headerCell: {
-        fontSize: 12,
+        fontSize: 13,
         fontWeight: '700',
         color: '#333',
         width: '100%',
@@ -102,7 +102,7 @@ export const commonStyles = StyleSheet.create({
         alignItems: 'center',
         borderBottomWidth: StyleSheet.hairlineWidth,
         borderBottomColor: '#aaa',
-        minHeight: 30,
+        minHeight: 35,
     },
     columnContainer: {
         flexDirection: 'row',
@@ -131,19 +131,19 @@ export const commonStyles = StyleSheet.create({
         textAlign: 'right',
     },
     cell: {
-        fontSize: 12,
+        fontSize: 13,
         color: '#444',
         width: '100%',
     },
     numberCell: {
-        fontSize: 12,
+        fontSize: 13,
         color: '#444',
         width: '100%',
         paddingRight:10,
         textAlign: 'right'
     },
     numberSmallCell:  {
-        fontSize: 12,
+        fontSize: 13,
         color: '#444',
         width: '100%',
         paddingRight:5,
@@ -328,7 +328,6 @@ export const commonStyles = StyleSheet.create({
     },
     linkText: {
         color: '#007AFF',
-        textDecorationLine: 'underline',
     },
     modalTableList: {
         flex: 1,
@@ -401,7 +400,7 @@ export const commonStyles = StyleSheet.create({
         backgroundColor: '#fff7e6'
     },
     listEmptyComponent: {
-        minHeight:30,
+        minHeight:35,
         justifyContent:'center',
         alignItems: 'center',
         borderBottomWidth: StyleSheet.hairlineWidth,
