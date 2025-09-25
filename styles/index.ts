@@ -13,15 +13,17 @@ export const commonStyles = StyleSheet.create({
         backgroundColor: '#f5f5f5',
     },
     filterRow: {
+        minHeight:35,
         flexDirection: 'row',
         alignItems: 'center',
         gap: 12,
     },
     filterRowFront: {
+        minHeight:35,
         flexDirection: 'row',
         alignItems: 'center',
         gap: 12,
-        marginBottom: 5
+        marginBottom: 5,
     },
     filterLabel: {
         minWidth: 70,

@@ -127,6 +127,10 @@ export default function AdminLayout() {
                     options={{title: '재고현황(주)', headerShown: true}}
                 />
                 <Stack.Screen
+                    name="stockReport"
+                    options={{title: '재고현황(통합)', headerShown: true}}
+                />
+                <Stack.Screen
                     name="realtimeStockReport"
                     options={{title: '실시간 재고현황(주)', headerShown: true}}
                 />
@@ -141,6 +145,10 @@ export default function AdminLayout() {
                 <Stack.Screen
                     name="tlgReportByPeriod"
                     options={{title: '기간별 TLG 현황', headerShown: true}}
+                />
+                <Stack.Screen
+                    name="tlgReportByPeriodOp"
+                    options={{title: 'TLG 현황(통합)', headerShown: true}}
                 />
             </Stack>
             {!hideFooter && (

@@ -44,7 +44,7 @@ export default function RealtimeSalesScreen() {
 
     const salesOrgList: SalesOrg[] = useMemo(
         () => [
-            { salesOrgCd: '', salesOrgNm: '전체' }, // 기본값 추가
+            { salesOrgCd: '', salesOrgNm: Const.ALL }, // 기본값 추가
             ...Array.from({ length: 6 }).map((_, i) => ({
                 salesOrgCd: `G${i + 1}`,
                 salesOrgNm: `주유소 ${i + 1}`,

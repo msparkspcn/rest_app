@@ -1,6 +1,8 @@
 import {StatusBar} from 'expo-status-bar';
 import React, {useMemo, useState} from 'react';
 import {
+    Alert,
+    FlatList,
     Modal,
     Pressable,
     SafeAreaView,
@@ -25,31 +27,29 @@ type StockRow = {
     curStockQty: number;
 };
 
-type StockDetailRow = {
-    cornerNm: string;
-    stockDt: string;
-    totalStockQty: number;
-    giQty: number;
-    saleQty: number;
-    curStockQty: number;
-}
-
+type SalesOrg = { salesOrgCd: string; salesOrgNm: string };
 type Corner = { cornerCd: string; cornerNm: string};
 
-export default function CornerStockReportScreen() {
+export default function StockReport() {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempDate, setTempDate] = useState<Date | null>(null);
     const [fromSaleDt, setFromSaleDt] = useState(getTodayYmd());
     const [toSaleDt, setToSaleDt] = useState(getTodayYmd());
     const [currentPickerType, setCurrentPickerType] = useState('from');
-    const cornerList: Corner[] = useMemo(
-        () => Array.from({length: 6}).map((_, i) => ({cornerCd: `G${i + 1}`, cornerNm: `매장 ${i + 1}`})),
+    const [itemNm, setItemNm] = useState('');
+    const salesOrgList: SalesOrg[] = useMemo(
+        () =>
+            Array.from({length: 6}).map((_, i) => {
+                return {
+                    salesOrgCd: `G${i + 1}`,
+                    salesOrgNm: `그룹 ${i + 1}`
+                };
+            }),
         []
     );
-    const [itemNm, setItemNm] = useState('');
-    const [isDetailVisible, setIsDetailVisible] = useState(false);
-    const [selectedItem, setSelectedItem] = useState<StockRow | null>(null);
-
+    const [selectedSalesOrgCd, setSelectedSalesOrgCd] = useState<string>('');
+    const [selectedSalesOrg, setSelectedSalesOrg] = useState<string | null>(salesOrgList[0]?.salesOrgCd ?? null);
+    const [showSalesOrgListModal, setShowSalesOrgListModal] = useState(false);
     const baseData: StockRow[] = useMemo(
         () =>
             Array.from({length: 15}).map((_, idx) => {
@@ -73,18 +73,16 @@ export default function CornerStockReportScreen() {
     }, [baseData]);
 
     const onSearch = () => {
-        // 데모: 현재는 선택 값만으로 필터링 적용
+        if(selectedSalesOrgCd=='') {
+            Alert.alert(Const.ERROR, Const.NO_SALES_ORG_MSG);
+            return;
+        }
     };
 
     const openDatePicker = (pickerType: string) => {
         setTempDate(new Date());
         setCurrentPickerType(pickerType);
         setShowDatePicker(true);
-    };
-
-    const openDetail = (stock: StockRow) => {
-        setSelectedItem(stock)
-        setIsDetailVisible(true);
     };
 
     const mainColumns: ColumnDef<StockRow>[] = useMemo(() => ([
@@ -96,11 +94,9 @@ export default function CornerStockReportScreen() {
         {
             key: 'itemNm', title: Const.ITEM_NM, flex: 1.5,
             renderCell: (item) => (
-                <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
-                    <Text style={[commonStyles.cell, commonStyles.linkText,{paddingLeft: 10}]}>
-                        {item.itemNm}
-                    </Text>
-                </Pressable>
+                <Text style={[commonStyles.cell, {paddingLeft: 5}]}>
+                    {item.itemNm}
+                </Text>
             ),
         },
         {
@@ -131,102 +127,20 @@ export default function CornerStockReportScreen() {
         },
     ]), [])
 
-    const detailData: StockDetailRow[] = useMemo(
-        () =>
-            Array.from({length: 10}).map((_, idx) => {
-                const qty = (idx % 3) * 100000;
-                return {
-                    cornerNm: '파스쿠찌',
-                    stockDt: `2025/09/0${idx + 1}`,
-                    totalStockQty: qty,
-                    giQty: qty,
-                    saleQty: qty,
-                    curStockQty: qty
-                };
-            }),
-        []
-    );
-
-    const StockDetailColumns: ColumnDef<StockDetailRow>[] = useMemo(() => ([
-        {key: 'stockDt', title: Const.DATE, flex: 1.5,
-            renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign: 'center'}]}>{item.stockDt}</Text>
-            )
-        },
-        {
-            key: 'totalStockQty', title: Const.TOTAL_STOCK_QTY, flex: 1.1,
-            renderCell: (item) => (
-                <Text style={commonStyles.numberSmallCell}>{item.totalStockQty.toLocaleString()}</Text>
-            )
-        },
-        {
-            key: 'giQty', title: Const.GI_QTY, flex: 1,
-            renderCell: (item) => (
-                <Text style={commonStyles.numberSmallCell}>{item.giQty.toLocaleString()}</Text>
-            )
-        },
-        {
-            key: 'saleQty', title: Const.SALE, flex: 1,
-            renderCell: (item) => (
-                <Text style={commonStyles.numberSmallCell}>{item.saleQty.toLocaleString()}</Text>
-            )
-        },
-        {
-            key: 'curStockQty', title: Const.CUR_STOCK_QTY, flex: 1.1,
-            renderCell: (item) => (
-                <Text style={commonStyles.numberSmallCell}>{item.curStockQty.toLocaleString()}</Text>
-            )
-        },
-    ]), []);
-
-    const detailTotalStockQty = useMemo(() => {
-        return detailData.reduce((acc, row) => acc, 0);
-    }, [detailData]);
-    const detailTotalGiQty = useMemo(() => {
-        return detailData.reduce((acc, row) => acc + row.giQty, 0);
-    }, [detailData]);
-    const detailTotalSaleQty = useMemo(() => {
-        return detailData.reduce((acc, row) => acc + row.saleQty, 0);
-    }, [detailData]);
-    const detailTotalCurStockQty = useMemo(() => {
-        return detailData.reduce((acc, row) => row.totalStockQty, 0);
-    }, [detailData]);
-
-    const renderDetailFooter = () => (
-        <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-            <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
-                <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.modalTotalText]}>
-                    합계
-                </Text>
-            </View>
-            <View style={[{flex: 1.1}, commonStyles.tableRightBorder]}>
-                <Text style={commonStyles.numberSmallCell}>
-                    {detailTotalStockQty.toLocaleString()}
-                </Text>
-            </View>
-            <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
-                <Text style={commonStyles.numberSmallCell}>
-                    {detailTotalGiQty.toLocaleString()}
-                </Text>
-            </View>
-            <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
-                <Text style={commonStyles.numberSmallCell}>
-                    {detailTotalSaleQty.toLocaleString()}
-                </Text>
-            </View>
-            <View style={[{flex: 1.1}, commonStyles.tableRightBorder]}>
-                <Text style={commonStyles.numberSmallCell}>
-                    {detailTotalCurStockQty.toLocaleString()}
-                </Text>
-            </View>
-        </View>
-    );
-
     return (
         <SafeAreaView style={commonStyles.container}>
             <StatusBar style="dark"/>
 
             <View style={commonStyles.topBar}>
+                <View style={commonStyles.filterRowFront}>
+                    <Text style={commonStyles.filterLabel}>사업장</Text>
+                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowSalesOrgListModal(true)}>
+                        <Text style={styles.selectText}>
+                            {salesOrgList.find(g => g.salesOrgCd === selectedSalesOrgCd)?.salesOrgNm || Const.SELECT}
+                        </Text>
+                        <Text style={commonStyles.selectArrow}> ▼</Text>
+                    </TouchableOpacity>
+                </View>
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>조회일자</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('from')}>
@@ -257,10 +171,7 @@ export default function CornerStockReportScreen() {
 
             <View style={commonStyles.sectionDivider}/>
 
-            <Table
-                data={filteredData}
-                columns={mainColumns}
-            />
+            <Table data={filteredData} columns={mainColumns} />
 
             <DatePickerModal
                 visible={showDatePicker}
@@ -272,26 +183,30 @@ export default function CornerStockReportScreen() {
                 }}
             />
 
-            <Modal
-                visible={isDetailVisible}
-                transparent animationType="fade"
-                onRequestClose={() => setIsDetailVisible(false)}
-            >
-                <View style={commonStyles.modalOverlay}
-                      pointerEvents="box-none">
-                    <View style={commonStyles.modalCard}>
-                        <View style={commonStyles.modalHeader}>
-                            <Text style={commonStyles.modalTitle}>{selectedItem?.itemNm}</Text>
-                            <TouchableOpacity onPress={() => setIsDetailVisible(false)}>
+            <Modal visible={showSalesOrgListModal} transparent animationType="slide"
+                   onRequestClose={() => setShowSalesOrgListModal(false)}>
+                <View style={commonStyles.modalOverlay}>
+                    <View style={commonStyles.modalContent}>
+                        <View style={commonStyles.listModalHeader}>
+                            <Text style={commonStyles.modalTitle}>사업장 선택</Text>
+                            <TouchableOpacity onPress={() => setShowSalesOrgListModal(false)}>
                                 <Text style={commonStyles.modalClose}>✕</Text>
                             </TouchableOpacity>
                         </View>
-
-                        <Table
-                            data={detailData}
-                            columns={StockDetailColumns}
-                            isModal={true}
-                            listFooter={renderDetailFooter}
+                        <FlatList
+                            data={salesOrgList}
+                            keyExtractor={(item) => item.salesOrgCd}
+                            renderItem={({item}) => (
+                                <TouchableOpacity
+                                    style={commonStyles.modalItem}
+                                    onPress={() => {
+                                        setSelectedSalesOrgCd(item.salesOrgCd);
+                                        setShowSalesOrgListModal(false);
+                                    }}
+                                >
+                                    <Text style={commonStyles.modalItemText}>{item.salesOrgNm}</Text>
+                                </TouchableOpacity>
+                            )}
                         />
                     </View>
                 </View>

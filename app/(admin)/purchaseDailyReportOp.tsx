@@ -34,7 +34,7 @@ export default function PurchaseDailyReportScreen() {
 
     const salesOrgList: SalesOrg[] = useMemo(
         () => [
-            { salesOrgCd: '', salesOrgNm: '전체' },
+            { salesOrgCd: '', salesOrgNm: Const.ALL },
             ...Array.from({ length: 6 }).map((_, i) => ({
                 salesOrgCd: `G${i + 1}`,
                 salesOrgNm: `주유소 ${i + 1}`,

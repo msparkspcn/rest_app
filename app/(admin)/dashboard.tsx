@@ -14,11 +14,11 @@ type CornerRow = {
   useYn: 'Y' | 'N';
 };
 
-type OperateFilter = '전체' | '운영' | '폐점';
+type OperateFilter = Const.ALL | '운영' | '폐점';
 
 export default function DashboardScreen() {
-  const [operateFilter, setOperateFilter] = useState<OperateFilter>('전체');
-  const [submittedFilter, setSubmittedFilter] = useState<OperateFilter>('전체');
+  const [operateFilter, setOperateFilter] = useState<OperateFilter>(Const.ALL);
+  const [submittedFilter, setSubmittedFilter] = useState<OperateFilter>(Const.ALL);
   const [isDetailVisible, setIsDetailVisible] = useState(false);
   const [selectedCorner, setSelectedCorner] = useState<CornerRow | null>(null);
 
@@ -54,7 +54,7 @@ export default function DashboardScreen() {
   }, []);
 
   const filteredData = useMemo(() => {
-    if (submittedFilter === '전체') return baseData;
+    if (submittedFilter === Const.ALL) return baseData;
     if (submittedFilter === '운영') return baseData.filter(r => r.useYn === 'Y');
 
 
@@ -142,7 +142,7 @@ export default function DashboardScreen() {
         <View style={commonStyles.filterRow}>
           <Text style={commonStyles.filterLabel}>운영여부</Text>
           <View style={commonStyles.segmented}>
-            {(['전체', '운영', '폐점'] as OperateFilter[]).map(option => (
+            {([Const.ALL, '운영', '폐점'] as OperateFilter[]).map(option => (
               <Pressable
                 key={option}
                 onPress={() => setOperateFilter(option)}

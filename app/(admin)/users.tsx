@@ -43,15 +43,15 @@ export default function UsersScreen() {
 
     if (formNewPassword.length > 0) {
       if (!formCurrentPassword) {
-        Alert.alert('오류', '현재 비밀번호를 입력해주세요.');
+        Alert.alert(Const.ERROR, '현재 비밀번호를 입력해주세요.');
         return;
       }
       if (formNewPassword !== formConfirmPassword) {
-        Alert.alert('오류', '변경 비밀번호가 일치하지 않습니다.');
+        Alert.alert(Const.ERROR, '변경 비밀번호가 일치하지 않습니다.');
         return;
       }
       if (formNewPassword.length < 7 || formNewPassword.length > 20) {
-        Alert.alert('오류', '비밀번호 길이를 확인해주세요.');
+        Alert.alert(Const.ERROR, '비밀번호 길이를 확인해주세요.');
         return;
       }
       const hasLetters = /[a-zA-Z]/.test(formNewPassword);
@@ -62,7 +62,7 @@ export default function UsersScreen() {
       if (hasNumbers) charTypeCount++;
       if (hasSymbols) charTypeCount++;
       if (charTypeCount < 2) {
-        Alert.alert('오류', '비밀번호 입력규칙을 확인해주세요.');
+        Alert.alert(Const.ERROR, '비밀번호 입력규칙을 확인해주세요.');
         return;
       }
     }

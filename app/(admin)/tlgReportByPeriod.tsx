@@ -5,7 +5,6 @@ import {
     SafeAreaView,
     StyleSheet,
     Text,
-    TextInput,
     TouchableOpacity,
     View
 } from 'react-native';
@@ -24,7 +23,7 @@ type TlgRow = {
     gasAmt: number;
 };
 
-
+type StoreGroup = { id: string; name: string };
 export default function tlgReportScreen() {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempDate, setTempDate] = useState<Date | null>(null);
@@ -33,6 +32,15 @@ export default function tlgReportScreen() {
     const [currentPickerType, setCurrentPickerType] = useState('from');
 
     const [itemNm, setItemNm] = useState('');
+    const storeGroups: StoreGroup[] = useMemo(
+        () => [
+            {id: "", name: "전체"},
+            {id: "01", name: "주유소"},
+            {id: "02", name: "충전소"}
+        ],
+        []
+    );
+    const [registerFilter, setRegisterFilter] = useState<StoreGroup>(storeGroups[0]);
     const baseData: TlgRow[] = useMemo(
         () =>
             Array.from({length: 9}).map((_, idx) => {
@@ -66,31 +74,31 @@ export default function tlgReportScreen() {
 
     const mainColumns: ColumnDef<TlgRow>[] = useMemo(() => ([
         {
-            key: 'dt', title: Const.DATE, flex: 1.5, align: 'center',
+            key: 'dt', title: Const.DATE, flex: 1.5,
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {paddingLeft: 10}]}>
+                <Text style={[commonStyles.cell, {textAlign:'center'}]}>
                     {item.dt}
                 </Text>
             ),
         },
         {
-            key: 'type', title: Const.TYPE, flex: 1, align: 'center',
+            key: 'type', title: Const.TYPE, flex: 1,
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {
-                    textAlign: 'center'
-                }]}>{item.type}</Text>
+                <Text style={[commonStyles.cell, {textAlign: 'center'}]}>
+                    {item.type}
+                </Text>
             )
         },
         {
-            key: 'gasType', title: Const.GAS_TYPE, flex: 1, align: 'center',
+            key: 'gasType', title: Const.GAS_TYPE, flex: 1,
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {
-                    textAlign: 'center'
-                }]}>{item.gasType}</Text>
+                <Text style={[commonStyles.cell, {textAlign: 'center'}]}>
+                    {item.gasType}
+                </Text>
             )
         },
         {
-            key: 'tankCd', title: Const.TANK_NO, flex: 1, align: 'center',
+            key: 'tankCd', title: Const.TANK_NO, flex: 1,
             renderCell: (item) => (
                 <Text style={[commonStyles.cell, {textAlign: 'center'}]}>
                     {item.tankCd}
@@ -98,13 +106,11 @@ export default function tlgReportScreen() {
             )
         },
         {
-            key: 'gasAmt', title: Const.GAS_AMT, flex: 1, align: 'center',
+            key: 'gasAmt', title: Const.GAS_AMT, flex: 1,
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {
-                    textAlign: 'right',
-                    paddingRight: 10,
-                    color: item.gasAmt < 0 ? 'red' : 'black',
-                }]}>{item.gasAmt.toLocaleString()}</Text>
+                <Text style={[commonStyles.numberCell, {color: item.gasAmt < 0 ? 'red' : ''}]}>{
+                    item.gasAmt.toLocaleString()}
+                </Text>
             )
         },
     ]), [])
@@ -126,16 +132,22 @@ export default function tlgReportScreen() {
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
-                <View style={commonStyles.filterRowFront}>
+                <View style={commonStyles.filterRow}>
                     <Text style={commonStyles.filterLabel}>{Const.ITEM_NM}</Text>
-                    <TextInput
-                        style={commonStyles.input}
-                        placeholderTextColor="#999"
-                        value={itemNm}
-                        onChangeText={setItemNm}
-                        returnKeyType="search"
-                        onSubmitEditing={onSearch}
-                    />
+                    <View style={commonStyles.segmented}>
+                        {storeGroups.map((option) => (
+                            <Pressable
+                                key={option.id}
+                                onPress={() => setRegisterFilter(option)}
+                                style={[commonStyles.segmentItem, registerFilter.id === option.id && commonStyles.segmentItemActive]}
+                            >
+                                <Text
+                                    style={[commonStyles.segmentText, registerFilter.id === option.id && commonStyles.segmentTextActive]}>
+                                    {option.name}
+                                </Text>
+                            </Pressable>
+                        ))}
+                    </View>
                     <Pressable style={commonStyles.searchButton} onPress={onSearch}>
                         <Text style={commonStyles.searchButtonText}>{Const.SEARCH}</Text>
                     </Pressable>
@@ -164,10 +176,6 @@ export default function tlgReportScreen() {
 
 const styles = StyleSheet.create({
     selectText: {fontSize: 14, color: '#333'},
-    modalTotalText: {
-        fontWeight: '700',
-        color: '#222',
-    },
 });
 
 

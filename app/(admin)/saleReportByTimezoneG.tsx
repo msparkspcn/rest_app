@@ -65,8 +65,7 @@ export default function SalesReportByTimezoneScreen() {
         {
             key: 'totalAmt', title: '판매금액', flex: 1, align: 'center',
             renderCell: (item) => (
-                <Text style={[
-                    commonStyles.numberCell]}>{item.totalAmt.toLocaleString()}</Text>
+                <Text style={[commonStyles.numberCell]}>{item.totalAmt.toLocaleString()}</Text>
             )
         },
         {
@@ -186,37 +185,12 @@ export default function SalesReportByTimezoneScreen() {
                 listHeader={() => (
                     <View>
                         {summaryRows.map(row => (
-                            <View key={row.key} style={{
-                                flexDirection: 'row',
-                                borderWidth: StyleSheet.hairlineWidth,
-                                borderColor: '#aaa',
-                                minHeight: 30,
-                                backgroundColor: '#fff7e6',
-                                alignItems:'center'
-                            }}>
-                                <View
-                                    style={{
-                                        flex: 0.8,
-                                        justifyContent: ' center',
-                                        alignItems: 'center',
-                                        borderRightWidth: StyleSheet.hairlineWidth,
-                                        borderColor: '#aaa',
-                                        paddingVertical: 5,
-                                    }}>
+                            <View key={row.key} style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+                                <View style={[{flex: 0.8}, commonStyles.tableRightBorder]}>
                                     <Text style={styles.summaryLabelText}>{row.label}</Text>
                                 </View>
 
-                                <View
-                                    style={{
-                                        flex: 1,
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        borderRightWidth: StyleSheet.hairlineWidth,
-                                        borderColor: '#aaa',
-                                        paddingVertical: 10,
-                                        // backgroundColor:'red'
-                                    }}
-                                >
+                                <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
                                     <Text style={commonStyles.numberCell}>
                                         {row.totalAmt.toLocaleString()}
                                     </Text>
@@ -247,7 +221,7 @@ const styles = StyleSheet.create({
     selectText: {fontSize: 14, color: '#333'},
     summaryLabelText: {
         fontWeight: '600',
-        fontSize: 11,
+        fontSize: 13,
         color: '#333',
         textAlign: 'center'
     },

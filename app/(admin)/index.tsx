@@ -79,7 +79,7 @@ export default function AdminHomeScreen() {
       title: '재고',
       icon: '📦',
       children: [
-        { title: '재고현황(통합)', icon: '📝', route: '/(admin)/dashboard', userRoleType: DEP_OP },
+        { title: '재고현황(통합)', icon: '📝', route: '/(admin)/stockReport', userRoleType: DEP_OP },
         { title: '재고현황(주)', icon: '📝', route: '/(admin)/cornerStockReportG', userRoleType: DEP_G },
         { title: '실시간 재고현황(주)', icon: '📝', route: '/(admin)/realtimeStockReport', userRoleType: DEP_G },
         { title: '매장 재고현황(휴)', icon: '📝', route: '/(admin)/cornerStockReport', userRoleType: DEP_R },
@@ -92,7 +92,7 @@ export default function AdminHomeScreen() {
       title: 'TLG',
       icon: '📦',
       children: [
-        { title: 'TLG현황(통합)', icon: '📝', route: '/(admin)/dashboard', userRoleType: DEP_OP },
+        { title: 'TLG현황(통합)', icon: '📝', route: '/(admin)/tlgReportByPeriodOp', userRoleType: DEP_OP },
         { title: 'TLG현황(통합)', icon: '📝', route: '/(admin)/tlgReportByPeriod', userRoleType: DEP_G },
       ],
     },
@@ -100,7 +100,6 @@ export default function AdminHomeScreen() {
 
   const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
 
-  // 사용자의 userRoleType 따라 메뉴를 필터링
   const filteredMenuGroups = useMemo(() => {
     if (!user) return [];
 

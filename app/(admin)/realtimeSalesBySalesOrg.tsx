@@ -1,6 +1,6 @@
 import {StatusBar} from 'expo-status-bar';
 import React, {useMemo, useState} from 'react';
-import {FlatList, Modal, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {Alert, FlatList, Modal, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {commonStyles} from "../../styles/index";
 import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
 import {Table} from "../../components/Table";
@@ -8,6 +8,7 @@ import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
 import {Ionicons} from "@expo/vector-icons";
 import Const from "../../constants/Const";
+import ListModal from "../../components/ListModal";
 
 type SaleRow = {
     no: number;
@@ -36,19 +37,19 @@ type CornerRow = {
     useYn: 'Y' | 'N';
 };
 
-type PosGroup = { id: string; name: string };
+type SalesOrg = { salesOrgCd: string; salesOrgNm: string };
 
 export default function RealtimeSalesBySalesOrgScreen() {
     const [saleDate, setSaleDate] = useState(getTodayYmd());
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempDate, setTempDate] = useState<Date | null>(null);
 
-    const posGroups: PosGroup[] = useMemo(
-        () => Array.from({length: 6}).map((_, i) => ({id: `G${i + 1}`, name: `그룹 ${i + 1}`})),
+    const salesOrgList: SalesOrg[] = useMemo(
+        () => Array.from({length: 6}).map((_, i) => ({salesOrgCd: `G${i + 1}`, salesOrgNm: `그룹 ${i + 1}`})),
         []
     );
-    const [selectedPosGroupId, setSelectedPosGroupId] = useState<string | null>(posGroups[0]?.id ?? null);
-    const [showPosGroupModal, setShowPosGroupModal] = useState(false);
+    const [selectedSalesOrgCd, setSelectedSalesOrgCd] = useState<string | null>(null);
+    const [showSalesOrgListModal, setShowSalesOrgListModal] = useState(false);
     const [isDetailVisible, setIsDetailVisible] = useState(false);
     const [detailChecked, setDetailChecked] = useState(false);
     const [selectedCorner, setSelectedCorner] = useState<CornerRow | null>(null);
@@ -93,7 +94,10 @@ export default function RealtimeSalesBySalesOrgScreen() {
     }, [baseData, detailChecked]);
 
     const onSearch = () => {
-        // 데모: 현재는 선택 값만으로 필터링 적용
+        if(selectedSalesOrgCd=='' || selectedSalesOrgCd == undefined) {
+            Alert.alert(Const.ERROR, Const.NO_SALES_ORG_MSG);
+            return;
+        }
     };
 
     const openDatePicker = () => {
@@ -283,9 +287,9 @@ export default function RealtimeSalesBySalesOrgScreen() {
             <View style={commonStyles.topBar}>
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>사업장</Text>
-                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowPosGroupModal(true)}>
+                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowSalesOrgListModal(true)}>
                         <Text
-                            style={styles.selectText}>{posGroups.find(g => g.id === selectedPosGroupId)?.name || Const.SELECT}</Text>
+                            style={styles.selectText}>{salesOrgList.find(g => g.salesOrgCd === selectedSalesOrgCd)?.salesOrgNm || Const.SELECT}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -360,34 +364,18 @@ export default function RealtimeSalesBySalesOrgScreen() {
                 onConfirm={(date) => setSaleDate(dateToYmd(date))}
             />
 
-            <Modal visible={showPosGroupModal} transparent animationType="slide"
-                   onRequestClose={() => setShowPosGroupModal(false)}>
-                <View style={commonStyles.modalOverlay}>
-                    <View style={commonStyles.modalContent}>
-                        <View style={commonStyles.listModalHeader}>
-                            <Text style={commonStyles.modalTitle}>사업장 선택</Text>
-                            <TouchableOpacity onPress={() => setShowPosGroupModal(false)}>
-                                <Text style={commonStyles.modalClose}>✕</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <FlatList
-                            data={posGroups}
-                            keyExtractor={(item) => item.id}
-                            renderItem={({item}) => (
-                                <TouchableOpacity
-                                    style={commonStyles.modalItem}
-                                    onPress={() => {
-                                        setSelectedPosGroupId(item.id);
-                                        setShowPosGroupModal(false);
-                                    }}
-                                >
-                                    <Text style={commonStyles.modalItemText}>{item.name}</Text>
-                                </TouchableOpacity>
-                            )}
-                        />
-                    </View>
-                </View>
-            </Modal>
+            <ListModal
+                visible={showSalesOrgListModal}
+                title="사업장 선택"
+                data={salesOrgList}
+                keyField="salesOrgCd"
+                labelField="salesOrgNm"
+                onClose={() => setShowSalesOrgListModal(false)}
+                onSelect={(item) => {
+                    setSelectedSalesOrgCd(item.salesOrgCd);
+                    setShowSalesOrgListModal(false);
+                }}
+            />
 
             <Modal visible={isDetailVisible} animationType="fade" transparent>
                 <View style={commonStyles.modalOverlay}>

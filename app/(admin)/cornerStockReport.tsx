@@ -28,9 +28,9 @@ type StockRow = {
     curStockQty: number;
 };
 
-type Vendor = { id: string; name: string };
+type Vendor = { vendorCd: string; vendorNm: string };
 type SearchCond = { id: string; name: string };
-type Corner = { id: string; name: string};
+type Corner = { cornerCd: string; cornerNm: string};
 
 export default function CornerStockReportScreen() {
     const [saleDate, setSaleDate] = useState(getTodayYmd());
@@ -38,23 +38,23 @@ export default function CornerStockReportScreen() {
     const [tempDate, setTempDate] = useState<Date | null>(null);
 
     const vendors: Vendor[] = useMemo(
-        () => Array.from({length: 6}).map((_, i) => ({id: `G${i + 1}`, name: `거래처 ${i + 1}`})),
+        () => Array.from({length: 6}).map((_, i) => ({vendorCd: `G${i + 1}`, vendorNm: `거래처 ${i + 1}`})),
         []
     );
-    const corners: Corner[] = useMemo(
-        () => Array.from({length: 6}).map((_, i) => ({id: `G${i + 1}`, name: `매장 ${i + 1}`})),
+    const cornerList: Corner[] = useMemo(
+        () => Array.from({length: 6}).map((_, i) => ({cornerCd: `G${i + 1}`, cornerNm: `매장 ${i + 1}`})),
         []
     );
 
     const searchCond: SearchCond[] = [{ id: "realtime", name: "실시간 기준" },
         { id: "closing", name: "영업 마감 기준" }]
-    const [selectedVendorId, setSelectedVendorId] = useState<string | null>(vendors[0]?.id ?? null);
+    const [selectedVendorId, setSelectedVendorId] = useState<string | null>(vendors[0]?.vendorCd ?? null);
     const [showVendorModal, setShowVendorModal] = useState(false);
     const [showCornerModal, setShowCornerModal] = useState(false);
     const [showSearchCond, setShowSearchCond] = useState(false);
     const [vendorQuery, setVendorQuery] = useState('');
     const [selectedSearchCond, setSelectedSearchCond] = useState<string | null>(searchCond[0]?.id ?? null);
-    const [selectedCorner, setSelectedCorner] = useState<string | null>(corners[0]?.id ?? null);
+    const [selectedCorner, setSelectedCorner] = useState<string | null>(null);
     const baseData: StockRow[] = useMemo(
         () =>
             Array.from({length: 15}).map((_, idx) => {
@@ -144,7 +144,7 @@ export default function CornerStockReportScreen() {
                     <Text style={commonStyles.filterLabel}>매장</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowCornerModal(true)}>
                         <Text
-                            style={styles.selectText}>{corners.find(g => g.id === selectedCorner)?.name || Const.SELECT}</Text>
+                            style={styles.selectText}>{cornerList.find(g => g.cornerCd === selectedCorner)?.cornerNm || Const.SELECT}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -152,7 +152,7 @@ export default function CornerStockReportScreen() {
                     <Text style={commonStyles.filterLabel}>{Const.VENDOR}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowVendorModal(true)}>
                         <Text
-                            style={styles.selectText}>{vendors.find(g => g.id === selectedVendorId)?.name || Const.SELECT}</Text>
+                            style={styles.selectText}>{vendors.find(g => g.vendorCd === selectedVendorId)?.vendorNm || Const.SELECT}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -197,7 +197,7 @@ export default function CornerStockReportScreen() {
             <ListModal
                 visible={showCornerModal}
                 title="매장 선택"
-                data={corners}
+                data={cornerList}
                 onClose={() => setShowCornerModal(false)}
                 onSelect={(item) => {
                     setSelectedCorner(item.id);
@@ -209,9 +209,11 @@ export default function CornerStockReportScreen() {
                 visible={showVendorModal}
                 title="거래처 선택"
                 data={vendors}
+                keyField="vendorCd"
+                labelField="vendorNm"
                 onClose={() => setShowVendorModal(false)}
                 onSelect={(item) => {
-                    setSelectedVendorId(item.id);
+                    setSelectedVendorId(item.vendorCd);
                     setShowVendorModal(false);
                 }}
             />

@@ -12,12 +12,12 @@ type VendorRow = {
   status: '등록' | '취소';
 };
 
-type RegisterFilter = '전체' | '등록' | '취소';
+type RegisterFilter = Const.ALL | '등록' | '취소';
 
 export default function VendorListScreen() {
   const [vendorQuery, setVendorQuery] = useState('');
-  const [registerFilter, setRegisterFilter] = useState<RegisterFilter>('전체');
-  const [submitted, setSubmitted] = useState<{ q: string; f: RegisterFilter }>({ q: '', f: '전체' });
+  const [registerFilter, setRegisterFilter] = useState<RegisterFilter>(Const.ALL);
+  const [submitted, setSubmitted] = useState<{ q: string; f: RegisterFilter }>({ q: '', f: Const.ALL });
   const [isDetailVisible, setIsDetailVisible] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState<VendorRow | null>(null);
 
@@ -31,7 +31,7 @@ export default function VendorListScreen() {
   const filteredData = useMemo(() => {
     const { q, f } = submitted;
     return baseData
-      .filter((row) => (f === '전체' ? true : row.status === f))
+      .filter((row) => (f === Const.ALL ? true : row.status === f))
       .filter((row) => (q.trim().length === 0 ? true : row.vendor.includes(q.trim())));
   }, [baseData, submitted]);
 
@@ -112,7 +112,7 @@ export default function VendorListScreen() {
         <View style={commonStyles.filterRow}>
           <Text style={commonStyles.filterLabel}>등록여부</Text>
           <View style={commonStyles.segmented}>
-            {(['전체', '등록', '취소'] as RegisterFilter[]).map((option) => (
+            {([Const.ALL, '등록', '취소'] as RegisterFilter[]).map((option) => (
               <Pressable
                 key={option}
                 onPress={() => setRegisterFilter(option)}

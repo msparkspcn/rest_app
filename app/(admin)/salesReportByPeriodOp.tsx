@@ -36,12 +36,12 @@ type SaleData = {
     salesOrgNm: string;
 }
 
-type CornerOption = { id: string; name: string };
+type Corner = { cornerCd: string; cornerNm: string };
 
 export default function SalesReportByPeriod() {
-    const corners: CornerOption[] = useMemo(
+    const cornerList: Corner[] = useMemo(
         () => Array.from({length: 12}).map((_, i) => (
-            {id: `S${100 + i}`, name: `주유소 ${i + 1}`}
+            {cornerCd: `S${100 + i}`, cornerNm: `주유소 ${i + 1}`}
         )),
         []
     );
@@ -49,7 +49,7 @@ export default function SalesReportByPeriod() {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempDate, setTempDate] = useState<Date | null>(null);
     const [showCornerModal, setShowCornerModal] = useState(false);
-    const [selectedCornerCd, setSelectedCornerCd] = useState<string | null>(corners[0]?.id ?? null);
+    const [selectedCornerCd, setSelectedCornerCd] = useState<string | null>(null);
     const [fromSaleDt, setFromSaleDt] = useState(getTodayYmd());
     const [toSaleDt, setToSaleDt] = useState(getTodayYmd());
     const [currentPickerType, setCurrentPickerType] = useState('from')
@@ -299,7 +299,7 @@ export default function SalesReportByPeriod() {
                     <Text style={commonStyles.filterLabel}>{Const.SALES_ORG}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowCornerModal(true)}>
                         <Text
-                            style={commonStyles.selectText}>{corners.find(g => g.id === selectedCornerCd)?.name || Const.SELECT}</Text>
+                            style={commonStyles.selectText}>{cornerList.find(g => g.cornerCd === selectedCornerCd)?.cornerNm || Const.SELECT}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                     <Pressable style={commonStyles.searchButton} onPress={onSearch}>
@@ -323,7 +323,7 @@ export default function SalesReportByPeriod() {
                             </TouchableOpacity>
                         </View>
                         <FlatList
-                            data={corners}
+                            data={cornerList}
                             keyExtractor={(item) => item.id}
                             style={commonStyles.modalList}
                             renderItem={({item}) => (

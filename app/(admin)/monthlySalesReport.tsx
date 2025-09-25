@@ -23,6 +23,7 @@ import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
 import Const from "../../constants/Const";
+import ListModal from "../../components/ListModal";
 
 type SaleRow = {
     cmpCd: string;
@@ -43,18 +44,18 @@ type SaleDetailRow = {
     netSaleAmt: number;
 }
 
-type CornerOption = { id: string; name: string };
+type Corner = { cornerCd: string; cornerNm: string };
 type DetailType = 'daily' | 'monthly';
 type DailyDetailRow = { saleDt: string; saleAmt: number, vatAmt: number, netSaleAmt: number };
 type MonthlyDetailRow = { saleMonth: string; monthSaleQty: number, monthSaleAmt: number, monthVatAmt: number, monthNetSaleAmt: number };
 
 export default function MonthlySalesReport() {
-    const corners: CornerOption[] = useMemo(
+    const cornerList: Corner[] = useMemo(
         () => [
-            { id: '', name: '전체' }, // 기본값 추가
+            {cornerCd: '', cornerNm: '전체'},
             ...Array.from({length: 12}).map((_, i) => ({
-                id: `S${100 + i}`,
-                name: `매장 ${i + 1}`
+                cornerCd: `S${100 + i}`,
+                cornerNm: `매장 ${i + 1}`
             })),
         ],
         []
@@ -414,7 +415,7 @@ export default function MonthlySalesReport() {
                     <Text style={commonStyles.filterLabel}>매장</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowCornerModal(true)}>
                         <Text
-                            style={commonStyles.selectText}>{corners.find(g => g.id === selectedCornerCd)?.name || '전체'}</Text>
+                            style={commonStyles.selectText}>{cornerList.find(g => g.cornerCd === selectedCornerCd)?.cornerNm || Const.ALL}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                     <Pressable style={commonStyles.searchButton} onPress={onSearch}>
@@ -428,34 +429,18 @@ export default function MonthlySalesReport() {
 
             <View style={commonStyles.sectionDivider}/>
 
-            <Modal visible={showCornerModal} animationType="fade" transparent>
-                <View style={commonStyles.modalOverlay}>
-                    <View style={commonStyles.modalContent}>
-                        <View style={commonStyles.listModalHeader}>
-                            <Text style={commonStyles.modalTitle}>매장 선택</Text>
-                            <TouchableOpacity onPress={() => setShowCornerModal(false)}>
-                                <Text style={commonStyles.modalClose}>✕</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <FlatList
-                            data={corners}
-                            keyExtractor={(item) => item.id}
-                            style={commonStyles.modalList}
-                            renderItem={({item}) => (
-                                <TouchableOpacity
-                                    style={commonStyles.modalItem}
-                                    onPress={() => {
-                                        setSelectedCornerCd(item.id);
-                                        setShowCornerModal(false);
-                                    }}
-                                >
-                                    <Text style={commonStyles.modalItemText}>{item.name}</Text>
-                                </TouchableOpacity>
-                            )}
-                        />
-                    </View>
-                </View>
-            </Modal>
+            <ListModal
+                visible={showCornerModal}
+                title="매장 선택"
+                data={cornerList}
+                keyField="cornerCd"
+                labelField="cornerNm"
+                onClose={() => setShowCornerModal(false)}
+                onSelect={(item) => {
+                    setSelectedCornerCd(item.cornerCd);
+                    setShowCornerModal(false);
+                }}
+            />
 
             <Modal visible={isDetailVisible} animationType="fade" transparent>
                 <View style={commonStyles.modalOverlay}>

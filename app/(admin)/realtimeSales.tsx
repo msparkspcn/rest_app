@@ -7,6 +7,7 @@ import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
 import Const from "../../constants/Const";
+import ListModal from "../../components/ListModal";
 
 type SaleRow = {
     storNm: string;
@@ -31,21 +32,28 @@ type SaleDetailRow = {
 type ListItem =
     | { type: 'summaryPair'; key: string; label: string; pairText: string }
     | { type: 'summaryTotals'; key: string; label: string; cashAmt: number; cardEtc: number; totalAmt: number }
-    | { type: 'detail'; key: string; no: number; posGroup: string; cashAmt: number; cardEtc: number; totalAmt: number };
-type PosGroup = { id: string; name: string };
+    | { type: 'detail'; key: string; no: number; storCd: string; cashAmt: number; cardEtc: number; totalAmt: number };
+type Stor = { storCd: string; storNm: string };
 
-export default function RealtimeSalesScreen() {
+export default function RealtimeSales() {
     const [saleDate, setSaleDate] = useState(getTodayYmd());
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempDate, setTempDate] = useState<Date | null>(null);
 
-    const posGroups: PosGroup[] = useMemo(
-        () => Array.from({length: 6}).map((_, i) => ({id: `G${i + 1}`, name: `그룹 ${i + 1}`})),
+    const storList: Stor[] = useMemo(
+        () => [
+            {storCd: '', storNm: '전체'},
+            ...Array.from({length: 6}).map((_, i) => ({
+                storCd: `G${i + 1}`,
+                storNm: `그룹 ${i + 1}`
+            })),
+        ],
         []
     );
-    const [selectedPosGroupId, setSelectedPosGroupId] = useState<string | null>(posGroups[0]?.id ?? null);
-    const [showPosGroupModal, setShowPosGroupModal] = useState(false);
+    const [selectedStorCd, setSelectedStorCd] = useState<string | null>(null);
+    const [showStorModal, setShowStorModal] = useState(false);
     const [isDetailVisible, setIsDetailVisible] = useState(false);
+    const [selectedStor, setSelectedStor] = useState<Stor | null>(null);
 
     const baseData: SaleRow[] = useMemo(
         () =>
@@ -66,10 +74,10 @@ export default function RealtimeSalesScreen() {
     );
 
     const filteredData = useMemo(() => {
-        if (!selectedPosGroupId) return baseData;
-        const groupName = posGroups.find(g => g.id === selectedPosGroupId)?.name;
+        if (!selectedStorCd) return baseData;
+        const groupName = storList.find(g => g.storCd === selectedStorCd)?.storNm;
         return baseData.filter(r => (groupName ? r.storNm === groupName : true));
-    }, [baseData, posGroups, selectedPosGroupId]);
+    }, [baseData, storList, selectedStorCd]);
 
     const onSearch = () => {
     };
@@ -79,41 +87,46 @@ export default function RealtimeSalesScreen() {
         setShowDatePicker(true);
     };
 
-    const openDetail = (posGroup: string) => {
+    const openDetail = (stor: Stor) => {
+        setSelectedStor(stor);
         setIsDetailVisible(true);
     }
 
     const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => ([
-        {key: 'no', title: Const.NO, flex: 0.5,
+        {
+            key: 'no', title: Const.NO, flex: 0.5,
             renderCell: (_item, index) => (
-                <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
+                <Text style={[commonStyles.cell, {textAlign: 'center'}]}>{index + 1}</Text>
             ),
         },
         {
             key: 'storNm', title: '포스그룹', flex: 1, align: 'center',
             renderCell: (item) => (
-                <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item.posGroup)}>
+                <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
                     <Text style={[commonStyles.cell, commonStyles.linkText, {paddingLeft: 10}]}>
                         {item.storNm}
                     </Text>
                 </Pressable>
             ),
         },
-        {key: 'cashAmt', title: '현금', flex: 1,
+        {
+            key: 'cashAmt', title: '현금', flex: 1,
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>
                     {item.cashAmt.toLocaleString()}
                 </Text>
             )
         },
-        {key: 'etcAmt', title: '카드 외', flex: 1,
+        {
+            key: 'etcAmt', title: '카드 외', flex: 1,
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>
                     {item.etcAmt.toLocaleString()}
                 </Text>
             )
         },
-        {key: 'totalAmt', title: '총매출', flex: 1.2, align: 'center',
+        {
+            key: 'totalAmt', title: '총매출', flex: 1.2, align: 'center',
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>
                     {item.totalAmt.toLocaleString()}
@@ -181,9 +194,10 @@ export default function RealtimeSalesScreen() {
     );
 
     const SaleDetailColumns: ColumnDef<SaleDetailRow>[] = useMemo(() => ([
-        {key: 'no', title: Const.NO, flex: 0.5, align: 'center',
+        {
+            key: 'no', title: Const.NO, flex: 0.5, align: 'center',
             renderCell: (_item, index) => (
-                <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
+                <Text style={[commonStyles.cell, {textAlign: 'center'}]}>{index + 1}</Text>
             ),
         },
         {key: 'itemNm', title: '상품명', flex: 2, align: 'center'},
@@ -221,9 +235,9 @@ export default function RealtimeSalesScreen() {
                 </View>
                 <View style={commonStyles.filterRow}>
                     <Text style={commonStyles.filterLabel}>포스그룹</Text>
-                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowPosGroupModal(true)}>
+                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowStorModal(true)}>
                         <Text
-                            style={styles.selectText}>{posGroups.find(g => g.id === selectedPosGroupId)?.name || Const.SELECT}</Text>
+                            style={styles.selectText}>{storList.find(g => g.storCd === selectedStorCd)?.storNm || Const.ALL}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                     <Pressable style={commonStyles.searchButton} onPress={onSearch}>
@@ -246,7 +260,7 @@ export default function RealtimeSalesScreen() {
                                         {row.label}
                                     </Text>
                                 </View>
-                                <View style={[{ flex: 3.2 }]}>
+                                <View style={[{flex: 3.2}]}>
                                     <Text style={commonStyles.numberCell}>
                                         {"pairText" in row ? row.pairText : ''}
                                     </Text>
@@ -264,34 +278,18 @@ export default function RealtimeSalesScreen() {
                 onConfirm={(date) => setSaleDate(dateToYmd(date))}
             />
 
-            <Modal visible={showPosGroupModal} transparent animationType="slide"
-                   onRequestClose={() => setShowPosGroupModal(false)}>
-                <View style={commonStyles.modalOverlay}>
-                    <View style={commonStyles.modalContent}>
-                        <View style={commonStyles.listModalHeader}>
-                            <Text style={commonStyles.modalTitle}>포스그룹 선택</Text>
-                            <TouchableOpacity onPress={() => setShowPosGroupModal(false)}>
-                                <Text style={commonStyles.modalClose}>✕</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <FlatList
-                            data={posGroups}
-                            keyExtractor={(item) => item.id}
-                            renderItem={({item}) => (
-                                <TouchableOpacity
-                                    style={commonStyles.modalItem}
-                                    onPress={() => {
-                                        setSelectedPosGroupId(item.id);
-                                        setShowPosGroupModal(false);
-                                    }}
-                                >
-                                    <Text style={commonStyles.modalItemText}>{item.name}</Text>
-                                </TouchableOpacity>
-                            )}
-                        />
-                    </View>
-                </View>
-            </Modal>
+            <ListModal
+                visible={showStorModal}
+                title="포스그룹 선택"
+                data={storList}
+                keyField="storCd"
+                labelField="storNm"
+                onClose={() => setShowStorModal(false)}
+                onSelect={(item) => {
+                    setSelectedStorCd(item.storCd);
+                    setShowStorModal(false);
+                }}
+            />
 
             <Modal
                 visible={isDetailVisible}
@@ -301,7 +299,9 @@ export default function RealtimeSalesScreen() {
                 <View style={commonStyles.modalOverlay}>
                     <View style={commonStyles.modalCard}>
                         <View style={commonStyles.modalHeader}>
-                            {/*{selectedItemNm && <Text style={commonStyles.modalTitle}>{selectedItemNm}</Text>}*/}
+                            {selectedStor && (
+                                <Text style={commonStyles.modalTitle}>{selectedStor?.storNm}</Text>
+                            )}
                             <TouchableOpacity onPress={() => setIsDetailVisible(false)}>
                                 <Text style={commonStyles.modalClose}>✕</Text>
                             </TouchableOpacity>

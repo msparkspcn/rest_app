@@ -55,9 +55,11 @@ export default {
     RETURN_LOGIN_PAGE: '로그인으로 돌아가기',
     RETURN_TERMS_PAGE: '약관으로 돌아가기',
     SELECT: '선택',
+    ALL: '전체',
     CONFIRM: '확인',
     NAME: '이름',
     ID: '아이디',
     PW: '비밀번호',
     VAT: '부가세',
+    NO_SALES_ORG_MSG: '사업장을 선택해주세요.',
 }

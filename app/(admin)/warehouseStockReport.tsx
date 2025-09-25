@@ -37,7 +37,7 @@ type StockDetailRow = {
     curStockQty: number;
 }
 
-type Vendor = { id: string; name: string };
+type Vendor = { vendorCd: string; vendorNm: string };
 type ItemClass = {
     id: string;
     name: string;
@@ -51,7 +51,7 @@ export default function WarehouseStockReportScreen() {
     const [currentPickerType, setCurrentPickerType] = useState('from')
 
     const vendors: Vendor[] = useMemo(
-        () => Array.from({length: 6}).map((_, i) => ({id: `G${i + 1}`, name: `거래처 ${i + 1}`})),
+        () => Array.from({length: 6}).map((_, i) => ({vendorCd: `G${i + 1}`, vendorNm: `거래처 ${i + 1}`})),
         []
     );
     const itemClasses: ItemClass[] = useMemo(
@@ -59,7 +59,7 @@ export default function WarehouseStockReportScreen() {
         []
     );
 
-    const [selectedVendorId, setSelectedVendorId] = useState<string | null>(vendors[0]?.id ?? null);
+    const [selectedVendorId, setSelectedVendorId] = useState<string | null>(vendors[0]?.vendorCd ?? null);
     const [showVendorModal, setShowVendorModal] = useState(false);
     const [showItemClassModal, setShowItemClassModal] = useState(false);
     const [vendorQuery, setVendorQuery] = useState('');
@@ -295,7 +295,7 @@ export default function WarehouseStockReportScreen() {
                     <Text style={commonStyles.filterLabel}>{Const.VENDOR}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowVendorModal(true)}>
                         <Text
-                            style={styles.selectText}>{vendors.find(g => g.id === selectedVendorId)?.name || Const.SELECT}</Text>
+                            style={styles.selectText}>{vendors.find(g => g.vendorCd === selectedVendorId)?.vendorNm || Const.SELECT}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -338,6 +338,8 @@ export default function WarehouseStockReportScreen() {
                 visible={showItemClassModal}
                 title="상품분류 선택"
                 data={itemClasses}
+                keyField="id"
+                labelField="name"
                 onClose={() => setShowItemClassModal(false)}
                 onSelect={(item) => {
                     setSelectedItemClass(item.id);
@@ -349,9 +351,11 @@ export default function WarehouseStockReportScreen() {
                 visible={showVendorModal}
                 title="거래처 선택"
                 data={vendors}
+                keyField="vendorCd"
+                labelField="vendorNm"
                 onClose={() => setShowVendorModal(false)}
                 onSelect={(item) => {
-                    setSelectedVendorId(item.id);
+                    setSelectedVendorId(item.vendorCd);
                     setShowVendorModal(false);
                 }}
             />

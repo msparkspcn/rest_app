@@ -1,12 +1,13 @@
 import {StatusBar} from 'expo-status-bar';
 import React, {useMemo, useState} from 'react';
-import {FlatList, Modal, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {Alert, FlatList, Modal, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {commonStyles} from "../../styles/index";
 import {dateToYmd, formattedDate, getTodayYmd, ymdToDateWithDayShort} from "../../utils/DateUtils";
 import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
 import Const from "../../constants/Const";
+import ListModal from "../../components/ListModal";
 
 type Stor = {
     storCd: string;
@@ -33,32 +34,44 @@ export default function MobileOrderReportByPeriod() {
     const [toSaleDt, setToSaleDt] = useState(getTodayYmd());
     const [currentPickerType, setCurrentPickerType] = useState('from')
     const salesOrgList: SalesOrg[] = useMemo(
-        () => [
-            {salesOrgCd: '', salesOrgNm: '선택'},
-            ...Array.from({length: 6}).map((_, i) => ({
-                salesOrgCd: `G${i + 1}`,
-                salesOrgNm: `그룹 ${i + 1}`
-            })),
-        ],
+        () =>
+            Array.from({length: 6}).map((_, i) => {
+                return {
+                    salesOrgCd: `G${i + 1}`,
+                    salesOrgNm: `그룹 ${i + 1}`
+                };
+            }),
         []
     );
     const storList: Stor[] = useMemo(
-        () => Array.from({length: 6}).map((_, i) => ({storCd: `G${i + 1}`, storNm: `그룹 ${i + 1}`})),
+        () =>
+            Array.from({length: 6}).map((_, i) => {
+                return {
+                    storCd: `G${i + 1}`,
+                    storNm: `그룹 ${i + 1}`
+                }
+            }),
         []
     );
     const [selectedSalesOrg, setSelectedSalesOrg] = useState<string | null>(salesOrgList[0]?.salesOrgCd ?? null);
     const [selectedStor, setSelectedStor] = useState<Stor | null>(null);
     const [showStorModal, setShowStorModal] = useState(false);
     const [isDetailVisible, setIsDetailVisible] = useState(false);
-
+    const [showSalesOrgListModal, setShowSalesOrgListModal] = useState(false);
 
     const openDatePicker = (pickerType: string) => {
         setTempDate(new Date());
         setCurrentPickerType(pickerType);
         setShowDatePicker(true);
     };
+    const [selectedSalesOrgCd, setSelectedSalesOrgCd] = useState<string | null>('');
+    const [selectedStorCd, setSelectedStorCd] = useState<string>('');
+
     const onSearch = () => {
-        // 데모: 현재는 선택 값만으로 필터링 적용
+        if(selectedSalesOrgCd=='') {
+            Alert.alert(Const.ERROR, Const.NO_SALES_ORG_MSG);
+            return;
+        }
     };
 
     const baseData: SaleRow[] = useMemo(
@@ -237,9 +250,9 @@ export default function MobileOrderReportByPeriod() {
                 </View>
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>사업장</Text>
-                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowStorModal(true)}>
+                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowSalesOrgListModal(true)}>
                         <Text style={styles.selectText}>
-                            {salesOrgList.find(g => g.salesOrgCd === selectedSalesOrg)?.salesOrgCd || Const.SELECT}
+                            {salesOrgList.find(g => g.salesOrgCd === selectedSalesOrgCd)?.salesOrgNm || Const.SELECT}
                         </Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
@@ -248,7 +261,7 @@ export default function MobileOrderReportByPeriod() {
                     <Text style={commonStyles.filterLabel}>매장그룹</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowStorModal(true)}>
                         <Text style={styles.selectText}>
-                            {storList.find(g => g.storCd === selectedStor)?.storCd || Const.SELECT}
+                            {storList.find(g => g.storCd === selectedStorCd)?.storNm || Const.SELECT}
                         </Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
@@ -283,34 +296,31 @@ export default function MobileOrderReportByPeriod() {
                 }}
             />
 
-            <Modal visible={showStorModal} transparent animationType="slide"
-                   onRequestClose={() => setShowStorModal(false)}>
-                <View style={commonStyles.modalOverlay}>
-                    <View style={commonStyles.modalContent}>
-                        <View style={commonStyles.listModalHeader}>
-                            <Text style={commonStyles.modalTitle}>매장그룹 선택</Text>
-                            <TouchableOpacity onPress={() => setShowStorModal(false)}>
-                                <Text style={commonStyles.modalClose}>✕</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <FlatList
-                            data={storList}
-                            keyExtractor={(item) => item.id}
-                            renderItem={({item}) => (
-                                <TouchableOpacity
-                                    style={commonStyles.modalItem}
-                                    onPress={() => {
-                                        setSelectedStor(item.id);
-                                        setShowStorModal(false);
-                                    }}
-                                >
-                                    <Text style={commonStyles.modalItemText}>{item.name}</Text>
-                                </TouchableOpacity>
-                            )}
-                        />
-                    </View>
-                </View>
-            </Modal>
+            <ListModal
+                visible={showSalesOrgListModal}
+                title="사업장 선택"
+                data={salesOrgList}
+                keyField="salesOrgCd"
+                labelField="salesOrgNm"
+                onClose={() => setShowSalesOrgListModal(false)}
+                onSelect={(item) => {
+                    setSelectedSalesOrgCd(item.salesOrgCd);
+                    setShowSalesOrgListModal(false);
+                }}
+            />
+
+            <ListModal
+                visible={showStorModal}
+                title="매장그룹 선택"
+                data={storList}
+                keyField="storCd"
+                labelField="storNm"
+                onClose={() => setShowStorModal(false)}
+                onSelect={(item) => {
+                    setSelectedStorCd(item.storCd);
+                    setShowStorModal(false);
+                }}
+            />
 
             <Modal visible={isDetailVisible}
                    transparent animationType="fade"

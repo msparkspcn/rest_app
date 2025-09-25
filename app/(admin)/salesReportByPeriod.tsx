@@ -1,7 +1,7 @@
-import { commonStyles } from '@/styles';
-import { Ionicons } from '@expo/vector-icons';
-import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useMemo, useState } from 'react';
+import {commonStyles} from '@/styles';
+import {Ionicons} from '@expo/vector-icons';
+import {StatusBar} from 'expo-status-bar';
+import React, {useEffect, useMemo, useState} from 'react';
 import {
     FlatList,
     Modal,
@@ -19,6 +19,7 @@ import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
 import Const from "../../constants/Const";
+import ListModal from "../../components/ListModal";
 
 type SaleRow = {
     saleDtInfo: string;
@@ -35,18 +36,24 @@ type SaleData = {
     cornerNm: string;
 }
 
-type CornerOption = { id: string; name: string };
+type Corner = { cornerCd: string; cornerNm: string };
 
 export default function SalesReportByPeriod() {
-    const corners: CornerOption[] = useMemo(
-        () => Array.from({ length: 12 }).map((_, i) => ({ id: `S${100 + i}`, name: `매장 ${i + 1}` })),
+    const cornerList: Corner[] = useMemo(
+        () => [
+            {cornerCd: '', cornerNm: '전체'},
+            ...Array.from({length: 12}).map((_, i) => ({
+                cornerCd: `S${100 + i}`,
+                cornerNm: `매장 ${i + 1}`
+            })),
+        ],
         []
     );
     const [isDetailVisible, setIsDetailVisible] = useState(false);
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempDate, setTempDate] = useState<Date | null>(null);
     const [showCornerModal, setShowCornerModal] = useState(false);
-    const [selectedCornerCd, setSelectedCornerCd] = useState<string | null>(corners[0]?.id ?? null);
+    const [selectedCornerCd, setSelectedCornerCd] = useState<string | null>(null);
     const [fromSaleDt, setFromSaleDt] = useState(getTodayYmd());
     const [toSaleDt, setToSaleDt] = useState(getTodayYmd());
     const [currentPickerType, setCurrentPickerType] = useState('from')
@@ -56,8 +63,8 @@ export default function SalesReportByPeriod() {
     useEffect(() => {
         console.log('api 테스트1')
         setAuthToken("1");
-        getStoreInfo('5000511001','1234')
-    },[])
+        getStoreInfo('5000511001', '1234')
+    }, [])
 
     const getStoreInfo = (userId, password) => {
         api.login(userId, password)
@@ -67,7 +74,7 @@ export default function SalesReportByPeriod() {
                     console.log('userInfo:' + JSON.stringify(userInfo))
                 }
             })
-            .catch(error => console.log("userInfo error:"+error))
+            .catch(error => console.log("userInfo error:" + error))
             .finally()
     }
 
@@ -91,7 +98,9 @@ export default function SalesReportByPeriod() {
                     setSaleList(saleList);
                 }
             })
-            .catch(error => {console.log("restDailySale error:"+error)});
+            .catch(error => {
+                console.log("restDailySale error:" + error)
+            });
     }
 
     const onSearch = () => {
@@ -108,19 +117,24 @@ export default function SalesReportByPeriod() {
     };
 
     const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => ([
-        { key: 'saleDtInfo',       title: '일자(요일)',     flex: 1, align: 'center',
+        {
+            key: 'saleDtInfo', title: '일자(요일)', flex: 1, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.numberCell, {textAlign:'center'}]}>
+                <Text style={[commonStyles.numberCell, {textAlign: 'center'}]}>
                     {ymdToDateWithDay(item.saleDt)}
                 </Text>
-            )},
-        { key: 'salesOrgCd',     title: Const.CORNER_NM,   flex: 1.8,   align: 'left',
+            )
+        },
+        {
+            key: 'salesOrgCd', title: Const.CORNER_NM, flex: 1.8, align: 'left',
             renderCell: (item) => (
                 <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
-                    <Text style={[commonStyles.cell, commonStyles.linkText,{paddingLeft:10}]}>{item.salesOrgCd}</Text>
+                    <Text style={[commonStyles.cell, commonStyles.linkText, {paddingLeft: 10}]}>{item.salesOrgCd}</Text>
                 </Pressable>
-            ),   },
-        { key: 'saleAmt', title: '총매출', flex: 1.2, align: 'right',
+            ),
+        },
+        {
+            key: 'saleAmt', title: '총매출', flex: 1.2, align: 'right',
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>{item.saleAmt.toLocaleString()}</Text>
             )
@@ -129,7 +143,7 @@ export default function SalesReportByPeriod() {
 
     type ProductSaleRow = { no: number; itemNm: string, qty: number, price: number, totalAmt: number };
     const productData: ProductSaleRow[] = useMemo(
-        () => Array.from({ length: 50 }).map((_, index) => ({
+        () => Array.from({length: 50}).map((_, index) => ({
             no: index + 1,
             itemNm: `상품 ${index + 1}`,
             qty: index * 5,
@@ -140,19 +154,22 @@ export default function SalesReportByPeriod() {
     );
 
     const productColumns: ColumnDef<ProductSaleRow>[] = useMemo(() => ([
-        { key: 'no',          title: Const.NO,     flex: 0.5, align: 'center' },
-        { key: 'itemNm', title: '상품명',   flex: 2.2, align: 'left' },
-        { key: 'qty', title: Const.QTY,   flex: 0.8, align: 'right',
+        {key: 'no', title: Const.NO, flex: 0.5, align: 'center'},
+        {key: 'itemNm', title: '상품명', flex: 2.2, align: 'left'},
+        {
+            key: 'qty', title: Const.QTY, flex: 0.8, align: 'right',
             renderCell: (item) => (
                 <Text style={commonStyles.numberSmallCell}>{item.qty.toLocaleString()}</Text>
             )
         },
-        { key: 'price', title: Const.PRICE,   flex: 1, align: 'right',
+        {
+            key: 'price', title: Const.PRICE, flex: 1, align: 'right',
             renderCell: (item) => (
                 <Text style={commonStyles.numberSmallCell}>{item.price.toLocaleString()}</Text>
             )
         },
-        { key: 'totalAmt', title: '금액',   flex: 1.5, align: 'right',
+        {
+            key: 'totalAmt', title: '금액', flex: 1.5, align: 'right',
             renderCell: (item) => (
                 <Text style={commonStyles.numberSmallCell}>{item.totalAmt.toLocaleString()}</Text>
             )
@@ -178,18 +195,18 @@ export default function SalesReportByPeriod() {
     const renderSummaryRow = () => {
         return (
             <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-                <View style={[{ flex: 2.7 }, commonStyles.tableRightBorder,]}>
+                <View style={[{flex: 2.7}, commonStyles.tableRightBorder,]}>
                     <Text
                         style={[commonStyles.modalCell, commonStyles.alignCenter,
                             {fontSize: 13, fontWeight: 'bold'}
                         ]}>합계</Text>
                 </View>
-                <View style={[{ flex: 0.8 }, commonStyles.tableRightBorder]}>
+                <View style={[{flex: 0.8}, commonStyles.tableRightBorder]}>
                     <Text style={commonStyles.numberSmallCell}>
                         {summaryRow.totalQty.toLocaleString()}
                     </Text>
                 </View>
-                <View style={[{ flex: 2.5}, commonStyles.tableRightBorder]}>
+                <View style={[{flex: 2.5}, commonStyles.tableRightBorder]}>
                     <Text style={commonStyles.numberSmallCell}>
                         {summaryRow.totalAmt.toLocaleString()}
                     </Text>
@@ -199,7 +216,7 @@ export default function SalesReportByPeriod() {
     };
     return (
         <SafeAreaView style={commonStyles.container}>
-            <StatusBar style="dark" />
+            <StatusBar style="dark"/>
 
             <View style={commonStyles.topBar}>
                 <View style={commonStyles.filterRowFront}>
@@ -217,7 +234,8 @@ export default function SalesReportByPeriod() {
                 <View style={commonStyles.filterRow}>
                     <Text style={commonStyles.filterLabel}>매장</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowCornerModal(true)}>
-                        <Text style={commonStyles.selectText}>{corners.find(g => g.id === selectedCornerCd)?.name || Const.SELECT}</Text>
+                        <Text
+                            style={commonStyles.selectText}>{cornerList.find(g => g.cornerCd === selectedCornerCd)?.cornerNm || Const.ALL}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                     <Pressable style={commonStyles.searchButton} onPress={onSearch}>
@@ -225,47 +243,32 @@ export default function SalesReportByPeriod() {
                     </Pressable>
                 </View>
             </View>
-            <View style={commonStyles.sectionDivider} />
+            <View style={commonStyles.sectionDivider}/>
 
             <Table data={saleList} columns={mainColumns}/>
 
-            <View style={commonStyles.sectionDivider} />
+            <View style={commonStyles.sectionDivider}/>
 
-            <Modal visible={showCornerModal} animationType="fade" transparent>
-                <View style={commonStyles.modalOverlay}>
-                    <View style={commonStyles.modalContent}>
-                        <View style={commonStyles.modalHeader}>
-                            <Text style={commonStyles.modalTitle}>매장 선택</Text>
-                            <TouchableOpacity onPress={() => setShowCornerModal(false)}>
-                                <Text style={commonStyles.modalClose}>✕</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <FlatList
-                            data={corners}
-                            keyExtractor={(item) => item.id}
-                            style={commonStyles.modalList}
-                            renderItem={({ item }) => (
-                                <TouchableOpacity
-                                    style={commonStyles.modalItem}
-                                    onPress={() => {
-                                        setSelectedCornerCd(item.id);
-                                        setShowCornerModal(false);
-                                    }}
-                                >
-                                    <Text style={commonStyles.modalItemText}>{item.name}</Text>
-                                </TouchableOpacity>
-                            )}
-                        />
-                    </View>
-                </View>
-            </Modal>
+            <ListModal
+                visible={showCornerModal}
+                title="매장 선택"
+                data={cornerList}
+                keyField="cornerCd"
+                labelField="cornerNm"
+                onClose={() => setShowCornerModal(false)}
+                onSelect={(item) => {
+                    setSelectedCornerCd(item.cornerCd);
+                    setShowCornerModal(false);
+                }}
+            />
+
             <Modal visible={isDetailVisible} animationType="fade" transparent>
                 <View style={commonStyles.modalOverlay}>
                     <View style={commonStyles.modalCard}>
                         <View style={commonStyles.modalHeader}>
                             <Text style={commonStyles.modalTitle}>{selectedSale?.cornerNm}</Text>
                             <Pressable onPress={closeDetail} hitSlop={8}>
-                                <Ionicons name="close" size={24} color="#333" />
+                                <Ionicons name="close" size={24} color="#333"/>
                             </Pressable>
                         </View>
 

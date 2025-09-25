@@ -77,13 +77,13 @@ export default function RealtimeSalesScreen() {
 
     const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => ([
         {
-            key: 'no', title: Const.NO, flex: 0.5, align: 'center',
+            key: 'no', title: Const.NO, flex: 0.4,
             renderCell: (_item, index) => (
                 <Text style={[commonStyles.cell, {textAlign: 'center'}]}>{index + 1}</Text>
             ),
         },
         {
-            key: 'storNm', title: '매장', flex: 1, align: 'center',
+            key: 'storNm', title: '매장', flex: 0.8,
             renderCell: (item) => (
                 <Text style={[commonStyles.cell, {paddingLeft: 10}]}>
                     {item.storNm}
@@ -91,7 +91,7 @@ export default function RealtimeSalesScreen() {
             ),
         },
         {
-            key: 'gauge', title: '게이지', flex: 1, align: 'center',
+            key: 'gauge', title: '게이지', flex: 1,
             renderCell: (item) => (
                 <Text style={[commonStyles.cell, {paddingLeft: 10}]}>
                     {item.gauge}
@@ -99,17 +99,17 @@ export default function RealtimeSalesScreen() {
             )
         },
         {
-            key: 'saleQty', title: '판매수량', flex: 1, align: 'center',
+            key: 'saleQty', title: '판매수량', flex: 1,
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign: 'right', paddingRight: 10}]}>
+                <Text style={commonStyles.numberSmallCell}>
                     {item.saleQty.toLocaleString()}
                 </Text>
             )
         },
         {
-            key: 'totalAmt', title: '총매출', flex: 1, align: 'center',
+            key: 'totalAmt', title: '총매출', flex: 1,
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign: 'right', paddingRight: 10}]}>
+                <Text style={commonStyles.numberSmallCell}>
                     {item.totalAmt.toLocaleString()}
                 </Text>
             )
@@ -218,84 +218,34 @@ export default function RealtimeSalesScreen() {
                 listHeader={() => (
                     <View>
                         {summaryRows.map(row => (
-                            <View
-                                key={row.key}
-                                style={{
-                                    flexDirection: 'row',
-                                    justifyContent: 'space-between',
-                                    borderWidth: StyleSheet.hairlineWidth,
-                                    // borderBottomWidth: StyleSheet.hairlineWidth,
-                                    borderColor: '#aaa',
-                                    minHeight: 30,
-                                    backgroundColor: '#fff7e6'
-                            }}>
+                            <View key={row.key} style={[commonStyles.tableRow, commonStyles.summaryRow]}>
                                 {row.type === 'summaryPair' ? (
                                     <>
-                                        <View
-                                            style={{
-                                                flex: 1.5,
-                                                justifyContent: 'center',
-                                                alignItems: 'flex-start',
-                                                paddingLeft: 10,
-                                                borderRightWidth: StyleSheet.hairlineWidth,
-                                                borderColor: '#aaa',
-                                            }}
-                                        >
-                                            <Text style={[styles.cell, styles.summaryLabelText]}>
+                                        <View style={[{flex: 1.2}, commonStyles.tableRightBorder]}>
+                                            <Text style={[commonStyles.cell, styles.summaryLabelText, {textAlign:'center'}]}>
                                                 {row.label}
                                             </Text>
                                         </View>
-                                        <View
-                                            style={{
-                                                flex: 3,
-                                                justifyContent: 'center',
-                                                paddingLeft: 10,
-                                                paddingRight: 10,
-                                            }}
-                                        >
-                                            <Text style={[styles.cell, styles.rightSpanText]}>
+                                        <View style={[{flex: 3}, commonStyles.tableRightBorder]}>
+                                            <Text style={[commonStyles.numberSmallCell]}>
                                                 {row.pairText}
                                             </Text>
                                         </View>
                                     </>
                                 ) : (
                                     <>
-                                        <View style={{
-                                            flex: 1.5,
-                                            justifyContent: 'center',
-                                            alignItems: 'flex-start',
-                                            borderRightWidth: StyleSheet.hairlineWidth,
-                                            borderColor: '#aaa',
-                                            paddingLeft: 10,
-                                            paddingRight: 5,
-                                        }}>
-                                            <Text style={[styles.cell, styles.summaryLabelText]}>
+                                        <View style={[{flex: 1.2}, commonStyles.tableRightBorder]}>
+                                            <Text style={[commonStyles.cell, styles.summaryLabelText, {textAlign:'center'}]}>
                                                 {row.label}
                                             </Text>
                                         </View>
-                                        <View style={{
-                                            flex: 2,
-                                            justifyContent: 'center',
-                                            alignItems: 'flex-end',
-                                            paddingLeft: 10,
-                                            borderRightWidth: StyleSheet.hairlineWidth,
-                                            paddingRight: 10,
-                                            borderColor: '#aaa',
-                                        }}>
-                                            <Text style={[styles.cell, styles.rightSpanText]}>
+                                        <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
+                                            <Text style={[commonStyles.numberSmallCell]}>
                                                 {row.saleQty.toLocaleString()}
                                             </Text>
                                         </View>
-                                        <View style={{
-                                            flex: 1,
-                                            justifyContent: 'center',
-                                            alignItems: 'flex-end',
-                                            paddingRight: 10
-                                        }}>
-                                            <Text style={[
-                                                styles.cell,
-                                                styles.rightSpanText
-                                            ]}>
+                                        <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                                            <Text style={[commonStyles.numberSmallCell]}>
                                                 {row.totalAmt.toLocaleString()}
                                             </Text>
                                         </View>
@@ -348,17 +298,5 @@ export default function RealtimeSalesScreen() {
 
 const styles = StyleSheet.create({
     selectText: {fontSize: 14, color: '#333'},
-    tableList: {flex: 1},
-    tableListContent: {paddingBottom: 12},
-    tableRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: '#eee',
-        paddingVertical: 12
-    },
-    summaryRow: {backgroundColor: '#fff7e6'},
-    summaryLabelText: {fontWeight: '700', color: '#333'},
-    cell: {fontSize: 11, color: '#444'},
-    rightSpanText: {textAlign: 'right'},
+    summaryLabelText: {fontWeight: '700', color: '#333'}
 });

@@ -7,6 +7,7 @@ import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
 import Const from "../../constants/Const";
+import ListModal from "../../components/ListModal";
 
 type SaleRow = {
     cornerNm: string;
@@ -23,7 +24,7 @@ type SaleDetailRow = {
     compRatio: number;
 }
 
-type PosGroup = { id: string; name: string };
+type Corner = { cornerCd: string; cornerNm: string };
 
 type CornerRow = {
     no: number;
@@ -38,12 +39,18 @@ export default function RealtimeSalesByCornerScreen() {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempDate, setTempDate] = useState<Date | null>(null);
 
-    const posGroups: PosGroup[] = useMemo(
-        () => Array.from({length: 6}).map((_, i) => ({id: `G${i + 1}`, name: `그룹 ${i + 1}`})),
+    const cornerList: Corner[] = useMemo(
+        () => [
+            {cornerCd: '', cornerNm: '전체'},
+            ...Array.from({length: 12}).map((_, i) => ({
+                cornerCd: `S${100 + i}`,
+                cornerNm: `매장 ${i + 1}`
+            })),
+        ],
         []
     );
-    const [selectedPosGroupId, setSelectedPosGroupId] = useState<string | null>(posGroups[0]?.id ?? null);
-    const [showPosGroupModal, setShowPosGroupModal] = useState(false);
+    const [selectedCornerCd, setSelectedCornerCd] = useState<string | null>(null);
+    const [showCornerListModal, setShowCornerListModal] = useState(false);
     const [isDetailVisible, setIsDetailVisible] = useState(false);
     const [selectedCorner, setSelectedCorner] = useState<CornerRow | null>(null);
     const baseData: SaleRow[] = useMemo(
@@ -66,10 +73,8 @@ export default function RealtimeSalesByCornerScreen() {
     );
 
     const filteredData = useMemo(() => {
-        if (!selectedPosGroupId) return baseData;
-        const groupName = posGroups.find(g => g.id === selectedPosGroupId)?.name;
-        return baseData.filter(r => (groupName ? r.cornerNm === groupName : true));
-    }, [baseData, posGroups, selectedPosGroupId]);
+        return baseData;
+    }, [baseData]);
 
     const onSearch = () => {
         // 데모: 현재는 선택 값만으로 필터링 적용
@@ -244,9 +249,9 @@ export default function RealtimeSalesByCornerScreen() {
                 </View>
                 <View style={commonStyles.filterRow}>
                     <Text style={commonStyles.filterLabel}>매장</Text>
-                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowPosGroupModal(true)}>
+                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowCornerListModal(true)}>
                         <Text
-                            style={styles.selectText}>{posGroups.find(g => g.id === selectedPosGroupId)?.name || Const.SELECT}</Text>
+                            style={styles.selectText}>{cornerList.find(g => g.cornerCd === selectedCornerCd)?.cornerNm || Const.ALL}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                     <Pressable style={commonStyles.searchButton} onPress={onSearch}>
@@ -270,34 +275,18 @@ export default function RealtimeSalesByCornerScreen() {
                 onConfirm={(date) => setSaleDate(dateToYmd(date))}
             />
 
-            <Modal visible={showPosGroupModal} transparent animationType="slide"
-                   onRequestClose={() => setShowPosGroupModal(false)}>
-                <View style={commonStyles.modalOverlay}>
-                    <View style={commonStyles.modalContent}>
-                        <View style={commonStyles.listModalHeader}>
-                            <Text style={commonStyles.modalTitle}>매장 선택</Text>
-                            <TouchableOpacity onPress={() => setShowPosGroupModal(false)}>
-                                <Text style={commonStyles.modalClose}>✕</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <FlatList
-                            data={posGroups}
-                            keyExtractor={(item) => item.id}
-                            renderItem={({item}) => (
-                                <TouchableOpacity
-                                    style={commonStyles.modalItem}
-                                    onPress={() => {
-                                        setSelectedPosGroupId(item.id);
-                                        setShowPosGroupModal(false);
-                                    }}
-                                >
-                                    <Text style={commonStyles.modalItemText}>{item.name}</Text>
-                                </TouchableOpacity>
-                            )}
-                        />
-                    </View>
-                </View>
-            </Modal>
+            <ListModal
+                visible={showCornerListModal}
+                title="매장 선택"
+                data={cornerList}
+                keyField="cornerCd"
+                labelField="cornerNm"
+                onClose={() => setShowCornerListModal(false)}
+                onSelect={(item) => {
+                    setSelectedCornerCd(item.cornerCd);
+                    setShowCornerListModal(false);
+                }}
+            />
 
             <Modal
                 visible={isDetailVisible}

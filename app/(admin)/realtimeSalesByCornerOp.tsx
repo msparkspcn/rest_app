@@ -1,12 +1,13 @@
 import {StatusBar} from 'expo-status-bar';
 import React, {useMemo, useState} from 'react';
-import {FlatList, Modal, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {Alert, FlatList, Modal, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {commonStyles} from "../../styles/index";
 import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
 import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
 import Const from "../../constants/Const";
+import MyRadioGroup from "../../components/ui/RadioGroup";
 
 type SaleRow = {
     cornerNm: string;
@@ -23,7 +24,7 @@ type SaleDetailRow = {
     compRatio: string;
 }
 
-type PosGroup = { id: string; name: string };
+type Stor = { storCd: string; storNm: string };
 
 type CornerRow = {
     no: number;
@@ -34,29 +35,30 @@ type CornerRow = {
 };
 type SalesOrg =  {salesOrgCd: string; salesOrgNm: string};
 
-export default function RealtimeSalesByCornerScreen() {
+export default function RealtimeSalesByCornerOp() {
     const [saleDate, setSaleDate] = useState(getTodayYmd());
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempDate, setTempDate] = useState<Date | null>(null);
 
-    const posGroups: PosGroup[] = useMemo(
+    const storList: Stor[] = useMemo(
         () => Array.from({length: 6}).map((_, i) => ({id: `G${i + 1}`, name: `그룹 ${i + 1}`})),
         []
     );
-    const [selectedPosGroupId, setSelectedPosGroupId] = useState<string | null>(posGroups[0]?.id ?? null);
-    const [showPosGroupModal, setShowPosGroupModal] = useState(false);
+    const [selectedStorCd, setSelectedStorCd] = useState<string | null>(null);
+    const [showStorModal, setShowStorModal] = useState(false);
     const [isDetailVisible, setIsDetailVisible] = useState(false);
     const [selectedCorner, setSelectedCorner] = useState<CornerRow | null>(null);
     const [showSalesOrgListModal, setShowSalesOrgListModal] = useState(false);
-
+    const [dcIncludedChecked, setDcIncludedChecked] = useState(false);
+    const [selected, setSelected] = useState('option1');
     const salesOrgList: SalesOrg[] = useMemo(
-        () => [
-            { salesOrgCd: '', salesOrgNm: '전체' }, // 기본값 추가
-            ...Array.from({ length: 6 }).map((_, i) => ({
-                salesOrgCd: `G${i + 1}`,
-                salesOrgNm: `주유소 ${i + 1}`,
-            })),
-        ],
+        () =>
+            Array.from({length: 6}).map((_, i) => {
+                return {
+                    salesOrgCd: `G${i + 1}`,
+                    salesOrgNm: `그룹 ${i + 1}`
+                };
+            }),
         []
     );
 
@@ -80,13 +82,16 @@ export default function RealtimeSalesByCornerScreen() {
     const [selectedSalesOrgCd, setSelectedSalesOrgCd] = useState<string>('');
 
     const filteredData = useMemo(() => {
-        if (!selectedPosGroupId) return baseData;
-        const groupName = posGroups.find(g => g.id === selectedPosGroupId)?.name;
+        if (!selectedStorCd) return baseData;
+        const groupName = posGroups.find(g => g.id === selectedStorCd)?.name;
         return baseData.filter(r => (groupName ? r.cornerNm === groupName : true));
-    }, [baseData, posGroups, selectedPosGroupId]);
+    }, [baseData, posGroups, selectedStorCd]);
 
     const onSearch = () => {
-        // 데모: 현재는 선택 값만으로 필터링 적용
+        if(selectedSalesOrgCd=='') {
+            Alert.alert(Const.ERROR, Const.NO_SALES_ORG_MSG);
+            return;
+        }
     };
 
     const openDatePicker = () => {
@@ -99,7 +104,9 @@ export default function RealtimeSalesByCornerScreen() {
         setSelectedCorner(corner)
         setIsDetailVisible(true);
     }
-
+    const handleDcIncludedToggle = () => {
+        setDcIncludedChecked(!dcIncludedChecked)
+    }
     const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => ([
         {
             key: 'cornerNm', title: Const.CORNER_NM, flex: 1, align: 'center',
@@ -262,12 +269,34 @@ export default function RealtimeSalesByCornerScreen() {
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
-                <View style={commonStyles.filterRow}>
+                <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>매장</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowPosGroupModal(true)}>
                         <Text
-                            style={styles.selectText}>{posGroups.find(g => g.id === selectedPosGroupId)?.name || Const.SELECT}</Text>
+                            style={styles.selectText}>{posGroups.find(g => g.id === selectedStorCd)?.name || Const.SELECT}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
+                    </TouchableOpacity>
+                </View>
+                <View style={commonStyles.filterRow}>
+                    <Text style={commonStyles.filterLabel}>출력순서</Text>
+                    <MyRadioGroup
+                        options={[
+                            { label: '매장명', value: 'option1' },
+                            { label: '매장순서', value: 'option2' },
+                        ]}
+                        selected={selected}
+                        onChange={setSelected}
+                    />
+                </View>
+                <View style={commonStyles.filterRow}>
+                    <Text style={commonStyles.filterLabel}>DC포함</Text>
+                    <TouchableOpacity
+                        style={commonStyles.checkboxContainer}
+                        onPress={handleDcIncludedToggle}
+                    >
+                        <View style={[commonStyles.checkbox, dcIncludedChecked && commonStyles.checkboxChecked]}>
+                            {dcIncludedChecked && <Text style={commonStyles.checkmark}>✓</Text>}
+                        </View>
                     </TouchableOpacity>
                     <Pressable style={commonStyles.searchButton} onPress={onSearch}>
                         <Text style={commonStyles.searchButtonText}>{Const.SEARCH}</Text>

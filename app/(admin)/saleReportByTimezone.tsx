@@ -7,6 +7,7 @@ import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
 import Const from "../../constants/Const";
+import ListModal from "../../components/ListModal";
 
 type SaleRow = { tmzonDiv: string; totalAmt: number, billCnt: number };
 type ListItem = {
@@ -16,19 +17,25 @@ type ListItem = {
     totalAmt: number;
     billCnt: number
 };
-type PosGroup = { id: string; name: string };
+type Stor = { storCd: string; storNm: string };
 
 export default function SalesReportByTimezoneScreen() {
     const [saleDate, setSaleDate] = useState(getTodayYmd());
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempDate, setTempDate] = useState<Date | null>(null);
 
-    const posGroups: PosGroup[] = useMemo(
-        () => Array.from({length: 6}).map((_, i) => ({id: `G${i + 1}`, name: `그룹 ${i + 1}`})),
+    const storList: Stor[] = useMemo(
+        () => [
+            {storCd: '', storNm: '전체'},
+            ...Array.from({length: 6}).map((_, i) => ({
+                storCd: `G${i + 1}`,
+                storNm: `그룹 ${i + 1}`
+            })),
+        ],
         []
     );
-    const [selectedPosGroupId, setSelectedPosGroupId] = useState<string | null>(posGroups[0]?.id ?? null);
-    const [showPosGroupModal, setShowPosGroupModal] = useState(false);
+    const [selectedStorCd, setSelectedStorCd] = useState<string | null>(null);
+    const [showStorModal, setShowStorModal] = useState(false);
 
     const baseData: SaleRow[] = useMemo(
         () =>
@@ -44,9 +51,9 @@ export default function SalesReportByTimezoneScreen() {
     );
 
     const filteredData = useMemo(() => {
-        if (!selectedPosGroupId) return baseData;
+        if (!selectedStorCd) return baseData;
         return baseData;
-    }, [baseData, selectedPosGroupId]);
+    }, [baseData, selectedStorCd]);
 
     const onSearch = () => {
         // 데모: 현재는 선택 값만으로 필터링 적용
@@ -157,9 +164,9 @@ export default function SalesReportByTimezoneScreen() {
                 </View>
                 <View style={commonStyles.filterRow}>
                     <Text style={commonStyles.filterLabel}>포스그룹</Text>
-                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowPosGroupModal(true)}>
+                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowStorModal(true)}>
                         <Text
-                            style={styles.selectText}>{posGroups.find(g => g.id === selectedPosGroupId)?.name || Const.SELECT}</Text>
+                            style={styles.selectText}>{storList.find(g => g.storCd === selectedStorCd)?.storNm || Const.ALL}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                     <Pressable style={commonStyles.searchButton} onPress={onSearch}>
@@ -181,7 +188,7 @@ export default function SalesReportByTimezoneScreen() {
                                         {row.label}
                                     </Text>
                                 </View>
-                                <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                                <View style={[{flex: 1} ]}>
                                     <Text style={commonStyles.numberCell}>{row.totalAmt}</Text>
                                 </View>
                                 <View style={[{flex: 0.5}, commonStyles.tableRightBorder]}>
@@ -199,34 +206,18 @@ export default function SalesReportByTimezoneScreen() {
                 onClose={() => setShowDatePicker(false)}
                 onConfirm={(date) => setSaleDate(dateToYmd(date))}
             />
-            <Modal visible={showPosGroupModal} transparent animationType="slide"
-                   onRequestClose={() => setShowPosGroupModal(false)}>
-                <View style={commonStyles.modalOverlay}>
-                    <View style={commonStyles.modalContent}>
-                        <View style={commonStyles.modalHeader}>
-                            <Text style={commonStyles.modalTitle}>포스그룹 선택</Text>
-                            <TouchableOpacity onPress={() => setShowPosGroupModal(false)}>
-                                <Text style={commonStyles.modalClose}>✕</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <FlatList
-                            data={posGroups}
-                            keyExtractor={(item) => item.id}
-                            renderItem={({item}) => (
-                                <TouchableOpacity
-                                    style={commonStyles.modalItem}
-                                    onPress={() => {
-                                        setSelectedPosGroupId(item.id);
-                                        setShowPosGroupModal(false);
-                                    }}
-                                >
-                                    <Text style={commonStyles.modalItemText}>{item.name}</Text>
-                                </TouchableOpacity>
-                            )}
-                        />
-                    </View>
-                </View>
-            </Modal>
+            <ListModal
+                visible={showStorModal}
+                title="포스그룹 선택"
+                data={storList}
+                keyField="storCd"
+                labelField="storNm"
+                onClose={() => setShowStorModal(false)}
+                onSelect={(item) => {
+                    setSelectedStorCd(item.storCd);
+                    setShowStorModal(false);
+                }}
+            />
         </SafeAreaView>
     );
 }

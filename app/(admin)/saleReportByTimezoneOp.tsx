@@ -16,7 +16,7 @@ type ListItem = {
     totalAmt: number;
     billCnt: number
 };
-type PosGroup = { id: string; name: string };
+type Stor = { storCd: string; storNm: string };
 
 export default function SalesReportByTimezoneScreen() {
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -24,12 +24,12 @@ export default function SalesReportByTimezoneScreen() {
     const [fromSaleDt, setFromSaleDt] = useState(getTodayYmd());
     const [toSaleDt, setToSaleDt] = useState(getTodayYmd());
     const [currentPickerType, setCurrentPickerType] = useState('from')
-    const posGroups: PosGroup[] = useMemo(
+    const storList: Stor[] = useMemo(
         () => Array.from({length: 6}).map((_, i) => ({id: `G${i + 1}`, name: `그룹 ${i + 1}`})),
         []
     );
-    const [selectedPosGroupId, setSelectedPosGroupId] = useState<string | null>(posGroups[0]?.id ?? null);
-    const [showPosGroupModal, setShowPosGroupModal] = useState(false);
+    const [selectedStorCd, setSelectedStorCd] = useState<string | null>(null);
+    const [showStorModal, setShowStorModal] = useState(false);
 
     const baseData: SaleRow[] = useMemo(
         () =>
@@ -45,9 +45,9 @@ export default function SalesReportByTimezoneScreen() {
     );
 
     const filteredData = useMemo(() => {
-        if (!selectedPosGroupId) return baseData;
+        if (!selectedStorCd) return baseData;
         return baseData;
-    }, [baseData, selectedPosGroupId]);
+    }, [baseData, selectedStorCd]);
 
     const onSearch = () => {
         // 데모: 현재는 선택 값만으로 필터링 적용
@@ -170,7 +170,7 @@ export default function SalesReportByTimezoneScreen() {
                     <Text style={commonStyles.filterLabel}>사업장</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowPosGroupModal(true)}>
                         <Text
-                            style={styles.selectText}>{posGroups.find(g => g.id === selectedPosGroupId)?.name || Const.SELECT}</Text>
+                            style={styles.selectText}>{posGroups.find(g => g.id === selectedStorCd)?.name || Const.SELECT}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                     <Pressable style={commonStyles.searchButton} onPress={onSearch}>

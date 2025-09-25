@@ -60,13 +60,13 @@ export default function RealtimeStockReportScreen() {
     };
 
     const mainColumns: ColumnDef<StockRow>[] = useMemo(() => ([
-        {key: 'no', title: Const.NO, flex: 0.5, align: 'center',
+        {key: 'no', title: Const.NO, flex: 0.5,
             renderCell: (_item, index) => (
                 <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
             ),
         },
         {
-            key: 'itemNm', title: Const.ITEM_NM, flex: 1.5, align: 'center',
+            key: 'itemNm', title: Const.ITEM_NM, flex: 1.5,
             renderCell: (item) => (
                 <Text style={[commonStyles.cell,{paddingLeft: 10}]}>
                     {item.itemNm}
@@ -74,28 +74,28 @@ export default function RealtimeStockReportScreen() {
             ),
         },
         {
-            key: 'totalStockQty', title: Const.TOTAL_STOCK_QTY, flex: 1, align: 'center',
+            key: 'totalStockQty', title: Const.TOTAL_STOCK_QTY, flex: 1,
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>{item.totalStockQty.toLocaleString()}</Text>
             )
         },
         {
-            key: 'giQty', title: Const.GI_QTY, flex: 1, align: 'center',
+            key: 'giQty', title: Const.GI_QTY, flex: 1,
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>{item.giQty.toLocaleString()}</Text>
             )
         },
         {
-            key: 'goQty', title: Const.GO_QTY, flex: 1, align: 'center',
+            key: 'goQty', title: Const.GO_QTY, flex: 1,
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>{item.goQty.toLocaleString()}</Text>
             )
         },
         {
-            key: 'curStockQty', title: Const.CUR_STOCK_QTY, flex: 1, align: 'center',
+            key: 'curStockQty', title: Const.CUR_STOCK_QTY, flex: 1,
             renderCell: (item) => (
                 <Text style={[commonStyles.numberCell,
-                    { color: item.curStockQty < 0 ? 'red' : 'black'}
+                    { color: item.curStockQty < 0 ? 'red' : ''}
                 ]}>{item.curStockQty.toLocaleString()}</Text>
             )
         },
