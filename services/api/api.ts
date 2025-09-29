@@ -42,13 +42,23 @@ export function restDailySale(params) {
     return post(request, params);
 }
 
-export function restMonthlyCornerSale(params) {
+export function restMonthlyCornerSale(params) { //월 매출현황(휴)
     const request = host + "/api/v1/rest/sale/restMonthlyCornerSale";
     return post(request, params);
 }
 
 
-export function restMonthlySale(params) {
+export function restMonthlySale(params) { //월 매출현황(휴)
     const request = host + "/api/v1/rest/sale/restMonthlySale";
+    return post(request, params);
+}
+
+export function restTodayItemSale(params) {
+    const request = host + "/api/v1/rest/sale/restTodayItemSale";
+    return post(request, params);
+}
+
+export function restDailyCornerSale(params) { //기간별 매출현황
+    const request = host + "/api/v1/rest/sale/restDailyCornerSale";
     return post(request, params);
 }

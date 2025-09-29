@@ -24,17 +24,11 @@ import ListModal from "../../components/ListModal";
 type SaleRow = {
     saleDtInfo: string;
     salesOrgCd: string; //임시
+    cornerCd: string;
     cornerNm: string;
     saleAmt: number;
+    taxSaleAmt: number;
 };
-
-type SaleData = {
-    saleDt: string;
-    saleAmt: number;
-    totalSaleAmt: number;
-    cornerCd: number;
-    cornerNm: string;
-}
 
 type Corner = { cornerCd: string; cornerNm: string };
 
@@ -53,58 +47,45 @@ export default function SalesReportByPeriod() {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempDate, setTempDate] = useState<Date | null>(null);
     const [showCornerModal, setShowCornerModal] = useState(false);
-    const [selectedCornerCd, setSelectedCornerCd] = useState<string | null>(null);
+    const [selectedCornerCd, setSelectedCornerCd] = useState<string | null>('');
     const [fromSaleDt, setFromSaleDt] = useState(getTodayYmd());
     const [toSaleDt, setToSaleDt] = useState(getTodayYmd());
     const [currentPickerType, setCurrentPickerType] = useState('from')
     const [selectedSale, setSelectedSale] = useState<SaleRow | null>(null);
-    const [saleList, setSaleList] = useState([]);
+    const [saleList, setSaleList] = useState<[] | null>(null);
 
     useEffect(() => {
         console.log('api 테스트1')
         setAuthToken("1");
-        getStoreInfo('5000511001', '1234')
     }, [])
 
-    const getStoreInfo = (userId, password) => {
-        api.login(userId, password)
-            .then(response => {
-                if (response.data.responseBody != null) {
-                    const userInfo = response.data.responseBody;
-                    console.log('userInfo:' + JSON.stringify(userInfo))
-                }
-            })
-            .catch(error => console.log("userInfo error:" + error))
-            .finally()
-    }
-
-    const restDailySale = () => {
-        console.log("조회 클릭")
+    const restDailyCornerSale = () => {
+        console.log("restDailyCornerSale 조회 클릭 fromSaleDt:"+fromSaleDt+", toSaleDt:"+toSaleDt)
         const request = {
             cmpCd: "SLKR",
             cornerCd: "",
-            detailDiv: "",
+            detailDiv: "string",
             fromSaleDt: fromSaleDt,
-            itemClassCd: "string",
+            itemClassCd: "",
             salesOrgCd: "8000",
             storCd: "5000511",
             toSaleDt: toSaleDt
         }
-        api.restDailySale(request)
+        api.restDailyCornerSale(request)
             .then(result => {
                 if (result.data.responseBody != null) {
                     const saleList = result.data.responseBody;
-                    console.log('111:' + JSON.stringify(saleList))
+                    console.log('saleList:' + JSON.stringify(saleList))
                     setSaleList(saleList);
                 }
             })
             .catch(error => {
-                console.log("restDailySale error:" + error)
+                console.log("restDailyCornerSale error:" + error)
             });
     }
 
     const onSearch = () => {
-        restDailySale();
+        restDailyCornerSale();
     };
 
     const openDetail = (sale: SaleRow) => {
@@ -116,30 +97,107 @@ export default function SalesReportByPeriod() {
         setIsDetailVisible(false);
     };
 
-    const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => ([
+    const totalSumRow = useMemo(() => {
+        if (!saleList || saleList.length === 0) return null;
+
+        const totalSum = saleList.reduce((acc, cur) => acc + cur.saleAmt, 0);
+        return {
+            ...saleList[0],
+            cornerNm: '전체 합계',
+            saleAmt: totalSum,
+            cornerCd: '',
+            saleDtInfo: '',
+            salesOrgCd: '',
+            taxSaleAmt: 0,
+            isTotal: true,
+        };
+    }, [saleList]);
+
+
+    const tableData = useMemo(() => {
+        if (!saleList) return []; // null 방지
+
+        const result: (SaleRow & { isSummary?: boolean })[] = [];
+
+        // 2) 날짜별 처리
+        const grouped: Record<string, SaleRow[]> = {};
+        saleList.forEach(item => {
+            if (!grouped[item.saleDt]) grouped[item.saleDt] = [];
+            grouped[item.saleDt].push(item);
+        });
+
+        Object.keys(grouped)
+            .sort() // 날짜 오름차순
+            .forEach(date => {
+                const rows = grouped[date];
+                let dateSum = 0;
+
+                rows.forEach((item, idx) => {
+                    dateSum += item.saleAmt;
+                    result.push({
+                        ...item,
+                        // 날짜 표시: 첫 행만
+                        saleDtInfo: idx === 0 ? item.saleDt : '',
+                    });
+                });
+
+                // 날짜별 합계 row
+                result.push({
+                    ...rows[0],
+                    cornerNm: `${date} 소계`,
+                    saleAmt: dateSum,
+                    isSummary: true,
+                });
+            });
+
+        return result;
+    }, [saleList]);
+
+    const mainColumns: ColumnDef<SaleRow & { isSummary?: boolean; saleDtInfo?: string }>[] = useMemo(() => [
         {
-            key: 'saleDtInfo', title: '일자(요일)', flex: 1, align: 'center',
+            key: 'saleDtInfo',
+            title: '일자(요일)',
+            flex: 1,
+            align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.numberCell, {textAlign: 'center'}]}>
-                    {ymdToDateWithDay(item.saleDt)}
+                <Text style={[
+                    commonStyles.numberCell,
+                    item.isTotal ? { fontWeight: 'bold', backgroundColor: '#ffe5b4' } : {textAlign: 'center'}
+                ]}>
+                    {item.isSummary || item.isTotal ? '' : ymdToDateWithDay(item.saleDtInfo || item.saleDt)}
                 </Text>
-            )
-        },
-        {
-            key: 'salesOrgCd', title: Const.CORNER_NM, flex: 1.8, align: 'left',
-            renderCell: (item) => (
-                <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
-                    <Text style={[commonStyles.cell, commonStyles.linkText, {paddingLeft: 10}]}>{item.salesOrgCd}</Text>
-                </Pressable>
             ),
         },
         {
-            key: 'saleAmt', title: '총매출', flex: 1.2, align: 'right',
-            renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.saleAmt.toLocaleString()}</Text>
-            )
+            key: 'cornerNm',
+            title: Const.CORNER_NM,
+            flex: 1.8,
+            align: 'left',
+            renderCell: (item) => {
+                const cellFlex = item.isSummary ? 3 : 1.8;
+                return (
+                    <View style={{ flex: cellFlex, justifyContent: 'center' }}>
+                        <Text style={[commonStyles.cell,
+                            item.isSummary ? {fontWeight: 'bold', textAlign: 'center'}
+                            : [commonStyles.linkText, {paddingLeft: 10}]]}>
+                            {item.cornerNm}
+                        </Text>
+                    </View>
+                )
+            },
         },
-    ]), []);
+        {
+            key: 'saleAmt',
+            title: '총매출',
+            flex: 1.2,
+            align: 'right',
+            renderCell: (item) => (
+                <Text style={[commonStyles.numberCell, item.isSummary ? { fontWeight: 'bold' } : null]}>
+                    {item.saleAmt.toLocaleString()}
+                </Text>
+            ),
+        },
+    ], [tableData]);
 
     type ProductSaleRow = { no: number; itemNm: string, qty: number, price: number, totalAmt: number };
     const productData: ProductSaleRow[] = useMemo(
@@ -245,7 +303,25 @@ export default function SalesReportByPeriod() {
             </View>
             <View style={commonStyles.sectionDivider}/>
 
-            <Table data={saleList} columns={mainColumns}/>
+            <Table
+                data={tableData}
+                columns={mainColumns}
+                listHeader= {totalSumRow ? (
+                            <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+                                <View style={[{flex: 2.8}, commonStyles.tableRightBorder]}>
+                                    <Text style={[commonStyles.cell, commonStyles.summaryLabelText, {textAlign:'center'}]}>
+                                        합계
+                                    </Text>
+                                </View>
+                                <View style={[{flex: 1.2}, commonStyles.tableRightBorder]}>
+                                    <Text style={commonStyles.numberCell}>
+                                        {totalSumRow.saleAmt.toLocaleString()}
+                                    </Text>
+                                </View>
+                                )}
+                            </View>
+                ) : null}
+            />
 
             <View style={commonStyles.sectionDivider}/>
 
