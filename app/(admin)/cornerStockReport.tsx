@@ -1,8 +1,6 @@
 import {StatusBar} from 'expo-status-bar';
 import React, {useEffect, useMemo, useState} from 'react';
 import {
-    FlatList,
-    Modal,
     Pressable,
     SafeAreaView,
     StyleSheet,
@@ -20,6 +18,7 @@ import Const from "../../constants/Const";
 import ListModal from "../../components/ListModal";
 import {useUser} from "../../contexts/UserContext";
 import * as api from "../../services/api/api";
+import {User, Corner} from "../../types";
 
 type StockRow = {
     itemNm: string;
@@ -37,13 +36,7 @@ type Vendor = {
 };
 
 type SearchCond = { id: string; name: string };
-type Corner = {
-    cmpCd: string;
-    salesOrgCd: string;
-    storCd: string;
-    cornerCd: string;
-    cornerNm: string
-};
+
 
 export default function CornerStockReportScreen() {
     const [saleDate, setSaleDate] = useState(getTodayYmd());
@@ -62,7 +55,7 @@ export default function CornerStockReportScreen() {
     const [itemQuery, setItemQuery] = useState('');
     const [selectedSearchCond, setSelectedSearchCond] = useState<string | null>(searchCond[0]?.id ?? null);
     const [selectedCornerCd, setSelectedCornerCd] = useState<string | null>('');
-    const {user} = useUser();
+    const {user}:User = useUser();
 
     useEffect(() => {
         console.log('api 테스트1');
@@ -74,8 +67,6 @@ export default function CornerStockReportScreen() {
         const request = {
             cmpCd: user.cmpCd,
             salesOrgCd: user.salesOrgCd,
-            storCd: "",
-            cornerValue: ""
         }
         api.getCornerList(request)
             .then(result => {

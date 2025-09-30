@@ -1,20 +1,14 @@
 import {StatusBar} from 'expo-status-bar';
 import React, {useEffect, useMemo, useState} from 'react';
-import {Alert, FlatList, Modal, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {Alert, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {commonStyles} from '@/styles';
 import {Table} from "../../components/Table";
 import Const from "../../constants/Const";
 import ListModal from "../../components/ListModal";
 import {useUser} from "../../contexts/UserContext";
 import * as api from "../../services/api/api";
+import {Corner, User} from "../../types";
 
-type Corner = {
-    cmpCd: string;
-    salesOrgCd: string;
-    storCd: string;
-    cornerCd: string;
-    cornerNm: string
-};
 type ProductRow = { itemNm: string; useYn: 'Y' | 'N' };
 
 export default function KioskSoldOutScreen() {
@@ -22,15 +16,13 @@ export default function KioskSoldOutScreen() {
 
     const [selectedCornerCd, setSelectedCornerCd] = useState<string | null>(null);
     const [showCornerModal, setShowCornerModal] = useState(false);
-    const {user} = useUser();
+    const {user}:User = useUser();
 
     useEffect(() => {
         console.log('user:'+JSON.stringify(user.cmpCd));
         const request = {
             cmpCd: user.cmpCd,
             salesOrgCd: user.salesOrgCd,
-            storCd: "",
-            cornerValue: ""
         }
         api.getCornerList(request)
             .then(result => {

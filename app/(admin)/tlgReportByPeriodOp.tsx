@@ -1,12 +1,10 @@
 import {StatusBar} from 'expo-status-bar';
-import React, {useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {
-    FlatList, Modal,
     Pressable,
     SafeAreaView,
     StyleSheet,
     Text,
-    TextInput,
     TouchableOpacity,
     View
 } from 'react-native';
@@ -16,6 +14,10 @@ import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
 import Const from "../../constants/Const";
+import ListModal from "../../components/ListModal";
+import {User, SalesOrg} from "../../types";
+import {useUser} from "../../contexts/UserContext";
+import * as api from "../../services/api/api";
 
 type TlgRow = {
     salesOrgNm: string;
@@ -25,23 +27,14 @@ type TlgRow = {
     gasAmt: number;
 };
 
-type SalesOrg = { salesOrgCd: string; salesOrgNm: string };
 type StoreGroup = { id: string; name: string };
 export default function tlgReportByPeriodOp() {
     const [saleDate, setSaleDate] = useState(getTodayYmd());
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempDate, setTempDate] = useState<Date | null>(null);
-    const salesOrgList: SalesOrg[] = useMemo(
-        () => [
-            {salesOrgCd: '', salesOrgNm: '전체'},
-            ...Array.from({length: 6}).map((_, i) => ({
-                salesOrgCd: `G${i + 1}`,
-                salesOrgNm: `그룹 ${i + 1}`
-            })),
-        ],
-        []
-    );
-    const [selectedSalesOrg, setSelectedSalesOrg] = useState<SalesOrg | null>(salesOrgList[0] ?? null);
+    const {user}: User = useUser();
+    const [salesOrgList, setSalesOrgList] = useState<SalesOrg[]>([]);
+
     const [showSalesOrgListModal, setShowSalesOrgListModal] = useState(false);
     const [selectedSalesOrgCd, setSelectedSalesOrgCd] = useState<string>('');
     const storeGroups: StoreGroup[] = useMemo(
@@ -53,6 +46,31 @@ export default function tlgReportByPeriodOp() {
         []
     );
     const [registerFilter, setRegisterFilter] = useState<StoreGroup>(storeGroups[0]);
+
+    useEffect(() => {
+        getSalesOrgList();
+    },[]);
+
+    const getSalesOrgList = () => {
+        const request = {
+            cmpCd: user.cmpCd,
+            operType: '',
+            restValue: '',
+        }
+        console.log("request:"+JSON.stringify(request))
+        api.getSalsOrgList(request)
+            .then(result => {
+                console.log("result:"+JSON.stringify(result))
+                if (result.data.responseBody != null) {
+                    const salesOrgList = result.data.responseBody;
+                    console.log('salesOrgList:' + JSON.stringify(salesOrgList))
+                    setSalesOrgList(salesOrgList);
+                }
+            })
+            .catch(error => {
+                console.log("getSalsOrgList error:" + error)
+            });
+    }
 
     const baseData: TlgRow[] = useMemo(
         () =>
@@ -189,34 +207,18 @@ export default function tlgReportByPeriodOp() {
                 onConfirm={(date) => setSaleDate(dateToYmd(date))}
             />
 
-            <Modal visible={showSalesOrgListModal} transparent animationType="slide"
-                   onRequestClose={() => setShowSalesOrgListModal(false)}>
-                <View style={commonStyles.modalOverlay}>
-                    <View style={commonStyles.modalContent}>
-                        <View style={commonStyles.listModalHeader}>
-                            <Text style={commonStyles.modalTitle}>사업장 선택</Text>
-                            <TouchableOpacity onPress={() => setShowSalesOrgListModal(false)}>
-                                <Text style={commonStyles.modalClose}>✕</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <FlatList
-                            data={salesOrgList}
-                            keyExtractor={(item) => item.salesOrgCd}
-                            renderItem={({item}) => (
-                                <TouchableOpacity
-                                    style={commonStyles.modalItem}
-                                    onPress={() => {
-                                        setSelectedSalesOrgCd(item.salesOrgCd);
-                                        setShowSalesOrgListModal(false);
-                                    }}
-                                >
-                                    <Text style={commonStyles.modalItemText}>{item.salesOrgNm}</Text>
-                                </TouchableOpacity>
-                            )}
-                        />
-                    </View>
-                </View>
-            </Modal>
+            <ListModal
+                visible={showSalesOrgListModal}
+                title="사업장 선택"
+                data={salesOrgList}
+                keyField="salesOrgCd"
+                labelField="salesOrgNm"
+                onClose={() => setShowSalesOrgListModal(false)}
+                onSelect={(item) => {
+                    setSelectedSalesOrgCd(item.salesOrgCd);
+                    setShowSalesOrgListModal(false);
+                }}
+            />
         </SafeAreaView>
     );
 };

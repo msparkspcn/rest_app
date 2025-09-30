@@ -2,8 +2,6 @@ import {StatusBar} from 'expo-status-bar';
 import React, {useMemo, useState} from 'react';
 import {
     Alert,
-    FlatList,
-    Modal,
     Pressable,
     SafeAreaView,
     StyleSheet,
@@ -18,6 +16,8 @@ import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
 import Const from "../../constants/Const";
+import {User, Corner} from "../../types";
+import ListModal from "../../components/ListModal";
 
 type StockRow = {
     itemNm: string;
@@ -28,7 +28,6 @@ type StockRow = {
 };
 
 type SalesOrg = { salesOrgCd: string; salesOrgNm: string };
-type Corner = { cornerCd: string; cornerNm: string};
 
 export default function StockReport() {
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -183,34 +182,19 @@ export default function StockReport() {
                 }}
             />
 
-            <Modal visible={showSalesOrgListModal} transparent animationType="slide"
-                   onRequestClose={() => setShowSalesOrgListModal(false)}>
-                <View style={commonStyles.modalOverlay}>
-                    <View style={commonStyles.modalContent}>
-                        <View style={commonStyles.listModalHeader}>
-                            <Text style={commonStyles.modalTitle}>사업장 선택</Text>
-                            <TouchableOpacity onPress={() => setShowSalesOrgListModal(false)}>
-                                <Text style={commonStyles.modalClose}>✕</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <FlatList
-                            data={salesOrgList}
-                            keyExtractor={(item) => item.salesOrgCd}
-                            renderItem={({item}) => (
-                                <TouchableOpacity
-                                    style={commonStyles.modalItem}
-                                    onPress={() => {
-                                        setSelectedSalesOrgCd(item.salesOrgCd);
-                                        setShowSalesOrgListModal(false);
-                                    }}
-                                >
-                                    <Text style={commonStyles.modalItemText}>{item.salesOrgNm}</Text>
-                                </TouchableOpacity>
-                            )}
-                        />
-                    </View>
-                </View>
-            </Modal>
+            <ListModal
+                visible={showSalesOrgListModal}
+                title="사업장 선택"
+                data={salesOrgList}
+                keyField="salesOrgCd"
+                labelField="salesOrgNm"
+                onClose={() => setShowSalesOrgListModal(false)}
+                onSelect={(item) => {
+                    setSelectedSalesOrgCd(item.salesOrgCd);
+                    setShowSalesOrgListModal(false);
+                }}
+            />
+
         </SafeAreaView>
     );
 };

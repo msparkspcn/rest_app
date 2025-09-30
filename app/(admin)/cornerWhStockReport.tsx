@@ -18,6 +18,7 @@ import Const from "../../constants/Const";
 import ListModal from "../../components/ListModal";
 import {useUser} from "../../contexts/UserContext";
 import * as api from "../../services/api/api";
+import {User, Corner} from "../../types";
 
 type StockRow = {
     itemNm: string;
@@ -33,13 +34,6 @@ type Vendor = {
     outSdCmpNm: string
 };
 type SearchCond = { id: string; name: string };
-type Corner = {
-    cmpCd: string;
-    salesOrgCd: string;
-    storCd: string;
-    cornerCd: string;
-    cornerNm: string
-};
 
 export default function CornerWhStockReportScreen() {
     const [saleDate, setSaleDate] = useState(getTodayYmd());
@@ -60,7 +54,7 @@ export default function CornerWhStockReportScreen() {
     const [itemQuery, setItemQuery] = useState('');
     const [selectedSearchCond, setSelectedSearchCond] = useState<string | null>(searchCond[0]?.id ?? null);
     const [selectedCorner, setSelectedCorner] = useState<string | null>(cornerList[0]?.cornerCd ?? null);
-    const {user} = useUser();
+    const {user}:User = useUser();
 
     useEffect(() => {
         console.log('api 테스트1');
@@ -72,8 +66,6 @@ export default function CornerWhStockReportScreen() {
         const request = {
             cmpCd: user.cmpCd,
             salesOrgCd: user.salesOrgCd,
-            storCd: "",
-            cornerValue: ""
         }
         api.getCornerList(request)
             .then(result => {

@@ -19,6 +19,7 @@ import Const from "../../constants/Const";
 import ListModal from "../../components/ListModal";
 import {useUser} from "../../contexts/UserContext";
 import * as api from "../../services/api/api";
+import {User} from "../../types";
 
 type StockRow = {
     cornerNm: string;
@@ -70,7 +71,7 @@ export default function WarehouseStockReportScreen() {
     const [showExistStockChecked, setShowExistStockChecked] = useState(false);
     const [isDetailVisible, setIsDetailVisible] = useState(false);
     const [selectedItem, setSelectedItem] = useState<StockRow | null>(null);
-    const {user} = useUser();
+    const {user}:User = useUser();
 
     useEffect(() => {
         console.log('api 테스트1');

@@ -18,6 +18,9 @@ import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
 import Const from "../../constants/Const";
+import {User, SalesOrg} from "../../types";
+import ListModal from "../../components/ListModal";
+import {useUser} from "../../contexts/UserContext";
 
 type SaleRow = {
     saleDtInfo: string;
@@ -35,29 +38,47 @@ type SaleData = {
     salesOrgNm: string;
 }
 
-type Corner = { cornerCd: string; cornerNm: string };
-
-export default function SalesReportByPeriod() {
-    const cornerList: Corner[] = useMemo(
-        () => Array.from({length: 12}).map((_, i) => (
-            {cornerCd: `S${100 + i}`, cornerNm: `주유소 ${i + 1}`}
-        )),
-        []
-    );
+export default function SalesReportByPeriodOp() {
     const [isDetailVisible, setIsDetailVisible] = useState(false);
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempDate, setTempDate] = useState<Date | null>(null);
-    const [showCornerModal, setShowCornerModal] = useState(false);
-    const [selectedCornerCd, setSelectedCornerCd] = useState<string | null>(null);
+    const [salesOrgList, setSalesOrgList] = useState<SalesOrg[]>([]);
+    const [selectedSalesOrgCd, setSelectedSalesOrgCd] = useState<string | null>(null);
+    const [showSalesOrgListModal, setShowSalesOrgListModal] = useState(false);
+
     const [fromSaleDt, setFromSaleDt] = useState(getTodayYmd());
     const [toSaleDt, setToSaleDt] = useState(getTodayYmd());
     const [currentPickerType, setCurrentPickerType] = useState('from')
     const [selectedSale, setSelectedSale] = useState<SaleRow | null>(null);
     const [saleList, setSaleList] = useState([]);
 
+    const {user}: User = useUser();
+
     useEffect(() => {
-        console.log('api 테스트1')
-    }, [])
+        console.log('api 테스트112321')
+        getSalesOrgList();
+    }, []);
+
+    const getSalesOrgList = () => {
+        const request = {
+            cmpCd: user.cmpCd,
+            operType: "",
+            restValue: "",
+        }
+        console.log("request:"+JSON.stringify(request))
+        api.getSalsOrgList(request)
+            .then(result => {
+                console.log("result:"+JSON.stringify(result))
+                if (result.data.responseBody != null) {
+                    const salesOrgList = result.data.responseBody;
+                    console.log('salesOrgList:' + JSON.stringify(salesOrgList))
+                    setSalesOrgList(salesOrgList);
+                }
+            })
+            .catch(error => {
+                console.log("getSalsOrgList error:" + error)
+            });
+    };
 
     const restDailySale = () => {
         console.log("조회 클릭")
@@ -282,9 +303,10 @@ export default function SalesReportByPeriod() {
                 </View>
                 <View style={commonStyles.filterRow}>
                     <Text style={commonStyles.filterLabel}>{Const.SALES_ORG}</Text>
-                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowCornerModal(true)}>
-                        <Text
-                            style={commonStyles.selectText}>{cornerList.find(g => g.cornerCd === selectedCornerCd)?.cornerNm || Const.SELECT}</Text>
+                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowSalesOrgListModal(true)}>
+                        <Text style={styles.selectText}>
+                            {salesOrgList.find(g => g.salesOrgCd === selectedSalesOrgCd)?.salesOrgNm || Const.SELECT}
+                        </Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                     <Pressable style={commonStyles.searchButton} onPress={onSearch}>
@@ -298,34 +320,19 @@ export default function SalesReportByPeriod() {
 
             <View style={commonStyles.sectionDivider}/>
 
-            <Modal visible={showCornerModal} animationType="fade" transparent>
-                <View style={commonStyles.modalOverlay}>
-                    <View style={commonStyles.modalContent}>
-                        <View style={commonStyles.modalHeader}>
-                            <Text style={commonStyles.modalTitle}>매장 선택</Text>
-                            <TouchableOpacity onPress={() => setShowCornerModal(false)}>
-                                <Text style={commonStyles.modalClose}>✕</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <FlatList
-                            data={cornerList}
-                            keyExtractor={(item) => item.id}
-                            style={commonStyles.modalList}
-                            renderItem={({item}) => (
-                                <TouchableOpacity
-                                    style={commonStyles.modalItem}
-                                    onPress={() => {
-                                        setSelectedCornerCd(item.id);
-                                        setShowCornerModal(false);
-                                    }}
-                                >
-                                    <Text style={commonStyles.modalItemText}>{item.name}</Text>
-                                </TouchableOpacity>
-                            )}
-                        />
-                    </View>
-                </View>
-            </Modal>
+            <ListModal
+                visible={showSalesOrgListModal}
+                title="사업장 선택"
+                data={salesOrgList}
+                keyField="salesOrgCd"
+                labelField="salesOrgNm"
+                onClose={() => setShowSalesOrgListModal(false)}
+                onSelect={(item) => {
+                    setSelectedSalesOrgCd(item.salesOrgCd);
+                    setShowSalesOrgListModal(false);
+                }}
+            />
+
             <Modal visible={isDetailVisible} animationType="fade" transparent>
                 <View style={commonStyles.modalOverlay}>
                     <View style={commonStyles.modalCard}>

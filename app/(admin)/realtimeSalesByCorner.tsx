@@ -10,6 +10,7 @@ import Const from "../../constants/Const";
 import ListModal from "../../components/ListModal";
 import {useUser} from "../../contexts/UserContext";
 import * as api from "../../services/api/api";
+import {User, Corner} from "../../types";
 
 type SaleRow = {
     cornerNm: string;
@@ -25,14 +26,6 @@ type SaleDetailRow = {
     totalAmt: number;
     compRatio: number;
 }
-
-type Corner = {
-    cmpCd: string;
-    salesOrgCd: string;
-    storCd: string;
-    cornerCd: string;
-    cornerNm: string
-};
 
 type CornerRow = {
     no: number;
@@ -52,7 +45,7 @@ export default function RealtimeSalesByCornerScreen() {
     const [showCornerListModal, setShowCornerListModal] = useState(false);
     const [isDetailVisible, setIsDetailVisible] = useState(false);
     const [selectedCorner, setSelectedCorner] = useState<CornerRow | null>(null);
-    const {user} = useUser();
+    const {user}:User = useUser();
 
     useEffect(() => {
         console.log('api 테스트1');
@@ -62,9 +55,7 @@ export default function RealtimeSalesByCornerScreen() {
     const getCornerList = () => {
         const request = {
             cmpCd: user.cmpCd,
-            salesOrgCd: user.salesOrgCd,
-            storCd: "",
-            cornerValue: ""
+            salesOrgCd: user.salesOrgCd
         }
         api.getCornerList(request)
             .then(result => {

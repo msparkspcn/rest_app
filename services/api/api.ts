@@ -42,6 +42,16 @@ export function getCornerList(params) {
     return post(request, params);
 }
 
+export function getStorList(params) {
+    const request = host + "/api/v1/store/list";
+    return post(request, params);
+}
+
+export function getSalsOrgList(params) {
+    const request = host + "/api/v1/rest/list";
+    return post(request, params);
+}
+
 export function getCornerHandleItems(params) {
     const request = host + "/api/v1/item/corner-handle-items";
     return post(request, params);

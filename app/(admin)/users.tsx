@@ -12,7 +12,8 @@ import {
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import Const from "../../constants/Const";
-
+import {useUser} from "../../contexts/UserContext";
+import {User} from "../../types";
 export default function UsersScreen() {
   const [users, setUsers] = useState(
     [
@@ -27,16 +28,18 @@ export default function UsersScreen() {
       },
     ]
   );
+  const {user}:User = useUser();
 
   const currentUser = users[0];
 
-  const [formName, setFormName] = useState(currentUser?.name ?? '');
+  const [userName, setUserName] = useState(currentUser?.name ?? '');
   const [formCurrentPassword, setFormCurrentPassword] = useState('');
   const [formNewPassword, setFormNewPassword] = useState('');
   const [formConfirmPassword, setFormConfirmPassword] = useState('');
 
   useEffect(() => {
-    setFormName(currentUser?.name ?? '');
+    setUserName(currentUser?.name ?? '');
+    setUserName(user.userNm)
   }, [currentUser?.name]);
 
   const validateAndSave = () => {
@@ -69,7 +72,7 @@ export default function UsersScreen() {
 
     // 이름 변경 반영
     if (currentUser) {
-      setUsers(prev => prev.map(u => u.id === currentUser.id ? { ...u, name: formName } : u));
+      setUsers(prev => prev.map(u => u.id === currentUser.id ? { ...u, name: userName } : u));
     }
 
     // 실제 API 연동 위치: 현재 비밀번호 검증 및 변경 비밀번호 저장
@@ -94,20 +97,17 @@ export default function UsersScreen() {
         <View style={styles.form}>
           <View style={styles.formRow}>
             <Text style={styles.formLabel}>소속구분</Text>
-            <TextInput
-              style={[styles.formInput, styles.readonlyInput]}
-              value={currentUser?.departmentType ?? ''}
-              editable={false}
-            />
+            <Text style={[styles.formInput, styles.readonlyInput]}>
+              {user.salesOrgNm}
+            </Text>
           </View>
 
           <View style={styles.formRow}>
             <Text style={styles.formLabel}>{Const.ID}</Text>
-            <TextInput
-              style={[styles.formInput, styles.readonlyInput]}
-              value={currentUser?.email ?? ''}
-              editable={false}
-            />
+            <Text style={[styles.formInput, styles.readonlyInput]}>
+              {user.userId}
+            </Text>
+
           </View>
 
           <View style={styles.formRow}>
@@ -115,6 +115,7 @@ export default function UsersScreen() {
             <TextInput
               style={styles.formInput}
               value={formCurrentPassword}
+              placeholder="현재 비밀번호를 입력해주세요."
               onChangeText={setFormCurrentPassword}
               secureTextEntry
               autoCapitalize="none"
@@ -128,6 +129,7 @@ export default function UsersScreen() {
             <TextInput
               style={styles.formInput}
               value={formNewPassword}
+              placeholder="신규 비밀번호를 입력해 주세요."
               onChangeText={setFormNewPassword}
               secureTextEntry
               autoCapitalize="none"
@@ -141,6 +143,7 @@ export default function UsersScreen() {
             <TextInput
               style={styles.formInput}
               value={formConfirmPassword}
+              placeholder="비밀버호를 다시 입력해 주세요."
               onChangeText={setFormConfirmPassword}
               secureTextEntry
               autoCapitalize="none"
@@ -153,8 +156,8 @@ export default function UsersScreen() {
             <Text style={styles.formLabel}>사용자명</Text>
             <TextInput
               style={styles.formInput}
-              value={formName}
-              onChangeText={setFormName}
+              value={userName}
+              onChangeText={setUserName}
               autoCapitalize="words"
               autoCorrect={false}
             />
@@ -189,7 +192,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     // flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: 15,
     paddingVertical: 40,
   },
   form: {
@@ -206,14 +209,13 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 0,
     width: 110,
-    marginRight: 12,
   },
   formInput: {
     backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
-    paddingHorizontal: 16,
+    paddingHorizontal: 10,
     paddingVertical: 10,
     fontSize: 16,
     flex: 1,

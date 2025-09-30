@@ -1,6 +1,6 @@
 import {StatusBar} from 'expo-status-bar';
-import React, {useMemo, useState} from 'react';
-import {Alert, FlatList, Modal, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import React, {useEffect, useMemo, useState} from 'react';
+import {Alert, Modal, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {commonStyles} from "../../styles/index";
 import {dateToYmd, formattedDate, getTodayYmd, ymdToDateWithDayShort} from "../../utils/DateUtils";
 import {Table} from "../../components/Table";
@@ -8,13 +8,10 @@ import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
 import Const from "../../constants/Const";
 import ListModal from "../../components/ListModal";
+import {User, SalesOrg, Stor} from "../../types";
+import {useUser} from "../../contexts/UserContext";
+import * as api from "../../services/api/api";
 
-type Stor = {
-    storCd: string;
-    storNm: string
-};
-
-type SalesOrg = { salesOrgCd: string; salesOrgNm: string };
 type SaleRow = {
     storNm: string;
     totalAmt: number;
@@ -33,27 +30,10 @@ export default function MobileOrderReportByPeriod() {
     const [fromSaleDt, setFromSaleDt] = useState(getTodayYmd());
     const [toSaleDt, setToSaleDt] = useState(getTodayYmd());
     const [currentPickerType, setCurrentPickerType] = useState('from')
-    const salesOrgList: SalesOrg[] = useMemo(
-        () =>
-            Array.from({length: 6}).map((_, i) => {
-                return {
-                    salesOrgCd: `G${i + 1}`,
-                    salesOrgNm: `그룹 ${i + 1}`
-                };
-            }),
-        []
-    );
-    const storList: Stor[] = useMemo(
-        () =>
-            Array.from({length: 6}).map((_, i) => {
-                return {
-                    storCd: `G${i + 1}`,
-                    storNm: `그룹 ${i + 1}`
-                }
-            }),
-        []
-    );
-    const [selectedSalesOrg, setSelectedSalesOrg] = useState<string | null>(salesOrgList[0]?.salesOrgCd ?? null);
+    const {user}: User = useUser();
+    const [salesOrgList, setSalesOrgList] = useState<SalesOrg[]>([]);
+    const [storList, setStorList] = useState<Stor[]>([]);
+
     const [selectedStor, setSelectedStor] = useState<Stor | null>(null);
     const [showStorModal, setShowStorModal] = useState(false);
     const [isDetailVisible, setIsDetailVisible] = useState(false);
@@ -66,6 +46,57 @@ export default function MobileOrderReportByPeriod() {
     };
     const [selectedSalesOrgCd, setSelectedSalesOrgCd] = useState<string | null>('');
     const [selectedStorCd, setSelectedStorCd] = useState<string>('');
+
+    useEffect(() => {
+        getSalesOrgList();
+    },[]);
+
+    useEffect(() => {
+        getStorList();
+    },[selectedSalesOrgCd]);
+
+    const getSalesOrgList = () => {
+        const request = {
+            cmpCd: user.cmpCd,
+            operType: '',
+            restValue: '',
+        }
+        console.log("request:"+JSON.stringify(request))
+        api.getSalsOrgList(request)
+            .then(result => {
+                console.log("result:"+JSON.stringify(result))
+                if (result.data.responseBody != null) {
+                    const salesOrgList = result.data.responseBody;
+                    console.log('salesOrgList:' + JSON.stringify(salesOrgList))
+                    setSalesOrgList(salesOrgList);
+                }
+            })
+            .catch(error => {
+                console.log("getSalsOrgList error:" + error)
+            });
+    }
+
+    const getStorList = () => {
+        const request = {
+            cmpCd: user.cmpCd,
+            operType: Const.OPER_TYPE_REST,
+            salesOrgCd: selectedSalesOrgCd,
+            storeValue: ""
+        }
+        console.log("request:"+JSON.stringify(request))
+        api.getStorList(request)
+            .then(result => {
+                console.log("result:"+JSON.stringify(result))
+                if (result.data.responseBody != null) {
+                    const storList = result.data.responseBody;
+                    console.log('storList:' + JSON.stringify(storList))
+                    setStorList(storList);
+                }
+            })
+            .catch(error => {
+                console.log("getStorList error:" + error)
+            });
+    }
 
     const onSearch = () => {
         if(selectedSalesOrgCd=='') {

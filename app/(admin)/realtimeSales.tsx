@@ -1,6 +1,6 @@
 import {StatusBar} from 'expo-status-bar';
-import React, {useMemo, useState} from 'react';
-import {FlatList, Modal, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import React, {useEffect, useMemo, useState} from 'react';
+import {Modal, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {commonStyles} from "../../styles/index";
 import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
 import {Table} from "../../components/Table";
@@ -8,6 +8,9 @@ import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
 import Const from "../../constants/Const";
 import ListModal from "../../components/ListModal";
+import {useUser} from "../../contexts/UserContext";
+import * as api from "../../services/api/api";
+import {Stor, User} from "../../types";
 
 type SaleRow = {
     storNm: string;
@@ -33,27 +36,46 @@ type ListItem =
     | { type: 'summaryPair'; key: string; label: string; pairText: string }
     | { type: 'summaryTotals'; key: string; label: string; cashAmt: number; cardEtc: number; totalAmt: number }
     | { type: 'detail'; key: string; no: number; storCd: string; cashAmt: number; cardEtc: number; totalAmt: number };
-type Stor = { storCd: string; storNm: string };
 
 export default function RealtimeSales() {
     const [saleDate, setSaleDate] = useState(getTodayYmd());
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempDate, setTempDate] = useState<Date | null>(null);
 
-    const storList: Stor[] = useMemo(
-        () => [
-            {storCd: '', storNm: '전체'},
-            ...Array.from({length: 6}).map((_, i) => ({
-                storCd: `G${i + 1}`,
-                storNm: `그룹 ${i + 1}`
-            })),
-        ],
-        []
-    );
+    const [storList, setStorList] = useState<Stor[]>([]);
     const [selectedStorCd, setSelectedStorCd] = useState<string | null>(null);
     const [showStorModal, setShowStorModal] = useState(false);
     const [isDetailVisible, setIsDetailVisible] = useState(false);
     const [selectedStor, setSelectedStor] = useState<Stor | null>(null);
+    const {user}:User = useUser();
+
+    useEffect(()=> {
+        // setAuthToken("1");
+        getStorList();
+    },[]);
+
+    const getStorList = () => {
+        const request = {
+            cmpCd: user.cmpCd,
+            operType: Const.OPER_TYPE_REST,
+            salesOrgCd: user.salesOrgCd,
+            storeValue: ""
+        }
+        console.log("request:"+JSON.stringify(request))
+        api.getStorList(request)
+            .then(result => {
+                console.log("result:"+JSON.stringify(result))
+                if (result.data.responseBody != null) {
+                    const storList = result.data.responseBody;
+                    console.log('storList:' + JSON.stringify(storList))
+                    setStorList(storList);
+                }
+            })
+            .catch(error => {
+                console.log("getStorList error:" + error)
+            });
+    }
+
 
     const baseData: SaleRow[] = useMemo(
         () =>

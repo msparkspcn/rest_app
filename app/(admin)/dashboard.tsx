@@ -7,23 +7,16 @@ import * as api from "../../services/api/api";
 import {Table} from "../../components/Table";
 import Const from "../../constants/Const";
 import {useUser} from "../../contexts/UserContext";
-
-type CornerRow = {
-  cornerNm: string;
-  cornerCd: string;
-  storCd: string;
-  storNm: string;
-  useYn: 'Y' | 'N';
-};
+import {User, Corner} from "../../types";
 
 type OperateFilter = Const.ALL | '운영' | '폐점';
 
 export default function DashboardScreen() {
   const [operateFilter, setOperateFilter] = useState<OperateFilter>(Const.ALL);
   const [isDetailVisible, setIsDetailVisible] = useState(false);
-  const [selectedCorner, setSelectedCorner] = useState<CornerRow | null>(null);
-  const {user} = useUser();
-  const [cornerList, setCornerList] = useState(null);
+  const [selectedCorner, setSelectedCorner] = useState<Corner | null>(null);
+  const {user}:User = useUser();
+  const [cornerList, setCornerList] = useState<Corner[]>([]);
   const [cornerItemList, setCornerItemList] = useState(null);
 
   useEffect(() => {
@@ -35,8 +28,6 @@ export default function DashboardScreen() {
     const request = {
       cmpCd: user.cmpCd,
       salesOrgCd: user.salesOrgCd,
-      storCd: "",
-      cornerValue: ""
     }
     api.getCornerList(request)
         .then(result => {
@@ -51,7 +42,7 @@ export default function DashboardScreen() {
         });
   };
 
-  const openDetail = (corner: CornerRow) => {
+  const openDetail = (corner: Corner) => {
     console.log('corner:'+JSON.stringify(corner))
     const request = {
       cmpCd: corner.cmpCd,
@@ -93,7 +84,7 @@ export default function DashboardScreen() {
     cellAlign?: Align;
   };
 
-  const mainColumns: ColumnDef<CornerRow>[] = useMemo(() => ([
+  const mainColumns: ColumnDef<Corner>[] = useMemo(() => ([
     { key: 'no', title: Const.NO, flex: 0.6,
       renderCell: (_item, index) => (
           <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>

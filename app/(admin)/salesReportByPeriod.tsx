@@ -20,6 +20,7 @@ import {DatePickerModal} from "../../components/DatePickerModal";
 import Const from "../../constants/Const";
 import ListModal from "../../components/ListModal";
 import {useUser} from "../../contexts/UserContext";
+import {User, Corner} from "../../types";
 
 type SaleRow = {
     saleDtInfo: string;
@@ -28,14 +29,6 @@ type SaleRow = {
     cornerNm: string;
     saleAmt: number;
     taxSaleAmt: number;
-};
-
-type Corner = {
-    cmpCd: string;
-    salesOrgCd: string;
-    storCd: string;
-    cornerCd: string;
-    cornerNm: string
 };
 
 export default function SalesReportByPeriod() {
@@ -51,7 +44,7 @@ export default function SalesReportByPeriod() {
     const [currentPickerType, setCurrentPickerType] = useState('from')
     const [selectedSale, setSelectedSale] = useState<SaleRow | null>(null);
     const [saleList, setSaleList] = useState<[] | null>(null);
-    const {user} = useUser();
+    const {user}:User = useUser();
 
     useEffect(() => {
         console.log('api 테스트1');
@@ -61,9 +54,7 @@ export default function SalesReportByPeriod() {
     const getCornerList = () => {
         const request = {
             cmpCd: user.cmpCd,
-            salesOrgCd: user.salesOrgCd,
-            storCd: "",
-            cornerValue: ""
+            salesOrgCd: user.salesOrgCd
         }
         api.getCornerList(request)
             .then(result => {

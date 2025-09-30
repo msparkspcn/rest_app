@@ -8,7 +8,7 @@ import {ColumnDef} from "../../types/table";
 import Const from "../../constants/Const";
 import {useUser} from "../../contexts/UserContext";
 import * as api from "../../services/api/api";
-
+import {User} from "../../types";
 type VendorRow = {
   cmpCd: string;
   outSdCmpNm: string;
@@ -24,7 +24,7 @@ export default function VendorListScreen() {
   const [selectedVendor, setSelectedVendor] = useState<VendorRow | null>(null);
   const [vendorList, setVendorList] = useState(null);
   const [vendorItemList, setVendorItemList] = useState(null);
-  const {user} = useUser();
+  const {user}:User = useUser();
 
   useEffect(() => {
     console.log('api 테스트1')

@@ -1,6 +1,6 @@
 import {StatusBar} from 'expo-status-bar';
-import React, {useMemo, useState} from 'react';
-import {Alert, FlatList, Modal, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import React, {useEffect, useMemo, useState} from 'react';
+import {Alert, Modal, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {commonStyles} from "../../styles/index";
 import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
 import {Table} from "../../components/Table";
@@ -8,7 +8,10 @@ import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
 import Const from "../../constants/Const";
 import MyRadioGroup from "../../components/ui/RadioGroup";
-
+import {User, SalesOrg, Corner} from "../../types";
+import {useUser} from "../../contexts/UserContext";
+import * as api from "../../services/api/api";
+import ListModal from "../../components/ListModal";
 type SaleRow = {
     cornerNm: string;
     saleAmt: number;
@@ -24,8 +27,6 @@ type SaleDetailRow = {
     compRatio: string;
 }
 
-type Stor = { storCd: string; storNm: string };
-
 type CornerRow = {
     no: number;
     cornerNm: string;
@@ -33,34 +34,72 @@ type CornerRow = {
     posGroup: string;
     useYn: 'Y' | 'N';
 };
-type SalesOrg =  {salesOrgCd: string; salesOrgNm: string};
 
 export default function RealtimeSalesByCornerOp() {
     const [saleDate, setSaleDate] = useState(getTodayYmd());
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempDate, setTempDate] = useState<Date | null>(null);
 
-    const storList: Stor[] = useMemo(
-        () => Array.from({length: 6}).map((_, i) => ({id: `G${i + 1}`, name: `그룹 ${i + 1}`})),
-        []
-    );
-    const [selectedStorCd, setSelectedStorCd] = useState<string | null>(null);
-    const [showStorModal, setShowStorModal] = useState(false);
     const [isDetailVisible, setIsDetailVisible] = useState(false);
     const [selectedCorner, setSelectedCorner] = useState<CornerRow | null>(null);
     const [showSalesOrgListModal, setShowSalesOrgListModal] = useState(false);
     const [dcIncludedChecked, setDcIncludedChecked] = useState(false);
     const [selected, setSelected] = useState('option1');
-    const salesOrgList: SalesOrg[] = useMemo(
-        () =>
-            Array.from({length: 6}).map((_, i) => {
-                return {
-                    salesOrgCd: `G${i + 1}`,
-                    salesOrgNm: `그룹 ${i + 1}`
-                };
-            }),
-        []
-    );
+    const {user}: User = useUser();
+    const [salesOrgList, setSalesOrgList] = useState<SalesOrg[]>([]);
+    const [cornerList, setCornerList] = useState<Corner[]>([]);
+    const [showCornerModal, setShowCornerModal] = useState(false);
+    const [selectedCornerCd, setSelectedCornerCd] = useState<string | null>('');
+    const [selectedSalesOrgCd, setSelectedSalesOrgCd] = useState<string | null>('');
+
+
+    useEffect(() => {
+        getSalesOrgList();
+    },[]);
+
+    useEffect(() => {
+        getCornerList(selectedSalesOrgCd)
+    },[selectedSalesOrgCd])
+
+    const getSalesOrgList = () => {
+        const request = {
+            cmpCd: user.cmpCd,
+            operType: '',
+            restValue: '',
+        }
+        console.log("request:"+JSON.stringify(request))
+        api.getSalsOrgList(request)
+            .then(result => {
+                console.log("result:"+JSON.stringify(result))
+                if (result.data.responseBody != null) {
+                    const salesOrgList = result.data.responseBody;
+                    console.log('salesOrgList:' + JSON.stringify(salesOrgList))
+                    setSalesOrgList(salesOrgList);
+                }
+            })
+            .catch(error => {
+                console.log("getSalsOrgList error:" + error)
+            });
+    }
+
+    const getCornerList = (salesOrgCd: string) => {
+        console.log("getCornerList selectedSalesOrgCd:"+salesOrgCd+",cmpCd:"+user.cmpCd)
+        const request = {
+            cmpCd: user.cmpCd,
+            salesOrgCd: selectedSalesOrgCd
+        }
+        api.getCornerList(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const cornerList = result.data.responseBody;
+                    console.log('cornerList:' + JSON.stringify(cornerList))
+                    setCornerList(cornerList);
+                }
+            })
+            .catch(error => {
+                console.log("getCornerList error:" + error)
+            });
+    };
 
     const baseData: SaleRow[] = useMemo(
         () =>
@@ -79,13 +118,12 @@ export default function RealtimeSalesByCornerOp() {
             }),
         []
     );
-    const [selectedSalesOrgCd, setSelectedSalesOrgCd] = useState<string>('');
 
-    const filteredData = useMemo(() => {
-        if (!selectedStorCd) return baseData;
-        const groupName = posGroups.find(g => g.id === selectedStorCd)?.name;
-        return baseData.filter(r => (groupName ? r.cornerNm === groupName : true));
-    }, [baseData, posGroups, selectedStorCd]);
+    // const filteredData = useMemo(() => {
+    //     if (!selectedStorCd) return baseData;
+    //     const groupName = posGroups.find(g => g.id === selectedStorCd)?.name;
+    //     return baseData.filter(r => (groupName ? r.cornerNm === groupName : true));
+    // }, [baseData, posGroups, selectedStorCd]);
 
     const onSearch = () => {
         if(selectedSalesOrgCd=='') {
@@ -147,24 +185,24 @@ export default function RealtimeSalesByCornerOp() {
         },
     ]), [])
 
-    const totalSaleAmt = useMemo(() => filteredData.reduce((acc, r) => acc + r.saleAmt, 0), [filteredData]);
-    const totalMonthSaleAmt = useMemo(() => filteredData.reduce((acc, r) => acc + r.monthSaleAmt, 0), [filteredData]);
+    // const totalSaleAmt = useMemo(() => filteredData.reduce((acc, r) => acc + r.saleAmt, 0), [filteredData]);
+    // const totalMonthSaleAmt = useMemo(() => filteredData.reduce((acc, r) => acc + r.monthSaleAmt, 0), [filteredData]);
 
 
-    const renderFooter = () => (
-        <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-            <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
-                <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.totalText,
-                    {fontSize: 13, fontWeight: 'bold'}]}>{Const.TOTAL_AMT}</Text>
-            </View>
-            <View style={[{flex: 1.7}, commonStyles.tableRightBorder]}>
-                <Text style={[commonStyles.cell, styles.totalText, commonStyles.numberCell]}>{totalSaleAmt.toLocaleString()}</Text>
-            </View>
-            <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
-                <Text style={[commonStyles.cell, styles.totalText, commonStyles.numberCell]}>{totalMonthSaleAmt.toLocaleString()}</Text>
-            </View>
-        </View>
-    );
+    // const renderFooter = () => (
+    //     <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+    //         <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+    //             <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.totalText,
+    //                 {fontSize: 13, fontWeight: 'bold'}]}>{Const.TOTAL_AMT}</Text>
+    //         </View>
+    //         <View style={[{flex: 1.7}, commonStyles.tableRightBorder]}>
+    //             <Text style={[commonStyles.cell, styles.totalText, commonStyles.numberCell]}>{totalSaleAmt.toLocaleString()}</Text>
+    //         </View>
+    //         <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
+    //             <Text style={[commonStyles.cell, styles.totalText, commonStyles.numberCell]}>{totalMonthSaleAmt.toLocaleString()}</Text>
+    //         </View>
+    //     </View>
+    // );
 
     const detailData: SaleDetailRow[] = useMemo(
         () =>
@@ -271,9 +309,9 @@ export default function RealtimeSalesByCornerOp() {
                 </View>
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>매장</Text>
-                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowPosGroupModal(true)}>
+                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowCornerModal(true)}>
                         <Text
-                            style={styles.selectText}>{posGroups.find(g => g.id === selectedStorCd)?.name || Const.SELECT}</Text>
+                            style={styles.selectText}>{cornerList.find(g => g.cornerCd === selectedCornerCd)?.cornerNm || Const.ALL}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -306,11 +344,11 @@ export default function RealtimeSalesByCornerOp() {
 
             <View style={commonStyles.sectionDivider}/>
 
-            <Table
-                data={filteredData}
-                columns={mainColumns}
-                listFooter={renderFooter}
-            />
+            {/*<Table*/}
+            {/*    data={filteredData}*/}
+            {/*    columns={mainColumns}*/}
+            {/*    listFooter={renderFooter}*/}
+            {/*/>*/}
 
             <DatePickerModal
                 visible={showDatePicker}
@@ -319,63 +357,31 @@ export default function RealtimeSalesByCornerOp() {
                 onConfirm={(date) => setSaleDate(dateToYmd(date))}
             />
 
-            <Modal visible={showPosGroupModal} transparent animationType="slide"
-                   onRequestClose={() => setShowPosGroupModal(false)}>
-                <View style={commonStyles.modalOverlay}>
-                    <View style={commonStyles.modalContent}>
-                        <View style={commonStyles.listModalHeader}>
-                            <Text style={commonStyles.modalTitle}>매장 선택</Text>
-                            <TouchableOpacity onPress={() => setShowPosGroupModal(false)}>
-                                <Text style={commonStyles.modalClose}>✕</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <FlatList
-                            data={posGroups}
-                            keyExtractor={(item) => item.id}
-                            renderItem={({item}) => (
-                                <TouchableOpacity
-                                    style={commonStyles.modalItem}
-                                    onPress={() => {
-                                        setSelectedPosGroupId(item.id);
-                                        setShowPosGroupModal(false);
-                                    }}
-                                >
-                                    <Text style={commonStyles.modalItemText}>{item.name}</Text>
-                                </TouchableOpacity>
-                            )}
-                        />
-                    </View>
-                </View>
-            </Modal>
+            <ListModal
+                visible={showCornerModal}
+                title="매장 선택"
+                data={cornerList}
+                keyField="cornerCd"
+                labelField="cornerNm"
+                onClose={() => setShowCornerModal(false)}
+                onSelect={(item) => {
+                    setSelectedCornerCd(item.cornerCd);
+                    setShowCornerModal(false);
+                }}
+            />
 
-            <Modal visible={showSalesOrgListModal} transparent animationType="slide"
-                   onRequestClose={() => setShowSalesOrgListModal(false)}>
-                <View style={commonStyles.modalOverlay}>
-                    <View style={commonStyles.modalContent}>
-                        <View style={commonStyles.listModalHeader}>
-                            <Text style={commonStyles.modalTitle}>사업장 선택</Text>
-                            <TouchableOpacity onPress={() => setShowSalesOrgListModal(false)}>
-                                <Text style={commonStyles.modalClose}>✕</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <FlatList
-                            data={salesOrgList}
-                            keyExtractor={(item) => item.salesOrgCd}
-                            renderItem={({item}) => (
-                                <TouchableOpacity
-                                    style={commonStyles.modalItem}
-                                    onPress={() => {
-                                        setSelectedSalesOrgCd(item.salesOrgCd);
-                                        setShowSalesOrgListModal(false);
-                                    }}
-                                >
-                                    <Text style={commonStyles.modalItemText}>{item.salesOrgNm}</Text>
-                                </TouchableOpacity>
-                            )}
-                        />
-                    </View>
-                </View>
-            </Modal>
+            <ListModal
+                visible={showSalesOrgListModal}
+                title="사업장 선택"
+                data={salesOrgList}
+                keyField="salesOrgCd"
+                labelField="salesOrgNm"
+                onClose={() => setShowSalesOrgListModal(false)}
+                onSelect={(item) => {
+                    setSelectedSalesOrgCd(item.salesOrgCd);
+                    setShowSalesOrgListModal(false);
+                }}
+            />
 
             <Modal
                 visible={isDetailVisible}

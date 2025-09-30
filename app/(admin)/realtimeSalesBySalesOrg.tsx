@@ -1,6 +1,6 @@
 import {StatusBar} from 'expo-status-bar';
-import React, {useMemo, useState} from 'react';
-import {Alert, FlatList, Modal, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import React, {useEffect, useMemo, useState} from 'react';
+import {Alert, Modal, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {commonStyles} from "../../styles/index";
 import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
 import {Table} from "../../components/Table";
@@ -9,6 +9,9 @@ import {DatePickerModal} from "../../components/DatePickerModal";
 import {Ionicons} from "@expo/vector-icons";
 import Const from "../../constants/Const";
 import ListModal from "../../components/ListModal";
+import * as api from "../../services/api/api";
+import {useUser} from "../../contexts/UserContext";
+import {User, SalesOrg} from "../../types";
 
 type SaleRow = {
     no: number;
@@ -37,22 +40,45 @@ type CornerRow = {
     useYn: 'Y' | 'N';
 };
 
-type SalesOrg = { salesOrgCd: string; salesOrgNm: string };
-
 export default function RealtimeSalesBySalesOrgScreen() {
     const [saleDate, setSaleDate] = useState(getTodayYmd());
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempDate, setTempDate] = useState<Date | null>(null);
 
-    const salesOrgList: SalesOrg[] = useMemo(
-        () => Array.from({length: 6}).map((_, i) => ({salesOrgCd: `G${i + 1}`, salesOrgNm: `그룹 ${i + 1}`})),
-        []
-    );
+    const [salesOrgList, setSalesOrgList] = useState<SalesOrg[]>([]);
     const [selectedSalesOrgCd, setSelectedSalesOrgCd] = useState<string | null>(null);
     const [showSalesOrgListModal, setShowSalesOrgListModal] = useState(false);
     const [isDetailVisible, setIsDetailVisible] = useState(false);
     const [detailChecked, setDetailChecked] = useState(false);
     const [selectedCorner, setSelectedCorner] = useState<CornerRow | null>(null);
+
+    const {user}: User = useUser();
+
+    useEffect(() => {
+        getSalesOrgList();
+    },[]);
+
+    const getSalesOrgList = () => {
+        const request = {
+            cmpCd: user.cmpCd,
+            operType: Const.OPER_TYPE_REST,
+            restValue: user.salesOrgCd,
+        }
+        console.log("request:"+JSON.stringify(request))
+        api.getSalsOrgList(request)
+            .then(result => {
+                console.log("result:"+JSON.stringify(result))
+                if (result.data.responseBody != null) {
+                    const salesOrgList = result.data.responseBody;
+                    console.log('salesOrgList:' + JSON.stringify(salesOrgList))
+                    setSalesOrgList(salesOrgList);
+                }
+            })
+            .catch(error => {
+                console.log("getSalsOrgList error:" + error)
+            });
+    }
+
     const baseData: SaleRow[] = useMemo(
         () =>
             Array.from({length: 10}).map((_, idx) => {
@@ -288,8 +314,9 @@ export default function RealtimeSalesBySalesOrgScreen() {
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>사업장</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowSalesOrgListModal(true)}>
-                        <Text
-                            style={styles.selectText}>{salesOrgList.find(g => g.salesOrgCd === selectedSalesOrgCd)?.salesOrgNm || Const.SELECT}</Text>
+                        <Text style={styles.selectText}>
+                            {salesOrgList.find(g => g.salesOrgCd === selectedSalesOrgCd)?.salesOrgNm || Const.SELECT}
+                        </Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
