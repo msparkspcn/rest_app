@@ -14,7 +14,6 @@ import {
 } from 'react-native';
 import * as api from "../../services/api/api";
 import {formattedDate, ymdToDateWithDay, getTodayYmd, dateToYmd} from "../../utils/DateUtils";
-import {setAuthToken} from "../../services/api/api";
 import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
@@ -58,21 +57,7 @@ export default function SalesReportByPeriod() {
 
     useEffect(() => {
         console.log('api 테스트1')
-        setAuthToken("1");
-        getStoreInfo('5000511001', '1234')
     }, [])
-
-    const getStoreInfo = (userId, password) => {
-        api.login(userId, password)
-            .then(response => {
-                if (response.data.responseBody != null) {
-                    const userInfo = response.data.responseBody;
-                    console.log('userInfo:' + JSON.stringify(userInfo))
-                }
-            })
-            .catch(error => console.log("userInfo error:" + error))
-            .finally()
-    }
 
     const restDailySale = () => {
         console.log("조회 클릭")

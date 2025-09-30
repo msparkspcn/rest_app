@@ -1,6 +1,6 @@
 import {StatusBar} from 'expo-status-bar';
-import React, {useMemo, useState} from 'react';
-import {FlatList, Modal, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import React, {useEffect, useMemo, useState} from 'react';
+import {Modal, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {commonStyles} from "../../styles/index";
 import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
 import {Table} from "../../components/Table";
@@ -8,6 +8,8 @@ import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
 import Const from "../../constants/Const";
 import ListModal from "../../components/ListModal";
+import {useUser} from "../../contexts/UserContext";
+import * as api from "../../services/api/api";
 
 type SaleRow = {
     cornerNm: string;
@@ -24,7 +26,13 @@ type SaleDetailRow = {
     compRatio: number;
 }
 
-type Corner = { cornerCd: string; cornerNm: string };
+type Corner = {
+    cmpCd: string;
+    salesOrgCd: string;
+    storCd: string;
+    cornerCd: string;
+    cornerNm: string
+};
 
 type CornerRow = {
     no: number;
@@ -39,20 +47,38 @@ export default function RealtimeSalesByCornerScreen() {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempDate, setTempDate] = useState<Date | null>(null);
 
-    const cornerList: Corner[] = useMemo(
-        () => [
-            {cornerCd: '', cornerNm: '전체'},
-            ...Array.from({length: 12}).map((_, i) => ({
-                cornerCd: `S${100 + i}`,
-                cornerNm: `매장 ${i + 1}`
-            })),
-        ],
-        []
-    );
+    const [cornerList, setCornerList] = useState<Corner[]>([]);
     const [selectedCornerCd, setSelectedCornerCd] = useState<string | null>(null);
     const [showCornerListModal, setShowCornerListModal] = useState(false);
     const [isDetailVisible, setIsDetailVisible] = useState(false);
     const [selectedCorner, setSelectedCorner] = useState<CornerRow | null>(null);
+    const {user} = useUser();
+
+    useEffect(() => {
+        console.log('api 테스트1');
+        getCornerList();
+    },[]);
+
+    const getCornerList = () => {
+        const request = {
+            cmpCd: user.cmpCd,
+            salesOrgCd: user.salesOrgCd,
+            storCd: "",
+            cornerValue: ""
+        }
+        api.getCornerList(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const cornerList = result.data.responseBody;
+                    console.log('cornerList:' + JSON.stringify(cornerList))
+                    setCornerList(cornerList);
+                }
+            })
+            .catch(error => {
+                console.log("getCornerList error:" + error)
+            });
+    }
+
     const baseData: SaleRow[] = useMemo(
         () =>
             Array.from({length: 20}).map((_, idx) => {

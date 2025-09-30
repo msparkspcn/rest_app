@@ -3,7 +3,6 @@ import {Ionicons} from '@expo/vector-icons';
 import {StatusBar} from 'expo-status-bar';
 import React, {useEffect, useMemo, useState} from 'react';
 import {
-    FlatList,
     Modal,
     Pressable,
     SafeAreaView,
@@ -18,12 +17,12 @@ import {
     formattedMonth,
     getTodayYm
 } from "../../utils/DateUtils";
-import {setAuthToken} from "../../services/api/api";
 import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
 import Const from "../../constants/Const";
 import ListModal from "../../components/ListModal";
+import {useUser} from "../../contexts/UserContext";
 
 type SaleRow = {
     cmpCd: string;
@@ -44,22 +43,19 @@ type SaleDetailRow = {
     netSaleAmt: number;
 }
 
-type Corner = { cornerCd: string; cornerNm: string };
+type Corner = {
+    cmpCd: string;
+    salesOrgCd: string;
+    storCd: string;
+    cornerCd: string;
+    cornerNm: string
+};
 type DetailType = 'daily' | 'monthly';
 type DailyDetailRow = { saleDt: string; saleAmt: number, vatAmt: number, netSaleAmt: number };
 type MonthlyDetailRow = { saleMonth: string; monthSaleQty: number, monthSaleAmt: number, monthVatAmt: number, monthNetSaleAmt: number };
 
 export default function MonthlySalesReport() {
-    const cornerList: Corner[] = useMemo(
-        () => [
-            {cornerCd: '', cornerNm: '전체'},
-            ...Array.from({length: 12}).map((_, i) => ({
-                cornerCd: `S${100 + i}`,
-                cornerNm: `매장 ${i + 1}`
-            })),
-        ],
-        []
-    );
+    const [cornerList, setCornerList] = useState<Corner[]>([]);
     const [isDetailVisible, setIsDetailVisible] = useState(false);
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempDate, setTempDate] = useState<Date | null>(null);
@@ -72,23 +68,31 @@ export default function MonthlySalesReport() {
     const [saleList, setSaleList] = useState<[] | null>(null);
     const [detailType, setDetailType] = useState<DetailType>('daily');
     const [saleDetailList, setSaleDetailList] = useState<[] | null>(null);
+    const {user} = useUser();
 
     useEffect(() => {
-        console.log('api 테스트1')
-        setAuthToken("1");
-        getStoreInfo('5000511001', '1234')
-    },[])
+        console.log('api 테스트1');
+        getCornerList();
+    },[]);
 
-    const getStoreInfo = (userId, password) => {
-        api.login(userId, password)
-            .then(response => {
-                if (response.data.responseBody != null) {
-                    const userInfo = response.data.responseBody;
-                    console.log('userInfo:' + JSON.stringify(userInfo))
+    const getCornerList = () => {
+        const request = {
+            cmpCd: user.cmpCd,
+            salesOrgCd: user.salesOrgCd,
+            storCd: "",
+            cornerValue: ""
+        }
+        api.getCornerList(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const cornerList = result.data.responseBody;
+                    console.log('cornerList:' + JSON.stringify(cornerList))
+                    setCornerList(cornerList);
                 }
             })
-            .catch(error => console.log("userInfo error:" + error))
-            .finally()
+            .catch(error => {
+                console.log("getCornerList error:" + error)
+            });
     }
 
     const restMonthlyCornerSale = () => {

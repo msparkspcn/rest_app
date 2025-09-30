@@ -37,6 +37,26 @@ export function login(userId, password) {
     return post(request, body);
 }
 
+export function getCornerList(params) {
+    const request = host + "/api/v1/corner/list";
+    return post(request, params);
+}
+
+export function getCornerHandleItems(params) {
+    const request = host + "/api/v1/item/corner-handle-items";
+    return post(request, params);
+}
+
+export function getVendorList(params) {
+    const request = host + "/api/v1/vendor/list";
+    return post(request, params);
+}
+
+export function getVendorItemList(params) {
+    const request = host + "/api/v1/vendor/item/with-registration";
+    return post(request, params);
+}
+
 export function restDailySale(params) {
     const request = host + "/api/v1/rest/sale/restDailySale";
     return post(request, params);

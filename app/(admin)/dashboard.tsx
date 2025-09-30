@@ -6,11 +6,13 @@ import { Modal, Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-na
 import * as api from "../../services/api/api";
 import {Table} from "../../components/Table";
 import Const from "../../constants/Const";
+import {useUser} from "../../contexts/UserContext";
 
 type CornerRow = {
   cornerNm: string;
   cornerCd: string;
-  posGroup: string;
+  storCd: string;
+  storNm: string;
   useYn: 'Y' | 'N';
 };
 
@@ -18,57 +20,63 @@ type OperateFilter = Const.ALL | '운영' | '폐점';
 
 export default function DashboardScreen() {
   const [operateFilter, setOperateFilter] = useState<OperateFilter>(Const.ALL);
-  const [submittedFilter, setSubmittedFilter] = useState<OperateFilter>(Const.ALL);
   const [isDetailVisible, setIsDetailVisible] = useState(false);
   const [selectedCorner, setSelectedCorner] = useState<CornerRow | null>(null);
+  const {user} = useUser();
+  const [cornerList, setCornerList] = useState(null);
+  const [cornerItemList, setCornerItemList] = useState(null);
 
   useEffect(() => {
     console.log('api 테스트1')
-    getStoreInfo('5000511001','1234')
   })
 
-  const getStoreInfo = (userId, password) => {
-    api.login(userId, password)
-        .then(response => {
-          if (response.data.responseBody != null) {
-            const userInfo = response.data.responseBody;
-            console.log('userInfo:' + JSON.stringify(userInfo))
+  const onSearch = () => {
+    console.log('user:'+JSON.stringify(user.cmpCd));
+    const request = {
+      cmpCd: user.cmpCd,
+      salesOrgCd: user.salesOrgCd,
+      storCd: "",
+      cornerValue: ""
+    }
+    api.getCornerList(request)
+        .then(result => {
+          if (result.data.responseBody != null) {
+            const cornerList = result.data.responseBody;
+            console.log('cornerList:' + JSON.stringify(cornerList))
+            setCornerList(cornerList);
           }
         })
-        .catch(error => console.log("userInfo error:"+error))
-        .finally()
-  }
-
-  // 테스트 데이터 생성
-  const baseData: CornerRow[] = useMemo(() => {
-    const rows: CornerRow[] = [];
-    for (let i = 1; i <= 30; i += 1) {
-      rows.push({
-        cornerNm: `매장 ${i.toString().padStart(2, '0')}`,
-        cornerCd: `S${(1000 + i).toString()}`,
-        posGroup: `그룹 ${((i % 5) + 1).toString()}`,
-        useYn: i % 3 === 0 ? 'N' : 'Y',
-      });
-    }
-    return rows;
-  }, []);
-
-  const filteredData = useMemo(() => {
-    if (submittedFilter === Const.ALL) return baseData;
-    if (submittedFilter === '운영') return baseData.filter(r => r.useYn === 'Y');
-
-
-    return baseData.filter(r => r.useYn === 'N');
-  }, [baseData, submittedFilter]);
-
-  const onSearch = () => {
-    setSubmittedFilter(operateFilter);
-    //api 호출 처리 필요
+        .catch(error => {
+          console.log("getCornerList error:" + error)
+        });
   };
 
-  const openDetail = (store: CornerRow) => {
-    setSelectedCorner(store);
-    setIsDetailVisible(true);
+  const openDetail = (corner: CornerRow) => {
+    console.log('corner:'+JSON.stringify(corner))
+    const request = {
+      cmpCd: corner.cmpCd,
+      salesOrgCd: corner.salesOrgCd,
+      itemValue:"",
+      offset:"",
+      page:"1",
+      registered:true,
+      size:1000,
+      storCd: corner.storCd,
+      cornerCd: corner.cornerCd
+    }
+    api.getCornerHandleItems(request)
+        .then(result => {
+          if (result.data.responseBody != null) {
+            const itemList = result.data.responseBody.items;
+            console.log('itemList:' + JSON.stringify(itemList))
+            setCornerItemList(itemList);
+            setSelectedCorner(corner);
+            setIsDetailVisible(true);
+          }
+        })
+        .catch(error => {
+          console.log("getCornerHandleItems error:" + error)
+        });
   };
 
   const closeDetail = () => {
@@ -98,24 +106,23 @@ export default function DashboardScreen() {
           </Pressable>
       ),   },
     { key: 'cornerCd', title: '코드', flex: 1.2, align: 'center'},
-    { key: 'posGroup', title: '포스그룹', flex: 1.5, align: 'left'},
+    { key: 'storNm', title: '포스그룹', flex: 1.5, align: 'left',
+      renderCell: (item) => (
+          <Text style={[commonStyles.cell,{paddingLeft:10}]}>
+            {item.storNm}
+          </Text>
+      )
+    },
     { key: 'useYn', title: Const.USE_YN, flex: 1,
       renderCell: (item) => (
           <Text style={[commonStyles.cell, {textAlign:'center'}]}>
-            {item.useYn ==='Y' ? '운영' : '폐점'}
+            {item.useYn ==='1' ? '운영' : '폐점'}
           </Text>
       )
     },
   ]), []);
 
-  type ItemRow = { itemCd: string; itemName: string };
-  const itemData: ItemRow[] = useMemo(
-    () => Array.from({ length: 205 }).map((_, index) => ({
-      itemCd: `P${1001 + index}`,
-      itemName: `상품 ${index + 1}`,
-    })),
-    []
-  );
+  type ItemRow = { itemCd: string; itemNm: string };
 
   const itemColumns: ColumnDef<ItemRow>[] = useMemo(() => ([
     { key: 'no',          title: Const.NO,     flex: 0.4,
@@ -123,8 +130,14 @@ export default function DashboardScreen() {
           <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
       ),
     },
-    { key: 'itemCd', title: Const.ITEM_CD,  flex: 1.8, align: 'left'},
-    { key: 'itemName', title: Const.ITEM_NM,   flex: 2.2, align: 'left'},
+    { key: 'itemCd', title: Const.ITEM_CD,  flex: 1.8, align: 'left',
+      renderCell: (_item) => (
+          <Text style={[commonStyles.cell, { textAlign: 'center' }]}>
+            {_item.itemCd} {_item.itemSeq}
+          </Text>
+      ),
+    },
+    { key: 'itemNm', title: Const.ITEM_NM,   flex: 2.2, align: 'left'},
   ]), []);
 
   const CornerNmRow = () => {
@@ -161,7 +174,7 @@ export default function DashboardScreen() {
       </View>
       <View style={commonStyles.sectionDivider} />
 
-      <Table data={filteredData} columns={mainColumns}/>
+      <Table data={cornerList} columns={mainColumns}/>
 
       <View style={commonStyles.sectionDivider} />
 
@@ -176,7 +189,7 @@ export default function DashboardScreen() {
             </View>
 
             <Table
-                data={itemData}
+                data={cornerItemList}
                 columns={itemColumns}
                 isModal={true}
                 listHeader={CornerNmRow}

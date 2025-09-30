@@ -14,12 +14,12 @@ import {
 } from 'react-native';
 import * as api from "../../services/api/api";
 import {formattedDate, ymdToDateWithDay, getTodayYmd, dateToYmd} from "../../utils/DateUtils";
-import {setAuthToken} from "../../services/api/api";
 import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
 import Const from "../../constants/Const";
 import ListModal from "../../components/ListModal";
+import {useUser} from "../../contexts/UserContext";
 
 type SaleRow = {
     saleDtInfo: string;
@@ -30,19 +30,17 @@ type SaleRow = {
     taxSaleAmt: number;
 };
 
-type Corner = { cornerCd: string; cornerNm: string };
+type Corner = {
+    cmpCd: string;
+    salesOrgCd: string;
+    storCd: string;
+    cornerCd: string;
+    cornerNm: string
+};
 
 export default function SalesReportByPeriod() {
-    const cornerList: Corner[] = useMemo(
-        () => [
-            {cornerCd: '', cornerNm: '전체'},
-            ...Array.from({length: 12}).map((_, i) => ({
-                cornerCd: `S${100 + i}`,
-                cornerNm: `매장 ${i + 1}`
-            })),
-        ],
-        []
-    );
+    const [cornerList, setCornerList] = useState<Corner[]>([]);
+
     const [isDetailVisible, setIsDetailVisible] = useState(false);
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempDate, setTempDate] = useState<Date | null>(null);
@@ -53,11 +51,32 @@ export default function SalesReportByPeriod() {
     const [currentPickerType, setCurrentPickerType] = useState('from')
     const [selectedSale, setSelectedSale] = useState<SaleRow | null>(null);
     const [saleList, setSaleList] = useState<[] | null>(null);
+    const {user} = useUser();
 
     useEffect(() => {
-        console.log('api 테스트1')
-        setAuthToken("1");
-    }, [])
+        console.log('api 테스트1');
+        getCornerList();
+    }, []);
+
+    const getCornerList = () => {
+        const request = {
+            cmpCd: user.cmpCd,
+            salesOrgCd: user.salesOrgCd,
+            storCd: "",
+            cornerValue: ""
+        }
+        api.getCornerList(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const cornerList = result.data.responseBody;
+                    console.log('cornerList:' + JSON.stringify(cornerList))
+                    setCornerList(cornerList);
+                }
+            })
+            .catch(error => {
+                console.log("getCornerList error:" + error)
+            });
+    }
 
     const restDailyCornerSale = () => {
         console.log("restDailyCornerSale 조회 클릭 fromSaleDt:"+fromSaleDt+", toSaleDt:"+toSaleDt)
@@ -144,7 +163,7 @@ export default function SalesReportByPeriod() {
                 // 날짜별 합계 row
                 result.push({
                     ...rows[0],
-                    cornerNm: `${date} 소계`,
+                    cornerNm: `${formattedDate(date)} 소계`,
                     saleAmt: dateSum,
                     isSummary: true,
                 });
@@ -159,14 +178,18 @@ export default function SalesReportByPeriod() {
             title: '일자(요일)',
             flex: 1,
             align: 'center',
-            renderCell: (item) => (
-                <Text style={[
-                    commonStyles.numberCell,
-                    item.isTotal ? { fontWeight: 'bold', backgroundColor: '#ffe5b4' } : {textAlign: 'center'}
-                ]}>
-                    {item.isSummary || item.isTotal ? '' : ymdToDateWithDay(item.saleDtInfo || item.saleDt)}
-                </Text>
-            ),
+            renderCell: (item) => {
+                console.log('saleDtInfo isSummary:'+item.isSummary)
+                if(item.isSummary) return null;
+                return (
+                    <Text style={[
+                        commonStyles.numberCell,
+                        item.isTotal ? {fontWeight: 'bold', backgroundColor: '#ffe5b4'} : {textAlign: 'center'}
+                    ]}>
+                        {item.isTotal ? '' : ymdToDateWithDay(item.saleDtInfo || item.saleDt)}
+                    </Text>
+                    )
+            },
         },
         {
             key: 'cornerNm',
@@ -193,7 +216,7 @@ export default function SalesReportByPeriod() {
             align: 'right',
             renderCell: (item) => (
                 <Text style={[commonStyles.numberCell, item.isSummary ? { fontWeight: 'bold' } : null]}>
-                    {item.saleAmt.toLocaleString()}
+                    {item.taxSaleAmt.toLocaleString()}
                 </Text>
             ),
         },

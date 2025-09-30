@@ -1,15 +1,18 @@
 import { commonStyles } from '@/styles';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import React, { useMemo, useState } from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import { Modal, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View } from 'react-native';
 import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
 import Const from "../../constants/Const";
+import {useUser} from "../../contexts/UserContext";
+import * as api from "../../services/api/api";
 
 type VendorRow = {
-  vendor: string;
-  status: '등록' | '취소';
+  cmpCd: string;
+  outSdCmpNm: string;
+  useYn: '등록' | '취소';
 };
 
 type RegisterFilter = Const.ALL | '등록' | '취소';
@@ -17,31 +20,62 @@ type RegisterFilter = Const.ALL | '등록' | '취소';
 export default function VendorListScreen() {
   const [vendorQuery, setVendorQuery] = useState('');
   const [registerFilter, setRegisterFilter] = useState<RegisterFilter>(Const.ALL);
-  const [submitted, setSubmitted] = useState<{ q: string; f: RegisterFilter }>({ q: '', f: Const.ALL });
   const [isDetailVisible, setIsDetailVisible] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState<VendorRow | null>(null);
+  const [vendorList, setVendorList] = useState(null);
+  const [vendorItemList, setVendorItemList] = useState(null);
+  const {user} = useUser();
 
-  const baseData: VendorRow[] = useMemo(() => {
-    return Array.from({ length: 20 }).map((_, index) => ({
-      vendor: `거래처 ${String(index + 1).padStart(2, '0')}`,
-      status: index % 2 === 0 ? '등록' : '취소',
-    }));
-  }, []);
-
-  const filteredData = useMemo(() => {
-    const { q, f } = submitted;
-    return baseData
-      .filter((row) => (f === Const.ALL ? true : row.status === f))
-      .filter((row) => (q.trim().length === 0 ? true : row.vendor.includes(q.trim())));
-  }, [baseData, submitted]);
+  useEffect(() => {
+    console.log('api 테스트1')
+  })
 
   const onSearch = () => {
-    setSubmitted({ q: vendorQuery, f: registerFilter });
+    console.log('user:'+JSON.stringify(user.cmpCd));
+    const request = {
+      cmpCd: user.cmpCd,
+      salesOrgCd: user.salesOrgCd,
+      schValue: vendorQuery,
+    }
+    api.getVendorList(request)
+        .then(result => {
+          if (result.data.responseBody != null) {
+            const vendorList = result.data.responseBody;
+            console.log('List:' + JSON.stringify(vendorList))
+            setVendorList(vendorList);
+          }
+        })
+        .catch(error => {
+          console.log("getVendorList error:" + error)
+        });
   };
 
   const openDetail = (vendor: VendorRow) => {
-    setSelectedVendor(vendor);
-    setIsDetailVisible(true);
+    const request = {
+      cmpCd: vendor.cmpCd,
+      salesOrgCd: user.salesOrgCd,
+      itemCd: "",
+      itemNm: "",
+      outSdCmpCd: vendor.outSdCmpCd,
+      page:0,
+      size: 100000,
+    }
+    api.getVendorItemList(request)
+        .then(result => {
+          if (result.data.responseBody != null) {
+            const vendorItemList = result.data.responseBody.items;
+            // console.log('List:' + JSON.stringify(vendorItemList))
+            console.log('size:'+result.data.responseBody.totalCount);
+            setVendorItemList(vendorItemList);
+
+            setSelectedVendor(vendor);
+            setIsDetailVisible(true);
+          }
+        })
+        .catch(error => {
+          console.log("getVendorList error:" + error)
+        });
+
   };
 
   const closeDetail = () => {
@@ -49,14 +83,6 @@ export default function VendorListScreen() {
   };
 
   type VendorDetailRow = { itemCd: string; itemNm: string };
-  const detailData: VendorDetailRow[] = useMemo(
-    () =>
-      Array.from({ length: 30 }).map((_, index) => ({
-        itemCd: `C${1000 + index}`,
-        itemNm: `명칭 ${index + 1}`,
-      })),
-    []
-  );
 
   const vendorColumns: ColumnDef<VendorDetailRow>[] = useMemo(() => ([
     { key: 'no', title: Const.NO,     flex: 0.5, align: 'center',
@@ -64,7 +90,13 @@ export default function VendorListScreen() {
           <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
       ),
     },
-    { key: 'itemCd', title: '상품코드',  flex: 1.5, align: 'left'},
+    { key: 'itemCd', title: '상품코드',  flex: 1.5, align: 'left',
+      renderCell: (_item) => (
+          <Text style={[commonStyles.cell, { textAlign: 'center' }]}>
+            {_item.itemCd} {_item.itemSeq}
+          </Text>
+      )
+    },
     { key: 'itemNm', title: '상품명',   flex: 2.2, align: 'left'},
   ]), []);
 
@@ -74,19 +106,25 @@ export default function VendorListScreen() {
           <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
       ),
     },
-    { key: 'vendor',     title: '거래처',   flex: 2,   align: 'left',
+    { key: 'outSdCmpNm',     title: '거래처',   flex: 2,   align: 'left',
       renderCell: (item) => (
           <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
-            <Text style={[commonStyles.cell, commonStyles.linkText,{paddingLeft:10}]}>{item.vendor}</Text>
+            <Text style={[commonStyles.cell, commonStyles.linkText,{paddingLeft:10}]}>{item.outSdCmpNm}</Text>
           </Pressable>
       ),   },
-    { key: 'status',     title: '상태',    flex: 0.8, align: 'center' },
+    { key: 'useYn',     title: '상태',    flex: 0.5,
+      renderCell: (item) => (
+          <Text style={[commonStyles.cell, {textAlign:'center'}]}>
+            {item.useYn ==='1' ? '등록' : '취소'}
+          </Text>
+      )
+    },
   ]), []);
 
   const VendorNmRow = () => {
     return (
         <View style={{ borderWidth: StyleSheet.hairlineWidth, borderColor: '#aaa' }}>
-          <Text style={styles.modalStoreName}>{selectedVendor?.vendor}</Text>
+          <Text style={styles.modalStoreName}>{selectedVendor?.outSdCmpNm}</Text>
         </View>
     );
   };
@@ -132,7 +170,7 @@ export default function VendorListScreen() {
 
       <View style={commonStyles.sectionDivider} />
 
-      <Table data={filteredData} columns={mainColumns}/>
+      <Table data={vendorList} columns={mainColumns}/>
 
       <Modal visible={isDetailVisible} animationType="fade" transparent>
         <View style={commonStyles.modalOverlay}>
@@ -145,7 +183,7 @@ export default function VendorListScreen() {
             </View>
 
             <Table
-                data={detailData}
+                data={vendorItemList}
                 columns={vendorColumns}
                 isModal={true}
                 listHeader={VendorNmRow}

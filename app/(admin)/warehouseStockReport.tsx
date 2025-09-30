@@ -1,5 +1,5 @@
 import {StatusBar} from 'expo-status-bar';
-import React, {useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {
     Modal,
     Pressable,
@@ -17,6 +17,8 @@ import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
 import Const from "../../constants/Const";
 import ListModal from "../../components/ListModal";
+import {useUser} from "../../contexts/UserContext";
+import * as api from "../../services/api/api";
 
 type StockRow = {
     cornerNm: string;
@@ -37,7 +39,11 @@ type StockDetailRow = {
     curStockQty: number;
 }
 
-type Vendor = { vendorCd: string; vendorNm: string };
+type Vendor = {
+    cmpCd: string;
+    outSdCmpCd: string;
+    outSdCmpNm: string
+};
 type ItemClass = {
     id: string;
     name: string;
@@ -50,23 +56,45 @@ export default function WarehouseStockReportScreen() {
     const [tempDate, setTempDate] = useState<Date | null>(null);
     const [currentPickerType, setCurrentPickerType] = useState('from')
 
-    const vendors: Vendor[] = useMemo(
-        () => Array.from({length: 6}).map((_, i) => ({vendorCd: `G${i + 1}`, vendorNm: `거래처 ${i + 1}`})),
-        []
-    );
+    const [vendorList, setVendorList] = useState<Vendor[]>([]);
     const itemClasses: ItemClass[] = useMemo(
         () => Array.from({length: 6}).map((_, i) => ({id: `G${i + 1}`, name: `상품분류 ${i + 1}`})),
         []
     );
 
-    const [selectedVendorId, setSelectedVendorId] = useState<string | null>(vendors[0]?.vendorCd ?? null);
+    const [selectedOutSdCmpCd, setSelectedOutSdCmpCd] = useState<string | null>(null);
     const [showVendorModal, setShowVendorModal] = useState(false);
     const [showItemClassModal, setShowItemClassModal] = useState(false);
-    const [vendorQuery, setVendorQuery] = useState('');
+    const [itemQuery, setItemQuery] = useState('');
     const [selectedItemClass, setSelectedItemClass] = useState<string | null>(itemClasses[0]?.id ?? null);
     const [showExistStockChecked, setShowExistStockChecked] = useState(false);
     const [isDetailVisible, setIsDetailVisible] = useState(false);
     const [selectedItem, setSelectedItem] = useState<StockRow | null>(null);
+    const {user} = useUser();
+
+    useEffect(() => {
+        console.log('api 테스트1');
+        getVendorList();
+    },[]);
+
+    const getVendorList = () => {
+        const request = {
+            cmpCd: user.cmpCd,
+            salesOrgCd: user.salesOrgCd,
+            schValue: '',
+        }
+        api.getVendorList(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const vendorList = result.data.responseBody;
+                    console.log('List:' + JSON.stringify(vendorList))
+                    setVendorList(vendorList);
+                }
+            })
+            .catch(error => {
+                console.log("getVendorList error:" + error)
+            });
+    }
 
     const handleCheckbox = () => {
         setShowExistStockChecked(!showExistStockChecked)
@@ -285,8 +313,8 @@ export default function WarehouseStockReportScreen() {
                     <TextInput
                         style={commonStyles.input}
                         placeholderTextColor="#999"
-                        value={vendorQuery}
-                        onChangeText={setVendorQuery}
+                        value={itemQuery}
+                        onChangeText={setItemQuery}
                         returnKeyType="search"
                         onSubmitEditing={onSearch}
                     />
@@ -295,7 +323,7 @@ export default function WarehouseStockReportScreen() {
                     <Text style={commonStyles.filterLabel}>{Const.VENDOR}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowVendorModal(true)}>
                         <Text
-                            style={styles.selectText}>{vendors.find(g => g.vendorCd === selectedVendorId)?.vendorNm || Const.SELECT}</Text>
+                            style={styles.selectText}>{vendorList.find(g => g.outSdCmpCd === selectedOutSdCmpCd)?.outSdCmpNm || Const.SELECT}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -350,12 +378,12 @@ export default function WarehouseStockReportScreen() {
             <ListModal
                 visible={showVendorModal}
                 title="거래처 선택"
-                data={vendors}
-                keyField="vendorCd"
-                labelField="vendorNm"
+                data={vendorList}
+                keyField="outSdCmpCd"
+                labelField="outSdCmpNm"
                 onClose={() => setShowVendorModal(false)}
                 onSelect={(item) => {
-                    setSelectedVendorId(item.vendorCd);
+                    setSelectedOutSdCmpCd(item.outSdCmpCd);
                     setShowVendorModal(false);
                 }}
             />

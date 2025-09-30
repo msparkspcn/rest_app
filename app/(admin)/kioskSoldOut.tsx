@@ -1,22 +1,50 @@
 import {StatusBar} from 'expo-status-bar';
-import React, {useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {Alert, FlatList, Modal, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {commonStyles} from '@/styles';
 import {Table} from "../../components/Table";
 import Const from "../../constants/Const";
 import ListModal from "../../components/ListModal";
+import {useUser} from "../../contexts/UserContext";
+import * as api from "../../services/api/api";
 
-type Corner = { cornerCd: string; cornerNm: string };
+type Corner = {
+    cmpCd: string;
+    salesOrgCd: string;
+    storCd: string;
+    cornerCd: string;
+    cornerNm: string
+};
 type ProductRow = { itemNm: string; useYn: 'Y' | 'N' };
 
 export default function KioskSoldOutScreen() {
-    const cornerList: Corner[] = useMemo(
-        () => Array.from({length: 12}).map((_, i) => ({cornerCd: `S${100 + i}`, cornerNm: `매장 ${i + 1}`})),
-        []
-    );
+    const [cornerList, setCornerList] = useState<Corner[]>([]);
 
     const [selectedCornerCd, setSelectedCornerCd] = useState<string | null>(null);
     const [showCornerModal, setShowCornerModal] = useState(false);
+    const {user} = useUser();
+
+    useEffect(() => {
+        console.log('user:'+JSON.stringify(user.cmpCd));
+        const request = {
+            cmpCd: user.cmpCd,
+            salesOrgCd: user.salesOrgCd,
+            storCd: "",
+            cornerValue: ""
+        }
+        api.getCornerList(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const cornerList = result.data.responseBody;
+                    console.log('cornerList:' + JSON.stringify(cornerList))
+                    setCornerList(cornerList);
+                }
+            })
+            .catch(error => {
+                console.log("getCornerList error:" + error)
+            });
+    },[])
+
 
     const productData: ProductRow[] = useMemo(
         () =>
