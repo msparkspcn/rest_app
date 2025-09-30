@@ -7,8 +7,10 @@ import Const from "../../constants/Const";
 import { commonStyles } from "../../styles/index";
 import { ColumnDef } from "../../types/table";
 import { dateToYmd, formattedDate, getTodayYmd } from "../../utils/DateUtils";
-
-type SaleRow = { tmzonDiv: string; totalAmt: number, billCnt: number };
+import * as api from "../../services/api/api";
+import {User} from "../../types";
+import {useUser} from "../../contexts/UserContext";
+type SaleRow = { tmzonDiv: string; saleAmt: number, billCnt: number };
 type ListItem = {
     type: "summaryTotals";
     key: string;
@@ -25,34 +27,20 @@ export default function SalesReportByTimezoneScreen() {
 
     const storeGroups: StoreGroup[] = useMemo(
         () => [
-            {id: "", name: "전체"},
+            // {id: "", name: "전체"},    //api에서 주유소,충전소별로 보여주므로 전체 조회 제거
             {id: "01", name: "주유소"},
             {id: "02", name: "충전소"}
         ],
         []
     );
-    const [selectedStoreGroupId, setSelectedStoreGroupId] = useState<string | null>(storeGroups[0]?.id ?? null);
-    const [registerFilter, setRegisterFilter] = useState<StoreGroup>(storeGroups[0]);
-    const baseData: SaleRow[] = useMemo(
-        () =>
-            Array.from({length: 24}).map((_, idx) => {
-                const tmzonDiv = String(idx + 1).padStart(2, "0") + "시";
-                return {
-                    tmzonDiv,
-                    billCnt: idx * 10,
-                    totalAmt: 10000,
-                };
-            }),
-        []
-    );
+    const [selectedStorCd, setSelectedStorCd] = useState<StoreGroup>(storeGroups[0]);
+    const [saleList, setSaleList] = useState<SaleRow[]>([]);
 
-    const filteredData = useMemo(() => {
-        if (!selectedStoreGroupId) return baseData;
-        return baseData;
-    }, [baseData, selectedStoreGroupId]);
+    const {user}: User = useUser();
+
 
     const onSearch = () => {
-        // 데모: 현재는 선택 값만으로 필터링 적용
+        posGroupByOilHourlySale();
     };
 
     const openDatePicker = () => {
@@ -60,12 +48,39 @@ export default function SalesReportByTimezoneScreen() {
         setShowDatePicker(true);
     };
 
+    const posGroupByOilHourlySale = () => {
+        const request = {
+            cmpCd: user.cmpCd,
+            salesOrgCd: '8100',
+            fromSaleDt: saleDate,
+            toSaleDt: saleDate,
+            storCd: selectedStorCd.id
+        }
+        console.log("request:"+JSON.stringify(request))
+        api.posGroupByOilHourlySale(request)
+            .then(result => {
+                console.log("result:"+JSON.stringify(result.data))
+                if (result.data.responseBody != null) {
+                    const saleList = result.data.responseBody;
+                    console.log('salesOrgList:' + JSON.stringify(saleList))
+                    setSaleList(saleList);
+                }
+            })
+            .catch(error => {
+                console.log("getSalsOrgList error:" + error)
+            });
+    }
+
     const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => ([
-        {key: 'tmzonDiv', title: '시간대', flex: 0.8, align: 'center'},
-        {
-            key: 'totalAmt', title: '판매금액', flex: 1, align: 'center',
+        {key: 'tmzonDiv', title: '시간대', flex: 0.8, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.numberCell]}>{item.totalAmt.toLocaleString()}</Text>
+                <Text style={[commonStyles.cell, {textAlign: 'center'}]}>{item.tmzonDiv}시</Text>
+            )
+        },
+        {
+            key: 'saleAmt', title: '판매금액', flex: 1, align: 'center',
+            renderCell: (item) => (
+                <Text style={[commonStyles.numberCell]}>{item.saleAmt.toLocaleString()}</Text>
             )
         },
         {
@@ -77,14 +92,14 @@ export default function SalesReportByTimezoneScreen() {
     ]), [])
 
     const totalValues = useMemo(() => {
-        return filteredData.reduce(
+        return saleList.reduce(
             (acc, r) => {
-                acc.totalAmt += r.totalAmt;
+                acc.totalAmt += r.saleAmt;
                 return acc;
             },
             {cashAmt: 0, cardEtc: 0, totalAmt: 0}
         );
-    }, [filteredData]);
+    }, [saleList]);
 
     // 3행 요약 데이터 구성
     const summaryRows = useMemo(() => {
@@ -97,12 +112,12 @@ export default function SalesReportByTimezoneScreen() {
 
         // ✅ 특정 구간 totalAmt 합산 함수
         const sumByGroup = (group: string[]) =>
-            baseData
+            saleList
                 .filter((row) => group.includes(String(row.tmzonDiv).padStart(2, "0")))
                 .reduce(
                     (acc, row) => {
                         acc.billCnt += row.billCnt;
-                        acc.totalAmt += row.totalAmt;
+                        acc.totalAmt += row.saleAmt;
                         return acc;
                     },
                     {billCnt: 0, totalAmt: 0}
@@ -162,11 +177,11 @@ export default function SalesReportByTimezoneScreen() {
                         {storeGroups.map((option) => (
                             <Pressable
                                 key={option.id}
-                                onPress={() => setRegisterFilter(option)}
-                                style={[commonStyles.segmentItem, registerFilter.id === option.id && commonStyles.segmentItemActive]}
+                                onPress={() => setSelectedStorCd(option)}
+                                style={[commonStyles.segmentItem, selectedStorCd.id === option.id && commonStyles.segmentItemActive]}
                             >
                                 <Text
-                                    style={[commonStyles.segmentText, registerFilter.id === option.id && commonStyles.segmentTextActive]}>
+                                    style={[commonStyles.segmentText, selectedStorCd.id === option.id && commonStyles.segmentTextActive]}>
                                     {option.name}
                                 </Text>
                             </Pressable>
@@ -180,31 +195,31 @@ export default function SalesReportByTimezoneScreen() {
 
             <View style={commonStyles.sectionDivider}/>
             <Table
-                data={filteredData}
+                data={saleList}
                 columns={mainColumns}
-                listHeader={() => (
-                    <View>
-                        {summaryRows.map(row => (
-                            <View key={row.key} style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-                                <View style={[{flex: 0.8}, commonStyles.tableRightBorder]}>
-                                    <Text style={styles.summaryLabelText}>{row.label}</Text>
-                                </View>
-
-                                <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
-                                    <Text style={commonStyles.numberCell}>
-                                        {row.totalAmt.toLocaleString()}
-                                    </Text>
-                                </View>
-
-                                <View style={{ flex: 0.5 }}>
-                                    <Text style={commonStyles.numberCell}>
-                                        {row.billCnt.toLocaleString()}
-                                    </Text>
-                                </View>
-                            </View>
-                        ))}
-                    </View>
-                )}
+                // listHeader={() => (
+                //     <View>
+                //         {summaryRows.map(row => (
+                //             <View key={row.key} style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+                //                 <View style={[{flex: 0.8}, commonStyles.tableRightBorder]}>
+                //                     <Text style={styles.summaryLabelText}>{row.label}</Text>
+                //                 </View>
+                //
+                //                 <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                //                     <Text style={commonStyles.numberCell}>
+                //                         {/*{row.saleAmt.toLocaleString()}*/}
+                //                     </Text>
+                //                 </View>
+                //
+                //                 <View style={{ flex: 0.5 }}>
+                //                     <Text style={commonStyles.numberCell}>
+                //                         {row.billCnt.toLocaleString()}
+                //                     </Text>
+                //                 </View>
+                //             </View>
+                //         ))}
+                //     </View>
+                // )}
             />
 
             <DatePickerModal

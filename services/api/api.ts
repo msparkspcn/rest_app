@@ -92,3 +92,9 @@ export function restDailyCornerSale(params) { //기간별 매출현황
     const request = host + "/api/v1/rest/sale/restDailyCornerSale";
     return post(request, params);
 }
+
+export function posGroupByOilHourlySale(params) { //주유소 시간대별 매출현황
+    const request = host + "/api/v1/oil/sale/posGroupByOilHourlySale";
+    return post(request, params);
+}
+
