@@ -20,18 +20,10 @@ import Const from "../../constants/Const";
 
 type SaleRow = {
     saleDtInfo: string;
-    cornerNm: string;
+    // cornerNm: string;
     saleQty: number;
     saleAmt: number;
 };
-
-type SaleData = {
-    saleDt: string;
-    saleAmt: number;
-    totalSaleAmt: number;
-    cornerCd: number;
-    cornerNm: string;
-}
 
 type StoreGroup = { id: string; name: string };
 
@@ -46,26 +38,13 @@ export default function SalesReportByPeriod() {
     const [saleList, setSaleList] = useState([]);
     const storeGroups: StoreGroup[] = useMemo(
         () => [
-            {id: "", name: "전체"},
+            // {id: "", name: "전체"},
             {id: "01", name: "주유소"},
             {id: "02", name: "충전소"}
         ],
         []
     );
-    const [registerFilter, setRegisterFilter] = useState<StoreGroup>(storeGroups[0]);
-    const baseData: SaleRow[] = useMemo(
-        () =>
-            Array.from({length: 24}).map((_, idx) => {
-                return {
-                    // saleDtInfo: ymdToDateWithDay('20250901'),
-                    saleDtInfo: '20250901',
-                    cornerNm: '주유소',
-                    saleQty: idx * 10,
-                    saleAmt: 10000,
-                };
-            }),
-        []
-    );
+    const [selectedStorCd, setSelectedStorCd] = useState<StoreGroup>(storeGroups[0]);
 
     useEffect(() => {
         console.log('api 테스트1')
@@ -76,14 +55,12 @@ export default function SalesReportByPeriod() {
         const request = {
             cmpCd: "SLKR",
             cornerCd: "",
-            detailDiv: "",
-            fromSaleDt: '20250901',
-            itemClassCd: "string",
-            salesOrgCd: "8000",
-            storCd: "5000511",
+            fromSaleDt: fromSaleDt,
+            salesOrgCd: "8100",
+            storCd: selectedStorCd.id,
             toSaleDt: toSaleDt
         }
-        api.restDailySale(request)
+        api.posGroupByOilDailySale(request)
             .then(result => {
                 if (result.data.responseBody != null) {
                     const saleList = result.data.responseBody;
@@ -112,12 +89,12 @@ export default function SalesReportByPeriod() {
     const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => ([
         { key: 'saleDtInfo',       title: '일자(요일)',     flex: 1, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign:'center'}]}>{ymdToDateWithDay(item.saleDtInfo)}</Text>
+                <Text style={[commonStyles.cell, {textAlign:'center'}]}>{ymdToDateWithDay(item.saleDt)}</Text>
             )},
         { key: 'cornerNm',     title: Const.CORNER,   flex: 1,   align: 'left',
             renderCell: (item) => (
                 <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
-                    <Text style={[commonStyles.cell, commonStyles.linkText,{paddingLeft:10}]}>{item.cornerNm}</Text>
+                    <Text style={[commonStyles.cell, commonStyles.linkText,{paddingLeft:10}]}>{selectedStorCd.name}</Text>
                 </Pressable>
             ),   },
         { key: 'saleQty', title: Const.SALE_QTY, flex: 1.2, align: 'right',
@@ -131,12 +108,6 @@ export default function SalesReportByPeriod() {
             )
         },
     ]), []);
-
-    const alignStyles = {
-        left: commonStyles.alignLeft,
-        center: commonStyles.alignCenter,
-        right: commonStyles.alignRight,
-    } as const;
 
     type ProductSaleRow = { no: number; itemNm: string, qty: number, price: number, totalAmt: number };
     const productData: ProductSaleRow[] = useMemo(
@@ -274,11 +245,11 @@ export default function SalesReportByPeriod() {
                         {storeGroups.map((option) => (
                             <Pressable
                                 key={option.id}
-                                onPress={() => setRegisterFilter(option)}
-                                style={[commonStyles.segmentItem, registerFilter.id === option.id && commonStyles.segmentItemActive]}
+                                onPress={() => setSelectedStorCd(option)}
+                                style={[commonStyles.segmentItem, selectedStorCd.id === option.id && commonStyles.segmentItemActive]}
                             >
                                 <Text
-                                    style={[commonStyles.segmentText, registerFilter.id === option.id && commonStyles.segmentTextActive]}>
+                                    style={[commonStyles.segmentText, selectedStorCd.id === option.id && commonStyles.segmentTextActive]}>
                                     {option.name}
                                 </Text>
                             </Pressable>
@@ -292,8 +263,7 @@ export default function SalesReportByPeriod() {
             <View style={commonStyles.sectionDivider} />
 
             <Table
-                // data={saleList}
-                data={baseData}
+                data={saleList}
                 columns={mainColumns}
             />
 
@@ -303,7 +273,7 @@ export default function SalesReportByPeriod() {
                 <View style={commonStyles.modalOverlay}>
                     <View style={commonStyles.modalCard}>
                         <View style={commonStyles.modalHeader}>
-                            <Text style={commonStyles.modalTitle}>{formattedDate(selectedSale?.saleDtInfo)}{' '+selectedSale?.cornerNm}</Text>
+                            <Text style={commonStyles.modalTitle}>{formattedDate(selectedSale?.saleDt)}{' '+selectedStorCd.name}</Text>
                             <Pressable onPress={closeDetail} hitSlop={8}>
                                 <Ionicons name="close" size={24} color="#333" />
                             </Pressable>

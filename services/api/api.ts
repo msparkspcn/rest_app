@@ -98,3 +98,7 @@ export function posGroupByOilHourlySale(params) { //주유소 시간대별 매�
     return post(request, params);
 }
 
+export function posGroupByOilDailySale(params) { //주유소 기간별 매출현황
+    const request = host + "/api/v1/oil/sale/posGroupByOilDailySale";
+    return post(request, params);
+}
