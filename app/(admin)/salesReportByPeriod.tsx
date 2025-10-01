@@ -61,7 +61,10 @@ export default function SalesReportByPeriod() {
                 if (result.data.responseBody != null) {
                     const cornerList = result.data.responseBody;
                     console.log('cornerList:' + JSON.stringify(cornerList))
-                    setCornerList(cornerList);
+                    setCornerList([
+                        { cornerCd: '', cornerNm: '전체' },
+                        ...cornerList
+                    ]);
                 }
             })
             .catch(error => {

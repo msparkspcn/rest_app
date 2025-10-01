@@ -61,7 +61,11 @@ export default function RealtimeSalesRatio() {
                 if (result.data.responseBody != null) {
                     const salesOrgList = result.data.responseBody;
                     console.log('salesOrgList:' + JSON.stringify(salesOrgList))
-                    setSalesOrgList(salesOrgList);
+                    setSalesOrgList([
+                            {salesOrgCd:'', salesOrgNm: '전체'},
+                            ...salesOrgList
+                        ]
+                    );
                 }
             })
             .catch(error => {
@@ -182,7 +186,7 @@ export default function RealtimeSalesRatio() {
                     <Text style={commonStyles.filterLabel}>사업장</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowSalesOrgListModal(true)}>
                         <Text style={styles.selectText}>
-                            {salesOrgList.find(g => g.salesOrgCd === selectedSalesOrgCd)?.salesOrgNm || Const.SELECT}
+                            {salesOrgList.find(g => g.salesOrgCd === selectedSalesOrgCd)?.salesOrgNm || Const.ALL}
                         </Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>

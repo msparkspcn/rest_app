@@ -92,7 +92,10 @@ export default function CornerStockReportScreen() {
                 if (result.data.responseBody != null) {
                     const vendorList = result.data.responseBody;
                     console.log('List:' + JSON.stringify(vendorList))
-                    setVendorList(vendorList);
+                    setVendorList([
+                        { outSdCmpCd: '', outSdCmpNm: '전체' },
+                        ...vendorList
+                    ]);
                 }
             })
             .catch(error => {
@@ -205,7 +208,7 @@ export default function CornerStockReportScreen() {
                     <Text style={commonStyles.filterLabel}>{Const.SEARCH_COND}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowSearchCond(true)}>
                         <Text
-                            style={styles.selectText}>{searchCond.find(g => g.id === selectedSearchCond)?.name || Const.SELECT}</Text>
+                            style={styles.selectText}>{searchCond.find(g => g.id === selectedSearchCond)?.name || Const.ALL}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>

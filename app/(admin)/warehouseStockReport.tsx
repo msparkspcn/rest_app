@@ -89,7 +89,10 @@ export default function WarehouseStockReportScreen() {
                 if (result.data.responseBody != null) {
                     const vendorList = result.data.responseBody;
                     console.log('List:' + JSON.stringify(vendorList))
-                    setVendorList(vendorList);
+                    setVendorList([
+                        { outSdCmpCd: '', outSdCmpNm: '전체' },
+                        ...vendorList
+                    ]);
                 }
             })
             .catch(error => {
@@ -324,7 +327,7 @@ export default function WarehouseStockReportScreen() {
                     <Text style={commonStyles.filterLabel}>{Const.VENDOR}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowVendorModal(true)}>
                         <Text
-                            style={styles.selectText}>{vendorList.find(g => g.outSdCmpCd === selectedOutSdCmpCd)?.outSdCmpNm || Const.SELECT}</Text>
+                            style={styles.selectText}>{vendorList.find(g => g.outSdCmpCd === selectedOutSdCmpCd)?.outSdCmpNm || Const.ALL}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>

@@ -67,8 +67,12 @@ export default function RealtimeSales() {
                 console.log("result:"+JSON.stringify(result))
                 if (result.data.responseBody != null) {
                     const storList = result.data.responseBody;
-                    console.log('storList:' + JSON.stringify(storList))
-                    setStorList(storList);
+                    console.log('storList:' + JSON.stringify(storList));
+                    setStorList([
+                        {storCd:'', storNm: '전체'},
+                        ...storList
+                        ]
+                    );
                 }
             })
             .catch(error => {

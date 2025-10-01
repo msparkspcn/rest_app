@@ -64,7 +64,11 @@ export default function tlgReportByPeriodOp() {
                 if (result.data.responseBody != null) {
                     const salesOrgList = result.data.responseBody;
                     console.log('salesOrgList:' + JSON.stringify(salesOrgList))
-                    setSalesOrgList(salesOrgList);
+                    setSalesOrgList([
+                            {salesOrgCd:'', salesOrgNm: '전체'},
+                            ...salesOrgList
+                        ]
+                    );
                 }
             })
             .catch(error => {

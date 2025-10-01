@@ -90,7 +90,11 @@ export default function MobileOrderReportByPeriod() {
                 if (result.data.responseBody != null) {
                     const storList = result.data.responseBody;
                     console.log('storList:' + JSON.stringify(storList))
-                    setStorList(storList);
+                    setStorList([
+                            {storCd:'', storNm: '전체'},
+                            ...storList
+                        ]
+                    );
                 }
             })
             .catch(error => {
