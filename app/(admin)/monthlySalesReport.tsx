@@ -292,7 +292,7 @@ export default function MonthlySalesReport() {
     const MonthlyDetailColumns: ColumnDef<MonthlyDetailRow>[] = useMemo(() => [
         {key: 'saleMonth', title: '매출년월', flex: 1.5,
             renderCell: (item) => <Text
-                style={commonStyles.numberCell}>{formattedMonth(item.saleMonth)}</Text>
+                style={[commonStyles.cell, {textAlign:'center'}]}>{formattedMonth(item.saleMonth)}</Text>
         },
         {
             key: 'monthSaleQty', title: Const.QTY, flex: 1,

@@ -1,9 +1,8 @@
 import {commonStyles} from '@/styles';
 import {Ionicons} from '@expo/vector-icons';
 import {StatusBar} from 'expo-status-bar';
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
-    FlatList,
     Modal,
     Pressable,
     SafeAreaView,
@@ -29,6 +28,7 @@ type SaleRow = {
     cornerNm: string;
     saleAmt: number;
     taxSaleAmt: number;
+    totalSaleAmt: number; //임시로 총매출로 사용(값이 있음)
 };
 
 export default function SalesReportByPeriod() {
@@ -47,7 +47,6 @@ export default function SalesReportByPeriod() {
     const {user}:User = useUser();
 
     useEffect(() => {
-        console.log('api 테스트1');
         getCornerList();
     }, []);
 
@@ -60,7 +59,7 @@ export default function SalesReportByPeriod() {
             .then(result => {
                 if (result.data.responseBody != null) {
                     const cornerList = result.data.responseBody;
-                    console.log('cornerList:' + JSON.stringify(cornerList))
+                    // console.log('cornerList:' + JSON.stringify(cornerList))
                     setCornerList([
                         { cornerCd: '', cornerNm: '전체' },
                         ...cornerList
@@ -76,7 +75,7 @@ export default function SalesReportByPeriod() {
         console.log("restDailyCornerSale 조회 클릭 fromSaleDt:"+fromSaleDt+", toSaleDt:"+toSaleDt)
         const request = {
             cmpCd: "SLKR",
-            cornerCd: "",
+            cornerCd: selectedCornerCd,
             detailDiv: "string",
             fromSaleDt: fromSaleDt,
             itemClassCd: "",
@@ -88,7 +87,7 @@ export default function SalesReportByPeriod() {
             .then(result => {
                 if (result.data.responseBody != null) {
                     const saleList = result.data.responseBody;
-                    console.log('saleList:' + JSON.stringify(saleList))
+                    // console.log('saleList:' + JSON.stringify(saleList))
                     setSaleList(saleList);
                 }
             })
@@ -102,6 +101,7 @@ export default function SalesReportByPeriod() {
     };
 
     const openDetail = (sale: SaleRow) => {
+        console.log('sale:'+JSON.stringify(sale));
         setSelectedSale(sale);
         setIsDetailVisible(true);
     };
@@ -113,7 +113,8 @@ export default function SalesReportByPeriod() {
     const totalSumRow = useMemo(() => {
         if (!saleList || saleList.length === 0) return null;
 
-        const totalSum = saleList.reduce((acc, cur) => acc + cur.saleAmt, 0);
+        // const totalSum = saleList.reduce((acc, cur) => acc + cur.saleAmt, 0);
+        const totalSum = saleList.reduce((acc, cur) => acc + cur.totalSaleAmt, 0);  //임시
         return {
             ...saleList[0],
             cornerNm: '전체 합계',
@@ -129,6 +130,9 @@ export default function SalesReportByPeriod() {
 
     const tableData = useMemo(() => {
         if (!saleList) return []; // null 방지
+        console.log('selectedCornerCd:'+selectedCornerCd)
+        if(selectedCornerCd) return saleList;
+
 
         const result: (SaleRow & { isSummary?: boolean })[] = [];
 
@@ -146,19 +150,23 @@ export default function SalesReportByPeriod() {
                 let dateSum = 0;
 
                 rows.forEach((item, idx) => {
-                    dateSum += item.saleAmt;
+                    dateSum += item.totalSaleAmt;
                     result.push({
                         ...item,
                         // 날짜 표시: 첫 행만
-                        saleDtInfo: idx === 0 ? item.saleDt : '',
+                        saleDtInfo: idx === 0 ? item.saleDt : null,
                     });
                 });
 
                 // 날짜별 합계 row
                 result.push({
-                    ...rows[0],
+                    saleDtInfo: '',
+                    salesOrgCd: '',
+                    cornerCd: '',
                     cornerNm: `${formattedDate(date)} 소계`,
+                    taxSaleAmt: 0,
                     saleAmt: dateSum,
+                    totalSaleAmt: dateSum,
                     isSummary: true,
                 });
             });
@@ -173,14 +181,11 @@ export default function SalesReportByPeriod() {
             flex: 1,
             align: 'center',
             renderCell: (item) => {
-                console.log('saleDtInfo isSummary:'+item.isSummary)
-                if(item.isSummary) return null;
+                // console.log('item:'+JSON.stringify(item));
+                if (item.isSummary) return null;
                 return (
-                    <Text style={[
-                        commonStyles.numberCell,
-                        item.isTotal ? {fontWeight: 'bold', backgroundColor: '#ffe5b4'} : {textAlign: 'center'}
-                    ]}>
-                        {item.isTotal ? '' : ymdToDateWithDay(item.saleDtInfo || item.saleDt)}
+                    <Text style={[commonStyles.cell, {textAlign: 'center'}]}>
+                        {ymdToDateWithDay(item.saleDt)}
                     </Text>
                     )
             },
@@ -190,18 +195,20 @@ export default function SalesReportByPeriod() {
             title: Const.CORNER_NM,
             flex: 1.8,
             align: 'left',
-            renderCell: (item) => {
-                const cellFlex = item.isSummary ? 3 : 1.8;
-                return (
-                    <View style={{ flex: cellFlex, justifyContent: 'center' }}>
+            renderCell: (item) => (
+                    <Pressable style={commonStyles.columnPressable}
+                               onPress={() => {
+                                   // opensalesOrgNmDetail(item.storNm)
+                                   openDetail(item)
+                               }}
+                    >
                         <Text style={[commonStyles.cell,
                             item.isSummary ? {fontWeight: 'bold', textAlign: 'center'}
                             : [commonStyles.linkText, {paddingLeft: 10}]]}>
                             {item.cornerNm}
                         </Text>
-                    </View>
-                )
-            },
+                    </Pressable>
+            )
         },
         {
             key: 'saleAmt',
@@ -215,6 +222,25 @@ export default function SalesReportByPeriod() {
             ),
         },
     ], [tableData]);
+
+    const renderTotalRow = useMemo(() => {
+        console.log("호출")
+        if (!totalSumRow) return null;
+        return (
+            <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+                <View style={[{ flex: 2.8 }, commonStyles.tableRightBorder]}>
+                    <Text style={[commonStyles.cell, commonStyles.summaryLabelText, { textAlign: 'center' }]}>
+                        합계
+                    </Text>
+                </View>
+                <View style={[{ flex: 1.2 }, commonStyles.tableRightBorder]}>
+                    <Text style={commonStyles.numberCell}>
+                        {totalSumRow.saleAmt.toLocaleString()}
+                    </Text>
+                </View>
+            </View>
+        );
+    },[totalSumRow]);
 
     type ProductSaleRow = { no: number; itemNm: string, qty: number, price: number, totalAmt: number };
     const productData: ProductSaleRow[] = useMemo(
@@ -267,7 +293,20 @@ export default function SalesReportByPeriod() {
         };
     }, [productData]);
 
-    const renderSummaryRow = () => {
+    // const summaryRow = useMemo(() => {
+    //     if (saleList) {
+    //         const totalQty = saleList.reduce((sum, item) => sum + item.qty, 0);
+    //         const totalAmt = saleList.reduce((sum, item) => sum + item.totalAmt, 0);
+    //         return {
+    //             totalQty,
+    //             totalAmt
+    //         };
+    //     }
+    //
+    // }, [saleList]);
+
+    const renderSummaryRow = useMemo(() => {
+        console.log('호출됨')
         return (
             <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
                 <View style={[{flex: 2.7}, commonStyles.tableRightBorder,]}>
@@ -288,7 +327,7 @@ export default function SalesReportByPeriod() {
                 </View>
             </View>
         );
-    };
+    }, [saleList]);
     return (
         <SafeAreaView style={commonStyles.container}>
             <StatusBar style="dark"/>
@@ -323,21 +362,8 @@ export default function SalesReportByPeriod() {
             <Table
                 data={tableData}
                 columns={mainColumns}
-                listHeader= {totalSumRow ? (
-                            <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-                                <View style={[{flex: 2.8}, commonStyles.tableRightBorder]}>
-                                    <Text style={[commonStyles.cell, commonStyles.summaryLabelText, {textAlign:'center'}]}>
-                                        합계
-                                    </Text>
-                                </View>
-                                <View style={[{flex: 1.2}, commonStyles.tableRightBorder]}>
-                                    <Text style={commonStyles.numberCell}>
-                                        {totalSumRow.saleAmt.toLocaleString()}
-                                    </Text>
-                                </View>
-                                )}
-                            </View>
-                ) : null}
+                listHeader={!selectedCornerCd ? renderTotalRow : null}
+                listFooter={selectedCornerCd ? renderTotalRow : null}
             />
 
             <View style={commonStyles.sectionDivider}/>
@@ -359,7 +385,9 @@ export default function SalesReportByPeriod() {
                 <View style={commonStyles.modalOverlay}>
                     <View style={commonStyles.modalCard}>
                         <View style={commonStyles.modalHeader}>
-                            <Text style={commonStyles.modalTitle}>{selectedSale?.cornerNm}</Text>
+                            <Text style={commonStyles.modalTitle}>
+                                {formattedDate(selectedSale?.saleDt)}  {selectedSale?.cornerNm}
+                            </Text>
                             <Pressable onPress={closeDetail} hitSlop={8}>
                                 <Ionicons name="close" size={24} color="#333"/>
                             </Pressable>

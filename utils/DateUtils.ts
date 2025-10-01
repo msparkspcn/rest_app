@@ -58,3 +58,17 @@ export function ymdToDateWithDay(dateStr:String): string {
 
     return `${year}/${String(month + 1).padStart(2, "0")}/${String(day).padStart(2, "0")}\n(${dayOfWeek})`;
 }
+
+export function ymdToDateWithDayShort(dateStr:String): string {
+    // console.log('target date:'+dateStr);
+    const year = parseInt(dateStr.substring(0, 4), 10);
+    const month = parseInt(dateStr.substring(4, 6), 10) - 1; // JS Date는 0부터 시작
+    const day = parseInt(dateStr.substring(6, 8), 10);
+
+    const date = new Date(year, month, day);
+
+    const dayNames = ["일", "월", "화", "수", "목", "금", "토"];
+    const dayOfWeek = dayNames[date.getDay()];
+
+    return `${year}/${String(month + 1).padStart(2, "0")}/${String(day).padStart(2, "0")}[${dayOfWeek}]`;
+}

@@ -59,6 +59,24 @@ export function Table<T>({
     );
 
     const renderItem = ({ item, index }: { item: T; index: number }) => {
+        if ((item as any).isSummary) {
+            const summaryItem = item as any; // 타입 단순화
+            return (
+                <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+                    <View style={[{flex: 2.8}, commonStyles.tableRightBorder]}>
+                        <Text style={[commonStyles.summaryLabelText, {textAlign: 'center', fontSize: 13 }]}>
+                            {summaryItem.cornerNm}
+                        </Text>
+                    </View>
+                    <View style={[{flex: 1.2}, commonStyles.tableRightBorder]}>
+                        <Text style={[commonStyles.numberCell]}>
+                            {summaryItem.totalSaleAmt.toLocaleString()}
+                        </Text>
+                    </View>
+                </View>
+            );
+        }
+
         const rowContent = (
             <View style={[
                 commonStyles.tableRow,
@@ -67,10 +85,7 @@ export function Table<T>({
                 {columns.map((col, i) => (
                     <View
                         key={String(col.key)}
-                        style={[
-                            { flex: col.flex },
-                            commonStyles.columnContainer
-                        ]}
+                        style={[{ flex: col.flex }, commonStyles.columnContainer]}
                     >
                         {col.renderCell ? (
                             col.renderCell(item, index)

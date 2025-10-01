@@ -15,33 +15,39 @@ type VendorRow = {
   useYn: '등록' | '취소';
 };
 
-type RegisterFilter = Const.ALL | '등록' | '취소';
+type RegisterFilter = {
+  key: string;
+  name: string;
+}
 
 export default function VendorListScreen() {
   const [vendorQuery, setVendorQuery] = useState('');
-  const [registerFilter, setRegisterFilter] = useState<RegisterFilter>(Const.ALL);
+  const registerOptions: RegisterFilter[] = [
+    { key: "", name: "전체"},
+    { key: "1", name: "등록"},
+    { key: "0", name: "취소"},
+  ];
+  const [registerFilter, setRegisterFilter] = useState<RegisterFilter>(registerOptions[0]);
   const [isDetailVisible, setIsDetailVisible] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState<VendorRow | null>(null);
   const [vendorList, setVendorList] = useState(null);
   const [vendorItemList, setVendorItemList] = useState(null);
   const {user}:User = useUser();
 
-  useEffect(() => {
-    console.log('api 테스트1')
-  })
-
   const onSearch = () => {
     console.log('user:'+JSON.stringify(user.cmpCd));
+    console.log('useYn:'+registerFilter.key);
     const request = {
       cmpCd: user.cmpCd,
       salesOrgCd: user.salesOrgCd,
       schValue: vendorQuery,
+      useYn: registerFilter.key
     }
     api.getVendorList(request)
         .then(result => {
           if (result.data.responseBody != null) {
             const vendorList = result.data.responseBody;
-            console.log('List:' + JSON.stringify(vendorList))
+            // console.log('List:' + JSON.stringify(vendorList))
             setVendorList(vendorList);
           }
         })
@@ -54,12 +60,9 @@ export default function VendorListScreen() {
     const request = {
       cmpCd: vendor.cmpCd,
       salesOrgCd: user.salesOrgCd,
-      itemCd: "",
-      itemNm: "",
-      outSdCmpCd: vendor.outSdCmpCd,
-      page:0,
-      size: 100000,
+      outSdCmpCd: vendor.outSdCmpCd
     }
+    console.log('request:'+JSON.stringify(request))
     api.getVendorItemList(request)
         .then(result => {
           if (result.data.responseBody != null) {
@@ -150,14 +153,14 @@ export default function VendorListScreen() {
         <View style={commonStyles.filterRow}>
           <Text style={commonStyles.filterLabel}>등록여부</Text>
           <View style={commonStyles.segmented}>
-            {([Const.ALL, '등록', '취소'] as RegisterFilter[]).map((option) => (
+            {registerOptions.map((option) => (
               <Pressable
-                key={option}
+                key={option.key}
                 onPress={() => setRegisterFilter(option)}
-                style={[commonStyles.segmentItem, registerFilter === option && commonStyles.segmentItemActive]}
+                style={[commonStyles.segmentItem, registerFilter.key === option.key && commonStyles.segmentItemActive]}
               >
-                <Text style={[commonStyles.segmentText, registerFilter === option && commonStyles.segmentTextActive]}>
-                  {option}
+                <Text style={[commonStyles.segmentText, registerFilter.key === option.key && commonStyles.segmentTextActive]}>
+                  {option.name}
                 </Text>
               </Pressable>
             ))}
@@ -176,7 +179,7 @@ export default function VendorListScreen() {
         <View style={commonStyles.modalOverlay}>
           <View style={commonStyles.modalCard}>
             <View style={commonStyles.modalHeader}>
-              <Text style={commonStyles.modalTitle}>거래처 상세</Text>
+              <Text style={commonStyles.modalTitle}>거래처 취급상품</Text>
               <Pressable onPress={closeDetail} hitSlop={8}>
                 <Ionicons name="close" size={24} color="#333" />
               </Pressable>

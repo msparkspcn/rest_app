@@ -1,7 +1,7 @@
 import { commonStyles } from '@/styles';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Modal, Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import * as api from "../../services/api/api";
 import {Table} from "../../components/Table";
@@ -9,25 +9,31 @@ import Const from "../../constants/Const";
 import {useUser} from "../../contexts/UserContext";
 import {User, Corner} from "../../types";
 
-type OperateFilter = Const.ALL | '운영' | '폐점';
+type OperateFilter = {
+  key: string;
+  name: string;
+}
 
 export default function DashboardScreen() {
-  const [operateFilter, setOperateFilter] = useState<OperateFilter>(Const.ALL);
+  const operateOptions: OperateFilter[] = [
+    { key: "", name: "전체" },
+    { key: "1", name: "운영" },
+    { key: "0", name: "폐점" },
+  ];
+  const [operateFilter, setOperateFilter] = useState<OperateFilter>(operateOptions[0]);
+
   const [isDetailVisible, setIsDetailVisible] = useState(false);
   const [selectedCorner, setSelectedCorner] = useState<Corner | null>(null);
   const {user}:User = useUser();
   const [cornerList, setCornerList] = useState<Corner[]>([]);
   const [cornerItemList, setCornerItemList] = useState(null);
 
-  useEffect(() => {
-    console.log('api 테스트1')
-  })
-
   const onSearch = () => {
     console.log('user:'+JSON.stringify(user.cmpCd));
     const request = {
       cmpCd: user.cmpCd,
       salesOrgCd: user.salesOrgCd,
+      useYn: operateFilter.key
     }
     api.getCornerList(request)
         .then(result => {
@@ -146,14 +152,15 @@ export default function DashboardScreen() {
         <View style={commonStyles.filterRow}>
           <Text style={commonStyles.filterLabel}>운영여부</Text>
           <View style={commonStyles.segmented}>
-            {([Const.ALL, '운영', '폐점'] as OperateFilter[]).map(option => (
+            {operateOptions.map(option => (
               <Pressable
-                key={option}
+                key={option.key}
                 onPress={() => setOperateFilter(option)}
-                style={[commonStyles.segmentItem, operateFilter === option && commonStyles.segmentItemActive]}
+                style={[commonStyles.segmentItem, operateFilter.key === option.key && commonStyles.segmentItemActive]}
               >
-                <Text style={[commonStyles.segmentText, operateFilter === option && commonStyles.segmentTextActive]}>
-                  {option}
+                <Text style={[commonStyles.segmentText,
+                  operateFilter.key === option.key && commonStyles.segmentTextActive]}>
+                  {option.name}
                 </Text>
               </Pressable>
             ))}
