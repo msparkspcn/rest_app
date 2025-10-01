@@ -29,7 +29,6 @@ function ListModal<T>({
                           onSelect,
                       }: ListModalProps<T>) {
 
-    console.log('ListModal data:'+JSON.stringify(data));
     return (
         <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
             <View style={commonStyles.modalOverlay}>

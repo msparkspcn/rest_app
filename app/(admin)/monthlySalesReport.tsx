@@ -1,7 +1,7 @@
 import {commonStyles} from '@/styles';
 import {Ionicons} from '@expo/vector-icons';
 import {StatusBar} from 'expo-status-bar';
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
     Modal,
     Pressable,
@@ -13,9 +13,9 @@ import {
 } from 'react-native';
 import * as api from "../../services/api/api";
 import {
-    dateToYm,
+    dateToYm, formattedDate,
     formattedMonth,
-    getTodayYm
+    getTodayYm, getTodayYmd
 } from "../../utils/DateUtils";
 import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
@@ -37,16 +37,21 @@ type SaleRow = {
 
 };
 
-type SaleDetailRow = {
-    saleDt: string;
-    saleAmt: number;
-    vatAmt: number;
-    netSaleAmt: number;
-}
-
 type DetailType = 'daily' | 'monthly';
-type DailyDetailRow = { saleDt: string; saleAmt: number, vatAmt: number, netSaleAmt: number };
-type MonthlyDetailRow = { saleMonth: string; monthSaleQty: number, monthSaleAmt: number, monthVatAmt: number, monthNetSaleAmt: number };
+type DailyDetailRow = {
+    saleDt: string;
+    actualSaleAmt: number,  //
+    // vatAmt: number,
+    taxSaleAmt: number,
+    netSaleAmt: number
+};
+type MonthlyDetailRow = {
+    saleMonth: string;
+    monthSaleQty: number,
+    monthSaleAmt: number,
+    monthVatAmt: number,
+    monthNetSaleAmt: number
+};
 
 export default function MonthlySalesReport() {
     const [cornerList, setCornerList] = useState<Corner[]>([]);
@@ -79,7 +84,10 @@ export default function MonthlySalesReport() {
                 if (result.data.responseBody != null) {
                     const cornerList = result.data.responseBody;
                     console.log('cornerList:' + JSON.stringify(cornerList))
-                    setCornerList(cornerList);
+                    setCornerList([
+                        { cornerCd: '', cornerNm: '전체' },
+                        ...cornerList
+                    ]);
                 }
             })
             .catch(error => {
@@ -110,11 +118,11 @@ export default function MonthlySalesReport() {
             });
     }
 
-    const restMonthlySale = () => {
+    const restMonthlySale = (sale: SaleRow) => {
         console.log("restMonthlySale 조회 클릭 fromSaleMonth:"+fromSaleMonth+', toSaleMonth:'+toSaleMonth)
         const request = {
-            cmpCd: "SLKR",
-            cornerCd: 'CIBA',
+            cmpCd: sale.cmpCd,
+            cornerCd: sale.cornerCd,
             fromSaleMonth: fromSaleMonth,
             salesOrgCd: "8000",
             storCd: "5000511",
@@ -134,16 +142,52 @@ export default function MonthlySalesReport() {
             });
     }
 
+    const restCornerByDailySale = (sale: SaleRow) => {
+        console.log("restCornerByDailySale 조회 클릭 fromSaleMonth:"
+            +fromSaleMonth+', toSaleMonth:'+toSaleMonth)
+
+        const request = {
+            cmpCd: sale.cmpCd,
+            cornerCd: sale.cornerCd,
+            detailDiv: "",
+            fromSaleDt: fromSaleMonth+"01",
+            itemClassCd:"",
+            salesOrgCd: "8000",
+            storCd: "5000511",
+            toSaleDt: toSaleMonth == getTodayYm() ? getTodayYmd(): toSaleMonth+"31"
+        }
+        console.log('request:'+JSON.stringify(request));
+        api.restCornerByDailySale(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const saleList = result.data.responseBody;
+                    console.log('222:' + JSON.stringify(saleList))
+                    setSaleDetailList(saleList);
+                    setIsDetailVisible(true);
+                }
+            })
+            .catch(error => {
+                console.log("restMonthlySale error:" + error)
+            });
+    }
+
     const onSearch = () => {
         restMonthlyCornerSale();
     };
 
-    const openDetail = (sale: SaleRow, type: DetailType) => {
-        console.log('openDetail type:' + type)
-        restMonthlySale();
+    const openDetail = useCallback((sale: SaleRow, type: DetailType) => {
+        console.log('openDetail type:' + type +",fMonth:"+fromSaleMonth);
+        console.log('sale:'+JSON.stringify(sale));
+        if(type=='daily') {
+            console.log('here')
+            restCornerByDailySale(sale);
+        }
+        else {
+            restMonthlySale(sale);
+        }
         setSelectedSale(sale);
         setDetailType(type);
-    };
+    },[fromSaleMonth, toSaleMonth]);
 
     const closeDetail = () => {
         setIsDetailVisible(false);
@@ -184,7 +228,7 @@ export default function MonthlySalesReport() {
                 </Text>
             )
         },
-    ]), []);
+    ]), [openDetail]);
 
     const renderFooter = () => (
         <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
@@ -211,38 +255,34 @@ export default function MonthlySalesReport() {
     );
 
 
-    const dailyDetailData: DailyDetailRow[] = useMemo(
-        () => Array.from({length: 9}).map((_, index) => ({
-            saleDt: `2025/09/0${index + 1}`,
-            saleAmt: index * 1000,
-            vatAmt: index * 10,
-            netSaleAmt: index * 1000 - index * 10
-        })),
-        []
-    );
-
-    const DailyDetailColumns: ColumnDef<SaleDetailRow>[] = useMemo(() => ([
-        {key: 'saleDt', title: '일자', flex: 2, align: 'center'},
-        {
-            key: 'saleAmt', title: Const.SALE_AMT, flex: 2, align: 'right',
+    const DailyDetailColumns: ColumnDef<DailyDetailRow>[] = useMemo(() => ([
+        {key: 'saleDt', title: '일자', flex: 2,
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>
-                    {item.saleAmt.toLocaleString()}
+                <Text style={[commonStyles.cell,{textAlign: 'center'}]}>
+                    {formattedDate(item.saleDt)}
                 </Text>
             )
         },
         {
-            key: 'vatAmt', title: Const.VAT, flex: 1.5, align: 'right',
+            key: 'actualSaleAmt', title: Const.SALE_AMT, flex: 2, align: 'right',
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>
-                    {item.vatAmt.toLocaleString()}
+                <Text style={commonStyles.numberSmallCell}>
+                    {item.actualSaleAmt.toLocaleString()}
+                </Text>
+            )
+        },
+        {
+            key: 'taxSaleAmt', title: Const.VAT, flex: 1.5, align: 'right',
+            renderCell: (item) => (
+                <Text style={commonStyles.numberSmallCell}>
+                    {item.taxSaleAmt.toLocaleString()}
                 </Text>
             )
         },
         {
             key: 'netSaleAmt', title: '순매출', flex: 2, align: 'right',
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>
+                <Text style={commonStyles.numberSmallCell}>
                     {item.netSaleAmt.toLocaleString()}
                 </Text>
             )
@@ -276,7 +316,7 @@ export default function MonthlySalesReport() {
         }
     ], []);
 
-    const detailData = detailType === 'daily' ? dailyDetailData : saleDetailList;
+    const detailData = detailType === 'daily' ? saleDetailList : saleDetailList;
     const detailColumns = detailType === 'daily' ? DailyDetailColumns : MonthlyDetailColumns;
 
     const renderDetailFooterRow = (type: DetailType) => {
@@ -296,7 +336,7 @@ export default function MonthlySalesReport() {
                     </View>
                     <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
                         <Text style={commonStyles.numberSmallCell}>
-                            {summaryRow.totalVatAmt.toLocaleString()}
+                            {summaryRow.totalTaxSaleAmt.toLocaleString()}
                         </Text>
                     </View>
                     <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
@@ -348,15 +388,18 @@ export default function MonthlySalesReport() {
     };
 
     const summaryRow = useMemo(() => {
-        const totalSaleAmt = dailyDetailData.reduce((sum, item) => sum + item.saleAmt, 0);
-        const totalVatAmt = dailyDetailData.reduce((sum, item) => sum + item.vatAmt, 0);
-        const totalNetSaleAmt = dailyDetailData.reduce((sum, item) => sum + item.netSaleAmt, 0);
-        return {
-            totalSaleAmt: totalSaleAmt,
-            totalVatAmt: totalVatAmt,
-            totalNetSaleAmt: totalNetSaleAmt,
-        };
-    }, [dailyDetailData]);
+        if (saleDetailList) {
+            const totalSaleAmt = saleDetailList.reduce((sum, item) => sum + item.actualSaleAmt, 0);
+            const totalTaxSaleAmt = saleDetailList.reduce((sum, item) => sum + item.taxSaleAmt, 0);
+            const totalNetSaleAmt = saleDetailList.reduce((sum, item) => sum + item.netSaleAmt, 0);
+            return {
+                totalSaleAmt: totalSaleAmt,
+                totalTaxSaleAmt: totalTaxSaleAmt,
+                totalNetSaleAmt: totalNetSaleAmt,
+            };
+        }
+
+    }, [saleDetailList]);
 
     const monthlySummaryRow = useMemo(() => {
         if (saleDetailList) {

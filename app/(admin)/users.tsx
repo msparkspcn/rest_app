@@ -125,7 +125,7 @@ export default function UsersScreen() {
           </View>
 
           <View style={styles.formRow}>
-            <Text style={styles.formLabel}>변경 비밀번호</Text>
+            <Text style={styles.formLabel}>새 비밀번호</Text>
             <TextInput
               style={styles.formInput}
               value={formNewPassword}
@@ -137,9 +137,13 @@ export default function UsersScreen() {
               spellCheck={false}
             />
           </View>
-
+          <View style={styles.formColumn}>
+            <Text style={{color:'gray'}}>* 영문/숫자/특수문자 중 2가지 이상 조합, 8자~20자</Text>
+            <Text style={{color:'gray'}}>* 입력 가능 특수문자 : ~!@#$%^&*()_-=+;",.?</Text>
+            <Text style={{color:'gray'}}>* 연속된 문자열 제외(예:ABC, 123)</Text>
+          </View>
           <View style={styles.formRow}>
-            <Text style={styles.formLabel}></Text>
+            <Text style={styles.formLabel}>새 비밀번호 확인</Text>
             <TextInput
               style={styles.formInput}
               value={formConfirmPassword}
@@ -202,6 +206,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  formColumn: {
+    marginBottom: 10,
+    flexDirection: 'column'
   },
   formLabel: {
     fontSize: 16,

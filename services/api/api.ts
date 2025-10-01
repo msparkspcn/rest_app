@@ -83,6 +83,11 @@ export function restMonthlySale(params) { //월 매출현황(휴)
     return post(request, params);
 }
 
+export function restCornerByDailySale(params) { //월 매출현황(휴) > 매장명 클릭 => 일자별 매출현황
+    const request = host + "/api/v1/rest/sale/restCornerByDailySale";
+    return post(request, params);
+}
+
 export function restTodayItemSale(params) {
     const request = host + "/api/v1/rest/sale/restTodayItemSale";
     return post(request, params);
