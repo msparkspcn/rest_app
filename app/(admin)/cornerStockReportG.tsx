@@ -16,25 +16,24 @@ import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
 import Const from "../../constants/Const";
+import * as api from "../../services/api/api";
 
 type StockRow = {
     itemNm: string;
     giQty: number;
     goQty: number;
     totalStockQty: number;
-    curStockQty: number;
+    currentStockQty: number;
 };
 
 type StockDetailRow = {
     cornerNm: string;
-    stockDt: string;
+    recdisDt: string;
     totalStockQty: number;
-    giQty: number;
+    inStockQty: number;
     saleQty: number;
-    curStockQty: number;
+    currentStockQty: number;
 }
-
-type Corner = { cornerCd: string; cornerNm: string};
 
 export default function CornerStockReportScreen() {
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -42,27 +41,24 @@ export default function CornerStockReportScreen() {
     const [fromSaleDt, setFromSaleDt] = useState(getTodayYmd());
     const [toSaleDt, setToSaleDt] = useState(getTodayYmd());
     const [currentPickerType, setCurrentPickerType] = useState('from');
-    const cornerList: Corner[] = useMemo(
-        () => Array.from({length: 6}).map((_, i) => ({cornerCd: `G${i + 1}`, cornerNm: `매장 ${i + 1}`})),
-        []
-    );
-    const [itemNm, setItemNm] = useState('');
+    const [itemValue, setItemNm] = useState('');
     const [isDetailVisible, setIsDetailVisible] = useState(false);
     const [selectedItem, setSelectedItem] = useState<StockRow | null>(null);
-
+    const [stockList, setStockList] = useState<[] | null>(null);
+    const [stockDetailList, setStockDetailList] = useState<[] | null>(null);
     const baseData: StockRow[] = useMemo(
         () =>
             Array.from({length: 15}).map((_, idx) => {
                 const giQty = 7 + (idx % 5);
                 const totalStockQty = 20 + (idx % 7);
                 const goQty = 30 + (idx % 5);
-                const curStockQty = totalStockQty + giQty - goQty;
+                const currentStockQty = totalStockQty + giQty - goQty;
                 return {
                     itemNm: `상품 ${((idx % 6) + 1)}`,
                     giQty: giQty,
                     totalStockQty: totalStockQty,
                     goQty: goQty,
-                    curStockQty: curStockQty,
+                    currentStockQty: currentStockQty,
                 };
             }),
         []
@@ -85,7 +81,34 @@ export default function CornerStockReportScreen() {
     const openDetail = (stock: StockRow) => {
         setSelectedItem(stock)
         setIsDetailVisible(true);
+        oilTotalStockStatusList(stock);
     };
+
+    const oilTotalStockStatusList = (stock: StockRow) => {
+        console.log("oilTotalStockStatusList1 조회 클릭 stock:"+JSON.stringify(stock)+", itemValue:"+itemValue);
+        const request = {
+            cmpCd: "SLKR",
+            fromSaleDt: fromSaleDt,
+            itemClassCd: "",
+            itemValue: "별미곰탕",
+            salesOrgCd: "8000",
+            storCd: "5000511",
+            toSaleDt: toSaleDt
+        }
+        console.log('request:'+JSON.stringify(request))
+        api.oilTotalStockStatusList(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const stockList = result.data.responseBody;
+                    console.log('size:'+stockList.length);
+                    console.log('stockList:' + JSON.stringify(stockList))
+                    setStockDetailList(stockList);
+                }
+            })
+            .catch(error => {
+                console.log("oilTotalStockStatusList error:" + error)
+            });
+    }
 
     const mainColumns: ColumnDef<StockRow>[] = useMemo(() => ([
         {key: 'no', title: Const.NO, flex: 0.5,
@@ -122,47 +145,31 @@ export default function CornerStockReportScreen() {
             )
         },
         {
-            key: 'curStockQty', title: Const.CUR_STOCK_QTY, flex: 1,
+            key: 'currentStockQty', title: Const.CUR_STOCK_QTY, flex: 1,
             renderCell: (item) => (
-                <Text style={[commonStyles.numberSmallCell, {color: item.curStockQty < 0 ? 'red' : ''}]}>
-                    {item.curStockQty.toLocaleString()}
+                <Text style={[commonStyles.numberSmallCell, {color: item.currentStockQty < 0 ? 'red' : ''}]}>
+                    {item.currentStockQty.toLocaleString()}
                 </Text>
             )
         },
     ]), [])
 
-    const detailData: StockDetailRow[] = useMemo(
-        () =>
-            Array.from({length: 10}).map((_, idx) => {
-                const qty = (idx % 3) * 100000;
-                return {
-                    cornerNm: '파스쿠찌',
-                    stockDt: `2025/09/0${idx + 1}`,
-                    totalStockQty: qty,
-                    giQty: qty,
-                    saleQty: qty,
-                    curStockQty: qty
-                };
-            }),
-        []
-    );
-
     const StockDetailColumns: ColumnDef<StockDetailRow>[] = useMemo(() => ([
-        {key: 'stockDt', title: Const.DATE, flex: 1.5,
+        {key: 'recdisDt', title: Const.DATE, flex: 1.5,
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign: 'center'}]}>{item.stockDt}</Text>
+                <Text style={[commonStyles.cell, {textAlign: 'center'}]}>{formattedDate(item.recdisDt)}</Text>
             )
         },
         {
-            key: 'totalStockQty', title: Const.TOTAL_STOCK_QTY, flex: 1.1,
+            key: 'prevStockQty', title: Const.TOTAL_STOCK_QTY, flex: 1.1,
             renderCell: (item) => (
-                <Text style={commonStyles.numberSmallCell}>{item.totalStockQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberSmallCell}>{item.prevStockQty.toLocaleString()}</Text>
             )
         },
         {
-            key: 'giQty', title: Const.GI_QTY, flex: 1,
+            key: 'inStockQty', title: Const.GI_QTY, flex: 1,
             renderCell: (item) => (
-                <Text style={commonStyles.numberSmallCell}>{item.giQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberSmallCell}>{item.inStockQty.toLocaleString()}</Text>
             )
         },
         {
@@ -172,25 +179,34 @@ export default function CornerStockReportScreen() {
             )
         },
         {
-            key: 'curStockQty', title: Const.CUR_STOCK_QTY, flex: 1.1,
+            key: 'currentStockQty', title: Const.CUR_STOCK_QTY, flex: 1.1,
             renderCell: (item) => (
-                <Text style={commonStyles.numberSmallCell}>{item.curStockQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberSmallCell}>{item.currentStockQty.toLocaleString()}</Text>
             )
         },
     ]), []);
 
     const detailTotalStockQty = useMemo(() => {
-        return detailData.reduce((acc, row) => acc, 0);
-    }, [detailData]);
+        if(stockDetailList) {
+            return stockDetailList.reduce((acc, row) => acc, 0);
+        }
+
+    }, [stockDetailList]);
     const detailTotalGiQty = useMemo(() => {
-        return detailData.reduce((acc, row) => acc + row.giQty, 0);
-    }, [detailData]);
+        if(stockDetailList) {
+            return stockDetailList.reduce((acc, row) => acc + row.inStockQty, 0);
+        }
+        }, [stockDetailList]);
     const detailTotalSaleQty = useMemo(() => {
-        return detailData.reduce((acc, row) => acc + row.saleQty, 0);
-    }, [detailData]);
+        if(stockDetailList) {
+            return stockDetailList.reduce((acc, row) => acc + row.saleQty, 0);
+        }
+        }, [stockDetailList]);
     const detailTotalCurStockQty = useMemo(() => {
-        return detailData.reduce((acc, row) => row.totalStockQty, 0);
-    }, [detailData]);
+        if(stockDetailList) {
+            return stockDetailList.reduce((acc, row) => row.prevStockQty, 0);
+        }
+        }, [stockDetailList]);
 
     const renderDetailFooter = () => (
         <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
@@ -244,7 +260,7 @@ export default function CornerStockReportScreen() {
                     <TextInput
                         style={commonStyles.input}
                         placeholderTextColor="#999"
-                        value={itemNm}
+                        value={itemValue}
                         onChangeText={setItemNm}
                         returnKeyType="search"
                         onSubmitEditing={onSearch}
@@ -288,7 +304,7 @@ export default function CornerStockReportScreen() {
                         </View>
 
                         <Table
-                            data={detailData}
+                            data={stockDetailList}
                             columns={StockDetailColumns}
                             isModal={true}
                             listFooter={renderDetailFooter}

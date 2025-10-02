@@ -14,13 +14,14 @@ import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
 import Const from "../../constants/Const";
+import * as api from "../../services/api/api";
 
 type StockRow = {
     itemNm: string;
-    giQty: number;
-    goQty: number;
-    totalStockQty: number;
-    curStockQty: number;
+    inStockQty: number;
+    saleQty: number;
+    prevStockQty: number;
+    currentStockQty: number;
 };
 
 export default function RealtimeStockReportScreen() {
@@ -28,31 +29,37 @@ export default function RealtimeStockReportScreen() {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempDate, setTempDate] = useState<Date | null>(null);
     const [itemNm, setItemNm] = useState('');
-    const baseData: StockRow[] = useMemo(
-        () =>
-            Array.from({length: 15}).map((_, idx) => {
-                const giQty = 7 + (idx % 5);
-                const totalStockQty = 20 + (idx % 7);
-                const goQty = 30 + (idx % 5);
-                const curStockQty = totalStockQty + giQty - goQty;
-                return {
-                    itemNm: `상품 ${((idx % 6) + 1)}`,
-                    giQty: giQty,
-                    totalStockQty: totalStockQty,
-                    goQty: goQty,
-                    curStockQty: curStockQty,
-                };
-            }),
-        []
-    );
-
-    const filteredData = useMemo(() => {
-        return baseData;
-    }, [baseData]);
+    const [stockList, setStockList] = useState<[] | null>(null);
 
     const onSearch = () => {
-        // 데모: 현재는 선택 값만으로 필터링 적용
+        oilTotalStockStatusList();
     };
+
+    const oilTotalStockStatusList = () => {
+        console.log("oilTotalStockStatusList1 조회 클릭 fromSaleDt:"+saleDate+", itemNm:"+itemNm);
+        const request = {
+            cmpCd: "SLKR",
+            fromSaleDt: saleDate,
+            itemClassCd: "",
+            itemValue: itemNm,
+            salesOrgCd: "8000",
+            storCd: "5000511",
+            toSaleDt: saleDate
+        }
+        console.log('request:'+JSON.stringify(request))
+        api.oilTotalStockStatusList(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const stockList = result.data.responseBody;
+                    console.log('size:'+stockList.length);
+                    // console.log('stockList:' + JSON.stringify(stockList))
+                    setStockList(stockList);
+                }
+            })
+            .catch(error => {
+                console.log("oilTotalStockStatusList error:" + error)
+            });
+    }
 
     const openDatePicker = () => {
         setTempDate(new Date());
@@ -74,29 +81,29 @@ export default function RealtimeStockReportScreen() {
             ),
         },
         {
-            key: 'totalStockQty', title: Const.TOTAL_STOCK_QTY, flex: 1,
+            key: 'prevStockQty', title: Const.TOTAL_STOCK_QTY, flex: 1,
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.totalStockQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.prevStockQty.toLocaleString()}</Text>
             )
         },
         {
-            key: 'giQty', title: Const.GI_QTY, flex: 1,
+            key: 'inStockQty', title: Const.GI_QTY, flex: 1,
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.giQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.inStockQty.toLocaleString()}</Text>
             )
         },
         {
-            key: 'goQty', title: Const.GO_QTY, flex: 1,
+            key: 'saleQty', title: Const.GO_QTY, flex: 1,
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.goQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.saleQty.toLocaleString()}</Text>
             )
         },
         {
-            key: 'curStockQty', title: Const.CUR_STOCK_QTY, flex: 1,
+            key: 'currentStockQty', title: Const.CUR_STOCK_QTY, flex: 1,
             renderCell: (item) => (
                 <Text style={[commonStyles.numberCell,
-                    { color: item.curStockQty < 0 ? 'red' : ''}
-                ]}>{item.curStockQty.toLocaleString()}</Text>
+                    { color: item.currentStockQty < 0 ? 'red' : ''}
+                ]}>{item.currentStockQty.toLocaleString()}</Text>
             )
         },
     ]), [])
@@ -132,7 +139,7 @@ export default function RealtimeStockReportScreen() {
             <View style={commonStyles.sectionDivider}/>
 
             <Table
-                data={filteredData}
+                data={stockList}
                 columns={mainColumns}
             />
 

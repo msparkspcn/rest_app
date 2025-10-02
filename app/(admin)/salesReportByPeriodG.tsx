@@ -1,7 +1,7 @@
 import { commonStyles } from '@/styles';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
     Modal,
     Pressable,
@@ -45,10 +45,6 @@ export default function SalesReportByPeriod() {
         []
     );
     const [selectedStorCd, setSelectedStorCd] = useState<StoreGroup>(storeGroups[0]);
-
-    useEffect(() => {
-        console.log('api 테스트1')
-    })
 
     const restDailySale = () => {
         console.log("조회 클릭")

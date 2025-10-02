@@ -98,6 +98,11 @@ export function restDailyCornerSale(params) { //기간별 매출현황
     return post(request, params);
 }
 
+export function restCornerByItemSale(params) { //기간별 매출현황 > 매장명 클릭
+    const request = host + "/api/v1/rest/sale/restCornerByItemSale";
+    return post(request, params);
+}
+
 export function posGroupByOilHourlySale(params) { //주유소 시간대별 매출현황
     const request = host + "/api/v1/oil/sale/posGroupByOilHourlySale";
     return post(request, params);
@@ -105,5 +110,10 @@ export function posGroupByOilHourlySale(params) { //주유소 시간대별 매�
 
 export function posGroupByOilDailySale(params) { //주유소 기간별 매출현황
     const request = host + "/api/v1/oil/sale/posGroupByOilDailySale";
+    return post(request, params);
+}
+
+export function oilTotalStockStatusList(params) {
+    const request = host + "/api/v1/oilstock/oilTotalStockStatusList";
     return post(request, params);
 }

@@ -70,7 +70,6 @@ export default function MonthlySalesReport() {
     const {user}:User = useUser();
 
     useEffect(() => {
-        console.log('api 테스트1');
         getCornerList();
     },[]);
 

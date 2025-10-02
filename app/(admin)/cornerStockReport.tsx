@@ -58,7 +58,6 @@ export default function CornerStockReportScreen() {
     const {user}:User = useUser();
 
     useEffect(() => {
-        console.log('api 테스트1');
         getCornerList();
         getVendorList();
     },[]);
