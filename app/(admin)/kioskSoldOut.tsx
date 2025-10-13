@@ -28,7 +28,6 @@ export default function KioskSoldOutScreen() {
             .then(result => {
                 if (result.data.responseBody != null) {
                     const cornerList = result.data.responseBody;
-                    console.log('cornerList:' + JSON.stringify(cornerList))
                     setCornerList(cornerList);
                 }
             })

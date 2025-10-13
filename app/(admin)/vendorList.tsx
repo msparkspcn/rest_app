@@ -1,7 +1,7 @@
 import { commonStyles } from '@/styles';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import { Modal, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View } from 'react-native';
 import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
@@ -60,7 +60,12 @@ export default function VendorListScreen() {
     const request = {
       cmpCd: vendor.cmpCd,
       salesOrgCd: user.salesOrgCd,
-      outSdCmpCd: vendor.outSdCmpCd
+      outSdCmpCd: vendor.outSdCmpCd,
+      itemCd: "",
+      itemNm: "",
+      page: 0,
+      registered: true,
+      size: 100000
     }
     console.log('request:'+JSON.stringify(request))
     api.getVendorItemList(request)

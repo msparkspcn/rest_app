@@ -74,7 +74,6 @@ export default function WarehouseStockReportScreen() {
     const {user}:User = useUser();
 
     useEffect(() => {
-        console.log('api 테스트1');
         getVendorList();
     },[]);
 

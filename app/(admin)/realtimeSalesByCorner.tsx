@@ -60,7 +60,6 @@ export default function RealtimeSalesByCornerScreen() {
             .then(result => {
                 if (result.data.responseBody != null) {
                     const cornerList = result.data.responseBody;
-                    console.log('cornerList:' + JSON.stringify(cornerList))
                     setCornerList([
                         { cornerCd: '', cornerNm: '전체' },
                         ...cornerList

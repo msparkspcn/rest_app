@@ -35,18 +35,19 @@ export function parseYmdString(s: string) {
 };
 
 export function formattedDate(dateStr:String) {
-    console.log('dateStr:'+dateStr)
+    // console.log('dateStr:'+dateStr)
     if (!dateStr || dateStr.length !== 8) return '';
     return `${dateStr.substring(0, 4)}/${dateStr.substring(4, 6)}/${dateStr.substring(6, 8)}`;
 }
 
 export function formattedMonth(dateStr:String) {
-    console.log('dateStr:'+dateStr)
+    // console.log('dateStr:'+dateStr)
     if (!dateStr || dateStr.length !== 6) return '';
     return `${dateStr.substring(0, 4)}/${dateStr.substring(4, 6)}`;
 }
 
 export function ymdToDateWithDay(dateStr:String): string {
+    // console.log('target date:'+dateStr);
     const year = parseInt(dateStr.substring(0, 4), 10);
     const month = parseInt(dateStr.substring(4, 6), 10) - 1; // JS Date는 0부터 시작
     const day = parseInt(dateStr.substring(6, 8), 10);
