@@ -9,7 +9,11 @@ import {useUser} from "../../contexts/UserContext";
 import * as api from "../../services/api/api";
 import {Corner, User} from "../../types";
 
-type ProductRow = { itemNm: string; useYn: 'Y' | 'N' };
+type ProductRow = {
+    itemNm: string;
+    itemCd: string;
+    useYn: 'Y' | 'N'
+};
 
 export default function KioskSoldOutScreen() {
     const [cornerList, setCornerList] = useState<Corner[]>([]);
@@ -41,6 +45,7 @@ export default function KioskSoldOutScreen() {
         () =>
             Array.from({length: 60}).map((_, index) => ({
                 itemNm: `상품 ${index + 1}`,
+                itemCd: `코드 ${index + 1}`,
                 useYn: index % 3 === 0 ? 'N' : 'Y',
             })),
         []
@@ -82,7 +87,7 @@ export default function KioskSoldOutScreen() {
         {
             key: 'useYn', title: '사용여부', flex: 0.5, align: 'center',
             renderCell: (item) => (
-                <Pressable style={commonStyles.columnPressable} onPress={() => updateSoldoutYn()}>
+                <Pressable style={commonStyles.columnPressable} onPress={() => updateSoldoutYn(item)}>
                     <Text style={[commonStyles.cell, commonStyles.linkText, {textAlign: 'center'}]}>
                         {item.useYn === 'Y' ? '출력' : '품절'}
                     </Text>
@@ -91,8 +96,29 @@ export default function KioskSoldOutScreen() {
         },
     ]), []);
 
-    const updateSoldoutYn = () => {
-        Alert.alert('완료', '완료되었습니다.');
+    const updateSoldoutYn = (item: ProductRow) => {
+        const request = [{
+            cmpCd: user.cmpCd,
+            salesOrgCd: user.salesOrgCd,
+            cornerCd: "CIBA",
+            itemCd: "abcdsefdf",
+            itemSeq: "A001",
+            soldoutYn: "0",
+            storCd: "5000511"
+        }];
+        console.log('item:'+JSON.stringify(item)+', request:'+JSON.stringify(request));
+        api.updateSoldoutYn(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const res = result.data.responseBody;
+                    console.log('res:' + JSON.stringify(res));
+                    onSearch();
+                    // Alert.alert('완료', '완료되었습니다.');
+                }
+            })
+            .catch(error => {
+                console.log("updateSoldoutYn error:" + error)
+            });
     }
 
     return (

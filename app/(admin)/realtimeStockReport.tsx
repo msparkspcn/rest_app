@@ -15,6 +15,8 @@ import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
 import Const from "../../constants/Const";
 import * as api from "../../services/api/api";
+import {useUser} from "../../contexts/UserContext";
+import {User} from "../../types/user";
 
 type StockRow = {
     itemNm: string;
@@ -30,6 +32,7 @@ export default function RealtimeStockReportScreen() {
     const [tempDate, setTempDate] = useState<Date | null>(null);
     const [itemNm, setItemNm] = useState('');
     const [stockList, setStockList] = useState<[] | null>(null);
+    const {user}:User = useUser();
 
     const onSearch = () => {
         oilTotalStockStatusList();
@@ -38,11 +41,11 @@ export default function RealtimeStockReportScreen() {
     const oilTotalStockStatusList = () => {
         console.log("oilTotalStockStatusList1 조회 클릭 fromSaleDt:"+saleDate+", itemNm:"+itemNm);
         const request = {
-            cmpCd: "SLKR",
+            cmpCd: user.cmpCd,
             fromSaleDt: saleDate,
             itemClassCd: "",
             itemValue: itemNm,
-            salesOrgCd: "8000",
+            salesOrgCd: "8100",
             storCd: "5000511",
             toSaleDt: saleDate
         }
