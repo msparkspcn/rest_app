@@ -28,6 +28,10 @@ export function get(request: string, body: any) {
     });
 }
 
+export function put(request: string, body: any) {
+    return axios.put(request, body);
+}
+
 export function login(userId, password) {
     const request = host + '/api/v1/login/';
     const body = {
@@ -35,6 +39,12 @@ export function login(userId, password) {
         password: password
     };
     return post(request, body);
+}
+
+export function updateUser(params) {
+    const request = host + '/api/v1/user';
+
+    return put(request, params);
 }
 
 export function getCornerList(params) {
@@ -64,6 +74,11 @@ export function getVendorList(params) {
 
 export function getVendorItemList(params) {
     const request = host + "/api/v1/vendor/item/with-registration";
+    return post(request, params);
+}
+
+export function updateSoldoutYn(params) {
+    const request = host + "/api/v1/item/soldout";
     return post(request, params);
 }
 

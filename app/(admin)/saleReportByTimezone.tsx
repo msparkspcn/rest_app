@@ -144,8 +144,6 @@ export default function SalesReportByTimezoneScreen() {
         const afternoonTotals = sumByGroup(timeGroups.afternoon);
         const nightTotals = sumByGroup(timeGroups.night);
 
-        const sign = (n: number) => (n >= 0 ? '+' : '-');
-
         const row1: ListItem = {
             type: 'summaryTotals',
             key: 'time-dawn',
