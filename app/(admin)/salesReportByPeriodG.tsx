@@ -17,6 +17,8 @@ import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
 import Const from "../../constants/Const";
+import {useUser} from "../../contexts/UserContext";
+import {User} from "../../types/user";
 
 type SaleRow = {
     saleDtInfo: string;
@@ -45,11 +47,12 @@ export default function SalesReportByPeriod() {
         []
     );
     const [selectedStorCd, setSelectedStorCd] = useState<StoreGroup>(storeGroups[0]);
+    const {user}:User = useUser();
 
     const restDailySale = () => {
         console.log("조회 클릭")
         const request = {
-            cmpCd: "SLKR",
+            cmpCd: user.cmpCd,
             cornerCd: "",
             fromSaleDt: fromSaleDt,
             salesOrgCd: "8100",

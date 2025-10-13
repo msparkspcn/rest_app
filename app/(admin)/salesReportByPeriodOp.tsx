@@ -87,12 +87,12 @@ export default function SalesReportByPeriodOp() {
     const restDailySale = () => {
         console.log("조회 클릭")
         const request = {
-            cmpCd: "SLKR",
+            cmpCd: user.cmpCd,
             cornerCd: "",
             detailDiv: "",
             fromSaleDt: fromSaleDt,
             itemClassCd: "string",
-            salesOrgCd: "8000",
+            salesOrgCd: user.salesOrgCd,
             storCd: "5000511",
             toSaleDt: toSaleDt
         }

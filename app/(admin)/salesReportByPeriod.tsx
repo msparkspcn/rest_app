@@ -85,12 +85,12 @@ export default function SalesReportByPeriod() {
     const restDailyCornerSale = () => {
         console.log("restDailyCornerSale 조회 클릭 fromSaleDt:"+fromSaleDt+", toSaleDt:"+toSaleDt)
         const request = {
-            cmpCd: "SLKR",
+            cmpCd: user.cmpCd,
             cornerCd: selectedCornerCd,
             detailDiv: "string",
             fromSaleDt: fromSaleDt,
             itemClassCd: "",
-            salesOrgCd: "8000",
+            salesOrgCd: user.salesOrgCd,
             storCd: "5000511",
             toSaleDt: toSaleDt
         }
@@ -320,6 +320,12 @@ export default function SalesReportByPeriod() {
                 totalQty,
                 totalAmt
             };
+        }
+        else {
+            return {
+                totalQty: 0,
+                totalAmt: 0
+            }
         }
     }, [saleDetailList]);
 

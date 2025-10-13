@@ -7,7 +7,10 @@ import {
     Pressable,
     Platform,
 } from 'react-native';
-import DateTimePicker, {DateTimePickerEvent} from '@react-native-community/datetimepicker';
+import DateTimePicker, {
+    DateTimePickerAndroid,
+    DateTimePickerEvent,
+} from '@react-native-community/datetimepicker';
 import {commonStyles} from "../styles/index";
 
 interface DatePickerModal {
@@ -28,11 +31,47 @@ export const DatePickerModal: React.FC<DatePickerModal> = ({
                                                                title = '조회일자 선택',
                                                                pickerMode = 'date',
                                                            }) => {
-    const [tempDate, setTempDate] = React.useState<Date>(initialDate);
+    const [tempDate, setTempDate] = React.useState<Date>(initialDate ?? new Date());
 
     React.useEffect(() => {
-        setTempDate(initialDate); // 모달 열 때마다 초기화
+        setTempDate(initialDate ?? new Date());
     }, [initialDate, visible]);
+
+    const openAndroidPicker = () => {
+        DateTimePickerAndroid.open({
+            value: tempDate,
+            mode: 'date',
+            display: 'calendar',
+            onChange: (event: DateTimePickerEvent, date?: Date) => {
+                if (event.type === 'set' && date) {
+                    if (pickerMode === 'month') {
+                        const y = date.getFullYear();
+                        const m = date.getMonth();
+                        setTempDate(new Date(y, m, 1));
+                    } else {
+                        setTempDate(date);
+                    }
+                    // Android는 즉시 confirm & 닫기
+                    onConfirm(date);
+                    onClose();
+                } else if (event.type === 'dismissed') {
+                    onClose();
+                }
+            },
+        });
+    };
+
+    React.useEffect(() => {
+        if (Platform.OS === 'android' && visible) {
+            console.log('안드로이드 장비')
+            openAndroidPicker();
+        }
+    }, [visible]);
+
+
+    if (Platform.OS === 'android') {
+        return null;
+    }
 
     return (
         <Modal
@@ -51,7 +90,7 @@ export const DatePickerModal: React.FC<DatePickerModal> = ({
                     </View>
 
                     <View style={commonStyles.dateModalPickerContainer}>
-                        {tempDate && (
+                        {tempDate instanceof Date && !isNaN(tempDate.getTime()) && (
                             <DateTimePicker
                                 value={tempDate}
                                 mode="date"

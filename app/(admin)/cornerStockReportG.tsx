@@ -17,6 +17,8 @@ import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
 import Const from "../../constants/Const";
 import * as api from "../../services/api/api";
+import {useUser} from "../../contexts/UserContext";
+import {User} from "../../types/user";
 
 type StockRow = {
     itemNm: string;
@@ -46,6 +48,8 @@ export default function CornerStockReportScreen() {
     const [selectedItem, setSelectedItem] = useState<StockRow | null>(null);
     const [stockList, setStockList] = useState<[] | null>(null);
     const [stockDetailList, setStockDetailList] = useState<[] | null>(null);
+    const {user}:User = useUser();
+
     const baseData: StockRow[] = useMemo(
         () =>
             Array.from({length: 15}).map((_, idx) => {
@@ -87,11 +91,11 @@ export default function CornerStockReportScreen() {
     const oilTotalStockStatusList = (stock: StockRow) => {
         console.log("oilTotalStockStatusList1 조회 클릭 stock:"+JSON.stringify(stock)+", itemValue:"+itemValue);
         const request = {
-            cmpCd: "SLKR",
+            cmpCd: user.cmpCd,
             fromSaleDt: fromSaleDt,
             itemClassCd: "",
             itemValue: "별미곰탕",
-            salesOrgCd: "8000",
+            salesOrgCd: user.salesOrgCd,
             storCd: "5000511",
             toSaleDt: toSaleDt
         }

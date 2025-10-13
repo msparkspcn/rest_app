@@ -96,10 +96,10 @@ export default function MonthlySalesReport() {
     const restMonthlyCornerSale = () => {
         console.log("조회 클릭 fromSaleMonth:"+fromSaleMonth)
         const request = {
-            cmpCd: "SLKR",
+            cmpCd: user.cmpCd,
             cornerCd: selectedCornerCd,
             fromSaleMonth: fromSaleMonth,
-            salesOrgCd: "8000",
+            salesOrgCd: user.salesOrgCd,
             storCd: "5000511",
             toSaleMonth: toSaleMonth
         }
@@ -122,7 +122,7 @@ export default function MonthlySalesReport() {
             cmpCd: sale.cmpCd,
             cornerCd: sale.cornerCd,
             fromSaleMonth: fromSaleMonth,
-            salesOrgCd: "8000",
+            salesOrgCd: user.salesOrgCd,
             storCd: "5000511",
             toSaleMonth: toSaleMonth
         }
@@ -150,7 +150,7 @@ export default function MonthlySalesReport() {
             detailDiv: "",
             fromSaleDt: fromSaleMonth+"01",
             itemClassCd:"",
-            salesOrgCd: "8000",
+            salesOrgCd: user.salesOrgCd,
             storCd: "5000511",
             toSaleDt: toSaleMonth == getTodayYm() ? getTodayYmd(): toSaleMonth+"31"
         }

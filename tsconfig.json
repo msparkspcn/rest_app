@@ -6,7 +6,12 @@
       "@/*": [
         "./*"
       ]
-    }
+    },
+    "types": [
+    "react",
+    "react-native",
+    "@react-native-community/datetimepicker"
+  ]
   },
   "include": [
     "**/*.ts",
