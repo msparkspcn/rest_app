@@ -72,6 +72,12 @@ export function restDailySale(params) {
     return post(request, params);
 }
 
+export function restStorTimeZoneSale(params) { //시간대별 매출현황(휴)
+    const request = host + "/api/v1/rest/sale/restStorTimeZoneSale";
+    return post(request, params);
+}
+
+
 export function restMonthlyCornerSale(params) { //월 매출현황(휴)
     const request = host + "/api/v1/rest/sale/restMonthlyCornerSale";
     return post(request, params);

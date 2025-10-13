@@ -1,6 +1,6 @@
 import {StatusBar} from 'expo-status-bar';
 import React, {useEffect, useMemo, useState} from 'react';
-import {FlatList, Modal, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {commonStyles} from "../../styles/index";
 import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
 import {Table} from "../../components/Table";
@@ -30,7 +30,7 @@ export default function SalesReportByTimezoneScreen() {
     const [storList, setStorList] = useState<Stor[]>([]);
     const [selectedStorCd, setSelectedStorCd] = useState<string | null>(null);
     const [showStorModal, setShowStorModal] = useState(false);
-
+    const [saleList, setSaleList] = useState<[] | null>(null);
     const {user}:User = useUser();
 
     useEffect(()=> {
@@ -48,10 +48,8 @@ export default function SalesReportByTimezoneScreen() {
         console.log("request:"+JSON.stringify(request))
         api.getStorList(request)
             .then(result => {
-                console.log("result:"+JSON.stringify(result))
                 if (result.data.responseBody != null) {
                     const storList = result.data.responseBody;
-                    console.log('storList:' + JSON.stringify(storList))
                     setStorList([
                             {storCd:'', storNm: '전체'},
                             ...storList
@@ -64,27 +62,32 @@ export default function SalesReportByTimezoneScreen() {
             });
     }
 
-    const baseData: SaleRow[] = useMemo(
-        () =>
-            Array.from({length: 24}).map((_, idx) => {
-                const tmzonDiv = String(idx + 1).padStart(2, "0") + "시";
-                return {
-                    tmzonDiv,
-                    billCnt: idx * 10,
-                    totalAmt: 10000,
-                };
-            }),
-        []
-    );
-
-    const filteredData = useMemo(() => {
-        if (!selectedStorCd) return baseData;
-        return baseData;
-    }, [baseData, selectedStorCd]);
-
     const onSearch = () => {
-        // 데모: 현재는 선택 값만으로 필터링 적용
+        restStorTimeZoneSale();
     };
+    //20250905, 20250925
+    const restStorTimeZoneSale = () => {
+        const request = {
+            cmpCd: user.cmpCd,
+            fromSaleDt: saleDate,
+            salesOrgCd: user.salesOrgCd,
+            storCd:selectedStorCd,
+            toSaleDt: saleDate
+        }
+        console.log('request:'+JSON.stringify(request))
+        api.restStorTimeZoneSale(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const saleList = result.data.responseBody;
+                    console.log('size:'+saleList.length);
+                    console.log('saleList:' + JSON.stringify(saleList))
+                    setSaleList(saleList);
+                }
+            })
+            .catch(error => {
+                console.log("restStorTimeZoneSale error:" + error)
+            });
+    }
 
     const openDatePicker = () => {
         setTempDate(new Date());
@@ -92,11 +95,15 @@ export default function SalesReportByTimezoneScreen() {
     };
 
     const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => ([
-        {key: 'tmzonDiv', title: '시간대', flex: 1, align: 'center'},
+        {key: 'tmzonDiv', title: '시간대', flex: 1, align: 'center',
+            renderCell: (item) => (
+                <Text style={[{textAlign:'center'},commonStyles.cell]}>{item.tmzonDiv}시</Text>
+            )
+        },
         {
             key: 'totalAmt', title: '판매금액', flex: 1,
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.totalAmt.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.actualSaleAmt.toLocaleString()}</Text>
             )
         },
         {
@@ -107,18 +114,11 @@ export default function SalesReportByTimezoneScreen() {
         },
     ]), [])
 
-    const totalValues = useMemo(() => {
-        return filteredData.reduce(
-            (acc, r) => {
-                acc.totalAmt += r.totalAmt;
-                return acc;
-            },
-            {cashAmt: 0, cardEtc: 0, totalAmt: 0}
-        );
-    }, [filteredData]);
 
     // 3행 요약 데이터 구성
     const summaryRows = useMemo(() => {
+        if (!saleList || saleList.length === 0) return [];
+
         const timeGroups = {
             dawn: ["01", "02", "03", "04", "05", "06"],       // 새벽
             morning: ["07", "08", "09", "10", "11", "12"],    // 오전
@@ -128,15 +128,15 @@ export default function SalesReportByTimezoneScreen() {
 
         // ✅ 특정 구간 totalAmt 합산 함수
         const sumByGroup = (group: string[]) =>
-            baseData
+            saleList
                 .filter((row) => group.includes(String(row.tmzonDiv).padStart(2, "0")))
                 .reduce(
                     (acc, row) => {
-                        acc.billCnt += row.billCnt;
-                        acc.totalAmt += row.totalAmt;
+                        acc.billCnt += row.billCnt ?? 0;
+                        acc.totalAmt += row.actualSaleAmt ?? 0;
                         return acc;
                     },
-                    {billCnt: 0, totalAmt: 0}
+                    { billCnt: 0, totalAmt: 0 }
                 );
 
         const dawnTotals = sumByGroup(timeGroups.dawn);
@@ -175,7 +175,7 @@ export default function SalesReportByTimezoneScreen() {
             billCnt: nightTotals.billCnt
         };
         return [row1, row2, row3, row4];
-    }, [totalValues]);
+    }, [saleList]);
 
     return (
         <SafeAreaView style={commonStyles.container}>
@@ -204,7 +204,7 @@ export default function SalesReportByTimezoneScreen() {
 
             <View style={commonStyles.sectionDivider}/>
             <Table
-                data={filteredData}
+                data={saleList}
                 columns={mainColumns}
                 listHeader={() => (
                     <View>
@@ -215,11 +215,11 @@ export default function SalesReportByTimezoneScreen() {
                                         {row.label}
                                     </Text>
                                 </View>
-                                <View style={[{flex: 1} ]}>
-                                    <Text style={commonStyles.numberCell}>{row.totalAmt}</Text>
+                                <View style={[{flex: 1}, commonStyles.tableRightBorder ]}>
+                                    <Text style={commonStyles.numberCell}>{row.totalAmt.toLocaleString()}</Text>
                                 </View>
                                 <View style={[{flex: 0.5}, commonStyles.tableRightBorder]}>
-                                    <Text style={commonStyles.numberCell}>{row.billCnt}</Text>
+                                    <Text style={commonStyles.numberCell}>{row.billCnt.toLocaleString()}</Text>
                                 </View>
                             </View>
                         ))}
