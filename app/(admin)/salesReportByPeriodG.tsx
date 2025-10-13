@@ -90,7 +90,7 @@ export default function SalesReportByPeriod() {
         { key: 'cornerNm',     title: Const.CORNER,   flex: 1,   align: 'left',
             renderCell: (item) => (
                 <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
-                    <Text style={[commonStyles.cell, commonStyles.linkText,{paddingLeft:10}]}>{selectedStorCd.name}</Text>
+                    <Text style={[commonStyles.cell, commonStyles.linkText,{textAlign: 'center'}]}>{selectedStorCd.name}</Text>
                 </Pressable>
             ),   },
         { key: 'saleQty', title: Const.SALE_QTY, flex: 1.2, align: 'right',
@@ -104,6 +104,29 @@ export default function SalesReportByPeriod() {
             )
         },
     ]), []);
+
+    const totalAmt = useMemo(() => saleList.reduce((acc, r) => acc + r.saleAmt, 0), [saleList]);
+    const totalQty = useMemo(() => saleList.reduce((acc, r) => acc + r.saleQty, 0), [saleList]);
+
+
+    const renderFooter = () => (
+        <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+            <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
+                <Text style={[commonStyles.cell, commonStyles.summaryLabelText,
+                    {textAlign: 'center'}]}>합계</Text>
+            </View>
+            <View style={[{flex: 1.2}, commonStyles.tableRightBorder]}>
+                <Text style={commonStyles.numberCell}>
+                    {totalQty.toLocaleString()}
+                </Text>
+            </View>
+            <View style={[{flex: 1.2}, commonStyles.tableRightBorder]}>
+                <Text style={commonStyles.numberCell}>
+                    {totalAmt.toLocaleString()}
+                </Text>
+            </View>
+        </View>
+    );
 
     type ProductSaleRow = { no: number; itemNm: string, qty: number, price: number, totalAmt: number };
     const productData: ProductSaleRow[] = useMemo(
@@ -261,6 +284,7 @@ export default function SalesReportByPeriod() {
             <Table
                 data={saleList}
                 columns={mainColumns}
+                listFooter={renderFooter}
             />
 
             <View style={commonStyles.sectionDivider} />
