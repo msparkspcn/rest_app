@@ -1,6 +1,7 @@
 import {StatusBar} from 'expo-status-bar';
 import React, {useEffect, useMemo, useState} from 'react';
 import {
+    Alert,
     Pressable,
     SafeAreaView,
     StyleSheet,
@@ -34,9 +35,6 @@ type Vendor = {
     outSdCmpCd: string;
     outSdCmpNm: string
 };
-
-type SearchCond = { id: string; name: string };
-
 
 export default function CornerStockReportScreen() {
     const [saleDate, setSaleDate] = useState(getTodayYmd());
@@ -200,15 +198,7 @@ export default function CornerStockReportScreen() {
                     <Text style={commonStyles.filterLabel}>{Const.VENDOR}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowVendorModal(true)}>
                         <Text
-                            style={styles.selectText}>{vendorList.find(g => g.outSdCmpCd === selectedOutSdCmpCd)?.outSdCmpNm || Const.SELECT}</Text>
-                        <Text style={commonStyles.selectArrow}> ▼</Text>
-                    </TouchableOpacity>
-                </View>
-                <View style={commonStyles.filterRowFront}>
-                    <Text style={commonStyles.filterLabel}>{Const.SEARCH_COND}</Text>
-                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowSearchCond(true)}>
-                        <Text
-                            style={styles.selectText}>{searchCond.find(g => g.id === selectedSearchCond)?.name || Const.ALL}</Text>
+                            style={styles.selectText}>{vendorList.find(g => g.outSdCmpCd === selectedOutSdCmpCd)?.outSdCmpNm || Const.ALL}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -265,19 +255,6 @@ export default function CornerStockReportScreen() {
                 onSelect={(item) => {
                     setSelectedOutSdCmpCd(item.outSdCmpCd);
                     setShowVendorModal(false);
-                }}
-            />
-
-            <ListModal
-                visible={showSearchCond}
-                title="조회기준 선택"
-                data={searchCond}
-                keyField="id"
-                labelField="name"
-                onClose={() => setShowSearchCond(false)}
-                onSelect={(item) => {
-                    setSelectedSearchCond(item.id);
-                    setShowSearchCond(false);
                 }}
             />
 

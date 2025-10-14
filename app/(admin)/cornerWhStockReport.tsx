@@ -33,7 +33,6 @@ type Vendor = {
     outSdCmpCd: string;
     outSdCmpNm: string
 };
-type SearchCond = { id: string; name: string };
 
 export default function CornerWhStockReportScreen() {
     const [saleDate, setSaleDate] = useState(getTodayYmd());
@@ -43,18 +42,13 @@ export default function CornerWhStockReportScreen() {
     const [vendorList, setVendorList] = useState<Vendor[]>([]);
     const [cornerList, setCornerList] = useState<Corner[]>([]);
 
-    const searchCond: SearchCond[] = [
-        { id: "realtime", name: "실시간 기준" },
-        { id: "closing", name: "영업 마감 기준" }
-    ]
     const [selectedOutSdCmpCd, setSelectedOutSdCmpCd] = useState<string | null>(null);
     const [showVendorModal, setShowVendorModal] = useState(false);
     const [showCornerModal, setShowCornerModal] = useState(false);
-    const [showSearchCond, setShowSearchCond] = useState(false);
     const [itemQuery, setItemQuery] = useState('');
-    const [selectedSearchCond, setSelectedSearchCond] = useState<string | null>(searchCond[0]?.id ?? null);
     const [selectedCorner, setSelectedCorner] = useState<string | null>(cornerList[0]?.cornerCd ?? null);
     const {user}:User = useUser();
+    const [stockList, setStockList] = useState<[] | null>(null);
 
     useEffect(() => {
         getCornerList();
@@ -123,8 +117,10 @@ export default function CornerWhStockReportScreen() {
     }, [baseData]);
 
     const onSearch = () => {
-        // 데모: 현재는 선택 값만으로 필터링 적용
+
     };
+
+
 
     const openDatePicker = () => {
         setTempDate(new Date());
@@ -204,14 +200,6 @@ export default function CornerWhStockReportScreen() {
                     </TouchableOpacity>
                 </View>
                 <View style={commonStyles.filterRowFront}>
-                    <Text style={commonStyles.filterLabel}>{Const.SEARCH_COND}</Text>
-                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowSearchCond(true)}>
-                        <Text
-                            style={styles.selectText}>{searchCond.find(g => g.id === selectedSearchCond)?.name || Const.SELECT}</Text>
-                        <Text style={commonStyles.selectArrow}> ▼</Text>
-                    </TouchableOpacity>
-                </View>
-                <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>{Const.ITEM_NM}</Text>
                     <TextInput
                         style={commonStyles.selectInput}
@@ -264,19 +252,6 @@ export default function CornerWhStockReportScreen() {
                 onSelect={(item) => {
                     setSelectedOutSdCmpCd(item.outSdCmpCd);
                     setShowVendorModal(false);
-                }}
-            />
-
-            <ListModal
-                visible={showSearchCond}
-                title="조회기준 선택"
-                data={searchCond}
-                keyField="id"
-                labelField="name"
-                onClose={() => setShowSearchCond(false)}
-                onSelect={(item) => {
-                    setSelectedSearchCond(item.id);
-                    setShowSearchCond(false);
                 }}
             />
 

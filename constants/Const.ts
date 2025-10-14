@@ -62,6 +62,7 @@ export default {
     PW: '비밀번호',
     VAT: '부가세',
     NO_SALES_ORG_MSG: '사업장을 선택해주세요.',
+    NO_CORNER_MSG: '매장을 선택해주세요.',
     OPER_TYPE_REST: '01',
     OPER_TYPE_OIL: '02'
 }

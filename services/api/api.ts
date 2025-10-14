@@ -104,6 +104,26 @@ export function restMonthlySale(params) { //월 매출현황(휴)
     return post(request, params);
 }
 
+export function mobRestSaleAnalysis(params) { //시설별 매출현황(휴)
+    const request = host + "/api/v1/rest/sale/mobRestSaleAnalysis";
+    return post(request, params);
+}
+
+export function mobRestItemSaleAnalysis(params) { //시설별 매출현황 > 상세
+    const request = host + "/api/v1/rest/sale/mobRestItemSaleAnalysis";
+    return post(request, params);
+}
+
+export function mobRestRealTimeSaleNews(params) { //실시간 매장매출현황(휴)
+    const request = host + "/api/v1/rest/sale/mobRestRealTimeSaleNews";
+    return post(request, params);
+}
+
+export function mobRestRealTimeItemSale(params) { //실시간 매장매출현황(휴)
+    const request = host + "/api/v1/rest/sale/mobRestRealTimeSaleNews";
+    return post(request, params);
+}
+
 export function restCornerByDailySale(params) { //월 매출현황(휴) > 매장명 클릭 => 일자별 매출현황
     const request = host + "/api/v1/rest/sale/restCornerByDailySale";
     return post(request, params);

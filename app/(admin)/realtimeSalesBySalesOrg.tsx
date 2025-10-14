@@ -16,20 +16,21 @@ import {User, SalesOrg} from "../../types";
 type SaleRow = {
     no: number;
     cornerNm: string;
-    todaySaleAmt: number;
-    yedaySaleAmt: number;
-    monthSaleAmt: number;
-    yearSaleAmt: number;
+    cornerCd: string;
+    todayActualSaleAmt: number;
+    yesterdayActualSaleAmt: number;
+    monthlyActualSaleAmt: number;
+    yearActualSaleAmt: number;
 };
 
 type SaleDetailRow = {
     no: number;
     itemNm: string;
-    qty: number;
-    totalAmt: number;
-    monthQty: number;
-    monthAmt: number;
-    yearAmt: number;
+    todaySaleQty: number;
+    todayActualSaleAmt: number;
+    monthlySaleQty: number;
+    monthlyActualSaleAmt: number;
+    yearActualSaleAmt: number;
 }
 
 type CornerRow = {
@@ -51,8 +52,9 @@ export default function RealtimeSalesBySalesOrgScreen() {
     const [isDetailVisible, setIsDetailVisible] = useState(false);
     const [detailChecked, setDetailChecked] = useState(false);
     const [selectedCorner, setSelectedCorner] = useState<CornerRow | null>(null);
-
+    const [saleList, setSaleList] = useState<[] | null>(null);
     const {user}: User = useUser();
+    const [saleDetailList, setSaleDetailList] = useState<[] | null>(null);
 
     useEffect(() => {
         getSalesOrgList();
@@ -67,10 +69,8 @@ export default function RealtimeSalesBySalesOrgScreen() {
         console.log("request:"+JSON.stringify(request))
         api.getSalsOrgList(request)
             .then(result => {
-                console.log("result:"+JSON.stringify(result))
                 if (result.data.responseBody != null) {
                     const salesOrgList = result.data.responseBody;
-                    console.log('salesOrgList:' + JSON.stringify(salesOrgList))
                     setSalesOrgList(salesOrgList);
                 }
             })
@@ -78,52 +78,70 @@ export default function RealtimeSalesBySalesOrgScreen() {
                 console.log("getSalsOrgList error:" + error)
             });
     }
-
-    const baseData: SaleRow[] = useMemo(
-        () =>
-            Array.from({length: 10}).map((_, idx) => {
-                const todaySaleAmt = 10000 + (idx % 5) * 3000;
-                const yedaySaleAmt = 20000 + (idx % 7) * 2500;
-                const monthSaleAmt = 1000 * (idx % 4);
-                const yearSaleAmt = 1000 * (idx % 4);
-                return {
-                    no: idx + 1,
-                    cornerNm: `그룹 ${((idx % 6) + 1)}`,
-                    todaySaleAmt,
-                    yedaySaleAmt,
-                    monthSaleAmt,
-                    yearSaleAmt,
-                };
-            }),
-        []
-    );
+    const mobRestSaleAnalysis = () => {
+        console.log("조회 클릭 saleDate:"+saleDate)
+        const request = {
+            cmpCd: user.cmpCd,
+            fromSaleDt: saleDate,
+            salesOrgCd: user.salesOrgCd,
+            storCd: "",
+            toSaleDt: saleDate
+        }
+        api.mobRestSaleAnalysis(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const saleList = result.data.responseBody;
+                    console.log('111:' + JSON.stringify(saleList))
+                    setSaleList(saleList);
+                }
+            })
+            .catch(error => {
+                console.log("mobRestSaleAnalysis error:" + error)
+            });
+    }
 
     const handleCheckbox = () => {
         setDetailChecked(!detailChecked);
     };
 
-    const aggregateSales = (rows: SaleRow[]): SaleRow => {
+    const aggregateSales = (rows?: SaleRow[] | null): SaleRow => {
+        if (!Array.isArray(rows) || rows.length === 0) {
+            return {
+                no: 0,
+                cornerCd: "",
+                cornerNm: "합계",
+                todayActualSaleAmt: 0,
+                yesterdayActualSaleAmt: 0,
+                monthlyActualSaleAmt: 0,
+                yearActualSaleAmt: 0
+            };
+        }
+
         return rows.reduce((acc, cur) => ({
             no: 0,
+            cornerCd: "",
             cornerNm: "합계",
-            todaySaleAmt: acc.todaySaleAmt + cur.todaySaleAmt,
-            yedaySaleAmt: acc.yedaySaleAmt + cur.yedaySaleAmt,
-            monthSaleAmt: acc.monthSaleAmt + cur.monthSaleAmt,
-            yearSaleAmt: acc.yearSaleAmt + cur.yearSaleAmt,
-        }), {no: 0, cornerNm: "합계", todaySaleAmt: 0, yedaySaleAmt: 0, monthSaleAmt: 0, yearSaleAmt: 0});
+            todayActualSaleAmt: acc.todayActualSaleAmt + (cur.todayActualSaleAmt ?? 0),
+            yesterdayActualSaleAmt: acc.yesterdayActualSaleAmt + (cur.yesterdayActualSaleAmt ?? 0),
+            monthlyActualSaleAmt: acc.monthlyActualSaleAmt + (cur.monthlyActualSaleAmt ?? 0),
+            yearActualSaleAmt: acc.yearActualSaleAmt + (cur.yearActualSaleAmt ?? 0),
+        }), {
+            no: 0,
+            cornerCd: "",
+            cornerNm: "합계",
+            todayActualSaleAmt: 0,
+            yesterdayActualSaleAmt: 0,
+            monthlyActualSaleAmt: 0,
+            yearActualSaleAmt: 0
+        });
     };
-
-    const filteredData = useMemo((): SaleRow[] => {
-        return detailChecked
-            ? baseData
-            : [aggregateSales(baseData)];
-    }, [baseData, detailChecked]);
 
     const onSearch = () => {
         if(selectedSalesOrgCd=='' || selectedSalesOrgCd == undefined) {
             Alert.alert(Const.ERROR, Const.NO_SALES_ORG_MSG);
             return;
         }
+        mobRestSaleAnalysis();
     };
 
     const openDatePicker = () => {
@@ -131,9 +149,34 @@ export default function RealtimeSalesBySalesOrgScreen() {
         setShowDatePicker(true);
     };
 
-    const openDetail = (store: CornerRow) => {
-        setSelectedCorner(store);
-        setIsDetailVisible(true);
+    const openDetail = (sale: SaleRow) => {
+        console.log('openDetail sale:'+JSON.stringify(sale))
+        setSelectedCorner(sale);
+        mobRestItemSaleAnalysis(sale);
+    }
+
+    const mobRestItemSaleAnalysis = (item:SaleRow) => {
+        console.log("조회 클릭 saleDate:"+saleDate)
+        const request = {
+            cmpCd: user.cmpCd,
+            cornerCd: item.cornerCd,
+            fromSaleDt: saleDate,
+            salesOrgCd: user.salesOrgCd,
+            storCd: "",
+            toSaleDt: saleDate
+        }
+        api.mobRestItemSaleAnalysis(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const saleDetailList = result.data.responseBody;
+                    console.log('111:' + JSON.stringify(saleDetailList))
+                    setSaleDetailList(saleDetailList);
+                    setIsDetailVisible(true);
+                }
+            })
+            .catch(error => {
+                console.log("mobRestItemSaleAnalysis error:" + error)
+            });
     }
 
     const closeDetail = () => {
@@ -144,27 +187,27 @@ export default function RealtimeSalesBySalesOrgScreen() {
     const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => {
         const commonCols: ColumnDef<SaleRow>[] = [
             {
-                key: 'yedaySaleAmt', title: '전일매출', flex: 1,
+                key: 'yesterdayActualSaleAmt', title: '전일매출', flex: 1,
                 renderCell: (item) => (
-                    <Text style={commonStyles.numberSmallCell}>{item.yedaySaleAmt.toLocaleString()}</Text>
+                    <Text style={commonStyles.numberSmallCell}>{Math.round(item.yesterdayActualSaleAmt / 1000).toLocaleString()}</Text>
                 )
             },
             {
-                key: 'todaySaleAmt', title: '당일매출', flex: 1,
+                key: 'todayActualSaleAmt', title: '당일매출', flex: 1,
                 renderCell: (item) => (
-                    <Text style={commonStyles.numberSmallCell}>{item.todaySaleAmt.toLocaleString()}</Text>
+                    <Text style={commonStyles.numberSmallCell}>{Math.round(item.todayActualSaleAmt / 1000).toLocaleString()}</Text>
                 )
             },
             {
-                key: 'monthSaleAmt', title: '월누계매출', flex: 1.1,
+                key: 'monthlyActualSaleAmt', title: '월누계매출', flex: 1.1,
                 renderCell: (item) => (
-                    <Text style={commonStyles.numberSmallCell}>{item.monthSaleAmt.toLocaleString()}</Text>
+                    <Text style={commonStyles.numberSmallCell}>{Math.round(item.monthlyActualSaleAmt / 1000).toLocaleString()}</Text>
                 )
             },
             {
-                key: 'yearSaleAmt', title: '년누계', flex: 1.3,
+                key: 'yearActualSaleAmt', title: '년누계', flex: 1.3,
                 renderCell: (item) => (
-                    <Text style={commonStyles.numberSmallCell}>{item.yearSaleAmt.toLocaleString()}</Text>
+                    <Text style={commonStyles.numberSmallCell}>{Math.round(item.yearActualSaleAmt / 1000).toLocaleString()}</Text>
                 )
             },
         ];
@@ -193,87 +236,76 @@ export default function RealtimeSalesBySalesOrgScreen() {
         return commonCols;
     }, [detailChecked]);
 
-    const detailData: SaleDetailRow[] = useMemo(
-        () =>
-            Array.from({length: 10}).map((_, idx) => {
-                const qty = (idx % 4) + 1;
-                const totalAmt = qty * 100;
-                return {
-                    no: idx + 1,
-                    itemNm: `상품명 ${((idx % 6) + 1).toString().padStart(2, '0')}`,
-                    qty: qty,
-                    totalAmt: qty * 10,
-                    monthAmt: totalAmt * 10,
-                    monthQty: totalAmt,
-                    yearAmt: totalAmt * 10,
-                };
-            }),
-        []
-    );
-
     const SaleDetailColumns: ColumnDef<SaleDetailRow>[] = useMemo(() => ([
         {key: 'itemNm', title: '상품명', flex: 1, align: 'center'},
         {
-            key: 'qty', title: Const.QTY, flex: 0.6,
+            key: 'todaySaleQty', title: Const.QTY, flex: 0.6,
             renderCell: (item) => (
                 <Text style={[styles.cell, commonStyles.numberSmallCell]}>
-                    {item.qty.toLocaleString()}
+                    {item.todaySaleQty.toLocaleString()}
                 </Text>
             )
         },
         {
-            key: 'price', title: '금액', flex: 0.6,
+            key: 'todayActualSaleAmt', title: '금액', flex: 0.6,
             renderCell: (item) => (
                 <Text style={[styles.cell, commonStyles.numberSmallCell]}>
-                    {item.totalAmt.toLocaleString()}
+                    {Math.round(item.todayActualSaleAmt / 1000).toLocaleString()}
                 </Text>
             )
         },
         {
-            key: 'monthQty', title: '월누계\n수량', flex: 0.9,
+            key: 'monthlySaleQty', title: '월누계\n수량', flex: 0.9,
             renderCell: (item) => (
                 <Text style={[styles.cell, commonStyles.numberSmallCell]}>
-                    {item.monthQty.toLocaleString()}
+                    {item.monthlySaleQty.toLocaleString()}
                 </Text>
             )
         },
         {
-            key: 'monthAmt', title: '월누계금액', flex: 1.5,
+            key: 'monthlyActualSaleAmt', title: '월누계금액', flex: 1.5,
             renderCell: (item) => (
                 <Text style={[styles.cell, commonStyles.numberSmallCell]}>
-                    {item.monthAmt.toLocaleString()}
+                    {Math.round(item.monthlyActualSaleAmt / 1000).toLocaleString()}
                 </Text>
             )
         },
         {
-            key: 'yearAmt', title: '년누계금액', flex: 1.5,
+            key: 'yearActualSaleAmt', title: '년누계금액', flex: 1.5,
             renderCell: (item) => (
                 <Text style={[styles.cell, commonStyles.numberSmallCell]}>
-                    {item.yearAmt.toLocaleString()}
+                    {Math.round(item.yearActualSaleAmt / 1000).toLocaleString()}
                 </Text>
             )
         },
     ]), []);
     const summaryRow = useMemo(() => {
-        const totalSaleAmt = detailData.reduce((sum, item) => sum + item.totalAmt, 0);
-        const totalQty = detailData.reduce((sum, item) => sum + item.qty, 0);
-        const totalAmt = detailData.reduce((sum, item) => sum + item.totalAmt, 0);
-        const totalMonthAmt = detailData.reduce((sum, item) => sum + item.monthAmt, 0);
-        const totalMonthQty = detailData.reduce((sum, item) => sum + item.monthQty, 0);
-        const totalYearAmt = detailData.reduce((sum, item) => sum + item.yearAmt, 0);
+        if (!(saleDetailList) || saleDetailList.length === 0) {
+            return {
+                totalQty: 0,
+                totalAmt: 0,
+                totalMonthAmt: 0,
+                totalMonthlySaleQty: 0,
+                totalYearAmt: 0,
+            };
+        }
+        const totalQty = saleDetailList.reduce((sum, item) => sum + item.todaySaleQty, 0);
+        const totalAmt = saleDetailList.reduce((sum, item) => sum + item.todayActualSaleAmt, 0);
+        const totalMonthAmt = saleDetailList.reduce((sum, item) => sum + item.monthlyActualSaleAmt, 0);
+        const totalMonthlySaleQty = saleDetailList.reduce((sum, item) => sum + item.monthlySaleQty, 0);
+        const totalYearAmt = saleDetailList.reduce((sum, item) => sum + item.yearActualSaleAmt, 0);
         return {
             totalQty: totalQty,
             totalAmt: totalAmt,
-            totalSaleAmt: totalSaleAmt,
             totalMonthAmt: totalMonthAmt,
-            totalMonthQty: totalMonthQty,
+            totalMonthlySaleQty: totalMonthlySaleQty,
             totalYearAmt: totalYearAmt,
         };
-    }, [detailData]);
+    }, [saleDetailList]);
 
     const CornerNmRow = () => {
         return (
-            <View style={{flexDirection: 'row', justifyContent: 'space-between',}}>
+            <View style={{flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10}}>
                 <Text style={styles.subTitle}>{selectedCorner?.cornerNm}</Text>
                 <Text style={styles.subTitle}>(단위:천원)</Text>
             </View>
@@ -291,16 +323,16 @@ export default function RealtimeSalesBySalesOrgScreen() {
                     <Text style={commonStyles.numberSmallCell}>{summaryRow.totalQty.toLocaleString()}</Text>
                 </View>
                 <View style={[{flex: 0.6}, commonStyles.tableRightBorder]}>
-                    <Text style={commonStyles.numberSmallCell}>{summaryRow.totalAmt.toLocaleString()}</Text>
+                    <Text style={commonStyles.numberSmallCell}>{Math.round(summaryRow.totalAmt / 1000).toLocaleString()}</Text>
                 </View>
                 <View style={[{flex: 0.9}, commonStyles.tableRightBorder]}>
-                    <Text style={commonStyles.numberSmallCell}>{summaryRow.totalMonthQty.toLocaleString()}</Text>
+                    <Text style={commonStyles.numberSmallCell}>{summaryRow.totalMonthlySaleQty.toLocaleString()}</Text>
                 </View>
                 <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
-                    <Text style={commonStyles.numberSmallCell}>{summaryRow.totalMonthAmt.toLocaleString()}</Text>
+                    <Text style={commonStyles.numberSmallCell}>{Math.round(summaryRow.totalMonthAmt / 1000).toLocaleString()}</Text>
                 </View>
                 <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
-                    <Text style={commonStyles.numberSmallCell}>{summaryRow.totalYearAmt.toLocaleString()}</Text>
+                    <Text style={commonStyles.numberSmallCell}>{Math.round(summaryRow.totalYearAmt / 1000).toLocaleString()}</Text>
                 </View>
             </View>
         )
@@ -347,7 +379,7 @@ export default function RealtimeSalesBySalesOrgScreen() {
 
             <Text style={{textAlign: 'right', paddingHorizontal: 10, paddingTop: 10}}>(단위:천원)</Text>
             <Table
-                data={filteredData}
+                data={saleList}
                 columns={mainColumns}
                 listFooter={
                     detailChecked
@@ -360,22 +392,22 @@ export default function RealtimeSalesBySalesOrgScreen() {
                                 </View>
                                 <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
                                     <Text style={[commonStyles.numberSmallCell, commonStyles.summaryLabelText]}>
-                                        {aggregateSales(baseData).yedaySaleAmt.toLocaleString()}
+                                        {Math.round(aggregateSales(saleList).yesterdayActualSaleAmt / 1000).toLocaleString()}
                                     </Text>
                                 </View>
                                 <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
                                     <Text style={[commonStyles.numberSmallCell, commonStyles.summaryLabelText]}>
-                                        {aggregateSales(baseData).todaySaleAmt.toLocaleString()}
+                                        {Math.round(aggregateSales(saleList).todayActualSaleAmt / 1000).toLocaleString()}
                                     </Text>
                                 </View>
                                 <View style={[{flex: 1.1}, commonStyles.tableRightBorder]}>
                                     <Text style={[commonStyles.numberSmallCell, commonStyles.summaryLabelText]}>
-                                        {aggregateSales(baseData).monthSaleAmt.toLocaleString()}
+                                        {Math.round(aggregateSales(saleList).monthlyActualSaleAmt / 1000).toLocaleString()}
                                     </Text>
                                 </View>
                                 <View style={[{flex: 1.3}, commonStyles.tableRightBorder]}>
                                     <Text style={[commonStyles.numberSmallCell, commonStyles.summaryLabelText]}>
-                                        {aggregateSales(baseData).yearSaleAmt.toLocaleString()}
+                                        {Math.round(aggregateSales(saleList).yearActualSaleAmt / 1000).toLocaleString()}
                                     </Text>
                                 </View>
                             </View>
@@ -416,7 +448,7 @@ export default function RealtimeSalesBySalesOrgScreen() {
                         </View>
                         <CornerNmRow/>
                         <Table
-                            data={detailData}
+                            data={saleDetailList}
                             columns={SaleDetailColumns}
                             isModal={true}
                             listFooter={() => renderDetailFooterRow()}
@@ -438,9 +470,9 @@ const styles = StyleSheet.create({
         width: '100%'
     },
     subTitle: {
-        fontSize: 14,
+        fontSize: 16,
         fontWeight: '700',
-        paddingVertical: 10,
+        paddingTop: 20,
     },
 });
 

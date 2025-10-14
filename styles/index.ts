@@ -82,8 +82,8 @@ export const commonStyles = StyleSheet.create({
     tableHeaderRow: {
         flexDirection: 'row',
         backgroundColor: '#f0f3f7',
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: '#e0e0e0',
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: '#e0e0e0',
         minHeight: 35
     },
     headerCell: {
@@ -111,8 +111,8 @@ export const commonStyles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         height: '100%',
-        borderRightWidth: StyleSheet.hairlineWidth,
-        borderRightColor: '#aaa'
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: '#aaa'
     },
     cellDivider: {
         borderRightWidth: StyleSheet.hairlineWidth,
@@ -156,7 +156,7 @@ export const commonStyles = StyleSheet.create({
         backgroundColor: 'rgba(0,0,0,0.5)',
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 10,
+        // padding: 10,
     },
     modalContent: {
         backgroundColor: '#fff',
@@ -168,20 +168,21 @@ export const commonStyles = StyleSheet.create({
         width: '100%',
         maxWidth: 640,
         backgroundColor: '#fff',
-        padding: 10,
         height: '80%',
         shadowColor: '#000',
         shadowOffset: {width: 0, height: 2},
         shadowOpacity: 0.08,
         elevation: 2,
-        // borderWidth: StyleSheet.hairlineWidth,
-        // borderColor: '#e0e0e0',
     },
     modalHeader: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingVertical: 20
+        paddingHorizontal: 10,
+        paddingVertical: 13,
+        backgroundColor:'#fafafa',
+        borderBottomWidth:1,
+        borderBottomColor: '#aaa',
     },
     listModalHeader: {
         flexDirection: 'row',
@@ -198,7 +199,6 @@ export const commonStyles = StyleSheet.create({
     },
     modalSmallTitle: {
         fontSize: 14,
-        // fontWeight: '700',
         color: '#333',
     },
     modalTableHeaderRow: {
@@ -218,8 +218,8 @@ export const commonStyles = StyleSheet.create({
     modalTableRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: '#aaa',
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: '#aaa',
         minHeight: 30,
     },
     modalCell: {
@@ -228,8 +228,7 @@ export const commonStyles = StyleSheet.create({
     },
     modalTableContainer: {
         flex: 1,
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: '#aaa',
+        padding: 10,
         overflow: 'hidden',
         backgroundColor: '#fff'
     },
@@ -249,8 +248,6 @@ export const commonStyles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         height: '100%',
-        // borderWidth: StyleSheet.hairlineWidth,
-        // borderColor: '#aaa'
     },
 
     modalCellDivider: {
@@ -325,8 +322,8 @@ export const commonStyles = StyleSheet.create({
     modalItemText: {fontSize: 16, color: '#333'},
     modalOkButtonText: {color: '#fff', fontWeight: '600', fontSize: 14},
     headerCellDivider: {
-        borderRightWidth: StyleSheet.hairlineWidth,
-        borderRightColor: '#b0b0b0'
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: '#b0b0b0'
     },
     linkText: {
         color: '#007AFF',
