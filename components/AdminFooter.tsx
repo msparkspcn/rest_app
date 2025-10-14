@@ -18,7 +18,13 @@ export default function AdminFooter({ onReset, onLogoutPress, onHome }: AdminFoo
       onHome()
     }
   }
-  const handleReset = () => onReset && onReset();
+
+  const handleReset = () => {
+    if (onReset) {
+      onReset();
+    }
+  }
+
   const handleLogout = () => {
     logout();
     router.replace('/(auth)/login');
@@ -54,8 +60,8 @@ export default function AdminFooter({ onReset, onLogoutPress, onHome }: AdminFoo
 const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
-    paddingVertical: 10,
-    marginHorizontal: 20,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
     backgroundColor: '#f8f8f8',
     justifyContent: 'space-between',
   },

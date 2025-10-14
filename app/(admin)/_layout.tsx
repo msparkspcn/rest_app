@@ -1,9 +1,10 @@
 import {Stack, useSegments, router} from 'expo-router';
-import React from 'react';
+import React, {useCallback, useState} from 'react';
 import {StyleSheet, View} from 'react-native';
 import AdminFooter from '../../components/AdminFooter';
 
 export default function AdminLayout() {
+    const [refreshKey, setRefreshKey] = useState(0);
     const segments = useSegments();
     const lastSegment = segments[segments.length - 1];
     const hideFooter = lastSegment === '(admin)';
@@ -11,8 +12,12 @@ export default function AdminLayout() {
         router.back()
     };
 
+    const handleReset = useCallback(() => {
+        setRefreshKey(prev => prev + 1);
+    }, []);
+
     return (
-        <View style={styles.root}>
+        <View style={styles.root} key={refreshKey}>
             <Stack>
                 <Stack.Screen
                     name="index"
@@ -153,7 +158,7 @@ export default function AdminLayout() {
             </Stack>
             {!hideFooter && (
                 <View style={styles.footerWrap}>
-                    <AdminFooter onHome={handleHomePress}/>
+                    <AdminFooter onHome={handleHomePress} onReset={handleReset}/>
                 </View>
             )}
         </View>

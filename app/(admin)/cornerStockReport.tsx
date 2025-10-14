@@ -46,8 +46,10 @@ export default function CornerStockReportScreen() {
     const [vendorList, setVendorList] = useState<Vendor[]>([]);
     const [cornerList, setCornerList] = useState<Corner[]>([]);
 
-    const searchCond: SearchCond[] = [{ id: "realtime", name: "실시간 기준" },
-        { id: "closing", name: "영업 마감 기준" }]
+    const searchCond: SearchCond[] = [
+        { id: "realtime", name: "실시간 기준" },
+        { id: "closing", name: "영업 마감 기준" }
+    ]
     const [selectedOutSdCmpCd, setSelectedOutSdCmpCd] = useState<string | null>(null);
     const [showVendorModal, setShowVendorModal] = useState(false);
     const [showCornerModal, setShowCornerModal] = useState(false);
@@ -270,6 +272,8 @@ export default function CornerStockReportScreen() {
                 visible={showSearchCond}
                 title="조회기준 선택"
                 data={searchCond}
+                keyField="id"
+                labelField="name"
                 onClose={() => setShowSearchCond(false)}
                 onSelect={(item) => {
                     setSelectedSearchCond(item.id);

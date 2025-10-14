@@ -98,7 +98,7 @@ export default function SalesReportByPeriod() {
             .then(result => {
                 if (result.data.responseBody != null) {
                     const saleList = result.data.responseBody;
-                    // console.log('saleList:' + JSON.stringify(saleList))
+                    console.log('saleList:' + JSON.stringify(saleList))
                     setSaleList(saleList);
                     setAppliedCornerCd(selectedCornerCd);
                 }
@@ -167,7 +167,6 @@ export default function SalesReportByPeriod() {
     const tableData = useMemo(() => {
         if (!saleList) return []; // null 방지
         console.log('selectedCornerCd:'+selectedCornerCd)
-        if(selectedCornerCd) return saleList;
 
         const result: (SaleRow & { isSummary?: boolean })[] = [];
 
@@ -192,21 +191,21 @@ export default function SalesReportByPeriod() {
                         isFirstRow: idx === 0 ? true : false,
                     });
                 });
-
-                // 날짜별 합계 row
-                result.push({
-                    cmpCd: '',
-                    saleDt: '',
-                    salesOrgCd: '',
-                    storCd: '',
-                    cornerCd: '',
-                    cornerNm: `${formattedDate(date)} 소계`,
-                    taxSaleAmt: 0,
-                    saleAmt: dateSum,
-                    totalSaleAmt: dateSum,
-                    isSummary: true,
-                    isFirstRow: false
-                });
+                if(!selectedCornerCd) { //전체 조회일 경우 날짜별 합계 추가
+                    result.push({
+                        cmpCd: '',
+                        saleDt: '',
+                        salesOrgCd: '',
+                        storCd: '',
+                        cornerCd: '',
+                        cornerNm: `${formattedDate(date)} 소계`,
+                        taxSaleAmt: 0,
+                        saleAmt: dateSum,
+                        totalSaleAmt: dateSum,
+                        isSummary: true,
+                        isFirstRow: false
+                    });
+                }
             });
 
         return result;
@@ -219,7 +218,6 @@ export default function SalesReportByPeriod() {
             flex: 1,
             align: 'center',
             renderCell: (item) => {
-                // console.log('item:'+JSON.stringify(item));
                 if (item.isSummary) return null;
                 else if(!item.isFirstRow) return null;
                 return (
@@ -312,7 +310,7 @@ export default function SalesReportByPeriod() {
     };
 
     const summaryRow = useMemo(() => {
-        console.log('summaryRow render')
+        // console.log('summaryRow render');
         if (saleDetailList) {
             const totalQty = saleDetailList.reduce((sum, item) => sum + item.saleQty, 0);
             const totalAmt = saleDetailList.reduce((sum, item) => sum + item.actualSaleAmt, 0);

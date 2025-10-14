@@ -15,7 +15,7 @@ import { useUser } from '../../contexts/UserContext';
 import TeamsOfService from "./teamsOfService";
 import {commonStyles} from "../../styles/index";
 
-type MenuChild = { title: string; icon: string; route: Href; userRoleType: string };
+type MenuChild = { title: string; route: Href; userRoleType: string };
 type MenuGroup = { key: string; title: string; icon: string; children: MenuChild[] };
 // DEP_OP: 운영업체, DEP_R: 휴게소, DEP_G: 주유소
 export default function AdminHomeScreen() {
@@ -32,11 +32,11 @@ export default function AdminHomeScreen() {
       title: '마스터',
       icon: '📁',
       children: [
-        { title: '사용자 정보수정', icon: '👤', route: '/(admin)/users', userRoleType: 'all_except_001' },
-        { title: '매장현황(휴)', icon: '🏬', route: '/(admin)/dashboard', userRoleType: DEP_R },
-        { title: '거래처현황(휴)', icon: '🏬', route: '/(admin)/vendorList', userRoleType: DEP_R },
-        { title: '거래처현황(주)', icon: '🏬', route: '/(admin)/vendorList', userRoleType: DEP_G },
-        { title: '키오스크품절관리(휴)', icon: '🛑', route: '/(admin)/kioskSoldOut', userRoleType: DEP_R },
+        { title: '사용자 정보수정', route: '/(admin)/users', userRoleType: 'all_except_001' },
+        { title: '매장현황(휴)', route: '/(admin)/dashboard', userRoleType: DEP_R },
+        { title: '거래처현황(휴)', route: '/(admin)/vendorList', userRoleType: DEP_R },
+        { title: '거래처현황(주)', route: '/(admin)/vendorList', userRoleType: DEP_G },
+        { title: '키오스크품절관리(휴)', route: '/(admin)/kioskSoldOut', userRoleType: DEP_R },
       ],
     },
     {
@@ -44,10 +44,10 @@ export default function AdminHomeScreen() {
       title: '매입',
       icon: '🧾',
       children: [
-        { title: '일자별 매입현황(휴)', icon: '📝', route: '/(admin)/purchaseDailyReport', userRoleType: DEP_R },
-        { title: '일자별 매입현황(통합)', icon: '📝', route: '/(admin)/purchaseDailyReportOp', userRoleType: DEP_OP },
-        { title: '일자별 매입현황(주)', icon: '📝', route: '/(admin)/purchaseDailyReportG', userRoleType: DEP_G },
-        { title: '상품별 매입현황(휴)',  icon: '📄', route: '/(admin)/purchaseProductReport' as Href, userRoleType: DEP_R },
+        { title: '일자별 매입현황(휴)', route: '/(admin)/purchaseDailyReport', userRoleType: DEP_R },
+        { title: '일자별 매입현황(통합)', route: '/(admin)/purchaseDailyReportOp', userRoleType: DEP_OP },
+        { title: '일자별 매입현황(주)', route: '/(admin)/purchaseDailyReportG', userRoleType: DEP_G },
+        { title: '상품별 매입현황(휴)', route: '/(admin)/purchaseProductReport' as Href, userRoleType: DEP_R },
       ],
     },
     {
@@ -55,23 +55,23 @@ export default function AdminHomeScreen() {
       title: '매출',
       icon: '💸',
       children: [
-        { title: '실시간 매장매출현황(휴)', icon: '⚡️', route: '/(admin)/realtimeSalesByCornerOp' as Href, userRoleType: DEP_OP },
-        { title: '실시간 매출현황(휴)', icon: '⚡️', route: '/(admin)/realtimeSales' as Href, userRoleType: DEP_R },
-        { title: '실시간 매출현황(주)', icon: '⚡️', route: '/(admin)/realtimeSalesG2' as Href, userRoleType: DEP_OP },
-        { title: '실시간 매출현황(주)', icon: '⚡️', route: '/(admin)/realtimeSalesG' as Href, userRoleType: DEP_G },
-        { title: '실시간 매출현황(통합)', icon: '⚡️', route: '/(admin)/realtimeSalesOp' as Href, userRoleType: DEP_OP },
-        { title: '시간대별 매출현황(휴)', icon: '⏱️', route: '/(admin)/saleReportByTimezone', userRoleType: DEP_R },
-        { title: '시간대별 매출현황(주)', icon: '⏱️', route: '/(admin)/saleReportByTimezoneG', userRoleType: DEP_G},
-        { title: '기간별 매출현황(휴)', icon: '🗓️', route: '/(admin)/salesReportByPeriod', userRoleType: DEP_R },
-        { title: '기간별 매출현황(주)', icon: '🗓️', route: '/(admin)/salesReportByPeriodG', userRoleType: DEP_G },
-        { title: '기간별 매출현황(통합)', icon: '🗓️', route: '/(admin)/salesReportByPeriodOp', userRoleType: DEP_OP },
-        { title: '시간대별 매출현황(통합)', icon: '🗓️', route: '/(admin)/saleReportByTimezoneOp', userRoleType: DEP_OP },
-        { title: '기간별 모바일주문현황(휴)', icon: '🗓️', route: '/(admin)/mobileOrderReportByPeriod', userRoleType: DEP_OP },
-        { title: '실시간 매출현황(통합비율)', icon: '🗓️', route: '/(admin)/realtimeSalesRatioOp', userRoleType: DEP_OP },
-        { title: '월 매출현황(휴)', icon: '📅', route: '/(admin)/monthlySalesReport', userRoleType: DEP_R },
-        { title: '시설별 실시간 매출(통합)', icon: '🏗️', route: '/(admin)/realtimeSalesBySalesOrgG', userRoleType: DEP_G },
-        { title: '시설별 실시간 매출(통합)', icon: '🏗️', route: '/(admin)/realtimeSalesBySalesOrg', userRoleType: DEP_R },
-        { title: '실시간 매장매출현황(휴)', icon: '🏪', route: '/(admin)/realtimeSalesByCorner', userRoleType: DEP_R },
+        { title: '실시간 매장매출현황(휴)', route: '/(admin)/realtimeSalesByCornerOp' as Href, userRoleType: DEP_OP },
+        { title: '실시간 매출현황(휴)', route: '/(admin)/realtimeSales' as Href, userRoleType: DEP_R },
+        { title: '실시간 매출현황(주)', route: '/(admin)/realtimeSalesG2' as Href, userRoleType: DEP_OP },
+        { title: '실시간 매출현황(주)', route: '/(admin)/realtimeSalesG' as Href, userRoleType: DEP_G },
+        { title: '실시간 매출현황(통합)', route: '/(admin)/realtimeSalesOp' as Href, userRoleType: DEP_OP },
+        { title: '시간대별 매출현황(휴)', route: '/(admin)/saleReportByTimezone', userRoleType: DEP_R },
+        { title: '시간대별 매출현황(주)', route: '/(admin)/saleReportByTimezoneG', userRoleType: DEP_G},
+        { title: '기간별 매출현황(휴)', route: '/(admin)/salesReportByPeriod', userRoleType: DEP_R },
+        { title: '기간별 매출현황(주)', route: '/(admin)/salesReportByPeriodG', userRoleType: DEP_G },
+        { title: '기간별 매출현황(통합)', route: '/(admin)/salesReportByPeriodOp', userRoleType: DEP_OP },
+        { title: '시간대별 매출현황(통합)', route: '/(admin)/saleReportByTimezoneOp', userRoleType: DEP_OP },
+        { title: '기간별 모바일주문현황(휴)', route: '/(admin)/mobileOrderReportByPeriod', userRoleType: DEP_OP },
+        { title: '실시간 매출현황(통합비율)', route: '/(admin)/realtimeSalesRatioOp', userRoleType: DEP_OP },
+        { title: '월 매출현황(휴)', route: '/(admin)/monthlySalesReport', userRoleType: DEP_R },
+        { title: '시설별 실시간 매출(통합)', route: '/(admin)/realtimeSalesBySalesOrgG', userRoleType: DEP_G },
+        { title: '시설별 실시간 매출(통합)', route: '/(admin)/realtimeSalesBySalesOrg', userRoleType: DEP_R },
+        { title: '실시간 매장매출현황(휴)', route: '/(admin)/realtimeSalesByCorner', userRoleType: DEP_R },
       ],
     },
     {
@@ -79,12 +79,12 @@ export default function AdminHomeScreen() {
       title: '재고',
       icon: '📦',
       children: [
-        { title: '재고현황(통합)', icon: '📝', route: '/(admin)/stockReport', userRoleType: DEP_OP },
-        { title: '재고현황(주)', icon: '📝', route: '/(admin)/cornerStockReportG', userRoleType: DEP_G },
-        { title: '실시간 재고현황(주)', icon: '📝', route: '/(admin)/realtimeStockReport', userRoleType: DEP_G },
-        { title: '매장 재고현황(휴)', icon: '📝', route: '/(admin)/cornerStockReport', userRoleType: DEP_R },
-        { title: '창고 재고현황(휴)',  icon: '📊', route: '/(admin)/warehouseStockReport', userRoleType: DEP_R },
-        { title: '매장 창고 재고현황(휴)',  icon: '📊', route: '/(admin)/cornerWhStockReport', userRoleType: DEP_R },
+        { title: '재고현황(통합)', route: '/(admin)/stockReport', userRoleType: DEP_OP },
+        { title: '재고현황(주)', route: '/(admin)/cornerStockReportG', userRoleType: DEP_G },
+        { title: '실시간 재고현황(주)', route: '/(admin)/realtimeStockReport', userRoleType: DEP_G },
+        { title: '매장 재고현황(휴)', route: '/(admin)/cornerStockReport', userRoleType: DEP_R },
+        { title: '창고 재고현황(휴)', route: '/(admin)/warehouseStockReport', userRoleType: DEP_R },
+        { title: '매장 창고 재고현황(휴)', route: '/(admin)/cornerWhStockReport', userRoleType: DEP_R },
       ],
     },
     {
@@ -92,8 +92,8 @@ export default function AdminHomeScreen() {
       title: 'TLG',
       icon: '📦',
       children: [
-        { title: 'TLG현황(통합)', icon: '📝', route: '/(admin)/tlgReportByPeriodOp', userRoleType: DEP_OP },
-        { title: 'TLG현황(통합)', icon: '📝', route: '/(admin)/tlgReportByPeriod', userRoleType: DEP_G },
+        { title: 'TLG현황(통합)', route: '/(admin)/tlgReportByPeriodOp', userRoleType: DEP_OP },
+        { title: 'TLG현황(통합)', route: '/(admin)/tlgReportByPeriod', userRoleType: DEP_G },
       ],
     },
     ], []);
@@ -123,8 +123,6 @@ export default function AdminHomeScreen() {
   const { logout } = useUser();
 
   const handleLogout = () => {
-    // 여기에 로그아웃 로직을 구현하세요
-    console.log('로그아웃3');
     try {
       router.replace('/(auth)/login');
       logout();
@@ -169,9 +167,7 @@ export default function AdminHomeScreen() {
                       style={styles.childItem}
                       onPress={() => handleMenuPress(item.route)}
                     >
-                      <View style={styles.childIcon}>
-                        <Text style={styles.childIconText}>{item.icon}</Text>
-                      </View>
+                      <View style={styles.childIcon} />
                       <View style={styles.childContent}>
                         <Text style={styles.childTitle}>{item.title}</Text>
                       </View>
@@ -281,11 +277,8 @@ const styles = StyleSheet.create({
   childIcon: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: '#f7f7f7',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
   },
   childIconText: {
     fontSize: 18,
