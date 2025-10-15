@@ -87,6 +87,11 @@ export function restDailySale(params) {
     return post(request, params);
 }
 
+export function mobRestRealTimeSaleStat(params) {
+    const request = host + "/api/v1/rest/sale/mobRestRealTimeSaleStat";
+    return post(request, params);
+}
+
 export function restStorTimeZoneSale(params) { //시간대별 매출현황(휴)
     const request = host + "/api/v1/rest/sale/restStorTimeZoneSale";
     return post(request, params);
@@ -120,7 +125,12 @@ export function mobRestRealTimeSaleNews(params) { //실시간 매장매출현황
 }
 
 export function mobRestRealTimeItemSale(params) { //실시간 매장매출현황(휴)
-    const request = host + "/api/v1/rest/sale/mobRestRealTimeSaleNews";
+    const request = host + "/api/v1/rest/sale/mobRestRealTimeItemSale";
+    return post(request, params);
+}
+
+export function mobRestRealTimeSaleDetail(params) { //실시간 매장매출현황(휴) 상세
+    const request = host + "/api/v1/rest/sale/mobRestRealTimeSaleDetail";
     return post(request, params);
 }
 
@@ -156,5 +166,35 @@ export function posGroupByOilDailySale(params) { //주유소 기간별 매출현
 
 export function oilTotalStockStatusList(params) {
     const request = host + "/api/v1/oilstock/oilTotalStockStatusList";
+    return post(request, params);
+}
+
+export function mobOilPeriodStock(params) {   //재고현황(주)
+    const request = host + "/api/v1/oilstock/mobOilPeriodStock";
+    return post(request, params);
+}
+
+export function mobOilRealTimeStock(params) {   //실시간 재고현황(주)
+    const request = host + "/api/v1/oilstock/mobOilRealTimeStock";
+    return post(request, params);
+}
+
+export function restCornerStockList(params) { //휴게소 매장 재고현황(휴)
+    const request = host + "/api/v1/stock/status/daily/list";
+    return post(request, params);
+}
+
+export function getItemClassList(params) { //휴게소 창고 재고현황(휴)
+    const request = host + "/api/v1/item-class/list";
+    return post(request, params);
+}
+
+export function restWarehouseStockList(params) { //휴게소 창고 재고현황(휴)
+    const request = host + "/api/v1/stock/status/warehouse/list2";
+    return post(request, params);
+}
+
+export function restWarehouseStockList2(params) { //휴게소 창고 재고현황(휴) > 상세
+    const request = host + "/api/v1/stock/status/item/daily/list";
     return post(request, params);
 }
