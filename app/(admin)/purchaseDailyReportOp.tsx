@@ -77,7 +77,7 @@ export default function PurchaseDailyReportScreen() {
     );
 
     const mainColumns: ColumnDef<PurchaseRow>[] = useMemo(() => ([
-        {key: 'no', title: Const.NO, flex: 0.5, align: 'center',
+        {key: 'no', title: Const.NO, flex: 0.5,
             renderCell: (_item, index) => (
                 <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
             ),

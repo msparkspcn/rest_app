@@ -113,7 +113,7 @@ export default function RealtimeSalesScreen() {
     }
 
     const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => ([
-        {key: 'no', title: Const.NO, flex: 0.4, align: 'center',
+        {key: 'no', title: Const.NO, flex: 0.4,
             renderCell: (_item, index) => (
                 <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
             ),
@@ -189,7 +189,7 @@ export default function RealtimeSalesScreen() {
     );
 
     const SaleDetailColumns: ColumnDef<SaleDetailRow>[] = useMemo(() => ([
-        {key: 'no', title: Const.NO, flex: 0.5, align: 'center',
+        {key: 'no', title: Const.NO, flex: 0.5,
             renderCell: (_item, index) => (
                 <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
             ),

@@ -15,10 +15,9 @@ type VendorRow = {
   useYn: '등록' | '취소';
 };
 
-type RegisterFilter = {
-  key: string;
-  name: string;
-}
+type RegisterFilter = { key: string; name: string; }
+
+type VendorDetailRow = { itemCd: string; itemNm: string };
 
 export default function VendorListScreen() {
   const [vendorQuery, setVendorQuery] = useState('');
@@ -89,8 +88,6 @@ export default function VendorListScreen() {
   const closeDetail = () => {
     setIsDetailVisible(false);
   };
-
-  type VendorDetailRow = { itemCd: string; itemNm: string };
 
   const vendorColumns: ColumnDef<VendorDetailRow>[] = useMemo(() => ([
     { key: 'no', title: Const.NO,     flex: 0.5, align: 'center',
