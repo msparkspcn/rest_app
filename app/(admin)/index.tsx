@@ -33,7 +33,7 @@ export default function AdminHomeScreen() {
       icon: '📁',
       children: [
         { title: '사용자 정보수정', route: '/(admin)/users', userRoleType: 'all_except_001' },
-        { title: '매장현황(휴)', route: '/(admin)/dashboard', userRoleType: DEP_R },
+        { title: '매장현황(휴)', route: '/(admin)/cornerList', userRoleType: DEP_R },
         { title: '거래처현황(휴)', route: '/(admin)/vendorList', userRoleType: DEP_R },
         { title: '거래처현황(주)', route: '/(admin)/vendorList', userRoleType: DEP_G },
         { title: '키오스크품절관리(휴)', route: '/(admin)/kioskSoldOut', userRoleType: DEP_R },

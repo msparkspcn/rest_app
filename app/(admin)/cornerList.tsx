@@ -8,13 +8,13 @@ import {Table} from "../../components/Table";
 import Const from "../../constants/Const";
 import {useUser} from "../../contexts/UserContext";
 import {User, Corner} from "../../types";
+import {ColumnDef} from "../../types/table";
 
-type OperateFilter = {
-  key: string;
-  name: string;
-}
+type OperateFilter = { key: string; name: string; }
 
-export default function DashboardScreen() {
+type ItemRow = { itemCd: string; itemNm: string };
+
+export default function CornerListScreen() {
   const operateOptions: OperateFilter[] = [
     { key: "", name: "전체" },
     { key: "1", name: "운영" },
@@ -79,16 +79,6 @@ export default function DashboardScreen() {
     setIsDetailVisible(false);
   };
 
-  type Align = 'left' | 'center' | 'right';
-  type ColumnDef<T> = {
-    key: keyof T | string;
-    title: string;
-    flex: number;
-    align?: Align;
-    headerAlign?: Align;
-    cellAlign?: Align;
-  };
-
   const mainColumns: ColumnDef<Corner>[] = useMemo(() => ([
     { key: 'no', title: Const.NO, flex: 0.6,
       renderCell: (_item, index) => (
@@ -118,7 +108,7 @@ export default function DashboardScreen() {
     },
   ]), []);
 
-  type ItemRow = { itemCd: string; itemNm: string };
+
 
   const itemColumns: ColumnDef<ItemRow>[] = useMemo(() => ([
     { key: 'no',          title: Const.NO,     flex: 0.4,

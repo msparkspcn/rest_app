@@ -24,7 +24,7 @@ export default function AdminLayout() {
                     options={{title: '홈', headerShown: true}}
                 />
                 <Stack.Screen
-                    name="dashboard"
+                    name="cornerList"
                     options={{title: '매장현황(휴)', headerShown: true}}
                 />
                 <Stack.Screen
