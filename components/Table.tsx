@@ -63,12 +63,12 @@ export function Table<T>({
             const summaryItem = item as any; // 타입 단순화
             return (
                 <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-                    <View style={[{flex: 2.8}, commonStyles.tableRightBorder]}>
+                    <View style={[{flex: 2.5}, commonStyles.tableRightBorder]}>
                         <Text style={[commonStyles.summaryLabelText, {textAlign: 'center', fontSize: 13 }]}>
-                            {summaryItem.cornerNm}
+                            {summaryItem.orgNm}
                         </Text>
                     </View>
-                    <View style={[{flex: 1.2}, commonStyles.tableRightBorder]}>
+                    <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
                         <Text style={[commonStyles.numberCell]}>
                             {summaryItem.totalSaleAmt.toLocaleString()}
                         </Text>

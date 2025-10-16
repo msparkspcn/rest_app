@@ -69,6 +69,7 @@ export const commonStyles = StyleSheet.create({
     tableContainer: {
         flex: 1,
         backgroundColor: '#fff',
+        maxHeight: 580,
         marginTop: 10,
         marginHorizontal: 10,
         overflow: 'hidden',

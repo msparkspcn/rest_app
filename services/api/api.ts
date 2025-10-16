@@ -198,3 +198,15 @@ export function restWarehouseStockList2(params) { //휴게소 창고 재고현�
     const request = host + "/api/v1/stock/status/item/daily/list";
     return post(request, params);
 }
+
+
+export function mobOperPeriodSale(params) { //운영업체 기간별 매출현황(통합)
+    const request = host + "/api/v1/oper/sale/mobOperPeriodSale";
+    return post(request, params);
+}
+
+export function mobOperSaleDetail(params) { //운영업체 기간별 매출현황(통합) > 상세
+    const request = host + "/api/v1/oper/sale/mobOperSaleDetail";
+    return post(request, params);
+}
+
