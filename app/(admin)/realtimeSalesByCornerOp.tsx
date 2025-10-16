@@ -13,27 +13,23 @@ import {useUser} from "../../contexts/UserContext";
 import * as api from "../../services/api/api";
 import ListModal from "../../components/ListModal";
 type SaleRow = {
+    storCd: string;
+    cornerCd: string;
     cornerNm: string;
-    saleAmt: number;
-    dayCompRatio: string;
-    monthSaleAmt: number;
-    monthCompRatio: string
+    saleAmt: number; // DC 포함 금액
+    monthlySaleAmt: number; // DC 포함 금액
+    actualSaleAmt: number; // DC 미포함 금액
+    monthlyActualSaleAmt: number; // DC 미포함 금액
+    dailySaleRatio: string;
+    monthlySaleRatio: string
 };
 type SaleDetailRow = {
     no: number;
     itemNm: string;
-    qty: number;
-    totalAmt: number;
-    compRatio: string;
+    saleQty: number;
+    actualSaleAmt: number;
+    saleRatio: string;
 }
-
-type CornerRow = {
-    no: number;
-    cornerNm: string;
-    cornerCd: string;
-    posGroup: string;
-    useYn: 'Y' | 'N';
-};
 
 export default function RealtimeSalesByCornerOp() {
     const [saleDate, setSaleDate] = useState(getTodayYmd());
@@ -41,17 +37,19 @@ export default function RealtimeSalesByCornerOp() {
     const [tempDate, setTempDate] = useState<Date | null>(null);
 
     const [isDetailVisible, setIsDetailVisible] = useState(false);
-    const [selectedCorner, setSelectedCorner] = useState<CornerRow | null>(null);
+    const [selectedSale, setSelectedSale] = useState<SaleRow | null>(null);
     const [showSalesOrgListModal, setShowSalesOrgListModal] = useState(false);
     const [dcIncludedChecked, setDcIncludedChecked] = useState(false);
-    const [selected, setSelected] = useState('option1');
+    const [appliedDcChecked, setAppliedDcChecked] = useState(false);
+    const [sortOrder, setSortOrder] = useState('0');
     const {user}: User = useUser();
     const [salesOrgList, setSalesOrgList] = useState<SalesOrg[]>([]);
     const [cornerList, setCornerList] = useState<Corner[]>([]);
     const [showCornerModal, setShowCornerModal] = useState(false);
     const [selectedCornerCd, setSelectedCornerCd] = useState<string | null>('');
     const [selectedSalesOrgCd, setSelectedSalesOrgCd] = useState<string | null>('');
-
+    const [saleList, setSaleList] = useState<[] | null>(null);
+    const [saleDetailList, setSaleDetailList] = useState<[] | null>(null);
 
     useEffect(() => {
         getSalesOrgList();
@@ -103,35 +101,47 @@ export default function RealtimeSalesByCornerOp() {
             });
     };
 
-    const baseData: SaleRow[] = useMemo(
-        () =>
-            Array.from({length: 20}).map((_, idx) => {
-                const saleAmt = 10000 + (idx % 5) * 3000;
-                const dayCompRatio = (saleAmt/100).toFixed(1)+'%';
-                const monthSaleAmt = 10000 + (idx % 5);
-                const monthCompRatio = (monthSaleAmt / 100).toFixed(1)+'%';
-                return {
-                    cornerNm: `그룹 ${idx + 1}`,
-                    saleAmt: saleAmt,
-                    dayCompRatio: dayCompRatio,
-                    monthSaleAmt: monthSaleAmt,
-                    monthCompRatio: monthCompRatio,
-                };
-            }),
-        []
-    );
-
-    // const filteredData = useMemo(() => {
-    //     if (!selectedStorCd) return baseData;
-    //     const groupName = posGroups.find(g => g.id === selectedStorCd)?.name;
-    //     return baseData.filter(r => (groupName ? r.cornerNm === groupName : true));
-    // }, [baseData, posGroups, selectedStorCd]);
-
     const onSearch = () => {
+        console.log("조회 클릭")
         if(selectedSalesOrgCd=='') {
             Alert.alert(Const.ERROR, Const.NO_SALES_ORG_MSG);
             return;
         }
+
+        setAppliedDcChecked(dcIncludedChecked);
+
+        const request = {
+            cmpCd: user.cmpCd,
+            cornerCd: "",
+            fromSaleDt: saleDate,
+            salesOrgCd: user.salesOrgCd,
+            storCd: "",
+            toSaleDt: saleDate
+        }
+        api.mobRestRealTimeSaleNews(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const saleList = result.data.responseBody;
+                    console.log('saleList:' + JSON.stringify(saleList));
+
+                    const sortedList = [...saleList].sort((a, b) =>
+                        a.storeNm.localeCompare(b.storeNm, 'ko', {
+                            numeric: true,      // 숫자를 실제 숫자처럼 정렬 (1, 2, 10 순)
+                            sensitivity: 'base' // 대소문자 구분 없이 비교
+                        })
+                    );
+                    if(sortOrder == '0') {
+                        setSaleList(sortedList);
+                    }
+                    else {
+                        setSaleList(saleList);
+                    }
+
+                }
+            })
+            .catch(error => {
+                console.log("mobRestRealTimeSaleNews error:" + error)
+            });
     };
 
     const openDatePicker = () => {
@@ -139,11 +149,33 @@ export default function RealtimeSalesByCornerOp() {
         setShowDatePicker(true);
     };
 
-    const openDetail = (corner: CornerRow) => {
-        console.log('corner:' + JSON.stringify(corner))
-        setSelectedCorner(corner)
-        setIsDetailVisible(true);
+    const openDetail = (sale: SaleRow) => {
+        console.log("매출금액 클릭 item:"+JSON.stringify(sale)+",saleDate:"+saleDate);
+        setSelectedSale(sale);
+
+        const request = {
+            cmpCd: user.cmpCd,
+            cornerCd: sale.cornerCd,
+            fromSaleDt: saleDate,
+            salesOrgCd: user.salesOrgCd,
+            storCd: sale.storCd,
+            toSaleDt: saleDate
+        }
+        console.log('request:'+JSON.stringify(request));
+        api.mobRestRealTimeItemSale(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const saleDetailList = result.data.responseBody;
+                    console.log('saleDetailList:' + JSON.stringify(saleDetailList))
+                    setSaleDetailList(saleDetailList);
+                    setIsDetailVisible(true);
+                }
+            })
+            .catch(error => {
+                console.log("mobRestRealTimeItemSale error:" + error)
+            });
     }
+
     const handleDcIncludedToggle = () => {
         setDcIncludedChecked(!dcIncludedChecked)
     }
@@ -160,96 +192,103 @@ export default function RealtimeSalesByCornerOp() {
             key: 'saleAmt', title: Const.SALE_AMT, flex: 0.9, align: 'center',
             renderCell: (item) => (
                 <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
-                    <Text style={[commonStyles.cell, commonStyles.linkText, {
-                        textAlign: 'right',
-                        paddingRight: 10
-                    }]}>{item.saleAmt.toLocaleString()}</Text>
+                    <Text style={[
+                        commonStyles.cell,
+                        commonStyles.linkText,
+                        {textAlign: 'right', paddingRight: 10
+                    }]}>
+                        {appliedDcChecked
+                            ? item.saleAmt.toLocaleString()
+                            : item.actualSaleAmt.toLocaleString()}
+                    </Text>
                 </Pressable>
             )
         },
         {
-            key: 'dayCompRatio', title: Const.COMP_RATIO, flex: 0.8, align: 'center',
+            key: 'dailySaleRatio', title: Const.COMP_RATIO, flex: 0.8, align: 'center',
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.dayCompRatio.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.dailySaleRatio.toLocaleString()}</Text>
             )
         },
         {
-            key: 'monthSaleAmt', title: Const.MONTH_TOTAL_AMT, flex: 1.2, align: 'center',
+            key: 'monthlySaleAmt', title: Const.MONTH_TOTAL_AMT, flex: 1.2, align: 'center',
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.monthSaleAmt.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>
+                    {appliedDcChecked
+                        ? item.monthlySaleAmt.toLocaleString()
+                        : item.monthlyActualSaleAmt.toLocaleString()}
+                </Text>
             )
         },
         {
-            key: 'monthCompRatio', title: Const.COMP_RATIO, flex: 0.8, align: 'center',
+            key: 'monthlySaleRatio', title: Const.COMP_RATIO, flex: 0.8, align: 'center',
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.monthCompRatio.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.monthlySaleRatio.toLocaleString()}</Text>
             )
         },
     ]), [])
 
-    // const totalSaleAmt = useMemo(() => filteredData.reduce((acc, r) => acc + r.saleAmt, 0), [filteredData]);
-    // const totalMonthSaleAmt = useMemo(() => filteredData.reduce((acc, r) => acc + r.monthSaleAmt, 0), [filteredData]);
+    const totalSaleAmt = useMemo(
+        () => (saleList ?? []).reduce((acc, r) => acc + r.saleAmt, 0), [saleList]);
+    const totalMonthSaleAmt = useMemo(() => (saleList ?? []).reduce((acc, r) => acc + r.monthlySaleAmt, 0), [saleList]);
+    const totalActualSaleAmt = useMemo(
+        () => (saleList ?? []).reduce((acc, r) => acc + r.actualSaleAmt, 0), [saleList]);
+    const totalActualMonthSaleAmt = useMemo(() => (saleList ?? []).reduce((acc, r) => acc + r.monthlyActualSaleAmt, 0), [saleList]);
 
-
-    // const renderFooter = () => (
-    //     <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-    //         <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
-    //             <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.totalText,
-    //                 {fontSize: 13, fontWeight: 'bold'}]}>{Const.TOTAL_AMT}</Text>
-    //         </View>
-    //         <View style={[{flex: 1.7}, commonStyles.tableRightBorder]}>
-    //             <Text style={[commonStyles.cell, styles.totalText, commonStyles.numberCell]}>{totalSaleAmt.toLocaleString()}</Text>
-    //         </View>
-    //         <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
-    //             <Text style={[commonStyles.cell, styles.totalText, commonStyles.numberCell]}>{totalMonthSaleAmt.toLocaleString()}</Text>
-    //         </View>
-    //     </View>
-    // );
-
-    const detailData: SaleDetailRow[] = useMemo(
-        () =>
-            Array.from({length: 10}).map((_, idx) => {
-                const qty = 10+ idx;
-                const totalAmt = qty * 11000;
-                return {
-                    no: idx + 1,
-                    itemNm: `상품명 ${((idx % 6) + 1).toString().padStart(2, '0')}`,
-                    qty,
-                    totalAmt,
-                    compRatio: ((totalAmt / 10)).toFixed(1) + '%'
-                };
-            }),
-        []
+    const renderFooter = () => (
+        <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+            <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.totalText,
+                    {fontSize: 13, fontWeight: 'bold'}]}>{Const.TOTAL_AMT}</Text>
+            </View>
+            <View style={[{flex: 1.7}, commonStyles.tableRightBorder]}>
+                <Text style={[commonStyles.cell, styles.totalText, commonStyles.numberCell]}>
+                    {appliedDcChecked
+                        ? totalSaleAmt.toLocaleString()
+                        : totalActualSaleAmt.toLocaleString()}
+                </Text>
+            </View>
+            <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
+                <Text style={[commonStyles.cell, styles.totalText, commonStyles.numberCell]}>
+                    {appliedDcChecked
+                        ? totalMonthSaleAmt.toLocaleString()
+                        : totalActualMonthSaleAmt.toLocaleString()
+                    }
+                </Text>
+            </View>
+        </View>
     );
 
     const summaryRow = useMemo(() => {
-        const totalSaleAmt = detailData.reduce((sum, item) => sum + item.totalAmt, 0);
-        const totalQty = detailData.reduce((sum, item) => sum + item.qty, 0);
-        const totalCompRatio = detailData.reduce((sum, item) => sum + item.compRatio, 0.0+'%');
-        return {
-            totalQty: totalQty,
-            totalSaleAmt: totalSaleAmt,
-            totalCompRatio: totalCompRatio
-        };
-    }, [detailData]);
+        if(saleDetailList) {
+            const totalSaleAmt = saleDetailList.reduce((sum, item) => sum + item.actualSaleAmt, 0);
+            const totalQty = saleDetailList.reduce((sum, item) => sum + item.saleQty, 0);
+            const totalCompRatio = saleDetailList.reduce((sum, item) => sum + item.saleRatio, 0.0+'%');
+            return {
+                totalQty: totalQty,
+                totalSaleAmt: totalSaleAmt,
+                totalCompRatio: totalCompRatio
+            };
+        }
+    }, [saleDetailList]);
 
     const SaleDetailColumns: ColumnDef<SaleDetailRow>[] = useMemo(() => ([
         {key: 'no', title: Const.NO, flex: 0.5, align: 'center'},
         {key: 'itemNm', title: Const.ITEM_NM, flex: 2, align: 'center'},
         {
-            key: 'qty', title: Const.QTY, flex: 0.6, align: 'center',
+            key: 'saleQty', title: Const.QTY, flex: 0.6, align: 'center',
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>{item.qty.toLocaleString()}</Text>
             )
         },
         {
-            key: 'totalAmt', title: '금액', flex: 1, align: 'right',
+            key: 'actualSaleAmt', title: '금액', flex: 1, align: 'right',
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>{item.totalAmt.toLocaleString()}</Text>
             )
         },
         {
-            key: 'compRatio', title: Const.COMP_RATIO, flex: 0.6, align: 'right',
+            key: 'saleRatio', title: Const.COMP_RATIO, flex: 0.6, align: 'right',
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>{item.totalAmt.toLocaleString()}%</Text>
             )
@@ -321,11 +360,11 @@ export default function RealtimeSalesByCornerOp() {
                     <Text style={commonStyles.filterLabel}>출력순서</Text>
                     <MyRadioGroup
                         options={[
-                            { label: '매장명', value: 'option1' },
-                            { label: '매장순서', value: 'option2' },
+                            { label: '매장명', value: '0' },
+                            { label: '매장순서', value: '1' },
                         ]}
-                        selected={selected}
-                        onChange={setSelected}
+                        selected={sortOrder}
+                        onChange={setSortOrder}
                     />
                 </View>
                 <View style={commonStyles.filterRow}>
@@ -346,11 +385,11 @@ export default function RealtimeSalesByCornerOp() {
 
             <View style={commonStyles.sectionDivider}/>
 
-            {/*<Table*/}
-            {/*    data={filteredData}*/}
-            {/*    columns={mainColumns}*/}
-            {/*    listFooter={renderFooter}*/}
-            {/*/>*/}
+            <Table
+                data={saleList}
+                columns={mainColumns}
+                listFooter={renderFooter}
+            />
 
             <DatePickerModal
                 visible={showDatePicker}
@@ -393,14 +432,14 @@ export default function RealtimeSalesByCornerOp() {
                 <View style={commonStyles.modalOverlay}>
                     <View style={commonStyles.modalCard}>
                         <View style={commonStyles.modalHeader}>
-                            <Text style={commonStyles.modalTitle}>{selectedCorner?.cornerNm}</Text>
+                            <Text style={commonStyles.modalTitle}>{selectedSale?.cornerNm}</Text>
                             <TouchableOpacity onPress={() => setIsDetailVisible(false)}>
                                 <Text style={commonStyles.modalClose}>✕</Text>
                             </TouchableOpacity>
                         </View>
 
                         <Table
-                            data={detailData}
+                            data={saleDetailList}
                             columns={SaleDetailColumns}
                             isModal={true}
                             listFooter={renderDetailFooterRow}
