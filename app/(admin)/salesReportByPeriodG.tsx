@@ -309,7 +309,7 @@ export default function SalesReportByPeriod() {
                 <View style={commonStyles.modalOverlay}>
                     <View style={commonStyles.modalCard}>
                         <View style={commonStyles.modalHeader}>
-                            <Text style={commonStyles.modalTitle}>{formattedDate(selectedSale?.saleDt)}{' '+selectedStorCd.name}</Text>
+                            <Text style={commonStyles.modalTitle}>{formattedDate(selectedSale?.saleDt)}{'   '+selectedStorCd.name}</Text>
                             <Pressable onPress={closeDetail} hitSlop={8}>
                                 <Ionicons name="close" size={24} color="#333" />
                             </Pressable>

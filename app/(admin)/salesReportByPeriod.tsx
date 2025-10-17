@@ -27,7 +27,7 @@ type SaleRow = {
     salesOrgCd: string; //임시
     storCd: string;
     cornerCd: string;
-    cornerNm: string;
+    orgNm: string;
     saleAmt: number;
     taxSaleAmt: number;
     totalSaleAmt: number; //임시로 총매출로 사용(값이 있음)
@@ -112,7 +112,8 @@ export default function SalesReportByPeriod() {
         restDailyCornerSale();
     };
 
-    const restCornerByItemSale = (sale: SaleRow) => {
+    const openDetail = (sale: SaleRow) => {
+        setSelectedSale(sale);
         console.log('매장명 클릭 sale:'+JSON.stringify(sale));
         const request = {
             cmpCd: sale.cmpCd,
@@ -126,20 +127,15 @@ export default function SalesReportByPeriod() {
         api.restCornerByItemSale(request)
             .then(result => {
                 if (result.data.responseBody != null) {
-                    const saleList = result.data.responseBody;
-                    console.log('saleList13213:' + JSON.stringify(saleList))
-                    setSaleDetailList(saleList);
+                    const saleDetailList = result.data.responseBody;
+                    console.log('saleDetailList:' + JSON.stringify(saleDetailList))
+                    setSaleDetailList(saleDetailList);
                     setIsDetailVisible(true);
                 }
             })
             .catch(error => {
                 console.log("restCornerByItemSale error:" + error)
             });
-    }
-
-    const openDetail = (sale: SaleRow) => {
-        setSelectedSale(sale);
-        restCornerByItemSale(sale);
     };
 
     const closeDetail = () => {
@@ -153,7 +149,7 @@ export default function SalesReportByPeriod() {
         const totalSum = saleList.reduce((acc, cur) => acc + cur.totalSaleAmt, 0);  //임시
         return {
             ...saleList[0],
-            cornerNm: '전체 합계',
+            orgNm: '전체 합계',
             saleAmt: totalSum,
             cornerCd: '',
             saleDt: '',
@@ -198,7 +194,7 @@ export default function SalesReportByPeriod() {
                         salesOrgCd: '',
                         storCd: '',
                         cornerCd: '',
-                        cornerNm: `${formattedDate(date)} 소계`,
+                        orgNm: `${formattedDate(date)} 소계`,
                         taxSaleAmt: 0,
                         saleAmt: dateSum,
                         totalSaleAmt: dateSum,
@@ -228,9 +224,9 @@ export default function SalesReportByPeriod() {
             },
         },
         {
-            key: 'cornerNm',
+            key: 'orgNm',
             title: Const.CORNER_NM,
-            flex: 1.8,
+            flex: 1.5,
             align: 'left',
             renderCell: (item) => (
                     <Pressable style={commonStyles.columnPressable} onPress={() => {openDetail(item)}}>
@@ -245,7 +241,7 @@ export default function SalesReportByPeriod() {
         {
             key: 'saleAmt',
             title: '총매출',
-            flex: 1.2,
+            flex: 1.5,
             align: 'right',
             renderCell: (item) => (
                 <Text style={[commonStyles.numberCell, item.isSummary ? { fontWeight: 'bold' } : null]}>
@@ -259,12 +255,12 @@ export default function SalesReportByPeriod() {
         if (!totalSumRow) return null;
         return (
             <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-                <View style={[{ flex: 2.8 }, commonStyles.tableRightBorder]}>
+                <View style={[{ flex: 2.5 }, commonStyles.tableRightBorder]}>
                     <Text style={[commonStyles.cell, commonStyles.summaryLabelText, { textAlign: 'center' }]}>
                         합계
                     </Text>
                 </View>
-                <View style={[{ flex: 1.2 }, commonStyles.tableRightBorder]}>
+                <View style={[{ flex: 1.5 }, commonStyles.tableRightBorder]}>
                     <Text style={commonStyles.numberCell}>
                         {totalSumRow.saleAmt.toLocaleString()}
                     </Text>
@@ -407,7 +403,7 @@ export default function SalesReportByPeriod() {
                     <View style={commonStyles.modalCard}>
                         <View style={commonStyles.modalHeader}>
                             <Text style={commonStyles.modalTitle}>
-                                {formattedDate(selectedSale?.saleDt)}  {selectedSale?.cornerNm}
+                                {formattedDate(selectedSale?.saleDt)}  {selectedSale?.orgNm}
                             </Text>
                             <Pressable onPress={closeDetail} hitSlop={8}>
                                 <Ionicons name="close" size={24} color="#333"/>
