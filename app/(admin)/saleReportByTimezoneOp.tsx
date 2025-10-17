@@ -1,6 +1,6 @@
 import {StatusBar} from 'expo-status-bar';
 import React, {useEffect, useMemo, useState} from 'react';
-import {FlatList, Modal, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {commonStyles} from "../../styles/index";
 import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
 import {Table} from "../../components/Table";
@@ -12,13 +12,13 @@ import * as api from "../../services/api/api";
 import {useUser} from "../../contexts/UserContext";
 import ListModal from "../../components/ListModal";
 
-type SaleRow = { tmzonDiv: string; totalAmt: number, ratio: number };
+type SaleRow = { tmzonDiv: string; actualSaleAmt: number, saleRatio: number };
 type ListItem = {
     type: "summaryTotals";
     key: string;
     label: string;
     totalAmt: number;
-    billCnt: number
+    totalSaleRatio: number
 };
 
 export default function SalesReportByTimezoneScreen() {
@@ -28,12 +28,12 @@ export default function SalesReportByTimezoneScreen() {
     const [toSaleDt, setToSaleDt] = useState(getTodayYmd());
     const [currentPickerType, setCurrentPickerType] = useState('from')
 
-    const [selectedStorCd, setSelectedStorCd] = useState<string | null>(null);
     const [showSalesOrgListModal, setShowSalesOrgListModal] = useState(false);
     const [selectedSalesOrgCd, setSelectedSalesOrgCd] = useState<string>('');
 
     const {user}: User = useUser();
     const [salesOrgList, setSalesOrgList] = useState<SalesOrg[]>([]);
+    const [saleList, setSaleList] = useState<SaleRow[]>([]);
 
     useEffect(() => {
         getSalesOrgList();
@@ -48,7 +48,6 @@ export default function SalesReportByTimezoneScreen() {
         console.log("request:"+JSON.stringify(request))
         api.getSalsOrgList(request)
             .then(result => {
-                console.log("result:"+JSON.stringify(result))
                 if (result.data.responseBody != null) {
                     const salesOrgList = result.data.responseBody;
                     console.log('salesOrgList:' + JSON.stringify(salesOrgList))
@@ -64,26 +63,28 @@ export default function SalesReportByTimezoneScreen() {
             });
     }
 
-    const baseData: SaleRow[] = useMemo(
-        () =>
-            Array.from({length: 24}).map((_, idx) => {
-                const tmzonDiv = String(idx + 1).padStart(2, "0") + "시";
-                return {
-                    tmzonDiv,
-                    ratio: idx * 10,
-                    totalAmt: 10000,
-                };
-            }),
-        []
-    );
-
-    const filteredData = useMemo(() => {
-        if (!selectedStorCd) return baseData;
-        return baseData;
-    }, [baseData, selectedStorCd]);
-
     const onSearch = () => {
-        // 데모: 현재는 선택 값만으로 필터링 적용
+        console.log('조회 클릭')
+        const request = {
+            cmpCd: user.cmpCd,
+            salesOrgCd: selectedSalesOrgCd,
+            fromSaleDt: fromSaleDt,
+            toSaleDt: toSaleDt,
+            storCd: ""
+        }
+        console.log("request:"+JSON.stringify(request))
+        api.mobOperTmzonSale(request)
+            .then(result => {
+                console.log("result:"+JSON.stringify(result.data))
+                if (result.data.responseBody != null) {
+                    const saleList = result.data.responseBody;
+                    console.log('saleList:' + JSON.stringify(saleList))
+                    setSaleList(saleList);
+                }
+            })
+            .catch(error => {
+                console.log("mobOperTmzonSale error:" + error)
+            });
     };
 
     const openDatePicker = (pickerType: string) => {
@@ -93,34 +94,28 @@ export default function SalesReportByTimezoneScreen() {
     };
 
     const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => ([
-        {key: 'tmzonDiv', title: '시간대', flex: 1, align: 'center'},
+        {key: 'tmzonDiv', title: '시간대', flex: 1, align: 'center',
+            renderCell: (item) => (
+                <Text style={[{textAlign:'center'}, commonStyles.cell]}>{item.tmzonDiv}시</Text>
+            )
+        },
         {
-            key: 'totalAmt', title: '판매금액', flex: 1, align: 'center',
+            key: 'actualSaleAmt', title: '판매금액', flex: 1, align: 'center',
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>
-                    {item.totalAmt.toLocaleString()}
+                    {item.actualSaleAmt.toLocaleString()}
                 </Text>
             )
         },
         {
-            key: 'ratio', title: '비율', flex: 0.5, align: 'center',
+            key: 'saleRatio', title: '비율', flex: 0.5, align: 'center',
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>
-                    {item.ratio.toLocaleString()}.0%
+                    {item.saleRatio.toFixed(2)}%
                 </Text>
             )
         },
     ]), [])
-
-    const totalValues = useMemo(() => {
-        return filteredData.reduce(
-            (acc, r) => {
-                acc.totalAmt += r.totalAmt;
-                return acc;
-            },
-            {cashAmt: 0, cardEtc: 0, totalAmt: 0}
-        );
-    }, [filteredData]);
 
     // 3행 요약 데이터 구성
     const summaryRows = useMemo(() => {
@@ -133,15 +128,15 @@ export default function SalesReportByTimezoneScreen() {
 
         // ✅ 특정 구간 totalAmt 합산 함수
         const sumByGroup = (group: string[]) =>
-            baseData
+            saleList
                 .filter((row) => group.includes(String(row.tmzonDiv).padStart(2, "0")))
                 .reduce(
                     (acc, row) => {
-                        acc.billCnt += row.ratio;
-                        acc.totalAmt += row.totalAmt;
+                        acc.totalSaleRatio += row.saleRatio;
+                        acc.totalAmt += row.actualSaleAmt;
                         return acc;
                     },
-                    {billCnt: 0, totalAmt: 0}
+                    {totalSaleRatio: 0, totalAmt: 0}
                 );
 
         const dawnTotals = sumByGroup(timeGroups.dawn);
@@ -156,31 +151,31 @@ export default function SalesReportByTimezoneScreen() {
             key: 'time-dawn',
             label: '새벽\n[01시-06시]',
             totalAmt: dawnTotals.totalAmt,
-            billCnt: dawnTotals.billCnt
+            totalSaleRatio: dawnTotals.totalSaleRatio
         };
         const row2: ListItem = {
             type: 'summaryTotals',
             key: 'time-morning',
             label: '오전\n[07시-12시]',
             totalAmt: morningTotals.totalAmt,
-            billCnt: morningTotals.billCnt
+            totalSaleRatio: morningTotals.totalSaleRatio
         };
         const row3: ListItem = {
             type: 'summaryTotals',
             key: 'time-afternoon',
             label: '오후\n[13시-18시]',
             totalAmt: afternoonTotals.totalAmt,
-            billCnt: afternoonTotals.billCnt
+            totalSaleRatio: afternoonTotals.totalSaleRatio
         };
         const row4: ListItem = {
             type: 'summaryTotals',
             key: 'time-night',
             label: '저녁\n[19시-24시]',
             totalAmt: nightTotals.totalAmt,
-            billCnt: nightTotals.billCnt
+            totalSaleRatio: nightTotals.totalSaleRatio
         };
         return [row1, row2, row3, row4];
-    }, [totalValues]);
+    }, [saleList]);
 
     return (
         <SafeAreaView style={commonStyles.container}>
@@ -215,7 +210,7 @@ export default function SalesReportByTimezoneScreen() {
 
             <View style={commonStyles.sectionDivider}/>
             <Table
-                data={filteredData}
+                data={saleList}
                 columns={mainColumns}
                 listHeader={() => (
                     <View>
@@ -228,14 +223,14 @@ export default function SalesReportByTimezoneScreen() {
                                 </View>
                                 <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
                                     <Text style={commonStyles.numberCell}>
-                                        {row.totalAmt}
+                                        {row.totalAmt.toLocaleString()}
                                     </Text>
                                 </View>
                                 <View style={[{
                                     flex: 0.5,
                                 }, commonStyles.tableRightBorder]}>
                                     <Text style={commonStyles.numberCell}>
-                                        {row.billCnt}
+                                        {row.totalSaleRatio.toFixed(2)}%
                                     </Text>
                                 </View>
                             </View>

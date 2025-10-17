@@ -219,3 +219,8 @@ export function mobOperSaleDetail(params) { //운영업체 기간별 매출현�
     const request = host + "/api/v1/oper/sale/mobOperSaleDetail";
     return post(request, params);
 }
+
+export function mobOperTmzonSale(params) { //운영업체 시간대별 매출현황(통합)
+    const request = host + "/api/v1/oper/sale/mobOperTmzonSale";
+    return post(request, params);
+}
