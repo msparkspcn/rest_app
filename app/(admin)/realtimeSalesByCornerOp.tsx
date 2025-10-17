@@ -20,15 +20,20 @@ type SaleRow = {
     monthlySaleAmt: number; // DC 포함 금액
     actualSaleAmt: number; // DC 미포함 금액
     monthlyActualSaleAmt: number; // DC 미포함 금액
-    dailySaleRatio: string;
-    monthlySaleRatio: string
+    dailySaleRatio: number; // DC 포함 비율
+    monthlySaleRatio: number // DC 포함 비율
+    dailyActualSaleRatio: number; // DC 포함 비율
+    monthlyActualSaleRatio: number // DC 미포함 비율
+
 };
 type SaleDetailRow = {
     no: number;
     itemNm: string;
     saleQty: number;
-    actualSaleAmt: number;
-    saleRatio: string;
+    saleAmt: number; // DC 포함 금액
+    actualSaleAmt: number;  // DC 미포함 금액
+    saleRatio: number; // DC 포함 비율
+    actualSaleRatio: number;    // DC 미포함 비율
 }
 
 export default function RealtimeSalesByCornerOp() {
@@ -68,7 +73,6 @@ export default function RealtimeSalesByCornerOp() {
         console.log("request:"+JSON.stringify(request))
         api.getSalsOrgList(request)
             .then(result => {
-                console.log("result:"+JSON.stringify(result))
                 if (result.data.responseBody != null) {
                     const salesOrgList = result.data.responseBody;
                     console.log('salesOrgList:' + JSON.stringify(salesOrgList))
@@ -151,6 +155,7 @@ export default function RealtimeSalesByCornerOp() {
 
     const openDetail = (sale: SaleRow) => {
         console.log("매출금액 클릭 item:"+JSON.stringify(sale)+",saleDate:"+saleDate);
+        // console.log('dc포함여부:'+appliedDcChecked);
         setSelectedSale(sale);
 
         const request = {
@@ -207,7 +212,12 @@ export default function RealtimeSalesByCornerOp() {
         {
             key: 'dailySaleRatio', title: Const.COMP_RATIO, flex: 0.8, align: 'center',
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.dailySaleRatio.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>
+                    {appliedDcChecked
+                        ? item.dailySaleRatio.toLocaleString()
+                        :item.dailyActualSaleRatio.toLocaleString()
+                    }
+                </Text>
             )
         },
         {
@@ -223,10 +233,15 @@ export default function RealtimeSalesByCornerOp() {
         {
             key: 'monthlySaleRatio', title: Const.COMP_RATIO, flex: 0.8, align: 'center',
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.monthlySaleRatio.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>
+                    {appliedDcChecked
+                        ? item.monthlySaleRatio.toLocaleString()
+                        : item.monthlyActualSaleRatio.toLocaleString()
+                    }
+                </Text>
             )
         },
-    ]), [])
+    ]), [saleDate, appliedDcChecked])
 
     const totalSaleAmt = useMemo(
         () => (saleList ?? []).reduce((acc, r) => acc + r.saleAmt, 0), [saleList]);
@@ -273,24 +288,39 @@ export default function RealtimeSalesByCornerOp() {
     }, [saleDetailList]);
 
     const SaleDetailColumns: ColumnDef<SaleDetailRow>[] = useMemo(() => ([
-        {key: 'no', title: Const.NO, flex: 0.5, align: 'center'},
-        {key: 'itemNm', title: Const.ITEM_NM, flex: 2, align: 'center'},
+        {key: 'no', title: Const.NO, flex: 0.5,
+            renderCell: (_item, index) => (
+                <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
+            ),
+        },
+        {key: 'itemNm', title: Const.ITEM_NM, flex: 1.5},
         {
             key: 'saleQty', title: Const.QTY, flex: 0.6, align: 'center',
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.qty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberSmallCell}>{item.saleQty.toLocaleString()}</Text>
             )
         },
         {
             key: 'actualSaleAmt', title: '금액', flex: 1, align: 'right',
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.totalAmt.toLocaleString()}</Text>
+                <Text style={commonStyles.numberSmallCell}>
+                    {appliedDcChecked
+                        ? item.saleAmt.toLocaleString()
+                        : item.actualSaleAmt.toLocaleString()
+                    }
+                </Text>
             )
         },
         {
             key: 'saleRatio', title: Const.COMP_RATIO, flex: 0.6, align: 'right',
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.totalAmt.toLocaleString()}%</Text>
+                <Text style={commonStyles.numberSmallCell}>
+                    {appliedDcChecked
+                        ? item.saleRatio.toFixed(1)
+                        : item.actualSaleRatio.toFixed(1)
+                    }%
+
+                </Text>
             )
         },
     ]), []);
@@ -298,7 +328,7 @@ export default function RealtimeSalesByCornerOp() {
     const renderDetailFooterRow = () => {
         return (
             <View style={[commonStyles.modalTableRow, commonStyles.summaryRow]}>
-                <View style={[{flex: 2.5}, commonStyles.tableRightBorder]}>
+                <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
                     <Text
                         style={[commonStyles.modalCell,
                             {
@@ -309,17 +339,17 @@ export default function RealtimeSalesByCornerOp() {
                         ]}>합계</Text>
                 </View>
                 <View style={[{flex: 0.6}, commonStyles.tableRightBorder]}>
-                    <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
+                    <Text style={[commonStyles.modalCell, commonStyles.numberSmallCell]}>
                         {summaryRow.totalQty.toLocaleString()}
                     </Text>
                 </View>
                 <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
-                    <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
+                    <Text style={[commonStyles.modalCell, commonStyles.numberSmallCell]}>
                         {summaryRow.totalSaleAmt.toLocaleString()}
                     </Text>
                 </View>
                 <View style={[{flex: 0.6}, commonStyles.tableRightBorder]}>
-                    <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
+                    <Text style={[commonStyles.modalCell, commonStyles.numberSmallCell]}>
                         100%
                     </Text>
                 </View>
