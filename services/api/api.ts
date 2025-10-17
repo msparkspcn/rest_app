@@ -174,6 +174,16 @@ export function posGroupByOilDailySale(params) { //주유소 기간별 매출현
     return post(request, params);
 }
 
+export function mobOilDailyItemSale(params) { //주유소 기간별 매출현황 > 상세
+    const request = host + "/api/v1/oil/sale/mobOilDailyItemSale";
+    return post(request, params);
+}
+
+export function mobOilSaleAnalysis(params) { //주유소 시설별 실시간 매출(통합)
+    const request = host + "/api/v1/oil/sale/mobOilSaleAnalysis";
+    return post(request, params);
+}
+
 export function oilTotalStockStatusList(params) {
     const request = host + "/api/v1/oilstock/oilTotalStockStatusList";
     return post(request, params);
@@ -209,6 +219,10 @@ export function restWarehouseStockList2(params) { //휴게소 창고 재고현�
     return post(request, params);
 }
 
+export function mobOperRealTimeSale(params) { //운영업체 실시간 매출현황(통합)
+    const request = host + "/api/v1/oper/sale/mobOperRealTimeSale";
+    return post(request, params);
+}
 
 export function mobOperPeriodSale(params) { //운영업체 기간별 매출현황(통합)
     const request = host + "/api/v1/oper/sale/mobOperPeriodSale";

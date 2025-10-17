@@ -21,12 +21,17 @@ import {useUser} from "../../contexts/UserContext";
 import {User} from "../../types/user";
 
 type SaleRow = {
-    saleDtInfo: string;
-    // cornerNm: string;
+    saleDt: string;
     saleQty: number;
     saleAmt: number;
 };
 
+type SaleDetailRow = {
+    itemNm: string,
+    saleQty: number,
+    salePrc: number,
+    actualSaleAmt: number
+};
 type StoreGroup = { id: string; name: string };
 
 export default function SalesReportByPeriod() {
@@ -38,6 +43,7 @@ export default function SalesReportByPeriod() {
     const [currentPickerType, setCurrentPickerType] = useState('from')
     const [selectedSale, setSelectedSale] = useState<SaleRow | null>(null);
     const [saleList, setSaleList] = useState([]);
+    const [saleDetailList, setSaleDetailList] = useState([]);
     const storeGroups: StoreGroup[] = useMemo(
         () => [
             // {id: "", name: "전체"},
@@ -49,7 +55,7 @@ export default function SalesReportByPeriod() {
     const [selectedStorCd, setSelectedStorCd] = useState<StoreGroup>(storeGroups[0]);
     const {user}:User = useUser();
 
-    const restDailySale = () => {
+    const onSearch = () => {
         console.log("조회 클릭")
         const request = {
             cmpCd: user.cmpCd,
@@ -67,18 +73,31 @@ export default function SalesReportByPeriod() {
                     setSaleList(saleList);
                 }
             })
-            .catch(error => {console.log("restDailySale error:"+error)});
-    }
-
-    const onSearch = () => {
-        restDailySale();
+            .catch(error => {console.log("posGroupByOilDailySale error:"+error)});
     };
-
-
 
     const openDetail = (sale: SaleRow) => {
         setSelectedSale(sale);
-        setIsDetailVisible(true);
+        console.log("매장 클릭")
+        const request = {
+            cmpCd: user.cmpCd,
+            cornerCd: "",
+            fromSaleDt: sale.saleDt,
+            salesOrgCd: "8100",
+            storCd: "",
+            toSaleDt: sale.saleDt,
+        }
+        console.log('request:'+JSON.stringify(request))
+        api.mobOilDailyItemSale(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const saleDetailList = result.data.responseBody;
+                    console.log('111:' + JSON.stringify(saleDetailList))
+                    setSaleDetailList(saleDetailList);
+                    setIsDetailVisible(true);
+                }
+            })
+            .catch(error => {console.log("mobOilDailyItemSale error:"+error)});
     };
 
     const closeDetail = () => {
@@ -86,14 +105,16 @@ export default function SalesReportByPeriod() {
     };
 
     const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => ([
-        { key: 'saleDtInfo',       title: '일자(요일)',     flex: 1, align: 'center',
+        { key: 'saleDt',       title: '일자(요일)',     flex: 1, align: 'center',
             renderCell: (item) => (
                 <Text style={[commonStyles.cell, {textAlign:'center'}]}>{ymdToDateWithDay(item.saleDt)}</Text>
             )},
         { key: 'cornerNm',     title: Const.CORNER,   flex: 1,   align: 'left',
             renderCell: (item) => (
                 <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
-                    <Text style={[commonStyles.cell, commonStyles.linkText,{textAlign: 'center'}]}>{selectedStorCd.name}</Text>
+                    <Text style={[commonStyles.cell, commonStyles.linkText,{textAlign: 'center'}]}>
+                        {selectedStorCd.name}
+                    </Text>
                 </Pressable>
             ),   },
         { key: 'saleQty', title: Const.SALE_QTY, flex: 1.2, align: 'right',
@@ -131,39 +152,32 @@ export default function SalesReportByPeriod() {
         </View>
     );
 
-    type ProductSaleRow = { no: number; itemNm: string, qty: number, price: number, totalAmt: number };
-    const productData: ProductSaleRow[] = useMemo(
-        () => Array.from({ length: 9 }).map((_, index) => ({
-            no: index + 1,
-            itemNm: `상품 ${index + 1}`,
-            qty: index * 1000,
-            price: index * 10,
-            totalAmt: index * 10 * 10
-        })),
-        []
-    );
 
-    const productColumns: ColumnDef<ProductSaleRow>[] = useMemo(() => ([
-        { key: 'no', title: Const.NO, flex: 0.7, align: 'center' },
+    const saleDetailColumns: ColumnDef<SaleDetailRow>[] = useMemo(() => ([
+        { key: 'no', title: Const.NO, flex: 0.7,
+            renderCell: (_item, index) => (
+                <Text style={[commonStyles.cell, {textAlign: 'center'}]}>{index + 1}</Text>
+            ),
+        },
         { key: 'itemNm', title: '상품명',   flex: 2.2, align: 'left' },
-        { key: 'qty', title: '판매\n수량',   flex: 1.2, align: 'right',
+        { key: 'saleQty', title: '판매\n수량',   flex: 1.2, align: 'right',
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>
-                    {item.qty.toLocaleString()}
+                    {item.saleQty.toLocaleString()}
                 </Text>
             )
         },
-        { key: 'price', title: Const.PRICE,   flex: 1.5, align: 'right',
+        { key: 'salePrc', title: Const.PRICE,   flex: 1.5, align: 'right',
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>
-                    {item.price.toLocaleString()}
+                    {item.salePrc.toLocaleString()}
                 </Text>
             )
         },
-        { key: 'totalAmt', title: '금액',   flex: 2, align: 'right',
+        { key: 'actualSaleAmt', title: '금액',   flex: 2, align: 'right',
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>
-                    {item.totalAmt.toLocaleString()}
+                    {item.actualSaleAmt.toLocaleString()}
                 </Text>
             )
         },
@@ -177,13 +191,13 @@ export default function SalesReportByPeriod() {
     };
 
     const summaryRow = useMemo(() => {
-        const totalQty = productData.reduce((sum, item) => sum + item.qty, 0);
-        const totalAmt = productData.reduce((sum, item) => sum + item.totalAmt, 0);
+        const totalQty = saleDetailList.reduce((sum, item) => sum + item.saleQty, 0);
+        const totalAmt = saleDetailList.reduce((sum, item) => sum + item.actualSaleAmt, 0);
         return {
             totalQty,
             totalAmt
         };
-    }, [productData]);
+    }, [saleDetailList]);
 
     const renderSummaryRow = () => {
         return (
@@ -234,7 +248,6 @@ export default function SalesReportByPeriod() {
                             borderRightColor: '#aaa',
                             height:'100%'},
                         commonStyles.summaryCell,
-
                     ]}
                 >
                     <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
@@ -303,8 +316,8 @@ export default function SalesReportByPeriod() {
                         </View>
 
                         <Table
-                            data={productData}
-                            columns={productColumns}
+                            data={saleDetailList}
+                            columns={saleDetailColumns}
                             isModal={true}
                             listFooter={renderSummaryRow}
                         />

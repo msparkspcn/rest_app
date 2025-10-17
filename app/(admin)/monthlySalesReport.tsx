@@ -93,29 +93,6 @@ export default function MonthlySalesReport() {
             });
     }
 
-    const restMonthlyCornerSale = () => {
-        console.log("조회 클릭 fromSaleMonth:"+fromSaleMonth)
-        const request = {
-            cmpCd: user.cmpCd,
-            cornerCd: selectedCornerCd,
-            fromSaleMonth: fromSaleMonth,
-            salesOrgCd: user.salesOrgCd,
-            storCd: "5000511",
-            toSaleMonth: toSaleMonth
-        }
-        api.restMonthlyCornerSale(request)
-            .then(result => {
-                if (result.data.responseBody != null) {
-                    const saleList = result.data.responseBody;
-                    console.log('111:' + JSON.stringify(saleList))
-                    setSaleList(saleList);
-                }
-            })
-            .catch(error => {
-                console.log("restMonthlyCornerSale error:" + error)
-            });
-    }
-
     const restMonthlySale = (sale: SaleRow) => {
         console.log("restMonthlySale 조회 클릭 fromSaleMonth:"+fromSaleMonth+', toSaleMonth:'+toSaleMonth)
         const request = {
@@ -170,7 +147,26 @@ export default function MonthlySalesReport() {
     }
 
     const onSearch = () => {
-        restMonthlyCornerSale();
+        console.log("조회 클릭 fromSaleMonth:"+fromSaleMonth)
+        const request = {
+            cmpCd: user.cmpCd,
+            cornerCd: selectedCornerCd,
+            fromSaleMonth: fromSaleMonth,
+            salesOrgCd: user.salesOrgCd,
+            storCd: "5000511",
+            toSaleMonth: toSaleMonth
+        }
+        api.restMonthlyCornerSale(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const saleList = result.data.responseBody;
+                    console.log('111:' + JSON.stringify(saleList))
+                    setSaleList(saleList);
+                }
+            })
+            .catch(error => {
+                console.log("restMonthlyCornerSale error:" + error)
+            });
     };
 
     const openDetail = useCallback((sale: SaleRow, type: DetailType) => {

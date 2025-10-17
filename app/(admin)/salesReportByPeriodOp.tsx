@@ -207,7 +207,7 @@ export default function SalesReportByPeriodOp() {
 
     const mainColumns: ColumnDef<SaleRow& { isSummary?: boolean; }>[] = useMemo(() => [
         {
-            key: 'no', title: Const.NO, flex: 0.5, align: 'center',
+            key: 'no', title: Const.NO, flex: 0.5,
             renderCell: (item) => {
                 if (item.isSummary) return null;
                 return (

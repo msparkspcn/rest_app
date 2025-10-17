@@ -91,16 +91,6 @@ export default function SalesReportByTimezoneScreen() {
         },
     ]), [])
 
-    const totalValues = useMemo(() => {
-        return saleList.reduce(
-            (acc, r) => {
-                acc.totalAmt += r.saleAmt;
-                return acc;
-            },
-            {cashAmt: 0, cardEtc: 0, totalAmt: 0}
-        );
-    }, [saleList]);
-
     // 3행 요약 데이터 구성
     const summaryRows = useMemo(() => {
         const timeGroups = {
@@ -157,7 +147,7 @@ export default function SalesReportByTimezoneScreen() {
             billCnt: nightTotals.billCnt
         };
         return [row1, row2, row3, row4];
-    }, [totalValues]);
+    }, [saleList]);
 
     return (
         <SafeAreaView style={commonStyles.container}>

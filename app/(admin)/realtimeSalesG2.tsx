@@ -18,7 +18,7 @@ type SaleRow = {
     storCd: string;
     gaugeNm: string;
     saleQty: number;
-    actualSaleAmt: number
+    actualSaleAmt: number;
 };
 
 type StoreGroup = { id: string; name: string };
@@ -141,7 +141,7 @@ export default function RealtimeSalesScreen() {
         {
             key: 'storNm', title: '매장', flex: 0.8,
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {paddingLeft: 10}]}>
+                <Text style={[commonStyles.cell, {textAlign: 'center'}]}>
                     {item.storNm}
                 </Text>
             ),
@@ -155,7 +155,7 @@ export default function RealtimeSalesScreen() {
             )
         },
         {
-            key: 'saleQty', title: '판매수량', flex: 1,
+            key: 'saleQty', title: Const.SALE_QTY, flex: 1,
             renderCell: (item) => (
                 <Text style={commonStyles.numberSmallCell}>
                     {item.saleQty.toLocaleString()}

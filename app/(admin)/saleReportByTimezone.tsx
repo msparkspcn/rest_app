@@ -34,7 +34,6 @@ export default function SalesReportByTimezoneScreen() {
     const {user}:User = useUser();
 
     useEffect(()=> {
-        // setAuthToken("1");
         getStorList();
     },[]);
 
@@ -63,10 +62,7 @@ export default function SalesReportByTimezoneScreen() {
     }
 
     const onSearch = () => {
-        restStorTimeZoneSale();
-    };
-    //20250905, 20250925
-    const restStorTimeZoneSale = () => {
+        //20250905, 20250925
         const request = {
             cmpCd: user.cmpCd,
             fromSaleDt: saleDate,
@@ -87,7 +83,7 @@ export default function SalesReportByTimezoneScreen() {
             .catch(error => {
                 console.log("restStorTimeZoneSale error:" + error)
             });
-    }
+    };
 
     const openDatePicker = () => {
         setTempDate(new Date());
@@ -97,7 +93,7 @@ export default function SalesReportByTimezoneScreen() {
     const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => ([
         {key: 'tmzonDiv', title: '시간대', flex: 1, align: 'center',
             renderCell: (item) => (
-                <Text style={[{textAlign:'center'},commonStyles.cell]}>{item.tmzonDiv}시</Text>
+                <Text style={[{textAlign:'center'}, commonStyles.cell]}>{item.tmzonDiv}시</Text>
             )
         },
         {

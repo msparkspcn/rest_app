@@ -1,21 +1,23 @@
 import {StatusBar} from 'expo-status-bar';
 import React, {useMemo, useState} from 'react';
-import {FlatList, Modal, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {commonStyles} from "../../styles/index";
 import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
 import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
-import {Ionicons} from "@expo/vector-icons";
 import Const from "../../constants/Const";
+import * as api from "../../services/api/api";
+import {useUser} from "../../contexts/UserContext";
+import {User} from "../../types/user";
 
 type SaleRow = {
     no: number;
     cornerNm: string;
-    todaySaleAmt: number;
-    yedaySaleAmt: number;
-    monthSaleAmt: number;
-    yearSaleAmt: number;
+    todayActualSaleAmt: number;
+    yesterdayActualSaleAmt: number;
+    monthlyActualSaleAmt: number;
+    yearActualSaleAmt: number;
 };
 
 type SaleDetailRow = {
@@ -28,38 +30,16 @@ type SaleDetailRow = {
     yearAmt: number;
 }
 
-type CornerRow = {
-    no: number;
-    cornerNm: string;
-    cornerCd: string;
-    posGroup: string;
-    useYn: 'Y' | 'N';
-};
-
 export default function RealtimeSalesBySalesOrgScreen() {
     const [saleDate, setSaleDate] = useState(getTodayYmd());
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempDate, setTempDate] = useState<Date | null>(null);
 
     const [detailChecked, setDetailChecked] = useState(false);
-    const baseData: SaleRow[] = useMemo(
-        () =>
-            Array.from({length: 2}).map((_, idx) => {
-                const todaySaleAmt = 10000 + (idx % 5) * 3000;
-                const yedaySaleAmt = 20000 + (idx % 7) * 2500;
-                const monthSaleAmt = 1000 * (idx % 4);
-                const yearSaleAmt = 1000 * (idx % 4);
-                return {
-                    no: idx + 1,
-                    cornerNm: idx % 2 === 0 ? '주유소' : '충전소',
-                    todaySaleAmt,
-                    yedaySaleAmt,
-                    monthSaleAmt,
-                    yearSaleAmt,
-                };
-            }),
-        []
-    );
+    const [appliedDetailChecked, setAppliedDetailChecked] = useState(false);
+    const [saleList, setSaleList] = useState<[] | null>(null);
+    const {user}: User = useUser();
+    const [saleDetailList, setSaleDetailList] = useState<[] | null>(null);
 
     const handleCheckbox = () => {
         setDetailChecked(!detailChecked);
@@ -69,21 +49,35 @@ export default function RealtimeSalesBySalesOrgScreen() {
         return rows.reduce((acc, cur) => ({
             no: 0,
             cornerNm: "합계",
-            todaySaleAmt: acc.todaySaleAmt + cur.todaySaleAmt,
-            yedaySaleAmt: acc.yedaySaleAmt + cur.yedaySaleAmt,
-            monthSaleAmt: acc.monthSaleAmt + cur.monthSaleAmt,
-            yearSaleAmt: acc.yearSaleAmt + cur.yearSaleAmt,
-        }), {no: 0, cornerNm: "합계", todaySaleAmt: 0, yedaySaleAmt: 0, monthSaleAmt: 0, yearSaleAmt: 0});
+            todayActualSaleAmt: acc.todayActualSaleAmt + (cur.todayActualSaleAmt ?? 0),
+            yesterdayActualSaleAmt: acc.yesterdayActualSaleAmt + (cur.yesterdayActualSaleAmt ?? 0),
+            monthlyActualSaleAmt: acc.monthlyActualSaleAmt + (cur.monthlyActualSaleAmt ?? 0),
+            yearActualSaleAmt: acc.yearActualSaleAmt + (cur.yearActualSaleAmt ?? 0),
+        }), {no: 0, cornerNm: "합계", todayActualSaleAmt: 0, yesterdayActualSaleAmt: 0, monthlyActualSaleAmt: 0, yearActualSaleAmt: 0});
     };
 
-    const filteredData = useMemo((): SaleRow[] => {
-        return detailChecked
-            ? baseData
-            : [aggregateSales(baseData)];
-    }, [baseData, detailChecked]);
-
     const onSearch = () => {
-        // 데모: 현재는 선택 값만으로 필터링 적용
+        console.log("조회 클릭 saleDate:"+saleDate)
+        setAppliedDetailChecked(detailChecked);
+        const request = {
+            cmpCd: user.cmpCd,
+            fromSaleDt: saleDate,
+            salesOrgCd: '8100',
+            storCd: "",
+            toSaleDt: saleDate
+        }
+
+        api.mobOilSaleAnalysis(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const saleList = result.data.responseBody;
+                    console.log('111:' + JSON.stringify(saleList))
+                    setSaleList(saleList);
+                }
+            })
+            .catch(error => {
+                console.log("mobRestSaleAnalysis error:" + error)
+            });
     };
 
     const openDatePicker = () => {
@@ -95,44 +89,32 @@ export default function RealtimeSalesBySalesOrgScreen() {
     const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => {
         const commonCols: ColumnDef<SaleRow>[] = [
             {
-                key: 'yedaySaleAmt', title: '전일매출', flex: 1, align: 'center',
+                key: 'yesterdayActualSaleAmt', title: '전일매출', flex: 1, align: 'center',
                 renderCell: (item) => (
-                    <Text style={[commonStyles.cell, {
-                        textAlign: 'right',
-                        paddingRight: 10
-                    }]}>{item.yedaySaleAmt.toLocaleString()}</Text>
+                    <Text style={commonStyles.numberSmallCell}>{Math.round(item.yesterdayActualSaleAmt / 1000).toLocaleString()}</Text>
                 )
             },
             {
-                key: 'todaySaleAmt', title: '당일매출', flex: 1, align: 'center',
+                key: 'todayActualSaleAmt', title: '당일매출', flex: 1, align: 'center',
                 renderCell: (item) => (
-                    <Text style={[commonStyles.cell, {
-                        textAlign: 'right',
-                        paddingRight: 10
-                    }]}>{item.todaySaleAmt.toLocaleString()}</Text>
+                    <Text style={commonStyles.numberSmallCell}>{Math.round(item.todayActualSaleAmt / 1000).toLocaleString()}</Text>
                 )
             },
             {
-                key: 'monthSaleAmt', title: '월누계매출', flex: 1, align: 'center',
+                key: 'monthlyActualSaleAmt', title: '월누계매출', flex: 1, align: 'center',
                 renderCell: (item) => (
-                    <Text style={[commonStyles.cell, {
-                        textAlign: 'right',
-                        paddingRight: 10
-                    }]}>{item.monthSaleAmt.toLocaleString()}</Text>
+                    <Text style={commonStyles.numberSmallCell}>{Math.round(item.monthlyActualSaleAmt / 1000).toLocaleString()}</Text>
                 )
             },
             {
-                key: 'yearSaleAmt', title: '년누계', flex: 1, align: 'center',
+                key: 'yearActualSaleAmt', title: '년누계', flex: 1, align: 'center',
                 renderCell: (item) => (
-                    <Text style={[commonStyles.cell, {
-                        textAlign: 'right',
-                        paddingRight: 10
-                    }]}>{item.yearSaleAmt.toLocaleString()}</Text>
+                    <Text style={commonStyles.numberSmallCell}>{Math.round(item.yearActualSaleAmt / 1000).toLocaleString()}</Text>
                 )
             },
         ];
 
-        if (detailChecked) {
+        if (appliedDetailChecked) {
             return [
                 {
                     key: 'cornerNm',
@@ -153,7 +135,7 @@ export default function RealtimeSalesBySalesOrgScreen() {
         }
 
         return commonCols;
-    }, [detailChecked]);
+    }, [appliedDetailChecked]);
 
     const detailData: SaleDetailRow[] = useMemo(
         () =>
@@ -223,10 +205,10 @@ export default function RealtimeSalesBySalesOrgScreen() {
 
             <Text style={{textAlign: 'right', paddingHorizontal: 10, paddingTop: 10}}>(단위:천원)</Text>
             <Table
-                data={filteredData}
+                data={saleList}
                 columns={mainColumns}
                 listFooter={
-                    detailChecked
+                    appliedDetailChecked
                         ? () => (
                             <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
                                 <View style={[{flex: 1.2}, commonStyles.tableRightBorder]}>
@@ -235,24 +217,24 @@ export default function RealtimeSalesBySalesOrgScreen() {
                                 </View>
                                 <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
                                     <Text style={[commonStyles.cell, commonStyles.summaryLabelText, commonStyles.numberCell]}>
-                                        {aggregateSales(baseData).yedaySaleAmt.toLocaleString()}
+                                        {Math.round(aggregateSales(saleList).yesterdayActualSaleAmt / 1000).toLocaleString()}
                                     </Text>
                                 </View>
 
                                 <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
                                     <Text style={[commonStyles.cell, commonStyles.summaryLabelText, commonStyles.numberCell]}>
-                                        {aggregateSales(baseData).todaySaleAmt.toLocaleString()}
+                                        {Math.round(aggregateSales(saleList).todayActualSaleAmt / 1000).toLocaleString()}
                                     </Text>
                                 </View>
 
                                 <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
                                     <Text style={[commonStyles.cell, commonStyles.summaryLabelText, commonStyles.numberCell]}>
-                                        {aggregateSales(baseData).monthSaleAmt.toLocaleString()}
+                                        {Math.round(aggregateSales(saleList).monthlyActualSaleAmt / 1000).toLocaleString()}
                                     </Text>
                                 </View>
                                 <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
                                     <Text style={[commonStyles.cell, commonStyles.summaryLabelText, commonStyles.numberCell]}>
-                                        {aggregateSales(baseData).yearSaleAmt.toLocaleString()}
+                                        {Math.round(aggregateSales(saleList).yearActualSaleAmt / 1000).toLocaleString()}
                                     </Text>
                                 </View>
                             </View>

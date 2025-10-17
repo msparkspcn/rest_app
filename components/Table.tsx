@@ -68,8 +68,15 @@ export function Table<T>({
                             {summaryItem.orgNm}
                         </Text>
                     </View>
+                    {summaryItem.saleQty && (
+                        <View style={[{flex: 1.1}, commonStyles.tableRightBorder]}>
+                            <Text style={[commonStyles.numberSmallCell]}>
+                                {summaryItem.saleQty.toLocaleString()}
+                            </Text>
+                        </View>
+                    )}
                     <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
-                        <Text style={[commonStyles.numberCell]}>
+                        <Text style={[commonStyles.numberSmallCell]}>
                             {summaryItem.totalSaleAmt.toLocaleString()}
                         </Text>
                     </View>

@@ -78,27 +78,6 @@ export default function RealtimeSalesBySalesOrgScreen() {
                 console.log("getSalsOrgList error:" + error)
             });
     }
-    const mobRestSaleAnalysis = () => {
-        console.log("조회 클릭 saleDate:"+saleDate)
-        const request = {
-            cmpCd: user.cmpCd,
-            fromSaleDt: saleDate,
-            salesOrgCd: user.salesOrgCd,
-            storCd: "",
-            toSaleDt: saleDate
-        }
-        api.mobRestSaleAnalysis(request)
-            .then(result => {
-                if (result.data.responseBody != null) {
-                    const saleList = result.data.responseBody;
-                    console.log('111:' + JSON.stringify(saleList))
-                    setSaleList(saleList);
-                }
-            })
-            .catch(error => {
-                console.log("mobRestSaleAnalysis error:" + error)
-            });
-    }
 
     const handleCheckbox = () => {
         setDetailChecked(!detailChecked);
@@ -141,7 +120,25 @@ export default function RealtimeSalesBySalesOrgScreen() {
             Alert.alert(Const.ERROR, Const.NO_SALES_ORG_MSG);
             return;
         }
-        mobRestSaleAnalysis();
+        console.log("조회 클릭 saleDate:"+saleDate)
+        const request = {
+            cmpCd: user.cmpCd,
+            fromSaleDt: saleDate,
+            salesOrgCd: user.salesOrgCd,
+            storCd: "",
+            toSaleDt: saleDate
+        }
+        api.mobRestSaleAnalysis(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const saleList = result.data.responseBody;
+                    console.log('111:' + JSON.stringify(saleList))
+                    setSaleList(saleList);
+                }
+            })
+            .catch(error => {
+                console.log("mobRestSaleAnalysis error:" + error)
+            });
     };
 
     const openDatePicker = () => {

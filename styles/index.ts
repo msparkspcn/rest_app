@@ -142,7 +142,7 @@ export const commonStyles = StyleSheet.create({
         fontSize: 13,
         color: '#444',
         width: '100%',
-        paddingRight:10,
+        paddingRight:5,
         textAlign: 'right'
     },
     numberSmallCell:  {

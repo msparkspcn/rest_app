@@ -1,5 +1,5 @@
 import {StatusBar} from 'expo-status-bar';
-import React, {useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {
     Alert,
     Pressable,
@@ -16,8 +16,10 @@ import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
 import Const from "../../constants/Const";
-import {User, Corner} from "../../types";
+import {User, SalesOrg} from "../../types";
 import ListModal from "../../components/ListModal";
+import * as api from "../../services/api/api";
+import {useUser} from "../../contexts/UserContext";
 
 type StockRow = {
     itemNm: string;
@@ -27,8 +29,6 @@ type StockRow = {
     curStockQty: number;
 };
 
-type SalesOrg = { salesOrgCd: string; salesOrgNm: string };
-
 export default function StockReport() {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempDate, setTempDate] = useState<Date | null>(null);
@@ -36,40 +36,41 @@ export default function StockReport() {
     const [toSaleDt, setToSaleDt] = useState(getTodayYmd());
     const [currentPickerType, setCurrentPickerType] = useState('from');
     const [itemNm, setItemNm] = useState('');
-    const salesOrgList: SalesOrg[] = useMemo(
-        () =>
-            Array.from({length: 6}).map((_, i) => {
-                return {
-                    salesOrgCd: `G${i + 1}`,
-                    salesOrgNm: `그룹 ${i + 1}`
-                };
-            }),
-        []
-    );
-    const [selectedSalesOrgCd, setSelectedSalesOrgCd] = useState<string>('');
-    const [selectedSalesOrg, setSelectedSalesOrg] = useState<string | null>(salesOrgList[0]?.salesOrgCd ?? null);
-    const [showSalesOrgListModal, setShowSalesOrgListModal] = useState(false);
-    const baseData: StockRow[] = useMemo(
-        () =>
-            Array.from({length: 15}).map((_, idx) => {
-                const giQty = 7 + (idx % 5);
-                const totalStockQty = 20 + (idx % 7);
-                const goQty = 30 + (idx % 5);
-                const curStockQty = totalStockQty + giQty - goQty;
-                return {
-                    itemNm: `상품 ${((idx % 6) + 1)}`,
-                    giQty: giQty,
-                    totalStockQty: totalStockQty,
-                    goQty: goQty,
-                    curStockQty: curStockQty,
-                };
-            }),
-        []
-    );
 
-    const filteredData = useMemo(() => {
-        return baseData;
-    }, [baseData]);
+    const [selectedSalesOrgCd, setSelectedSalesOrgCd] = useState<string>('');
+    const [showSalesOrgListModal, setShowSalesOrgListModal] = useState(false);
+    const {user}: User = useUser();
+    const [salesOrgList, setSalesOrgList] = useState<SalesOrg[]>([]);
+    const [stockList, setStockList] = useState<[] | null>([]);
+
+    useEffect(() => {
+        getSalesOrgList();
+    },[]);
+
+    const getSalesOrgList = () => {
+        const request = {
+            cmpCd: user.cmpCd,
+            operType: '',
+            restValue: '',
+        }
+        console.log("request:"+JSON.stringify(request))
+        api.getSalsOrgList(request)
+            .then(result => {
+                console.log("result:"+JSON.stringify(result))
+                if (result.data.responseBody != null) {
+                    const salesOrgList = result.data.responseBody;
+                    console.log('salesOrgList:' + JSON.stringify(salesOrgList))
+                    setSalesOrgList([
+                            {salesOrgCd:'', salesOrgNm: '선택'},
+                            ...salesOrgList
+                        ]
+                    );
+                }
+            })
+            .catch(error => {
+                console.log("getSalsOrgList error:" + error)
+            });
+    }
 
     const onSearch = () => {
         if(selectedSalesOrgCd=='') {
@@ -170,7 +171,7 @@ export default function StockReport() {
 
             <View style={commonStyles.sectionDivider}/>
 
-            <Table data={filteredData} columns={mainColumns} />
+            <Table data={stockList} columns={mainColumns} />
 
             <DatePickerModal
                 visible={showDatePicker}

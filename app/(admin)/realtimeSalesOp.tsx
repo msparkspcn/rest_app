@@ -11,10 +11,14 @@ import ListModal from "../../components/ListModal";
 import {User, SalesOrg} from "../../types";
 import {useUser} from "../../contexts/UserContext";
 import * as api from "../../services/api/api";
+
 type SaleRow = {
-    salesOrgNm: string;
+    no: number;
+    orgNm: string;
     salesOrgCd: string;
-    totalAmt: number
+    actualSaleAmt: number;
+    operDiv: string;
+    totalSaleAmt: number;
 };
 type SummaryTotals = {
     label: string;
@@ -24,12 +28,18 @@ type SaleDetailRow = {
     storNm: string;
     cashAmt: number;
     cardAmt: number;
-    etcAmt: number;
-    totalAmt: number;
+    etcPayAmt: number;
+    actualSaleAmt: number;
 }
-type SalesOrgRow = {
-    salesOrgCd: string;
-    salesOrgNm: string;
+type OilSaleDetailRow = {
+    no: number;
+    storCd: string;
+    orgNm: string;
+    gaugeNm: string;
+    saleQty: number;
+    actualSaleAmt: number;
+    totalSaleAmt: number;
+    isFirstRow: boolean;
 };
 
 type ListItem =
@@ -48,10 +58,17 @@ export default function RealtimeSalesScreen() {
     const {user}: User = useUser();
     const [salesOrgList, setSalesOrgList] = useState<SalesOrg[]>([]);
     const [vatExcludedChecked, setVatExcludedChecked] = useState(false);
+    const [appliedVatChecked, setAppliedVatChecked] = useState(false);
     const [dcIncludedChecked, setDcIncludedChecked] = useState(false);
+    const [appliedDcChecked, setAppliedDcChecked] = useState(false);
 
     const [selectedSalesOrgCd, setSelectedSalesOrgCd] = useState<string>('');
-    const [selectedSalesOrg, setSelectedSalesOrg] = useState<SalesOrgRow | null>(null);
+    const [selectedSalesOrg, setSelectedSalesOrg] = useState<SaleRow | null>(null);
+    const [saleList, setSaleList] = useState<[] | null>(null);
+    const [saleStatList ,setSaleStatList] = useState<[] | null>([]);
+    const [saleDetailList, setSaleDetailList] = useState<[] | null>([]);
+    const [oilSaleDetailList, setOilSaleDetailList] = useState<[] | null>([]);
+    const [selectedOperDiv, setSelectedOperDiv] = useState("01");
 
     useEffect(() => {
         getSalesOrgList();
@@ -81,122 +98,272 @@ export default function RealtimeSalesScreen() {
             });
     }
 
-    const baseData: SaleRow[] = useMemo(
-        () =>
-            Array.from({length: 20}).map((_, idx) => {
-                const totalAmt = 1000000 * (idx % 5)
-                return {
-                    salesOrgCd: '',
-                    salesOrgNm: `주유소 ${((idx % 6) + 1)}`,
-                    totalAmt,
-                };
-            }),
-        []
-    );
-
-    const filteredData = useMemo(() => {
-        return baseData;
-    }, [baseData]);
 
     const onSearch = () => {
         // 데모: 현재는 선택 값만으로 필터링 적용
+        console.log("조회 클릭")
+
+        const request = {
+            cmpCd: user.cmpCd,
+            fromSaleDt: saleDate,
+            salesOrgCd: selectedSalesOrgCd,
+            storCd: "",
+            toSaleDt: ""
+        }
+        console.log('request:'+JSON.stringify(request));
+        // setLoading(true);
+        api.mobOperRealTimeSale(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const saleList = result.data.responseBody;
+                    console.log('saleList:' + JSON.stringify(saleList))
+                    setSaleList(saleList);
+                    // mobOperRealTimeSale();
+                }
+            })
+            .catch(error => {
+                console.log("mobOilRealTimeSale error:" + error)
+            });
     };
+
+    const tableData = useMemo(() => {
+        if (!saleList) return []; // null 방지
+
+        const result: (SaleRow & { isSummary?: boolean })[] = [];
+
+        const grouped: Record<string, SaleRow[]> = {};
+        saleList.forEach(item => {
+            if (!grouped[item.operDiv]) grouped[item.operDiv] = [];
+            grouped[item.operDiv].push(item);
+        });
+
+        let no = 0;
+        let sumNo = 0;
+        Object.keys(grouped)
+            .sort()
+            .forEach(operDiv => {
+                const rows = grouped[operDiv];
+                let storSum = 0;
+
+                rows.forEach((item) => {
+                    storSum += item.actualSaleAmt;
+                    no += 1;
+                    result.push({
+                        ...item,
+                        no: no
+                    });
+                });
+                if(!selectedSalesOrgCd) {
+                    let summaryName = '';
+                    if (operDiv === '01') summaryName = '휴게소 소계';
+                    else if (operDiv === '02') summaryName = '주유소 소계';
+                    sumNo -= 1;
+                    result.push({
+                        no: sumNo,
+                        salesOrgCd: '',
+                        orgNm: summaryName,
+                        actualSaleAmt: storSum,
+                        totalSaleAmt: storSum,
+                        operDiv:'',
+                        isSummary: true,
+                    });
+                }
+            });
+        console.log("result:"+JSON.stringify(result));
+
+        return result;
+    }, [saleList]);
+
+    const oilDetailTableData = useMemo(() => {
+        if (!oilSaleDetailList) return []; // null 방지
+        console.log('data:'+JSON.stringify(oilSaleDetailList));
+
+        const result: (OilSaleDetailRow & { isSummary?: boolean })[] = [];
+
+        const grouped: Record<string, OilSaleDetailRow[]> = {};
+        oilSaleDetailList.forEach(item => {
+            if (!grouped[item.storCd]) grouped[item.storCd] = [];
+            grouped[item.storCd].push(item);
+        });
+
+        let no = 0;
+        let sumNo = 0;
+        Object.keys(grouped)
+            .sort()
+            .forEach(storCd => {
+                const rows = grouped[storCd];
+                let storSum = 0;
+                let saleQtySum = 0;
+                rows.forEach((item, idx) => {
+                    storSum += item.actualSaleAmt;
+                    saleQtySum += item.saleQty;
+                    no += 1;
+                    result.push({
+                        ...item,
+                        no: no,
+                        isFirstRow: idx === 0 ? true : false,
+                    });
+                });
+                if(!selectedSalesOrgCd) {
+                    let summaryName = '';
+                    if (storCd === '01') summaryName = '주유소 소계';
+                    else if (storCd === '02') summaryName = '충전소 소계';
+                    sumNo -= 1;
+                    result.push({
+                        no: sumNo,
+                        storCd: '',
+                        orgNm: summaryName,
+                        gaugeNm: '',
+                        saleQty: saleQtySum,
+                        actualSaleAmt: storSum,
+                        totalSaleAmt: storSum,
+                        isSummary: true,
+                        isFirstRow: false
+                    });
+                }
+            });
+
+        return result;
+    }, [oilSaleDetailList]);
 
     const openDatePicker = () => {
         setTempDate(new Date());
         setShowDatePicker(true);
     };
 
-    const openDetail = (salesOrg: SalesOrgRow) => {
-        setIsDetailVisible(true);
-        setSelectedSalesOrg(salesOrg)
+    const openDetail = (sale: SaleRow) => {
+        setSelectedSalesOrg(sale);
+        setSelectedOperDiv(sale.operDiv);
+
+        if(sale.operDiv=='01') getRestSaleDetail();
+        else getOilSaleDetail();
     }
 
-    const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => ([
-        {key: 'no', title: Const.NO, flex: 0.4,
-            renderCell: (_item, index) => (
-                <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
-            ),
+    const getRestSaleDetail = () => {
+        const request = {
+            cmpCd: user.cmpCd,
+            cornerCd: "",
+            fromSaleDt: saleDate,
+            salesOrgCd: user.salesOrgCd,
+            storCd: "",
+            toSaleDt: saleDate,
+        }
+        console.log('request:'+JSON.stringify(request));
+        api.mobRestRealTimeSaleStat(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const saleDetailList = result.data.responseBody;
+                    console.log('saleDetailList:' + JSON.stringify(saleDetailList))
+                    setSaleDetailList(saleDetailList);
+                    setIsDetailVisible(true);
+                }
+            })
+            .catch(error => {
+                console.log("mobRestRealTimeSaleStat error:" + error)
+            });
+    }
+
+    const getOilSaleDetail = () => {
+        console.log("조회 클릭")
+
+        const request = {
+            cmpCd: user.cmpCd,
+            cornerCd: "",
+            fromSaleDt: saleDate,
+            salesOrgCd: selectedSalesOrgCd,
+            storCd: "",
+            toSaleDt: ""
+        }
+        console.log('request:'+JSON.stringify(request));
+        api.mobOilRealTimeSale(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const oilSaleList = result.data.responseBody;
+                    console.log('oilSaleList:' + JSON.stringify(oilSaleList))
+                    setOilSaleDetailList(oilSaleList);
+                    setIsDetailVisible(true);
+                }
+            })
+            .catch(error => {
+                console.log("mobOilRealTimeSale error:" + error)
+            });
+    }
+
+    const mainColumns: ColumnDef<SaleRow& { isSummary?: boolean; }>[] = useMemo(() => ([
+        {key: 'no', title: Const.NO, flex: 0.5,
+            renderCell: (item) => {
+                if (item.isSummary) return null;
+                return (
+                    <Text style={[commonStyles.cell, {textAlign: 'center'}]}>{item.no}</Text>
+                )
+            }
         },
         {
-            key: 'salesOrgNm', title: '사업소', flex: 2, align: 'center',
+            key: 'orgNm', title: '사업소', flex: 2, align: 'center',
             renderCell: (item) => (
                 <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
-                    <Text style={[commonStyles.cell, commonStyles.linkText, {paddingLeft: 10}]}>
+                    <Text style={[commonStyles.cell,
+                        item.isSummary ? {fontWeight: 'bold', textAlign: 'center'}
+                            : commonStyles.linkText, {paddingLeft: 10}]}>
                         {item.salesOrgNm}
                     </Text>
                 </Pressable>
             ),
         },
-        {key: 'totalAmt', title: '총매출', flex: 1.2, align: 'center',
+        {key: 'actualSaleAmt', title: '총매출', flex: 1.5, align: 'center',
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>
-                    {item.totalAmt.toLocaleString()}
+                <Text style={[commonStyles.numberCell, item.isSummary ? { fontWeight: 'bold' } : null]}>
+                    {item.actualSaleAmt.toLocaleString()}
                 </Text>
             )
         },
-    ]), [])
-
-    const totalValues = useMemo(() => {
-        return filteredData.reduce(
-            (acc, r) => {
-                acc.totalAmt += r.totalAmt;
-                return acc;
-            },
-            {cashAmt: 0, cardEtc: 0, totalAmt: 0}
-        );
-    }, [filteredData]);
+    ]), [tableData])
 
     // 3행 요약 데이터 구성
-    const summaryRows = useMemo(() => {
-        const today: SummaryTotals = {
-            label: '당일합계',
-            totalAmt: totalValues.totalAmt
-        };
-        // 데모 수치 생성
-        const yearCumulative = today.totalAmt * 200; // 연 누적 (예시)
-        const monthCumulative = today.totalAmt * 15; // 월 누적 (예시)
-        const prevWeekDelta = Math.round(today.totalAmt * 0.14); // 전주 매출 (예시)
-        const prevDayDelta = Math.round(today.totalAmt * -0.046); // 전일 매출 (예시, 음수)
-
-        const sign = (n: number) => (n >= 0 ? '+' : '-');
-        const pair1 = `${yearCumulative.toLocaleString()} / ${monthCumulative.toLocaleString()}`;
-        const pair2 = `${sign(prevWeekDelta)}${Math.abs(prevWeekDelta).toLocaleString()} / ${sign(prevDayDelta)}${Math.abs(prevDayDelta).toLocaleString()}`;
-
-        const row1: ListItem = {type: 'summaryPair', key: 's-ym', label: '년/월 매출누적', pairText: pair1};
-        const row2: ListItem = {type: 'summaryPair', key: 's-prev', label: '전주/전일 매출', pairText: pair2};
-        const row3: ListItem = {type: 'summaryTotals', key: 's-today', label: '당일합계', totalAmt: today.totalAmt};
-        return [row1, row2, row3];
-    }, [totalValues]);
-
-    const detailData: SaleDetailRow[] = useMemo(
-        () =>
-            Array.from({length: 10}).map((_, idx) => {
-                const qty = (idx % 4) + 1;
-                const cashAmt = 100000;
-                const cardAmt = 200000;
-                const etcAmt = 250000;
-                const totalAmt = qty * 10000000;
-                return {
-                    storNm: `포스그룹명 ${((idx % 6) + 1).toString().padStart(2, '0')}`,
-                    cashAmt,
-                    cardAmt,
-                    etcAmt,
-                    totalAmt: totalAmt,
-                };
-            }),
-        []
-    );
+    // const summaryRows = useMemo(() => {
+    //     const today: SummaryTotals = {
+    //         label: '당일합계',
+    //         totalAmt: totalValues.totalAmt
+    //     };
+    //     // 데모 수치 생성
+    //     const yearCumulative = today.totalAmt * 200; // 연 누적 (예시)
+    //     const monthCumulative = today.totalAmt * 15; // 월 누적 (예시)
+    //     const prevWeekDelta = Math.round(today.totalAmt * 0.14); // 전주 매출 (예시)
+    //     const prevDayDelta = Math.round(today.totalAmt * -0.046); // 전일 매출 (예시, 음수)
+    //
+    //     const sign = (n: number) => (n >= 0 ? '+' : '-');
+    //     const pair1 = `${yearCumulative.toLocaleString()} / ${monthCumulative.toLocaleString()}`;
+    //     const pair2 = `${sign(prevWeekDelta)}${Math.abs(prevWeekDelta).toLocaleString()} / ${sign(prevDayDelta)}${Math.abs(prevDayDelta).toLocaleString()}`;
+    //
+    //     const row1: ListItem = {type: 'summaryPair', key: 's-ym', label: '년/월 매출누적', pairText: pair1};
+    //     const row2: ListItem = {type: 'summaryPair', key: 's-prev', label: '전주/전일 매출', pairText: pair2};
+    //     const row3: ListItem = {type: 'summaryTotals', key: 's-today', label: '당일합계', totalAmt: today.totalAmt};
+    //     return [row1, row2, row3];
+    // }, [saleList]);
 
     const SaleDetailColumns: ColumnDef<SaleDetailRow>[] = useMemo(() => ([
         {key: 'no', title: Const.NO, flex: 0.5,
-            renderCell: (_item, index) => (
-                <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
+            renderCell: (item, index) => {
+                if (item.isSummary) return null;
+                return (
+                    <Text style={[commonStyles.cell, {textAlign: 'center'}]}>{index+1}</Text>
+                )
+            }
+        },
+        {
+            key: 'orgNm', title: '포스그룹', flex: 1.5, align: 'center',
+            renderCell: (item) => (
+                <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
+                    <Text style={[commonStyles.cell,
+                        item.isSummary ? {fontWeight: 'bold', textAlign: 'center'}
+                            : commonStyles.linkText, {paddingLeft: 10}]}>
+                        {item.storNm}
+                    </Text>
+                </Pressable>
             ),
         },
-        {key: 'storNm', title: '포스그룹', flex: 1.5, align: 'center'},
         {
-            key: 'cashAmt', title: Const.CASH, flex: 1, align: 'center',
+            key: 'cashAmt', title: Const.CASH, flex: 1,
             renderCell: (item) => (
                 <Text style={[commonStyles.cell, commonStyles.numberSmallCell]}>
                     {item.cashAmt.toLocaleString()}
@@ -204,35 +371,113 @@ export default function RealtimeSalesScreen() {
             )
         },
         {
-            key: 'etcAmt', title: Const.CARD_ETC, flex: 1, align: 'right',
+            key: 'etcPayAmt', title: Const.CARD_ETC, flex: 1, align: 'right',
             renderCell: (item) => (
                 <Text style={[commonStyles.cell, commonStyles.numberSmallCell]}>
-                    {item.etcAmt.toLocaleString()}
+                    {(item.etcPayAmt + item.cardAmt).toLocaleString()}
                 </Text>
             )
         },
         {
-            key: 'totalAmt', title: '금액', flex: 1.3, align: 'right',
+            key: 'actualSaleAmt', title: '금액', flex: 1.3, align: 'right',
             renderCell: (item) => (
                 <Text style={[commonStyles.cell, commonStyles.numberSmallCell]}>
-                    {item.totalAmt.toLocaleString()}
+                    {item.actualSaleAmt.toLocaleString()}
                 </Text>
             )
         },
-    ]), []);
+    ]), [selectedOperDiv]);
 
-    const summaryRow = useMemo(() => {
-        const totalSaleAmt = detailData.reduce((sum, item) => sum + item.totalAmt, 0);
-        const totalCashAmt = detailData.reduce((sum, item) => sum + item.cashAmt, 0);
-        const totalEtcAmt = detailData.reduce((sum, item) => sum + item.cardAmt + item.etcAmt, 0);
-        return {
-            totalCashAmt: totalCashAmt,
-            totalSaleAmt: totalSaleAmt,
-            totalEtcAmt: totalEtcAmt
-        };
-    }, [detailData]);
+    const saleOilDetailColumns: ColumnDef<OilSaleDetailRow& {isSummary?: boolean;}>[] = useMemo(() => ([
+        {key: 'no', title: Const.NO, flex: 0.5,
+            renderCell: (_item, index) => (
+                <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
+            ),
+        },
+        {
+            key: 'storNm', title: '매장', flex: 1,
+            renderCell: (item) => {
+                if(!item.isFirstRow) return null;
+                return (
+                    <Text style={[commonStyles.cell, {textAlign: 'center'}]}>
+                        {item.storNm}
+                    </Text>
+                )
+            }
+        },
+        {
+            key: 'gaugeNm', title: '게이지', flex: 1,
+            renderCell: (item) => (
+                <Text style={[commonStyles.cell, {paddingLeft: 5}]}>
+                    {item.gaugeNm}
+                </Text>
+            )
+        },
+        {
+            key: 'saleQty', title: Const.SALE_QTY, flex: 1.1,
+            renderCell: (item) => (
+                <Text style={commonStyles.numberSmallCell}>
+                    {item.saleQty.toLocaleString()}
+                </Text>
+            )
+        },
+        {
+            key: 'actualSaleAmt', title: Const.TOTAL_SALE_AMT, flex: 1.5,
+            renderCell: (item) => (
+                <Text style={commonStyles.numberSmallCell}>
+                    {item.actualSaleAmt.toLocaleString()}
+                </Text>
+            )
+        },
+    ]), [selectedOperDiv]);
 
-    const renderDetailFooterRow = () => {
+    const restSaleSummaryRow = useMemo(() => {
+        if(saleDetailList) {
+            const totalSaleAmt = saleDetailList.reduce((sum, item) => sum + item.actualSaleAmt, 0);
+            const totalCashAmt = saleDetailList.reduce((sum, item) => sum + item.cashAmt, 0);
+            const totalEtcPayAmt = saleDetailList.reduce((sum, item) => sum + item.cardAmt + item.etcPayAmt, 0);
+            return {
+                totalCashAmt: totalCashAmt,
+                totalSaleAmt: totalSaleAmt,
+                totalEtcPayAmt: totalEtcPayAmt
+            };
+        }
+    }, [saleDetailList]);
+
+    const oilSaleSummaryRow = useMemo(() => {
+        if(oilSaleDetailList) {
+            const totalSaleAmt = oilSaleDetailList.reduce((sum, item) => sum + item.actualSaleAmt, 0);
+            const totalSaleQty = oilSaleDetailList.reduce((sum, item) => sum + item.saleQty, 0);
+            return {
+                totalSaleAmt: totalSaleAmt,
+                totalSaleQty: totalSaleQty
+            };
+        }
+    }, [oilSaleDetailList]);
+
+    const renderOilSaleDetailFooterRow = () => {
+        return (
+            <View style={[commonStyles.modalTableRow, commonStyles.summaryRow]}>
+                <View style={[{flex: 2.5}, commonStyles.tableRightBorder]}>
+                    <Text style={[commonStyles.modalCell, {textAlign: 'center', fontWeight: 'bold'}]}>
+                        합계
+                    </Text>
+                </View>
+                <View style={[{flex: 1.1}, commonStyles.tableRightBorder]}>
+                    <Text style={[commonStyles.modalCell, commonStyles.numberSmallCell]}>
+                        {oilSaleSummaryRow.totalSaleQty.toLocaleString()}
+                    </Text>
+                </View>
+                <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
+                    <Text style={[commonStyles.modalCell, commonStyles.numberSmallCell]}>
+                        {oilSaleSummaryRow.totalSaleAmt.toLocaleString()}
+                    </Text>
+                </View>
+            </View>
+        )
+    }
+
+    const renderRestSaleDetailFooterRow = () => {
         return (
             <View style={[commonStyles.modalTableRow, commonStyles.summaryRow]}>
                 <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
@@ -247,17 +492,17 @@ export default function RealtimeSalesScreen() {
                 </View>
                 <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
                     <Text style={[commonStyles.modalCell, commonStyles.numberSmallCell]}>
-                        {summaryRow.totalCashAmt.toLocaleString()}
+                        {restSaleSummaryRow.totalCashAmt.toLocaleString()}
                     </Text>
                 </View>
                 <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
                     <Text style={[commonStyles.modalCell, commonStyles.numberSmallCell]}>
-                        {summaryRow.totalEtcAmt.toLocaleString()}
+                        {restSaleSummaryRow.totalEtcPayAmt.toLocaleString()}
                     </Text>
                 </View>
                 <View style={[{flex: 1.3}, commonStyles.tableRightBorder]}>
                     <Text style={[commonStyles.modalCell, commonStyles.numberSmallCell]}>
-                        {summaryRow.totalSaleAmt.toLocaleString()}
+                        {restSaleSummaryRow.totalSaleAmt.toLocaleString()}
                     </Text>
                 </View>
             </View>
@@ -324,24 +569,24 @@ export default function RealtimeSalesScreen() {
             <View style={commonStyles.sectionDivider}/>
 
             <Table
-                data={filteredData}
+                data={tableData}
                 columns={mainColumns}
-                listHeader={() => (
-                    <View>
-                        {summaryRows.map(row => (
-                            <View key={row.key} style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-                                <View style={[{flex:0.8}, commonStyles.tableRightBorder]}>
-                                    <Text style={[{paddingLeft:10},styles.cell, styles.summaryLabelText]}>{row.label}</Text>
-                                </View>
-                                <View style={[{ flex: 1 }]}>
-                                    <Text style={commonStyles.numberCell}>
-                                        {"pairText" in row ? row.pairText : row.totalAmt.toLocaleString()}
-                                    </Text>
-                                </View>
-                            </View>
-                        ))}
-                    </View>
-                )}
+                // listHeader={() => (
+                //     <View>
+                //         {saleStatList.map(row => (
+                //             <View key={row.sortOrder} style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+                //                 <View style={[{flex:0.8}, commonStyles.tableRightBorder]}>
+                //                     <Text style={[{paddingLeft:10},styles.cell, styles.summaryLabelText]}>{row.label}</Text>
+                //                 </View>
+                //                 <View style={[{ flex: 1 }]}>
+                //                     <Text style={commonStyles.numberCell}>
+                //                         {row.sortOrder === '1' || row.sortOrder === '2' ? row.pairText : row.totalAmt.toLocaleString()}
+                //                     </Text>
+                //                 </View>
+                //             </View>
+                //         ))}
+                //     </View>
+                // )}
             />
 
             <DatePickerModal
@@ -383,10 +628,10 @@ export default function RealtimeSalesScreen() {
                         </View>
 
                         <Table
-                            data={detailData}
-                            columns={SaleDetailColumns}
+                            data={selectedOperDiv === '01' ? saleDetailList : oilDetailTableData}
+                            columns={selectedOperDiv === '01' ? SaleDetailColumns : saleOilDetailColumns}
                             isModal={true}
-                            listFooter={renderDetailFooterRow}
+                            listFooter={selectedOperDiv === '01' ? renderRestSaleDetailFooterRow : renderOilSaleDetailFooterRow}
                         />
                     </View>
                 </View>
