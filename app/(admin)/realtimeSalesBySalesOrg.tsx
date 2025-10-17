@@ -233,7 +233,7 @@ export default function RealtimeSalesBySalesOrgScreen() {
         return commonCols;
     }, [detailChecked]);
 
-    const SaleDetailColumns: ColumnDef<SaleDetailRow>[] = useMemo(() => ([
+    const saleDetailColumns: ColumnDef<SaleDetailRow>[] = useMemo(() => ([
         {key: 'itemNm', title: '상품명', flex: 1, align: 'center'},
         {
             key: 'todaySaleQty', title: Const.QTY, flex: 0.6,
@@ -446,7 +446,7 @@ export default function RealtimeSalesBySalesOrgScreen() {
                         <CornerNmRow/>
                         <Table
                             data={saleDetailList}
-                            columns={SaleDetailColumns}
+                            columns={saleDetailColumns}
                             isModal={true}
                             listFooter={() => renderDetailFooterRow()}
                         />

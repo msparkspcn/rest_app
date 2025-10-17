@@ -199,7 +199,7 @@ export default function RealtimeSalesByCornerScreen() {
         }
     }, [saleDetailList]);
 
-    const SaleDetailColumns: ColumnDef<SaleDetailRow>[] = useMemo(() => ([
+    const saleDetailColumns: ColumnDef<SaleDetailRow>[] = useMemo(() => ([
         {key: 'no', title: Const.NO, flex: 0.5,
             renderCell: (_item, index) => (
                 <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
@@ -328,7 +328,7 @@ export default function RealtimeSalesByCornerScreen() {
 
                         <Table
                             data={saleDetailList}
-                            columns={SaleDetailColumns}
+                            columns={saleDetailColumns}
                             isModal={true}
                             listFooter={renderDetailFooterRow}
                         />

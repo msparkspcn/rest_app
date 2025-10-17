@@ -341,7 +341,7 @@ export default function RealtimeSalesScreen() {
     //     return [row1, row2, row3];
     // }, [saleList]);
 
-    const SaleDetailColumns: ColumnDef<SaleDetailRow>[] = useMemo(() => ([
+    const saleDetailColumns: ColumnDef<SaleDetailRow>[] = useMemo(() => ([
         {key: 'no', title: Const.NO, flex: 0.5,
             renderCell: (item, index) => {
                 if (item.isSummary) return null;
@@ -629,7 +629,7 @@ export default function RealtimeSalesScreen() {
 
                         <Table
                             data={selectedOperDiv === '01' ? saleDetailList : oilDetailTableData}
-                            columns={selectedOperDiv === '01' ? SaleDetailColumns : saleOilDetailColumns}
+                            columns={selectedOperDiv === '01' ? saleDetailColumns : saleOilDetailColumns}
                             isModal={true}
                             listFooter={selectedOperDiv === '01' ? renderRestSaleDetailFooterRow : renderOilSaleDetailFooterRow}
                         />

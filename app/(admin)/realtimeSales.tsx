@@ -249,14 +249,14 @@ export default function RealtimeSales() {
     //     return [row1, row2, row3];
     // }, [totalValues]);
 
-    const SaleDetailColumns: ColumnDef<SaleDetailRow>[] = useMemo(() => ([
+    const saleDetailColumns: ColumnDef<SaleDetailRow>[] = useMemo(() => ([
         {
             key: 'no', title: Const.NO, flex: 0.5,
             renderCell: (_item, index) => (
                 <Text style={[commonStyles.cell, {textAlign: 'center'}]}>{index + 1}</Text>
             ),
         },
-        {key: 'itemNm', title: '상품명', flex: 2, align: 'center'},
+        {key: 'itemNm', title: '상품명', flex: 2, align: 'left'},
         {
             key: 'saleQty', title: Const.QTY, flex: 0.5, align: 'center',
             renderCell: (item) => (
@@ -403,7 +403,7 @@ export default function RealtimeSales() {
 
                         <Table
                             data={saleDetailList}
-                            columns={SaleDetailColumns}
+                            columns={saleDetailColumns}
                             isModal={true}
                             listFooter={renderDetailFooterRow}
                         />
