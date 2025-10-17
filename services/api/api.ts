@@ -154,6 +154,16 @@ export function restCornerByItemSale(params) { //기간별 매출현황 > 매장
     return post(request, params);
 }
 
+export function mobOilRealTimeSale(params) { //주유소/운영업체 실시간 매출현황(주)
+    const request = host + "/api/v1/oil/sale/mobOilRealTimeSale";
+    return post(request, params);
+}
+
+export function mobOilRealTimeSaleStat(params) { //주유소/운영업체 실시간 매출현황(주) > 상세
+    const request = host + "/api/v1/oil/sale/mobOilRealTimeSaleStat";
+    return post(request, params);
+}
+
 export function posGroupByOilHourlySale(params) { //주유소 시간대별 매출현황
     const request = host + "/api/v1/oil/sale/posGroupByOilHourlySale";
     return post(request, params);
@@ -209,4 +219,3 @@ export function mobOperSaleDetail(params) { //운영업체 기간별 매출현�
     const request = host + "/api/v1/oper/sale/mobOperSaleDetail";
     return post(request, params);
 }
-
