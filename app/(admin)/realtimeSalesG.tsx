@@ -43,7 +43,7 @@ export default function RealtimeSalesScreen() {
 
     const onSearch = () => {
         console.log("조회 클릭 fromSaleDt")
-        // mobOilRealTimeSaleStat
+
         const request = {
             cmpCd: user.cmpCd,
             cornerCd: "",
@@ -235,5 +235,4 @@ export default function RealtimeSalesScreen() {
 const styles = StyleSheet.create({
     selectText: {fontSize: 14, color: '#333'},
     summaryLabelText: {fontWeight: '700', color: '#333'},
-
 });

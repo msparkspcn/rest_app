@@ -11,23 +11,16 @@ import ListModal from "../../components/ListModal";
 import * as api from "../../services/api/api";
 import {useUser} from "../../contexts/UserContext";
 import {User, SalesOrg} from "../../types";
+import LoadingOverlay from "../../components/LoadingOverlay";
+
 type SaleRow = {
     storNm: string;
     storCd: string;
-    gauge: string;
+    gaugeNm: string;
     saleQty: number;
-    totalAmt: number
-};
-type SummaryTotals = {
-    label: string;
-    saleQty: number;
-    totalAmt: number
+    actualSaleAmt: number
 };
 
-type ListItem =
-    | { type: 'summaryPair'; key: string; label: string; pairText: string }
-    | { type: 'summaryTotals'; key: string; label: string; saleQty: number; totalAmt: number }
-    | { type: 'detail'; key: string; no: number; posGroup: string; gauge: string; saleQty: number; totalAmt: number };
 type StoreGroup = { id: string; name: string };
 
 export default function RealtimeSalesScreen() {
@@ -42,17 +35,20 @@ export default function RealtimeSalesScreen() {
         ],
         []
     );
-    const [registerFilter, setRegisterFilter] = useState<StoreGroup>(storeGroups[0]);
+    const [selectedStorCd, setSelectedStorCd] = useState<StoreGroup>(storeGroups[0]);
 
-    const [selectedStoreGroupId, setSelectedStoreGroupId] =
-        useState<string | null>(storeGroups[0]?.id ?? null);
     const [showSalesOrgListModal, setShowSalesOrgListModal] = useState(false);
     const [selectedSalesOrgCd, setSelectedSalesOrgCd] = useState<string>('');
     const {user}: User = useUser();
     const [salesOrgList, setSalesOrgList] = useState<SalesOrg[]>([]);
+    const [saleList, setSaleList] = useState<[] | null>(null);
+    const [saleStatList ,setSaleStatList] = useState<[] | null>([]);
+    const [loading, setLoading] = useState(false);
+
     useEffect(() => {
         getSalesOrgList();
     },[]);
+
     const getSalesOrgList = () => {
         const request = {
             cmpCd: user.cmpCd,
@@ -74,34 +70,61 @@ export default function RealtimeSalesScreen() {
             });
     }
 
-    const baseData: SaleRow[] = useMemo(
-        () =>
-            Array.from({length: 20}).map((_, idx) => {
-                // const gauge = `${idx}번무연`;
-                const saleQty = 20000 + (idx % 7) * 2500;
-                return {
-                    storCd: '',
-                    storNm: `그룹 ${((idx % 6) + 1)}`,
-                    gauge: `${idx}번무연`,
-                    saleQty: saleQty,
-                    totalAmt: saleQty * 256,
-                };
-            }),
-        []
-    );
-
-    const filteredData = useMemo(() => {
-        if (!selectedStoreGroupId) return baseData;
-        const groupName = storeGroups.find(g => g.id === selectedStoreGroupId)?.name;
-        return baseData.filter(r => (groupName ? r.storNm === groupName : true));
-    }, [baseData, storeGroups, selectedStoreGroupId]);
 
     const onSearch = () => {
         if(selectedSalesOrgCd=='') {
             Alert.alert(Const.ERROR, Const.NO_SALES_ORG_MSG);
             return;
         }
+        console.log("조회 클릭")
+
+        const request = {
+            cmpCd: user.cmpCd,
+            cornerCd: "",
+            fromSaleDt: saleDate,
+            salesOrgCd: selectedSalesOrgCd,
+            storCd: selectedStorCd.id,
+            toSaleDt: ""
+        }
+        console.log('request:'+JSON.stringify(request));
+        setLoading(true);
+        api.mobOilRealTimeSale(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const saleList = result.data.responseBody;
+                    console.log('saleList:' + JSON.stringify(saleList))
+                    setSaleList(saleList);
+                    mobOilRealTimeSaleStat();
+                }
+            })
+            .catch(error => {
+                console.log("mobOilRealTimeSale error:" + error)
+            });
     };
+
+    const mobOilRealTimeSaleStat = () => {
+        const request = {
+            cmpCd: user.cmpCd,
+            cornerCd: "",
+            fromSaleDt: saleDate,
+            salesOrgCd: selectedSalesOrgCd,
+            storCd: selectedStorCd.id,
+            toSaleDt: ""
+        }
+        console.log('request:'+JSON.stringify(request));
+        api.mobOilRealTimeSaleStat(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const saleStatList = result.data.responseBody;
+                    console.log('saleStatList:' + JSON.stringify(saleStatList))
+                    setSaleStatList(saleStatList);
+                    setLoading(false);
+                }
+            })
+            .catch(error => {
+                console.log("mobOilRealTimeSaleStat error:" + error)
+            });
+    }
 
     const openDatePicker = () => {
         setTempDate(new Date());
@@ -124,10 +147,10 @@ export default function RealtimeSalesScreen() {
             ),
         },
         {
-            key: 'gauge', title: '게이지', flex: 0.8,
+            key: 'gaugeNm', title: '게이지', flex: 0.8,
             renderCell: (item) => (
                 <Text style={[commonStyles.cell, {paddingLeft: 10}]}>
-                    {item.gauge}
+                    {item.gaugeNm}
                 </Text>
             )
         },
@@ -140,74 +163,14 @@ export default function RealtimeSalesScreen() {
             )
         },
         {
-            key: 'totalAmt', title: '총매출', flex: 1.2,
+            key: 'actualSaleAmt', title: '총매출', flex: 1.2,
             renderCell: (item) => (
                 <Text style={commonStyles.numberSmallCell}>
-                    {item.totalAmt.toLocaleString()}
+                    {item.actualSaleAmt.toLocaleString()}
                 </Text>
             )
         },
     ]), [])
-
-    const totalValues = useMemo(() => {
-        return filteredData.reduce(
-            (acc, r) => {
-                acc.totalAmt += r.totalAmt;
-                return acc;
-            },
-            {saleQty: 0, totalAmt: 0}
-        );
-    }, [filteredData]);
-
-    // 요약 데이터 구성
-    const summaryRows = useMemo(() => {
-        const today: SummaryTotals = {
-            label: '당일합계',
-            saleQty: totalValues.saleQty,
-            totalAmt: totalValues.totalAmt
-        };
-        // 데모 수치 생성
-        const yearCumulative = today.totalAmt * 200; // 연 누적 (예시)
-        const monthCumulative = today.totalAmt * 15; // 월 누적 (예시)
-        const prevWeekDelta = Math.round(today.totalAmt * 0.14); // 전주 매출 (예시)
-        const prevDayDelta = Math.round(today.totalAmt * -0.046); // 전일 매출 (예시, 음수)
-
-        const sign = (n: number) => (n >= 0 ? '+' : '-');
-        const pair1 = `${yearCumulative.toLocaleString()} / ${monthCumulative.toLocaleString()}`;
-        const pair2 = `${sign(prevWeekDelta)}${Math.abs(prevWeekDelta).toLocaleString()} / ${sign(prevDayDelta)}${Math.abs(prevDayDelta).toLocaleString()}`;
-
-        const row1: ListItem = {type: 'summaryPair', key: 's-ym', label: '년/월 매출누적', pairText: pair1};
-        const row2: ListItem = {type: 'summaryPair', key: 's-prev', label: '전주/전일 매출', pairText: pair2};
-        const row3: ListItem = {
-            type: 'summaryTotals',
-            key: 's-today1',
-            label: '주유소 무연합계',
-            saleQty: today.saleQty,
-            totalAmt: today.totalAmt
-        };
-        const row4: ListItem = {
-            type: 'summaryTotals',
-            key: 's-today2',
-            label: '주유소 경유 합계',
-            saleQty: today.saleQty,
-            totalAmt: today.totalAmt
-        };
-        const row5: ListItem = {
-            type: 'summaryTotals',
-            key: 's-today3',
-            label: '충전소 LPG 합계',
-            saleQty: today.saleQty,
-            totalAmt: today.totalAmt
-        };
-        const row6: ListItem = {
-            type: 'summaryTotals',
-            key: 's-today4',
-            label: today.label,
-            saleQty: today.saleQty,
-            totalAmt: today.totalAmt
-        };
-        return [row1, row2, row3, row4, row5, row6];
-    }, [totalValues]);
 
     return (
         <SafeAreaView style={commonStyles.container}>
@@ -234,16 +197,16 @@ export default function RealtimeSalesScreen() {
                     </TouchableOpacity>
                 </View>
                 <View style={commonStyles.filterRow}>
-                    <Text style={commonStyles.filterLabel}>매장그룹</Text>
+                    <Text style={commonStyles.filterLabel}>{Const.STORE_GROUP}</Text>
                     <View style={commonStyles.segmented}>
                         {storeGroups.map((option) => (
                             <Pressable
                                 key={option.id}
-                                onPress={() => setRegisterFilter(option)}
-                                style={[commonStyles.segmentItem, registerFilter.id === option.id && commonStyles.segmentItemActive]}
+                                onPress={() => setSelectedStorCd(option)}
+                                style={[commonStyles.segmentItem, selectedStorCd.id === option.id && commonStyles.segmentItemActive]}
                             >
                                 <Text
-                                    style={[commonStyles.segmentText, registerFilter.id === option.id && commonStyles.segmentTextActive]}>
+                                    style={[commonStyles.segmentText, selectedStorCd.id === option.id && commonStyles.segmentTextActive]}>
                                     {option.name}
                                 </Text>
                             </Pressable>
@@ -258,15 +221,15 @@ export default function RealtimeSalesScreen() {
             <View style={commonStyles.sectionDivider}/>
 
             <Table
-                data={filteredData}
+                data={saleList}
                 columns={mainColumns}
                 listHeader={() => (
                     <View>
-                        {summaryRows.map(row => (
+                        {saleStatList.map(row => (
                             <View
-                                key={row.key}
+                                key={row.sortOrder}
                                 style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-                                {row.type === 'summaryPair' ? (
+                                {row.sortOrder === '1' || row.sortOrder === '2' ? (
                                     <>
                                         <View style={[{flex: 1.2}, commonStyles.tableRightBorder]}>
                                             <Text style={[commonStyles.cell, styles.summaryLabelText, {textAlign:'center'}]}>
@@ -275,7 +238,7 @@ export default function RealtimeSalesScreen() {
                                         </View>
                                         <View style={[{flex: 3}, commonStyles.tableRightBorder]}>
                                             <Text style={[commonStyles.numberSmallCell]}>
-                                                {row.pairText}
+                                                {row.saleQty.toLocaleString()} / {row.saleAmt.toLocaleString()}
                                             </Text>
                                         </View>
                                     </>
@@ -293,7 +256,7 @@ export default function RealtimeSalesScreen() {
                                         </View>
                                         <View style={[{flex: 1.2}, commonStyles.tableRightBorder]}>
                                             <Text style={[commonStyles.numberSmallCell]}>
-                                                {row.totalAmt.toLocaleString()}
+                                                {row.saleAmt.toLocaleString()}
                                             </Text>
                                         </View>
                                     </>
@@ -303,6 +266,8 @@ export default function RealtimeSalesScreen() {
                     </View>
                 )}
             />
+
+            {loading && (<LoadingOverlay />)}
 
             <DatePickerModal
                 visible={showDatePicker}
