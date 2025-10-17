@@ -292,7 +292,7 @@ export default function MobileOrderReportByPeriod() {
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
-                <View style={commonStyles.filterRowFront}>
+                <View style={commonStyles.filterRow}>
                     <Text style={commonStyles.filterLabel}>매장그룹</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowStorModal(true)}>
                         <Text style={styles.selectText}>
@@ -300,17 +300,6 @@ export default function MobileOrderReportByPeriod() {
                         </Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
-                </View>
-                <View style={commonStyles.filterRow}>
-                    <Text style={commonStyles.filterLabel}>구분</Text>
-                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowStorModal(true)}>
-                        <Text
-                            style={styles.selectText}>{storList.find(g => g.storCd === selectedStor)?.storCd || Const.SELECT}</Text>
-                        <Text style={commonStyles.selectArrow}> ▼</Text>
-                    </TouchableOpacity>
-                    <Pressable style={commonStyles.searchButton} onPress={onSearch}>
-                        <Text style={commonStyles.searchButtonText}>{Const.SEARCH}</Text>
-                    </Pressable>
                 </View>
             </View>
 

@@ -159,7 +159,7 @@ export default function RealtimeSales() {
                 }
             })
             .catch(error => {
-                console.log("mobRestRealTimeItemSaleDetail error:" + error)
+                console.log("mobRestRealTimeSaleDetail error:" + error)
             });
     }
 
