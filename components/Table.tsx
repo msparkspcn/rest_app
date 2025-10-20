@@ -63,19 +63,19 @@ export function Table<T>({
             const summaryItem = item as any; // 타입 단순화
             return (
                 <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-                    <View style={[{flex: 2.5}, commonStyles.tableRightBorder]}>
+                    <View style={[{flex: 2.5}, commonStyles.columnContainer]}>
                         <Text style={[commonStyles.summaryLabelText, {textAlign: 'center', fontSize: 13 }]}>
                             {summaryItem.orgNm}
                         </Text>
                     </View>
                     {summaryItem.saleQty && (
-                        <View style={[{flex: 1.1}, commonStyles.tableRightBorder]}>
+                        <View style={[{flex: 1.1}, commonStyles.columnContainer]}>
                             <Text style={[commonStyles.numberSmallCell]}>
                                 {summaryItem.saleQty.toLocaleString()}
                             </Text>
                         </View>
                     )}
-                    <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
+                    <View style={[{flex: 1.5}, commonStyles.columnContainer]}>
                         <Text style={[commonStyles.numberSmallCell]}>
                             {summaryItem.totalSaleAmt.toLocaleString()}
                         </Text>
@@ -121,7 +121,7 @@ export function Table<T>({
     // console.log("data:"+data)
 
     return (
-        <View style={isModal ? commonStyles.modalTableContainer : commonStyles.tableContainer}>
+        <View style={[isModal ? commonStyles.modalTableContainer : commonStyles.tableContainer]}>
             {renderHeader()}
             <FlatList
                 data={data}

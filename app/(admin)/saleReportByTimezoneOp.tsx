@@ -216,19 +216,19 @@ export default function SalesReportByTimezoneScreen() {
                     <View>
                         {summaryRows.map(row => (
                             <View key={row.key} style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-                                <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                                <View style={[{flex: 1}, commonStyles.columnContainer, commonStyles.tableRightBorder]}>
                                     <Text style={[styles.cell, styles.summaryLabelText, {textAlign: 'center'}]}>
                                         {row.label}
                                     </Text>
                                 </View>
-                                <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                                <View style={[{flex: 1}, commonStyles.columnContainer, commonStyles.tableRightBorder]}>
                                     <Text style={commonStyles.numberCell}>
                                         {row.totalAmt.toLocaleString()}
                                     </Text>
                                 </View>
                                 <View style={[{
                                     flex: 0.5,
-                                }, commonStyles.tableRightBorder]}>
+                                }, commonStyles.columnContainer, commonStyles.tableRightBorder]}>
                                     <Text style={commonStyles.numberCell}>
                                         {row.totalSaleRatio.toFixed(2)}%
                                     </Text>

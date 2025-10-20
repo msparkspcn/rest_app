@@ -11,19 +11,20 @@ import ListModal from "../../components/ListModal";
 import {User, SalesOrg} from "../../types";
 import {useUser} from "../../contexts/UserContext";
 import * as api from "../../services/api/api";
+import {AntDesign} from "@expo/vector-icons";
 
 type SaleRow = {
     no: number;
     orgNm: string;
+    saleAmt: number;
     salesOrgCd: string;
     actualSaleAmt: number;
+    netSaleAmt: number;
     operDiv: string;
     totalSaleAmt: number;
+    vatAmt: number;
 };
-type SummaryTotals = {
-    label: string;
-    totalAmt: number
-};
+
 type SaleDetailRow = {
     storNm: string;
     cashAmt: number;
@@ -42,11 +43,6 @@ type OilSaleDetailRow = {
     isFirstRow: boolean;
 };
 
-type ListItem =
-    | { type: 'summaryPair'; key: string; label: string; pairText: string }
-    | { type: 'summaryTotals'; key: string; label: string; totalAmt: number }
-    | { type: 'detail'; key: string; no: number; posGroup: string; totalAmt: number };
-
 export default function RealtimeSalesScreen() {
     const [saleDate, setSaleDate] = useState(getTodayYmd());
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -59,7 +55,7 @@ export default function RealtimeSalesScreen() {
     const [salesOrgList, setSalesOrgList] = useState<SalesOrg[]>([]);
     const [vatExcludedChecked, setVatExcludedChecked] = useState(false);
     const [appliedVatChecked, setAppliedVatChecked] = useState(false);
-    const [dcIncludedChecked, setDcIncludedChecked] = useState(false);
+    const [dcIncludedChecked, setDcIncludedChecked] = useState(true);
     const [appliedDcChecked, setAppliedDcChecked] = useState(false);
 
     const [selectedSalesOrgCd, setSelectedSalesOrgCd] = useState<string>('');
@@ -73,19 +69,17 @@ export default function RealtimeSalesScreen() {
     useEffect(() => {
         getSalesOrgList();
     },[]);
+
     const getSalesOrgList = () => {
         const request = {
             cmpCd: user.cmpCd,
             operType: '',
             restValue: '',
         }
-        console.log("request:"+JSON.stringify(request))
         api.getSalsOrgList(request)
             .then(result => {
-                console.log("result:"+JSON.stringify(result))
                 if (result.data.responseBody != null) {
                     const salesOrgList = result.data.responseBody;
-                    console.log('salesOrgList:' + JSON.stringify(salesOrgList))
                     setSalesOrgList([
                             {salesOrgCd:'', salesOrgNm: '전체'},
                             ...salesOrgList
@@ -100,9 +94,9 @@ export default function RealtimeSalesScreen() {
 
 
     const onSearch = () => {
-        // 데모: 현재는 선택 값만으로 필터링 적용
         console.log("조회 클릭")
-
+        setAppliedDcChecked(dcIncludedChecked);
+        setAppliedVatChecked(vatExcludedChecked);
         const request = {
             cmpCd: user.cmpCd,
             fromSaleDt: saleDate,
@@ -118,11 +112,36 @@ export default function RealtimeSalesScreen() {
                     const saleList = result.data.responseBody;
                     console.log('saleList:' + JSON.stringify(saleList))
                     setSaleList(saleList);
-                    // mobOperRealTimeSale();
+                    mobOperRealTimeSaleStat();
                 }
             })
             .catch(error => {
                 console.log("mobOilRealTimeSale error:" + error)
+            });
+    };
+
+    const mobOperRealTimeSaleStat = () => {
+        console.log("실적 조회")
+
+        const request = {
+            cmpCd: user.cmpCd,
+            fromSaleDt: saleDate,
+            salesOrgCd: selectedSalesOrgCd,
+            storCd: "",
+            toSaleDt: ""
+        }
+        console.log('request:'+JSON.stringify(request));
+        // setLoading(true);
+        api.mobOperRealTimeSaleStat(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const saleStatList = result.data.responseBody;
+                    console.log('saleStatList:' + JSON.stringify(saleStatList))
+                    setSaleStatList(saleStatList);
+                }
+            })
+            .catch(error => {
+                console.log("mobOperRealTimeSaleStat error:" + error)
             });
     };
 
@@ -144,9 +163,12 @@ export default function RealtimeSalesScreen() {
             .forEach(operDiv => {
                 const rows = grouped[operDiv];
                 let storSum = 0;
-
+                let netSaleSum = 0;
                 rows.forEach((item) => {
-                    storSum += item.actualSaleAmt;
+                    if (appliedVatChecked && appliedDcChecked) storSum += item.saleAmt - item.vatAmt; //부가세 적용, DC적용 X
+                    else if (appliedVatChecked && !appliedDcChecked) storSum += item.netSaleAmt; //부가세 적용, DC적용
+                    else if (!appliedVatChecked && appliedDcChecked) storSum += item.saleAmt; //부가세 적용X, DC적용 X 총 매출
+                    else if (!appliedVatChecked && !appliedDcChecked) storSum += item.actualSaleAmt; //부가세 적용X, DC적용 -> 기본값
                     no += 1;
                     result.push({
                         ...item,
@@ -162,14 +184,16 @@ export default function RealtimeSalesScreen() {
                         no: sumNo,
                         salesOrgCd: '',
                         orgNm: summaryName,
-                        actualSaleAmt: storSum,
+                        saleAmt: 0,
+                        actualSaleAmt: 0,
                         totalSaleAmt: storSum,
                         operDiv:'',
                         isSummary: true,
+                        vatAmt: 1, netSaleAmt: 0
                     });
                 }
             });
-        console.log("result:"+JSON.stringify(result));
+        // console.log("result:"+JSON.stringify(result));
 
         return result;
     }, [saleList]);
@@ -289,6 +313,14 @@ export default function RealtimeSalesScreen() {
             });
     }
 
+    const getDisplayAmt = (item: any) => {
+        if (appliedVatChecked && appliedDcChecked) return item.saleAmt - item.vatAmt; //부가세 적용, DC적용 X
+        if (appliedVatChecked && !appliedDcChecked) return item.netSaleAmt; //부가세 적용, DC적용
+        if (!appliedVatChecked && appliedDcChecked) return item.saleAmt; //부가세 적용X, DC적용 X 총 매출
+        if (!appliedVatChecked && !appliedDcChecked) return item.actualSaleAmt; //부가세 적용X, DC적용 -> 기본값
+    };
+
+
     const mainColumns: ColumnDef<SaleRow& { isSummary?: boolean; }>[] = useMemo(() => ([
         {key: 'no', title: Const.NO, flex: 0.5,
             renderCell: (item) => {
@@ -313,33 +345,11 @@ export default function RealtimeSalesScreen() {
         {key: 'actualSaleAmt', title: '총매출', flex: 1.5, align: 'center',
             renderCell: (item) => (
                 <Text style={[commonStyles.numberCell, item.isSummary ? { fontWeight: 'bold' } : null]}>
-                    {item.actualSaleAmt.toLocaleString()}
+                    {getDisplayAmt(item).toLocaleString()}
                 </Text>
             )
         },
     ]), [tableData])
-
-    // 3행 요약 데이터 구성
-    // const summaryRows = useMemo(() => {
-    //     const today: SummaryTotals = {
-    //         label: '당일합계',
-    //         totalAmt: totalValues.totalAmt
-    //     };
-    //     // 데모 수치 생성
-    //     const yearCumulative = today.totalAmt * 200; // 연 누적 (예시)
-    //     const monthCumulative = today.totalAmt * 15; // 월 누적 (예시)
-    //     const prevWeekDelta = Math.round(today.totalAmt * 0.14); // 전주 매출 (예시)
-    //     const prevDayDelta = Math.round(today.totalAmt * -0.046); // 전일 매출 (예시, 음수)
-    //
-    //     const sign = (n: number) => (n >= 0 ? '+' : '-');
-    //     const pair1 = `${yearCumulative.toLocaleString()} / ${monthCumulative.toLocaleString()}`;
-    //     const pair2 = `${sign(prevWeekDelta)}${Math.abs(prevWeekDelta).toLocaleString()} / ${sign(prevDayDelta)}${Math.abs(prevDayDelta).toLocaleString()}`;
-    //
-    //     const row1: ListItem = {type: 'summaryPair', key: 's-ym', label: '년/월 매출누적', pairText: pair1};
-    //     const row2: ListItem = {type: 'summaryPair', key: 's-prev', label: '전주/전일 매출', pairText: pair2};
-    //     const row3: ListItem = {type: 'summaryTotals', key: 's-today', label: '당일합계', totalAmt: today.totalAmt};
-    //     return [row1, row2, row3];
-    // }, [saleList]);
 
     const saleDetailColumns: ColumnDef<SaleDetailRow>[] = useMemo(() => ([
         {key: 'no', title: Const.NO, flex: 0.5,
@@ -571,22 +581,95 @@ export default function RealtimeSalesScreen() {
             <Table
                 data={tableData}
                 columns={mainColumns}
-                // listHeader={() => (
-                //     <View>
-                //         {saleStatList.map(row => (
-                //             <View key={row.sortOrder} style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-                //                 <View style={[{flex:0.8}, commonStyles.tableRightBorder]}>
-                //                     <Text style={[{paddingLeft:10},styles.cell, styles.summaryLabelText]}>{row.label}</Text>
-                //                 </View>
-                //                 <View style={[{ flex: 1 }]}>
-                //                     <Text style={commonStyles.numberCell}>
-                //                         {row.sortOrder === '1' || row.sortOrder === '2' ? row.pairText : row.totalAmt.toLocaleString()}
-                //                     </Text>
-                //                 </View>
-                //             </View>
-                //         ))}
-                //     </View>
-                // )}
+                listHeader={() => (
+                    <View>
+                        {saleStatList.map(row => {
+                            let saleValue1;
+                            let saleValue2;
+                            console.log('row:'+JSON.stringify(row));
+
+                            if (appliedVatChecked && appliedDcChecked) {
+                                saleValue1 = row.saleAmt1 - row.vatAmt1;
+                                saleValue2 = row.saleAmt2 - row.vatAmt2;
+
+                            } //부가세 적용, DC적용 X
+                            if (appliedVatChecked && !appliedDcChecked) {
+                                saleValue1 = row.netSaleAmt1;
+                                saleValue2 = row.netSaleAmt2;
+                            } //부가세 적용, DC적용
+                            if (!appliedVatChecked && appliedDcChecked) {
+                                saleValue1 = row.saleAmt1;
+                                saleValue2 = row.saleAmt2;
+                            } //부가세 적용X, DC적용 X 총 매출
+                            if (!appliedVatChecked && !appliedDcChecked) {
+                                saleValue1 = row.actualSaleAmt1;
+                                saleValue2 = row.actualSaleAmt2;
+                            }
+                            let lastWeekIsUp = saleValue1 > 0;
+                            let yesDayIsUp = saleValue2 > 0
+                            console.log('saleValue1:'+saleValue1+', saleValue2:'+saleValue2);
+                            return (
+                                <View
+                                    key={row.sortOrder}
+                                    style={[commonStyles.tableRow, commonStyles.summaryRow,
+                                        {
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between',
+                                            paddingHorizontal: 0,
+                                            width: '100%'
+                                        },
+                                    ]}
+                                >
+                                    <View style={[{flex: 1, justifyContent: 'center'}, commonStyles.tableRightBorder]}>
+                                        <Text style={[{paddingLeft: 10}, styles.cell, styles.summaryLabelText]}>
+                                            {row.label}
+                                        </Text>
+                                    </View>
+                                    <View style={[{flex: 2, flexDirection: 'row', alignItems: 'center', justifyContent:'flex-end'}]}>
+                                        {(row.sortOrder === '1') && (
+                                            <View style={{flexDirection: 'row', alignItems:'center'}}>
+                                                <Text style={{fontSize: 12, paddingRight: 5}}>
+                                                    {saleValue1.toLocaleString()}  /  </Text>
+                                                <Text style={{fontSize: 12, paddingRight: 5}}>
+                                                    {saleValue2.toLocaleString()}
+                                                </Text>
+                                            </View>
+                                        )}
+                                        {(row.sortOrder === '2') && (
+                                            <View style={{flexDirection: 'row', alignItems:'center'}}>
+                                                <Text style={{fontSize: 12}}>
+                                                    {saleValue1.toLocaleString()}
+                                                </Text>
+                                                <AntDesign
+                                                    name={lastWeekIsUp ? 'caretup' : 'caretdown'}
+                                                    size={13}
+                                                    color={lastWeekIsUp ? 'red' : 'blue'}
+                                                    style={{paddingHorizontal: 5}}
+                                                />
+                                                <Text style={{fontSize: 12}}>  /  {saleValue2.toLocaleString()}
+                                                </Text>
+                                                <AntDesign
+                                                    name={yesDayIsUp ? 'caretup' : 'caretdown'}
+                                                    size={13}
+                                                    color={yesDayIsUp ? 'red' : 'blue'}
+                                                    style={{paddingHorizontal: 5}}
+                                                />
+                                            </View>
+                                        )}
+                                        {(row.sortOrder === '3') && (
+                                            <View style={{flexDirection: 'row', alignItems:'center'}}>
+                                                <Text style={{fontSize: 12, paddingRight: 5}}>
+                                                    {saleValue1.toLocaleString()}
+                                                </Text>
+                                            </View>
+                                        )}
+                                    </View>
+                                </View>
+                            )
+                        })}
+                    </View>
+                )}
             />
 
             <DatePickerModal

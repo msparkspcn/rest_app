@@ -53,7 +53,7 @@ export default function SalesReportByPeriodOp() {
     const [selectedSale, setSelectedSale] = useState<SaleRow | null>(null);
     const [saleList, setSaleList] = useState([]);
     const {user}: User = useUser();
-    const [saleDetailList, setSaleDetailList] = useState<SaleDetailRow | null>(null);
+    const [saleDetailList, setSaleDetailList] = useState([]);
     const [selectedOperDiv, setSelectedOperDiv] = useState("01");
 
 
@@ -90,11 +90,11 @@ export default function SalesReportByPeriodOp() {
 
     const renderFooter = () => (
         <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-            <View style={[{flex: 2.5}, commonStyles.tableRightBorder]}>
+            <View style={[{flex: 2.5, paddingLeft:0.5}, commonStyles.columnContainer]}>
                 <Text style={[commonStyles.cell, styles.summaryLabelText,
                     {textAlign: 'center'}]}>합계</Text>
             </View>
-            <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
+            <View style={[{flex: 1.5}, commonStyles.columnContainer]}>
                 <Text style={[commonStyles.numberCell, styles.totalText]}>
                     {totalSaleAmt.toLocaleString()}
                 </Text>
@@ -440,7 +440,7 @@ export default function SalesReportByPeriodOp() {
                 <View style={commonStyles.modalOverlay}>
                     <View style={commonStyles.modalCard}>
                         <View style={commonStyles.modalHeader}>
-                            <Text style={commonStyles.modalTitle}>{selectedSale?.orgNm}</Text>
+                            <Text style={commonStyles.modalTitle}>{selectedSale?.salesOrgNm}</Text>
                             <Pressable onPress={closeDetail} hitSlop={8}>
                                 <Ionicons name="close" size={24} color="#333"/>
                             </Pressable>

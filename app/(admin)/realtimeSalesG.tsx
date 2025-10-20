@@ -13,11 +13,13 @@ import {User} from "../../types/user";
 import LoadingOverlay from "../../components/LoadingOverlay";
 
 type SaleRow = {
-    storNm: string;
+    no: number;
+    orgNm: string;
     storCd: string;
     gaugeNm: string;
     saleQty: number;
-    actualSaleAmt: number
+    actualSaleAmt: number;
+    totalSaleAmt: number;
 };
 
 type StoreGroup = { id: string; name: string };
@@ -99,7 +101,7 @@ export default function RealtimeSalesScreen() {
 
     const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => ([
         {
-            key: 'no', title: Const.NO, flex: 0.4,
+            key: 'no', title: Const.NO, flex: 0.5,
             renderCell: (_item, index) => (
                 <Text style={[commonStyles.cell, {textAlign: 'center'}]}>{index + 1}</Text>
             ),
@@ -107,21 +109,21 @@ export default function RealtimeSalesScreen() {
         {
             key: 'storNm', title: '매장', flex: 0.8,
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {paddingLeft: 10}]}>
+                <Text style={[commonStyles.cell, {textAlign: 'center'}]}>
                     {item.storNm}
                 </Text>
             ),
         },
         {
-            key: 'gaugeNm', title: '게이지', flex: 1,
+            key: 'gaugeNm', title: '게이지', flex: 1.2,
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {paddingLeft: 10}]}>
+                <Text style={[commonStyles.cell, {paddingLeft: 5}]}>
                     {item.gaugeNm}
                 </Text>
             )
         },
         {
-            key: 'saleQty', title: '판매수량', flex: 1,
+            key: 'saleQty', title: '판매수량', flex: 1.1,
             renderCell: (item) => (
                 <Text style={commonStyles.numberSmallCell}>
                     {item.saleQty.toLocaleString()}
@@ -129,7 +131,7 @@ export default function RealtimeSalesScreen() {
             )
         },
         {
-            key: 'actualSaleAmt', title: '총매출', flex: 1,
+            key: 'actualSaleAmt', title: '총매출', flex: 1.5,
             renderCell: (item) => (
                 <Text style={commonStyles.numberSmallCell}>
                     {item.actualSaleAmt.toLocaleString()}
@@ -137,6 +139,57 @@ export default function RealtimeSalesScreen() {
             )
         },
     ]), [])
+
+    const tableData = useMemo(() => {
+        if (!saleList) return []; // null 방지
+
+        const result: (SaleRow & { isSummary?: boolean })[] = [];
+
+        const grouped: Record<string, SaleRow[]> = {};
+        saleList.forEach(item => {
+            if (!grouped[item.storCd]) grouped[item.storCd] = [];
+            grouped[item.storCd].push(item);
+        });
+
+        let no = 0;
+        let sumNo = 0;
+        Object.keys(grouped)
+            .sort() // 날짜 오름차순
+            .forEach(storCd => {
+                const rows = grouped[storCd];
+                let dateSum = 0;
+                let saleQtySum = 0;
+                rows.forEach((item) => {
+                    dateSum += item.actualSaleAmt;
+                    saleQtySum += item.saleQty;
+                    no += 1;
+                    result.push({
+                        ...item,
+                        no: no
+                    });
+                });
+
+                if(selectedStorCd.id=="") {
+                    let summaryName = '';
+                    if (storCd === '01') summaryName = '주유소 소계';
+                    else if (storCd === '02') summaryName = '충전소 소계';
+                    sumNo -= 1;
+                    result.push({
+                        no: sumNo,
+                        orgNm: summaryName,
+                        storCd: '',
+                        gaugeNm: '',
+                        actualSaleAmt: dateSum,
+                        totalSaleAmt: dateSum,
+                        saleQty:saleQtySum,
+                        isSummary: true,
+                    });
+                }
+            });
+        console.log("result11:"+JSON.stringify(result));
+
+        return result;
+    }, [saleList]);
 
     return (
         <SafeAreaView style={commonStyles.container}>
@@ -175,20 +228,22 @@ export default function RealtimeSalesScreen() {
             <View style={commonStyles.sectionDivider}/>
 
             <Table
-                data={saleList}
+                data={tableData}
                 columns={mainColumns}
                 listHeader={() => (
                     <View>
                         {saleStatList.map(row => (
-                            <View key={row.sortOrder} style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+                            <View
+                                key={row.sortOrder}
+                                style={[commonStyles.tableRow, commonStyles.summaryRow]}>
                                 {row.sortOrder === '1' || row.sortOrder === '2' ? (
                                     <>
-                                        <View style={[{flex: 1.2}, commonStyles.tableRightBorder]}>
-                                            <Text style={[commonStyles.cell, styles.summaryLabelText, {textAlign:'center'}]}>
+                                        <View style={[{flex: 1.3}, commonStyles.columnContainer]}>
+                                            <Text style={[commonStyles.cell, commonStyles.summaryLabelText, {textAlign:'center'}]}>
                                                 {row.label}
                                             </Text>
                                         </View>
-                                        <View style={[{flex: 3}, commonStyles.tableRightBorder]}>
+                                        <View style={[{flex: 3.8}, commonStyles.columnContainer]}>
                                             <Text style={[commonStyles.numberSmallCell]}>
                                                 {row.saleQty.toLocaleString()} / {row.saleAmt.toLocaleString()}
                                             </Text>
@@ -196,17 +251,17 @@ export default function RealtimeSalesScreen() {
                                     </>
                                 ) : (
                                     <>
-                                        <View style={[{flex: 1.2}, commonStyles.tableRightBorder]}>
+                                        <View style={[{flex: 1.3,paddingLeft:0.5}, commonStyles.columnContainer]}>
                                             <Text style={[commonStyles.cell, styles.summaryLabelText, {textAlign:'center'}]}>
                                                 {row.label}
                                             </Text>
                                         </View>
-                                        <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
+                                        <View style={[{flex: 2.3}, commonStyles.columnContainer]}>
                                             <Text style={[commonStyles.numberSmallCell]}>
                                                 {row.saleQty.toLocaleString()}
                                             </Text>
                                         </View>
-                                        <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                                        <View style={[{flex: 1.5}, commonStyles.columnContainer]}>
                                             <Text style={[commonStyles.numberSmallCell]}>
                                                 {row.saleAmt.toLocaleString()}
                                             </Text>

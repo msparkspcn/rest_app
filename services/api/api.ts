@@ -224,6 +224,11 @@ export function mobOperRealTimeSale(params) { //운영업체 실시간 매출현
     return post(request, params);
 }
 
+export function mobOperRealTimeSaleStat(params) { //운영업체 실시간 매출현황(통합) > 실적
+    const request = host + "/api/v1/oper/sale/mobOperRealTimeSaleStat";
+    return post(request, params);
+}
+
 export function mobOperPeriodSale(params) { //운영업체 기간별 매출현황(통합)
     const request = host + "/api/v1/oper/sale/mobOperPeriodSale";
     return post(request, params);
@@ -236,5 +241,10 @@ export function mobOperSaleDetail(params) { //운영업체 기간별 매출현�
 
 export function mobOperTmzonSale(params) { //운영업체 시간대별 매출현황(통합)
     const request = host + "/api/v1/oper/sale/mobOperTmzonSale";
+    return post(request, params);
+}
+
+export function mobOperRealTimeSaleRatio(params) { //운영업체 시간대별 매출현황(통합)
+    const request = host + "/api/v1/oper/sale/mobOperRealTimeSaleRatio";
     return post(request, params);
 }
