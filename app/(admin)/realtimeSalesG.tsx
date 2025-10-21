@@ -20,6 +20,7 @@ type SaleRow = {
     saleQty: number;
     actualSaleAmt: number;
     totalSaleAmt: number;
+    isFirstRow: boolean;
 };
 
 type StoreGroup = { id: string; name: string };
@@ -38,7 +39,7 @@ export default function RealtimeSalesScreen() {
     );
 
     const [selectedStorCd, setSelectedStorCd] = useState<StoreGroup>(storeGroups[0]);
-    const [saleList, setSaleList] = useState<[] | null>(null);
+    const [saleList, setSaleList] = useState<SaleRow[]>([]);
     const [saleStatList ,setSaleStatList] = useState<[] | null>([]);
     const {user}:User = useUser();
     const [loading, setLoading] = useState(false);
@@ -60,12 +61,18 @@ export default function RealtimeSalesScreen() {
             .then(result => {
                 if (result.data.responseBody != null) {
                     const saleList = result.data.responseBody;
-                    console.log('saleList:' + JSON.stringify(saleList))
+                    console.log('saleList:' + JSON.stringify(saleList));
                     setSaleList(saleList);
-                    mobOilRealTimeSaleStat();
+                    if(saleList.length > 0) {
+                        mobOilRealTimeSaleStat();
+                    }
+                    else {
+                        setLoading(false);
+                    }
                 }
             })
             .catch(error => {
+                setLoading(false);
                 console.log("mobOilRealTimeSale error:" + error)
             });
     };
@@ -108,11 +115,14 @@ export default function RealtimeSalesScreen() {
         },
         {
             key: 'storNm', title: '매장', flex: 0.8,
-            renderCell: (item) => (
-                <Text style={[commonStyles.cell, {textAlign: 'center'}]}>
-                    {item.storNm}
-                </Text>
-            ),
+            renderCell: (item) => {
+                if(!item.isFirstRow) return null;
+                return (
+                    <Text style={[commonStyles.cell, {textAlign: 'center'}]}>
+                        {item.storNm}
+                    </Text>
+                )
+            },
         },
         {
             key: 'gaugeNm', title: '게이지', flex: 1.2,
@@ -141,8 +151,6 @@ export default function RealtimeSalesScreen() {
     ]), [])
 
     const tableData = useMemo(() => {
-        if (!saleList) return []; // null 방지
-
         const result: (SaleRow & { isSummary?: boolean })[] = [];
 
         const grouped: Record<string, SaleRow[]> = {};
@@ -159,13 +167,14 @@ export default function RealtimeSalesScreen() {
                 const rows = grouped[storCd];
                 let dateSum = 0;
                 let saleQtySum = 0;
-                rows.forEach((item) => {
+                rows.forEach((item, idx) => {
                     dateSum += item.actualSaleAmt;
                     saleQtySum += item.saleQty;
                     no += 1;
                     result.push({
                         ...item,
-                        no: no
+                        no: no,
+                        isFirstRow: idx === 0 ? true : false
                     });
                 });
 
@@ -183,6 +192,7 @@ export default function RealtimeSalesScreen() {
                         totalSaleAmt: dateSum,
                         saleQty:saleQtySum,
                         isSummary: true,
+                        isFirstRow: false
                     });
                 }
             });
@@ -190,6 +200,52 @@ export default function RealtimeSalesScreen() {
 
         return result;
     }, [saleList]);
+
+    const renderListHeader = () => {
+        if (saleList.length == 0) return null;
+        return (
+            <View>
+                {saleStatList.map(row => (
+                    <View
+                        key={row.sortOrder}
+                        style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+                        {row.sortOrder === '1' || row.sortOrder === '2' ? (
+                            <>
+                                <View style={[{flex: 1.3}, commonStyles.columnContainer]}>
+                                    <Text style={[commonStyles.cell, commonStyles.summaryLabelText, {textAlign:'center'}]}>
+                                        {row.label}
+                                    </Text>
+                                </View>
+                                <View style={[{flex: 3.8}, commonStyles.columnContainer]}>
+                                    <Text style={[commonStyles.numberSmallCell]}>
+                                        {row.saleQty.toLocaleString()} / {row.saleAmt.toLocaleString()}
+                                    </Text>
+                                </View>
+                            </>
+                        ) : (
+                            <>
+                                <View style={[{flex: 1.3,paddingLeft:0.5}, commonStyles.columnContainer]}>
+                                    <Text style={[commonStyles.cell, commonStyles.summaryLabelText, {textAlign:'center'}]}>
+                                        {row.label}
+                                    </Text>
+                                </View>
+                                <View style={[{flex: 2.3}, commonStyles.columnContainer]}>
+                                    <Text style={[commonStyles.numberSmallCell]}>
+                                        {row.saleQty.toLocaleString()}
+                                    </Text>
+                                </View>
+                                <View style={[{flex: 1.5}, commonStyles.columnContainer]}>
+                                    <Text style={[commonStyles.numberSmallCell]}>
+                                        {row.saleAmt.toLocaleString()}
+                                    </Text>
+                                </View>
+                            </>
+                        )}
+                    </View>
+                ))}
+            </View>
+        )
+    };
 
     return (
         <SafeAreaView style={commonStyles.container}>
@@ -230,52 +286,10 @@ export default function RealtimeSalesScreen() {
             <Table
                 data={tableData}
                 columns={mainColumns}
-                listHeader={() => (
-                    <View>
-                        {saleStatList.map(row => (
-                            <View
-                                key={row.sortOrder}
-                                style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-                                {row.sortOrder === '1' || row.sortOrder === '2' ? (
-                                    <>
-                                        <View style={[{flex: 1.3}, commonStyles.columnContainer]}>
-                                            <Text style={[commonStyles.cell, commonStyles.summaryLabelText, {textAlign:'center'}]}>
-                                                {row.label}
-                                            </Text>
-                                        </View>
-                                        <View style={[{flex: 3.8}, commonStyles.columnContainer]}>
-                                            <Text style={[commonStyles.numberSmallCell]}>
-                                                {row.saleQty.toLocaleString()} / {row.saleAmt.toLocaleString()}
-                                            </Text>
-                                        </View>
-                                    </>
-                                ) : (
-                                    <>
-                                        <View style={[{flex: 1.3,paddingLeft:0.5}, commonStyles.columnContainer]}>
-                                            <Text style={[commonStyles.cell, styles.summaryLabelText, {textAlign:'center'}]}>
-                                                {row.label}
-                                            </Text>
-                                        </View>
-                                        <View style={[{flex: 2.3}, commonStyles.columnContainer]}>
-                                            <Text style={[commonStyles.numberSmallCell]}>
-                                                {row.saleQty.toLocaleString()}
-                                            </Text>
-                                        </View>
-                                        <View style={[{flex: 1.5}, commonStyles.columnContainer]}>
-                                            <Text style={[commonStyles.numberSmallCell]}>
-                                                {row.saleAmt.toLocaleString()}
-                                            </Text>
-                                        </View>
-                                    </>
-                                )}
-                            </View>
-                        ))}
-                    </View>
-                )}
+                listHeader={renderListHeader}
             />
 
             {loading && (<LoadingOverlay />)}
-
 
             <DatePickerModal
                 visible={showDatePicker}
@@ -289,5 +303,4 @@ export default function RealtimeSalesScreen() {
 
 const styles = StyleSheet.create({
     selectText: {fontSize: 14, color: '#333'},
-    summaryLabelText: {fontWeight: '700', color: '#333'},
 });
