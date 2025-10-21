@@ -11,6 +11,8 @@ import { commonStyles } from "../../styles/index";
 import { Stor, User } from "../../types";
 import { ColumnDef } from "../../types/table";
 import { dateToYmd, formattedDate, getTodayYmd } from "../../utils/DateUtils";
+import LoadingOverlay from "../../components/LoadingOverlay";
+import {AntDesign} from "@expo/vector-icons";
 
 type SaleRow = {
     saleDt: string;
@@ -21,22 +23,13 @@ type SaleRow = {
     etcPayAmt: number;
     actualSaleAmt: number
 };
-type SummaryTotals = {
-    label: string;
-    cashAmt: number;
-    cardEtc: number;
-    totalAmt: number
-};
+
 type SaleDetailRow = {
     itemNm: string;
     saleQty: number;
     salePrc: number;
     actualSaleAmt: number;
 }
-type ListItem =
-    | { type: 'summaryPair'; key: string; label: string; pairText: string }
-    | { type: 'summaryTotals'; key: string; label: string; cashAmt: number; cardEtc: number; totalAmt: number }
-    | { type: 'detail'; key: string; no: number; storCd: string; cashAmt: number; cardEtc: number; totalAmt: number };
 
 export default function RealtimeSales() {
     const [saleDate, setSaleDate] = useState(getTodayYmd());
@@ -49,8 +42,10 @@ export default function RealtimeSales() {
     const [isDetailVisible, setIsDetailVisible] = useState(false);
     const [selectedStor, setSelectedStor] = useState<SaleRow | null>(null);
     const {user}:User = useUser();
-    const [saleList, setSaleList] = useState<[] | null>(null);
-    const [saleDetailList, setSaleDetailList] = useState<[] | null>(null);
+    const [saleList, setSaleList] = useState<SaleRow[]>([]);
+    const [saleDetailList, setSaleDetailList] = useState<SaleDetailRow[]>([]);
+    const [saleStatList ,setSaleStatList] = useState<[] | null>([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(()=> {
         getStorList();
@@ -63,48 +58,17 @@ export default function RealtimeSales() {
             salesOrgCd: user.salesOrgCd,
             storeValue: ""
         }
-        console.log("request:" + JSON.stringify(request))
         api.getStorList(request)
             .then(result => {
-                // console.log("result:"+JSON.stringify(result))
                 if (result.data.responseBody != null) {
                     const storList = result.data.responseBody;
-                    setStorList([
-                            {storCd: '', storNm: '전체'},
-                            ...storList
-                        ]
-                    );
+                    setStorList([{storCd: '', storNm: '전체'}, ...storList]);
                 }
             })
             .catch(error => {
                 console.log("getStorList error:" + error)
             });
     }
-
-    const baseData: SaleRow[] = useMemo(
-        () =>
-            Array.from({length: 80}).map((_, idx) => {
-                const cashAmt = 10000 + (idx % 5) * 3000;
-                const cardAmt = 20000 + (idx % 7) * 2500;
-                const etcPayAmt = 1000 * (idx % 4);
-                return {
-                    saleDt:'',
-                    storCd: '',
-                    storNm: `그룹 ${((idx % 6) + 1)}`,
-                    cashAmt,
-                    cardAmt,
-                    etcPayAmt,
-                    actualSaleAmt: cashAmt + cardAmt + etcPayAmt,
-                };
-            }),
-        []
-    );
-
-    const filteredData = useMemo(() => {
-        if (!selectedStorCd) return baseData;
-        const groupName = storList.find(g => g.storCd === selectedStorCd)?.storNm;
-        return baseData.filter(r => (groupName ? r.storNm === groupName : true));
-    }, [baseData, storList, selectedStorCd]);
 
     const onSearch = () => {
         console.log("조회 클릭")
@@ -117,19 +81,53 @@ export default function RealtimeSales() {
             toSaleDt: saleDate
         }
         console.log('request:'+JSON.stringify(request));
+        setLoading(true);
+
         api.mobRestRealTimeSaleStat(request)
             .then(result => {
                 if (result.data.responseBody != null) {
                     const saleList = result.data.responseBody;
                     console.log('saleList:' + JSON.stringify(saleList))
+                    console.log('length:'+saleList.length);
                     setSaleList(saleList);
+                    if(saleList.length > 0) {
+                        mobRestRealTimeSaleResult();
+                    }
+                    else {
+                        setLoading(false);
+                    }
                 }
             })
             .catch(error => {
+                setLoading(false);
                 console.log("mobRestRealTimeSaleStat error:" + error)
             });
 
     };
+
+    const mobRestRealTimeSaleResult = () => {
+        const request = {
+            cmpCd: user.cmpCd,
+            cornerCd: "",
+            fromSaleDt: saleDate,
+            salesOrgCd: user.salesOrgCd,
+            storCd: selectedStorCd,
+            toSaleDt: saleDate
+        }
+        console.log('request2:'+JSON.stringify(request));
+        api.mobRestRealTimeSaleResult(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const saleStatList = result.data.responseBody;
+                    console.log('saleStatList:' + JSON.stringify(saleStatList))
+                    setSaleStatList(saleStatList);
+                    setLoading(false);
+                }
+            })
+            .catch(error => {
+                console.log("mobRestRealTimeSaleResult error:" + error)
+            });
+    }
 
     const openDatePicker = () => {
         setTempDate(new Date());
@@ -206,49 +204,6 @@ export default function RealtimeSales() {
         },
     ]), [])
 
-    // const totalValues = useMemo(() => {
-    //     return filteredData.reduce(
-    //         (acc, r) => {
-    //             acc.cashAmt += r.cashAmt;
-    //             acc.cardEtc += r.cardAmt + r.etcPayAmt;
-    //             acc.totalAmt += r.actualSaleAmt;
-    //             return acc;
-    //         },
-    //         {cashAmt: 0, cardEtc: 0, totalAmt: 0}
-    //     );
-    // }, [filteredData]);
-
-    // 3행 요약 데이터 구성
-    // const summaryRows = useMemo(() => {
-    //     const today: SummaryTotals = {
-    //         label: '당일합계',
-    //         cashAmt: totalValues.cashAmt,
-    //         cardEtc: totalValues.cardEtc,
-    //         totalAmt: totalValues.totalAmt
-    //     };
-    //     // 데모 수치 생성
-    //     const yearCumulative = today.totalAmt * 200; // 연 누적 (예시)
-    //     const monthCumulative = today.totalAmt * 15; // 월 누적 (예시)
-    //     const prevWeekDelta = Math.round(today.totalAmt * 0.14); // 전주 매출 (예시)
-    //     const prevDayDelta = Math.round(today.totalAmt * -0.046); // 전일 매출 (예시, 음수)
-    //
-    //     const sign = (n: number) => (n >= 0 ? '+' : '-');
-    //     const pair1 = `${yearCumulative.toLocaleString()} / ${monthCumulative.toLocaleString()}`;
-    //     const pair2 = `${sign(prevWeekDelta)}${Math.abs(prevWeekDelta).toLocaleString()} / ${sign(prevDayDelta)}${Math.abs(prevDayDelta).toLocaleString()}`;
-    //
-    //     const row1: ListItem = {type: 'summaryPair', key: 's-ym', label: '년/월 매출누적', pairText: pair1};
-    //     const row2: ListItem = {type: 'summaryPair', key: 's-prev', label: '전주/전일 매출', pairText: pair2};
-    //     const row3: ListItem = {
-    //         type: 'summaryTotals',
-    //         key: 's-today',
-    //         label: today.label,
-    //         cashAmt: today.cashAmt,
-    //         cardEtc: today.cardEtc,
-    //         totalAmt: today.totalAmt
-    //     };
-    //     return [row1, row2, row3];
-    // }, [totalValues]);
-
     const saleDetailColumns: ColumnDef<SaleDetailRow>[] = useMemo(() => ([
         {
             key: 'no', title: Const.NO, flex: 0.5,
@@ -278,15 +233,108 @@ export default function RealtimeSales() {
     ]), []);
 
     const detailSummaryRow = useMemo(() => {
-        if(saleDetailList) {
-            const totalSaleAmt = saleDetailList.reduce((sum, item) => sum + item.actualSaleAmt, 0);
-            const totalQty = saleDetailList.reduce((sum, item) => sum + item.saleQty, 0);
-            return {
-                totalQty: totalQty,
-                totalSaleAmt: totalSaleAmt
-            };
-        }
+        if (saleDetailList.length === 0) return null;
+
+        const totalSaleAmt = saleDetailList.reduce((sum, item) => sum + item.actualSaleAmt, 0);
+        const totalQty = saleDetailList.reduce((sum, item) => sum + item.saleQty, 0);
+        return {
+            totalQty: totalQty,
+            totalSaleAmt: totalSaleAmt
+        };
     }, [saleDetailList]);
+
+    const summaryRow = useMemo(() => {
+        if (saleList.length === 0) return null;
+
+        const totalCashAmt = saleList.reduce((sum, item) => sum + item.cashAmt, 0);
+        const totalEtcAmt = saleList.reduce((sum, item) => sum + item.cardAmt + item.etcPayAmt, 0);
+        const totalAmt = totalCashAmt + totalEtcAmt;
+        return {
+            totalCashAmt: totalCashAmt,
+            totalEtcAmt: totalEtcAmt,
+            totalAmt: totalAmt,
+        };
+    }, [saleList]);
+
+    const renderListHeader = () => {
+        if(saleList.length == 0) return null;
+        return (
+            <View>
+                {saleStatList.map(row => {
+                    let lastWeekIsUp = row.saleAmt1 > 0;
+                    let yesDayIsUp = row.saleAmt2 > 0;
+                    return (
+                        <View
+                            key={row.sortOrder}
+                            style={[commonStyles.tableRow, commonStyles.summaryRow]}
+                        >
+                            {(row.sortOrder === '1' || row.sortOrder === '2') && (
+                                <View style={[{flex: 1.5}, commonStyles.columnContainer]}>
+                                    <Text
+                                        style={[{textAlign: 'center'}, commonStyles.cell, commonStyles.summaryLabelText]}>
+                                        {row.label}
+                                    </Text>
+                                </View>
+                            )}
+                            {row.sortOrder === '1' && (
+                                <View style={[{flex: 3.2}, commonStyles.columnContainer]}>
+                                    <Text style={commonStyles.numberCell}>
+                                        {row.saleAmt1.toLocaleString()} / {row.saleAmt2.toLocaleString()}
+                                    </Text>
+                                </View>
+                            )}
+                            {row.sortOrder === '2' && (
+                                <View style={[{flex: 3.2, flexDirection: 'row', alignItems: 'center', justifyContent:'flex-end'}]}>
+                                    <Text style={{fontSize: 12, color:'#444'}}>
+                                        {row.saleAmt1.toLocaleString()}
+                                    </Text>
+                                    <AntDesign
+                                        name={lastWeekIsUp ? 'caretup' : 'caretdown'}
+                                        size={13}
+                                        color={lastWeekIsUp ? 'red' : 'blue'}
+                                        style={{paddingHorizontal: 5}}
+                                    />
+                                    <Text style={{fontSize: 12, color:'#444'}}> / {row.saleAmt2.toLocaleString()}
+                                    </Text>
+                                    <AntDesign
+                                        name={yesDayIsUp ? 'caretup' : 'caretdown'}
+                                        size={13}
+                                        color={yesDayIsUp ? 'red' : 'blue'}
+                                        style={{paddingHorizontal: 5}}
+                                    />
+                                </View>
+                            )}
+                            {row.sortOrder === '3' && (
+                                <>
+                                    <View style={[{flex: 1.5, paddingRight: 1}, commonStyles.columnContainer]}>
+                                        <Text
+                                            style={[commonStyles.cell, commonStyles.summaryLabelText, {textAlign: 'center'}]}>
+                                            {row.label}
+                                        </Text>
+                                    </View>
+                                    <View style={[{flex: 1}, commonStyles.columnContainer]}>
+                                        <Text style={[commonStyles.numberSmallCell]}>
+                                            {summaryRow.totalCashAmt.toLocaleString()}
+                                        </Text>
+                                    </View>
+                                    <View style={[{flex: 1}, commonStyles.columnContainer]}>
+                                        <Text style={[commonStyles.numberSmallCell]}>
+                                            {summaryRow.totalEtcAmt.toLocaleString()}
+                                        </Text>
+                                    </View>
+                                    <View style={[{flex: 1.2}, commonStyles.columnContainer]}>
+                                        <Text style={[commonStyles.numberSmallCell]}>
+                                            {summaryRow.totalAmt.toLocaleString()}
+                                        </Text>
+                                    </View>
+                                </>
+                            )}
+                        </View>
+                    )
+                })}
+            </View>
+        )
+    };
 
     const renderDetailFooterRow = () => {
         return (
@@ -345,24 +393,7 @@ export default function RealtimeSales() {
             <Table
                 data={saleList}
                 columns={mainColumns}
-                // listHeader={() => (
-                //     <View>
-                //         {summaryRows.map(row => (
-                //             <View key={row.key} style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-                //                 <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
-                //                     <Text style={[{textAlign: 'center'}, styles.cell, styles.summaryLabelText]}>
-                //                         {row.label}
-                //                     </Text>
-                //                 </View>
-                //                 <View style={[{flex: 3.2}]}>
-                //                     <Text style={commonStyles.numberCell}>
-                //                         {"pairText" in row ? row.pairText : ''}
-                //                     </Text>
-                //                 </View>
-                //             </View>
-                //         ))}
-                //     </View>
-                // )}
+                listHeader={renderListHeader}
             />
 
             <DatePickerModal
@@ -410,15 +441,13 @@ export default function RealtimeSales() {
                     </View>
                 </View>
             </Modal>
+            {loading && (<LoadingOverlay />)}
         </SafeAreaView>
     );
-}
+};
 
 const styles = StyleSheet.create({
     selectText: {fontSize: 14, color: '#333'},
-    summaryLabelText: {fontWeight: '700', color: '#333'},
-    cell: {fontSize: 13, color: '#444'},
-    rightSpanText: {textAlign: 'right'},
 });
 
 

@@ -92,6 +92,11 @@ export function mobRestRealTimeSaleStat(params) {
     return post(request, params);
 }
 
+export function mobRestRealTimeSaleResult(params) { // 휴게소 실시간 매출현황(휴) > 상단실적
+    const request = host + "/api/v1/rest/sale/mobRestRealTimeSaleResult";
+    return post(request, params);
+}
+
 export function restStorTimeZoneSale(params) { //시간대별 매출현황(휴)
     const request = host + "/api/v1/rest/sale/restStorTimeZoneSale";
     return post(request, params);
