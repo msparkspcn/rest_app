@@ -136,7 +136,9 @@ export function Table<T>({
                         </Text>
                     </View>
                 }
-                contentContainerStyle={isModal ? commonStyles.modalTableListContent : styles.tableListContent}
+                contentContainerStyle={[isModal ? commonStyles.modalTableListContent : styles.tableListContent,
+                { paddingHorizontal: 0, paddingLeft: 0 }
+                ]}
                 bounces={false}
                 alwaysBounceVertical={false}
                 overScrollMode="never"

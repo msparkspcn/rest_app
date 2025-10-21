@@ -2,6 +2,7 @@ import axios from 'axios';
 
 // export const host = "https://o2api.spc.co.kr";
 export const host = "https://s9rest.ngrok.io";
+// export const host = "http://10.212.44.112:8081";
 
 const api = axios.create({ baseURL: host });
 
