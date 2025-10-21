@@ -11,6 +11,7 @@ import {User, SalesOrg} from "../../types";
 import * as api from "../../services/api/api";
 import {useUser} from "../../contexts/UserContext";
 import ListModal from "../../components/ListModal";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 type SaleRow = { tmzonDiv: string; actualSaleAmt: number, saleRatio: number };
 type ListItem = {
@@ -34,17 +35,14 @@ export default function SalesReportByTimezoneScreen() {
     const {user}: User = useUser();
     const [salesOrgList, setSalesOrgList] = useState<SalesOrg[]>([]);
     const [saleList, setSaleList] = useState<SaleRow[]>([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         getSalesOrgList();
     },[]);
 
     const getSalesOrgList = () => {
-        const request = {
-            cmpCd: user.cmpCd,
-            operDiv: '',
-            restValue: '',
-        }
+        const request = { cmpCd: user.cmpCd }
         console.log("request:"+JSON.stringify(request))
         api.getSalsOrgList(request)
             .then(result => {
@@ -72,7 +70,8 @@ export default function SalesReportByTimezoneScreen() {
             toSaleDt: toSaleDt,
             storCd: ""
         }
-        console.log("request:"+JSON.stringify(request))
+        console.log("request:"+JSON.stringify(request));
+        setLoading(true);
         api.mobOperTmzonSale(request)
             .then(result => {
                 console.log("result:"+JSON.stringify(result.data))
@@ -81,8 +80,10 @@ export default function SalesReportByTimezoneScreen() {
                     console.log('saleList:' + JSON.stringify(saleList))
                     setSaleList(saleList);
                 }
+                setLoading(false);
             })
             .catch(error => {
+                setLoading(false);
                 console.log("mobOperTmzonSale error:" + error)
             });
     };
@@ -177,6 +178,58 @@ export default function SalesReportByTimezoneScreen() {
         return [row1, row2, row3, row4];
     }, [saleList]);
 
+    const renderListHeader = () => {
+        if (saleList.length == 0) return null;
+        return (
+            <View>
+                {summaryRows.map(row => (
+                    <View key={row.key} style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+                        <View style={[{flex: 1}, commonStyles.columnContainer, commonStyles.tableRightBorder]}>
+                            <Text style={[commonStyles.cell, styles.summaryLabelText, {textAlign: 'center'}]}>
+                                {row.label}
+                            </Text>
+                        </View>
+                        <View style={[{flex: 1}, commonStyles.columnContainer, commonStyles.tableRightBorder]}>
+                            <Text style={commonStyles.numberCell}>
+                                {row.totalAmt.toLocaleString()}
+                            </Text>
+                        </View>
+                        <View style={[{
+                            flex: 0.5,
+                        }, commonStyles.columnContainer, commonStyles.tableRightBorder]}>
+                            <Text style={commonStyles.numberCell}>
+                                {row.totalSaleRatio.toFixed(2)}%
+                            </Text>
+                        </View>
+                    </View>
+                ))}
+            </View>
+        )
+    };
+
+    const totalAmt = useMemo(() => saleList.reduce((acc, r) => acc + r.actualSaleAmt, 0), [saleList]);
+    const totalSaleRatio = useMemo(() => saleList.reduce((acc, r) => acc + r.saleRatio, 0), [saleList]);
+
+
+    const renderFooter = () => (
+        <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+            <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                <Text style={[commonStyles.cell, commonStyles.summaryLabelText,
+                    {textAlign: 'center'}]}>합계</Text>
+            </View>
+            <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                <Text style={commonStyles.numberCell}>
+                    {totalAmt.toLocaleString()}
+                </Text>
+            </View>
+            <View style={[{flex: 0.5}, commonStyles.tableRightBorder]}>
+                <Text style={commonStyles.numberCell}>
+                    {totalSaleRatio.toFixed(2)}%
+                </Text>
+            </View>
+        </View>
+    )
+
     return (
         <SafeAreaView style={commonStyles.container}>
             <StatusBar style="dark"/>
@@ -185,19 +238,19 @@ export default function SalesReportByTimezoneScreen() {
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>조회기간</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('from')}>
-                        <Text style={styles.selectText}>{formattedDate(fromSaleDt)}</Text>
+                        <Text style={commonStyles.selectText}>{formattedDate(fromSaleDt)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                     <Text>-</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('to')}>
-                        <Text style={styles.selectText}>{formattedDate(toSaleDt)}</Text>
+                        <Text style={commonStyles.selectText}>{formattedDate(toSaleDt)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={commonStyles.filterRow}>
                     <Text style={commonStyles.filterLabel}>사업장</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowSalesOrgListModal(true)}>
-                        <Text style={styles.selectText}>
+                        <Text style={commonStyles.selectText}>
                             {salesOrgList.find(g => g.salesOrgCd === selectedSalesOrgCd)?.salesOrgNm || Const.ALL}
                         </Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
@@ -212,31 +265,8 @@ export default function SalesReportByTimezoneScreen() {
             <Table
                 data={saleList}
                 columns={mainColumns}
-                listHeader={() => (
-                    <View>
-                        {summaryRows.map(row => (
-                            <View key={row.key} style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-                                <View style={[{flex: 1}, commonStyles.columnContainer, commonStyles.tableRightBorder]}>
-                                    <Text style={[styles.cell, styles.summaryLabelText, {textAlign: 'center'}]}>
-                                        {row.label}
-                                    </Text>
-                                </View>
-                                <View style={[{flex: 1}, commonStyles.columnContainer, commonStyles.tableRightBorder]}>
-                                    <Text style={commonStyles.numberCell}>
-                                        {row.totalAmt.toLocaleString()}
-                                    </Text>
-                                </View>
-                                <View style={[{
-                                    flex: 0.5,
-                                }, commonStyles.columnContainer, commonStyles.tableRightBorder]}>
-                                    <Text style={commonStyles.numberCell}>
-                                        {row.totalSaleRatio.toFixed(2)}%
-                                    </Text>
-                                </View>
-                            </View>
-                        ))}
-                    </View>
-                )}
+                listHeader={renderListHeader}
+                listFooter={renderFooter}
             />
 
             <DatePickerModal
@@ -261,15 +291,14 @@ export default function SalesReportByTimezoneScreen() {
                     setShowSalesOrgListModal(false);
                 }}
             />
+            {loading && (<LoadingOverlay />)}
         </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    selectText: {fontSize: 14, color: '#333'},
     summaryRow: {backgroundColor: '#fff7e6'},
     summaryLabelText: {fontWeight: '600', fontSize: 12, color: '#333'},
-    cell: {fontSize: 13, color: '#444'},
 });
 
 

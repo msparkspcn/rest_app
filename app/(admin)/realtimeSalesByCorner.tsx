@@ -266,14 +266,14 @@ export default function RealtimeSalesByCornerScreen() {
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>조회일자</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={openDatePicker}>
-                        <Text style={styles.selectText}>{formattedDate(saleDate)}</Text>
+                        <Text style={commonStyles.selectText}>{formattedDate(saleDate)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={commonStyles.filterRow}>
                     <Text style={commonStyles.filterLabel}>매장</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowCornerListModal(true)}>
-                        <Text style={styles.selectText}>
+                        <Text style={commonStyles.selectText}>
                             {cornerList.find(g => g.cornerCd === selectedCornerCd)?.cornerNm || Const.ALL}
                         </Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
@@ -340,7 +340,6 @@ export default function RealtimeSalesByCornerScreen() {
 }
 
 const styles = StyleSheet.create({
-    selectText: {fontSize: 14, color: '#333'},
     totalText: {fontWeight: '700', color: '#222'},
 });
 

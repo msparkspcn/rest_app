@@ -343,7 +343,7 @@ export default function RealtimeSalesBySalesOrgScreen() {
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>사업장</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowSalesOrgListModal(true)}>
-                        <Text style={styles.selectText}>
+                        <Text style={commonStyles.selectText}>
                             {salesOrgList.find(g => g.salesOrgCd === selectedSalesOrgCd)?.salesOrgNm || Const.SELECT}
                         </Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
@@ -352,7 +352,7 @@ export default function RealtimeSalesBySalesOrgScreen() {
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>조회일자</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={openDatePicker}>
-                        <Text style={styles.selectText}>{formattedDate(saleDate)}</Text>
+                        <Text style={commonStyles.selectText}>{formattedDate(saleDate)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -458,9 +458,6 @@ export default function RealtimeSalesBySalesOrgScreen() {
 }
 
 const styles = StyleSheet.create({
-    selectText: {
-        fontSize: 14, color: '#333'
-    },
     cell: {
         fontSize: 11,
         color: '#444',

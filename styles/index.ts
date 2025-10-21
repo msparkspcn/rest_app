@@ -416,4 +416,8 @@ export const commonStyles = StyleSheet.create({
         fontWeight: '700',
         color: '#333'
     },
+    selectText: {
+        fontSize: 14,
+        color: '#333'
+    },
 })

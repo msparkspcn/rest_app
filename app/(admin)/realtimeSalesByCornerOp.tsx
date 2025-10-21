@@ -12,6 +12,7 @@ import {User, SalesOrg, Corner} from "../../types";
 import {useUser} from "../../contexts/UserContext";
 import * as api from "../../services/api/api";
 import ListModal from "../../components/ListModal";
+import LoadingOverlay from "../../components/LoadingOverlay";
 type SaleRow = {
     storCd: string;
     cornerCd: string;
@@ -44,17 +45,18 @@ export default function RealtimeSalesByCornerOp() {
     const [isDetailVisible, setIsDetailVisible] = useState(false);
     const [selectedSale, setSelectedSale] = useState<SaleRow | null>(null);
     const [showSalesOrgListModal, setShowSalesOrgListModal] = useState(false);
-    const [dcIncludedChecked, setDcIncludedChecked] = useState(false);
-    const [appliedDcChecked, setAppliedDcChecked] = useState(false);
+    const [dcIncludedChecked, setDcIncludedChecked] = useState(true);
+    const [appliedDcChecked, setAppliedDcChecked] = useState(true);
     const [sortOrder, setSortOrder] = useState('0');
     const {user}: User = useUser();
     const [salesOrgList, setSalesOrgList] = useState<SalesOrg[]>([]);
     const [cornerList, setCornerList] = useState<Corner[]>([]);
     const [showCornerModal, setShowCornerModal] = useState(false);
-    const [selectedCornerCd, setSelectedCornerCd] = useState<string | null>('');
+    const [selectedCornerCd, setSelectedCornerCd] = useState<string>('');
     const [selectedSalesOrgCd, setSelectedSalesOrgCd] = useState<string | null>('');
     const [saleList, setSaleList] = useState<[] | null>(null);
     const [saleDetailList, setSaleDetailList] = useState<[] | null>(null);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         getSalesOrgList();
@@ -67,7 +69,7 @@ export default function RealtimeSalesByCornerOp() {
     const getSalesOrgList = () => {
         const request = {
             cmpCd: user.cmpCd,
-            operDiv: '',
+            operDiv: '01',
             restValue: '',
         }
         console.log("request:"+JSON.stringify(request))
@@ -116,22 +118,25 @@ export default function RealtimeSalesByCornerOp() {
 
         const request = {
             cmpCd: user.cmpCd,
-            cornerCd: "",
+            cornerCd: selectedCornerCd,
             fromSaleDt: saleDate,
             salesOrgCd: user.salesOrgCd,
             storCd: "",
             toSaleDt: saleDate
         }
+        console.log('request:'+JSON.stringify(request));
+        setLoading(true);
+
         api.mobRestRealTimeSaleNews(request)
             .then(result => {
                 if (result.data.responseBody != null) {
                     const saleList = result.data.responseBody;
-                    console.log('saleList:' + JSON.stringify(saleList));
+                    // console.log('saleList:' + JSON.stringify(saleList));
 
                     const sortedList = [...saleList].sort((a, b) =>
-                        a.storeNm.localeCompare(b.storeNm, 'ko', {
-                            numeric: true,      // 숫자를 실제 숫자처럼 정렬 (1, 2, 10 순)
-                            sensitivity: 'base' // 대소문자 구분 없이 비교
+                        a.cornerNm.localeCompare(b.cornerNm, 'ko', {
+                            numeric: true,
+                            sensitivity: 'base'
                         })
                     );
                     if(sortOrder == '0') {
@@ -140,10 +145,11 @@ export default function RealtimeSalesByCornerOp() {
                     else {
                         setSaleList(saleList);
                     }
-
+                    setLoading(false);
                 }
             })
             .catch(error => {
+                setLoading(false);
                 console.log("mobRestRealTimeSaleNews error:" + error)
             });
     };
@@ -188,7 +194,7 @@ export default function RealtimeSalesByCornerOp() {
         {
             key: 'cornerNm', title: Const.CORNER_NM, flex: 1, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {paddingLeft: 10}]}>
+                <Text style={[commonStyles.cell, {paddingLeft: 5}]}>
                     {item.cornerNm}
                 </Text>
             ),
@@ -197,11 +203,7 @@ export default function RealtimeSalesByCornerOp() {
             key: 'saleAmt', title: Const.SALE_AMT, flex: 0.9, align: 'center',
             renderCell: (item) => (
                 <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
-                    <Text style={[
-                        commonStyles.cell,
-                        commonStyles.linkText,
-                        {textAlign: 'right', paddingRight: 10
-                    }]}>
+                    <Text style={[commonStyles.numberSmallCell, commonStyles.linkText]}>
                         {appliedDcChecked
                             ? item.saleAmt.toLocaleString()
                             : item.actualSaleAmt.toLocaleString()}
@@ -214,9 +216,9 @@ export default function RealtimeSalesByCornerOp() {
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>
                     {appliedDcChecked
-                        ? item.dailySaleRatio.toLocaleString()
-                        :item.dailyActualSaleRatio.toLocaleString()
-                    }
+                        ? item.dailySaleRatio.toFixed(1)
+                        :item.dailyActualSaleRatio.toFixed(1)
+                    }%
                 </Text>
             )
         },
@@ -235,9 +237,9 @@ export default function RealtimeSalesByCornerOp() {
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>
                     {appliedDcChecked
-                        ? item.monthlySaleRatio.toLocaleString()
-                        : item.monthlyActualSaleRatio.toLocaleString()
-                    }
+                        ? item.monthlySaleRatio.toFixed(1)
+                        : item.monthlyActualSaleRatio.toFixed(1)
+                    }%
                 </Text>
             )
         },
@@ -365,7 +367,7 @@ export default function RealtimeSalesByCornerOp() {
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>사업장명</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowSalesOrgListModal(true)}>
-                        <Text style={styles.selectText}>
+                        <Text style={commonStyles.selectText}>
                             {salesOrgList.find(g => g.salesOrgCd === selectedSalesOrgCd)?.salesOrgNm || Const.SELECT}
                         </Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
@@ -374,7 +376,7 @@ export default function RealtimeSalesByCornerOp() {
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>조회일자</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={openDatePicker}>
-                        <Text style={styles.selectText}>{formattedDate(saleDate)}</Text>
+                        <Text style={commonStyles.selectText}>{formattedDate(saleDate)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -382,7 +384,7 @@ export default function RealtimeSalesByCornerOp() {
                     <Text style={commonStyles.filterLabel}>매장</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowCornerModal(true)}>
                         <Text
-                            style={styles.selectText}>{cornerList.find(g => g.cornerCd === selectedCornerCd)?.cornerNm || Const.ALL}</Text>
+                            style={commonStyles.selectText}>{cornerList.find(g => g.cornerCd === selectedCornerCd)?.cornerNm || Const.ALL}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -477,14 +479,13 @@ export default function RealtimeSalesByCornerOp() {
                     </View>
                 </View>
             </Modal>
+            {loading && (<LoadingOverlay />)}
         </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    selectText: {fontSize: 14, color: '#333'},
     totalText: {fontWeight: '700', color: '#222'},
-
 });
 
 

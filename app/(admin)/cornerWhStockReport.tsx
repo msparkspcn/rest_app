@@ -179,7 +179,7 @@ export default function CornerWhStockReportScreen() {
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>조회일자</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={openDatePicker}>
-                        <Text style={styles.selectText}>{formattedDate(saleDate)}</Text>
+                        <Text style={commonStyles.selectText}>{formattedDate(saleDate)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -187,7 +187,7 @@ export default function CornerWhStockReportScreen() {
                     <Text style={commonStyles.filterLabel}>매장</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowCornerModal(true)}>
                         <Text
-                            style={styles.selectText}>{cornerList.find(g => g.cornerCd === selectedCorner)?.cornerNm || Const.SELECT}</Text>
+                            style={commonStyles.selectText}>{cornerList.find(g => g.cornerCd === selectedCorner)?.cornerNm || Const.SELECT}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -195,7 +195,7 @@ export default function CornerWhStockReportScreen() {
                     <Text style={commonStyles.filterLabel}>{Const.VENDOR}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowVendorModal(true)}>
                         <Text
-                            style={styles.selectText}>{vendorList.find(g => g.outSdCmpCd === selectedOutSdCmpCd)?.outSdCmpNm || Const.ALL}</Text>
+                            style={commonStyles.selectText}>{vendorList.find(g => g.outSdCmpCd === selectedOutSdCmpCd)?.outSdCmpNm || Const.ALL}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -258,9 +258,4 @@ export default function CornerWhStockReportScreen() {
         </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    selectText: {fontSize: 14, color: '#333'},
-});
-
 

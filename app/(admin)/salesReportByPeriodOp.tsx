@@ -20,6 +20,7 @@ import Const from "../../constants/Const";
 import {User, SalesOrg} from "../../types";
 import ListModal from "../../components/ListModal";
 import {useUser} from "../../contexts/UserContext";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 type SaleRow = {
     no: number;
@@ -51,33 +52,24 @@ export default function SalesReportByPeriodOp() {
     const [toSaleDt, setToSaleDt] = useState(getTodayYmd());
     const [currentPickerType, setCurrentPickerType] = useState('from')
     const [selectedSale, setSelectedSale] = useState<SaleRow | null>(null);
-    const [saleList, setSaleList] = useState([]);
+    const [saleList, setSaleList] = useState<SaleRow[]>([]);
     const {user}: User = useUser();
     const [saleDetailList, setSaleDetailList] = useState([]);
     const [selectedOperDiv, setSelectedOperDiv] = useState("01");
-
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        console.log('api 테스트112321')
         getSalesOrgList();
     }, []);
 
     const getSalesOrgList = () => {
-        const request = {
-            cmpCd: user.cmpCd,
-            operType: "",
-            restValue: "",
-        }
-        console.log("request:"+JSON.stringify(request))
+        const request = { cmpCd: user.cmpCd }
+
         api.getSalsOrgList(request)
             .then(result => {
                 if (result.data.responseBody != null) {
                     const salesOrgList = result.data.responseBody;
-                    setSalesOrgList([
-                            {salesOrgCd:'', salesOrgNm: '전체'},
-                            ...salesOrgList
-                        ]
-                    );
+                    setSalesOrgList([{salesOrgCd:'', salesOrgNm: '전체'}, ...salesOrgList]);
                 }
             })
             .catch(error => {
@@ -111,15 +103,18 @@ export default function SalesReportByPeriodOp() {
             storCd: "",
             toSaleDt: toSaleDt
         }
+        setLoading(true);
         api.mobOperPeriodSale(request)
             .then(result => {
                 if (result.data.responseBody != null) {
                     const saleList = result.data.responseBody;
                     // console.log('list:' + JSON.stringify(saleList))
                     setSaleList(saleList);
+                    setLoading(false);
                 }
             })
             .catch(error => {
+                setLoading(false);
                 console.log("mobOperPeriodSale error:" + error)
             });
     };
@@ -395,19 +390,19 @@ export default function SalesReportByPeriodOp() {
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>조회일자</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('from')}>
-                        <Text style={styles.selectText}>{formattedDate(fromSaleDt)}</Text>
+                        <Text style={commonStyles.selectText}>{formattedDate(fromSaleDt)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                     <Text>-</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('to')}>
-                        <Text style={styles.selectText}>{formattedDate(toSaleDt)}</Text>
+                        <Text style={commonStyles.selectText}>{formattedDate(toSaleDt)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={commonStyles.filterRow}>
                     <Text style={commonStyles.filterLabel}>{Const.SALES_ORG}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowSalesOrgListModal(true)}>
-                        <Text style={styles.selectText}>
+                        <Text style={commonStyles.selectText}>
                             {salesOrgList.find(g => g.salesOrgCd === selectedSalesOrgCd)?.salesOrgNm || Const.ALL}
                         </Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
@@ -465,15 +460,12 @@ export default function SalesReportByPeriodOp() {
                     else setToSaleDt(dateToYmd(date));
                 }}
             />
+            {loading && (<LoadingOverlay />)}
         </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    selectText: {
-        fontSize: 16,
-        color: '#333',
-    },
     summaryRow: {
         backgroundColor: '#fff7e6'
     },

@@ -123,12 +123,12 @@ export default function tlgReportScreen() {
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>조회일자</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('from')}>
-                        <Text style={styles.selectText}>{formattedDate(fromSaleDt)}</Text>
+                        <Text style={commonStyles.selectText}>{formattedDate(fromSaleDt)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                     <Text>-</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('to')}>
-                        <Text style={styles.selectText}>{formattedDate(toSaleDt)}</Text>
+                        <Text style={commonStyles.selectText}>{formattedDate(toSaleDt)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -173,9 +173,4 @@ export default function tlgReportScreen() {
         </SafeAreaView>
     );
 };
-
-const styles = StyleSheet.create({
-    selectText: {fontSize: 14, color: '#333'},
-});
-
 

@@ -179,7 +179,7 @@ export default function SalesReportByTimezoneScreen() {
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>조회일자</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={openDatePicker}>
-                        <Text style={styles.selectText}>{formattedDate(saleDate)}</Text>
+                        <Text style={commonStyles.selectText}>{formattedDate(saleDate)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -187,7 +187,7 @@ export default function SalesReportByTimezoneScreen() {
                     <Text style={commonStyles.filterLabel}>포스그룹</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowStorModal(true)}>
                         <Text
-                            style={styles.selectText}>{storList.find(g => g.storCd === selectedStorCd)?.storNm || Const.ALL}</Text>
+                            style={commonStyles.selectText}>{storList.find(g => g.storCd === selectedStorCd)?.storNm || Const.ALL}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                     <Pressable style={commonStyles.searchButton} onPress={onSearch}>
@@ -244,7 +244,6 @@ export default function SalesReportByTimezoneScreen() {
 }
 
 const styles = StyleSheet.create({
-    selectText: {fontSize: 14, color: '#333'},
     summaryLabelText: {fontWeight: '600', fontSize: 12, color: '#333'},
     cell: {fontSize: 13, color: '#444'},
 });

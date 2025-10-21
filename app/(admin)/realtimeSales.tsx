@@ -371,7 +371,7 @@ export default function RealtimeSales() {
                 <View style={[commonStyles.filterRowFront]}>
                     <Text style={commonStyles.filterLabel}>조회일자</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={openDatePicker}>
-                        <Text style={styles.selectText}>{formattedDate(saleDate)}</Text>
+                        <Text style={commonStyles.selectText}>{formattedDate(saleDate)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -379,7 +379,7 @@ export default function RealtimeSales() {
                     <Text style={commonStyles.filterLabel}>포스그룹</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowStorModal(true)}>
                         <Text
-                            style={styles.selectText}>{storList.find(g => g.storCd === selectedStorCd)?.storNm || Const.ALL}</Text>
+                            style={commonStyles.selectText}>{storList.find(g => g.storCd === selectedStorCd)?.storNm || Const.ALL}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                     <Pressable style={commonStyles.searchButton} onPress={onSearch}>
@@ -445,9 +445,5 @@ export default function RealtimeSales() {
         </SafeAreaView>
     );
 };
-
-const styles = StyleSheet.create({
-    selectText: {fontSize: 14, color: '#333'},
-});
 
 

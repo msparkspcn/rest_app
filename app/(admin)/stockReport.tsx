@@ -135,7 +135,7 @@ export default function StockReport() {
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>사업장</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowSalesOrgListModal(true)}>
-                        <Text style={styles.selectText}>
+                        <Text style={commonStyles.selectText}>
                             {salesOrgList.find(g => g.salesOrgCd === selectedSalesOrgCd)?.salesOrgNm || Const.SELECT}
                         </Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
@@ -144,12 +144,12 @@ export default function StockReport() {
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>조회일자</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('from')}>
-                        <Text style={styles.selectText}>{formattedDate(fromSaleDt)}</Text>
+                        <Text style={commonStyles.selectText}>{formattedDate(fromSaleDt)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                     <Text>-</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('to')}>
-                        <Text style={styles.selectText}>{formattedDate(toSaleDt)}</Text>
+                        <Text style={commonStyles.selectText}>{formattedDate(toSaleDt)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -199,13 +199,4 @@ export default function StockReport() {
         </SafeAreaView>
     );
 };
-
-const styles = StyleSheet.create({
-    selectText: {fontSize: 14, color: '#333'},
-    modalTotalText: {
-        fontWeight: '700',
-        color: '#222',
-    },
-});
-
 

@@ -186,7 +186,7 @@ export default function SalesReportByTimezoneScreen() {
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>조회일자</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={openDatePicker}>
-                        <Text style={styles.selectText}>{formattedDate(saleDate)}</Text>
+                        <Text style={commonStyles.selectText}>{formattedDate(saleDate)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -231,17 +231,11 @@ export default function SalesReportByTimezoneScreen() {
 };
 
 const styles = StyleSheet.create({
-    selectText: {fontSize: 14, color: '#333'},
     summaryLabelText: {
         fontWeight: '600',
         fontSize: 13,
         color: '#333',
         textAlign: 'center'
-    },
-    cell: {
-        fontSize: 12,
-        color: '#444',
-        width:'100%'
     },
 });
 

@@ -293,7 +293,7 @@ export default function RealtimeSalesScreen() {
                         style={commonStyles.selectInput}
                         onPress={() => setShowSalesOrgListModal(true)}
                     >
-                        <Text style={styles.selectText}>
+                        <Text style={commonStyles.selectText}>
                             {salesOrgList.find(g => g.salesOrgCd === selectedSalesOrgCd)?.salesOrgNm || Const.SELECT}
                         </Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
@@ -302,7 +302,7 @@ export default function RealtimeSalesScreen() {
                 <View style={[commonStyles.filterRowFront]}>
                     <Text style={commonStyles.filterLabel}>조회일자</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={openDatePicker}>
-                        <Text style={styles.selectText}>{formattedDate(saleDate)}</Text>
+                        <Text style={commonStyles.selectText}>{formattedDate(saleDate)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>

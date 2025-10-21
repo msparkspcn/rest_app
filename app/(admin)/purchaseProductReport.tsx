@@ -191,12 +191,12 @@ export default function PurchaseProductReportScreen() {
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>조회일자</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('from')}>
-                        <Text style={styles.selectText}>{formattedDate(fromPurchaseDt)}</Text>
+                        <Text style={commonStyles.selectText}>{formattedDate(fromPurchaseDt)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                     <Text style={commonStyles.tilde}>~</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('to')}>
-                        <Text style={styles.selectText}>{formattedDate(toPurchaseDt)}</Text>
+                        <Text style={commonStyles.selectText}>{formattedDate(toPurchaseDt)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -260,7 +260,6 @@ export default function PurchaseProductReportScreen() {
 }
 
 const styles = StyleSheet.create({
-    selectText: {fontSize: 14, color: '#333'},
     totalRow: {backgroundColor: '#fafafa'},
     totalText: {fontWeight: '700', color: '#222'},
     modalTotalText: {fontWeight: '700', color: '#222'},

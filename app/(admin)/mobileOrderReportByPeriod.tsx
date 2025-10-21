@@ -58,8 +58,7 @@ export default function MobileOrderReportByPeriod() {
     const getSalesOrgList = () => {
         const request = {
             cmpCd: user.cmpCd,
-            operDiv: '',
-            restValue: '',
+            operDiv: Const.OPER_TYPE_REST
         }
         console.log("request:"+JSON.stringify(request))
         api.getSalsOrgList(request)
@@ -274,19 +273,19 @@ export default function MobileOrderReportByPeriod() {
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>조회기간</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('from')}>
-                        <Text style={styles.selectText}>{formattedDate(fromSaleDt)}</Text>
+                        <Text style={commonStyles.selectText}>{formattedDate(fromSaleDt)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                     <Text>-</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('to')}>
-                        <Text style={styles.selectText}>{formattedDate(toSaleDt)}</Text>
+                        <Text style={commonStyles.selectText}>{formattedDate(toSaleDt)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>사업장</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowSalesOrgListModal(true)}>
-                        <Text style={styles.selectText}>
+                        <Text style={commonStyles.selectText}>
                             {salesOrgList.find(g => g.salesOrgCd === selectedSalesOrgCd)?.salesOrgNm || Const.SELECT}
                         </Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
@@ -295,7 +294,7 @@ export default function MobileOrderReportByPeriod() {
                 <View style={commonStyles.filterRow}>
                     <Text style={commonStyles.filterLabel}>매장그룹</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowStorModal(true)}>
-                        <Text style={styles.selectText}>
+                        <Text style={commonStyles.selectText}>
                             {storList.find(g => g.storCd === selectedStorCd)?.storNm || Const.SELECT}
                         </Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
@@ -375,16 +374,9 @@ export default function MobileOrderReportByPeriod() {
 }
 
 const styles = StyleSheet.create({
-    selectText: {
-        fontSize: 14, color: '#333'
-    },
     summaryLabelText: {
         fontWeight: '600',
         fontSize: 12,
         color: '#333'
-    },
-    cell: {
-        fontSize: 13,
-        color: '#444'
     },
 });

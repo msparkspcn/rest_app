@@ -9,6 +9,7 @@ import Const from "../../constants/Const";
 import {useUser} from "../../contexts/UserContext";
 import {User, Corner} from "../../types";
 import {ColumnDef} from "../../types/table";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 type OperateFilter = { key: string; name: string; }
 
@@ -27,6 +28,7 @@ export default function CornerListScreen() {
   const {user}:User = useUser();
   const [cornerList, setCornerList] = useState<Corner[]>([]);
   const [cornerItemList, setCornerItemList] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const onSearch = () => {
     console.log('user:'+JSON.stringify(user.cmpCd));
@@ -35,6 +37,7 @@ export default function CornerListScreen() {
       salesOrgCd: user.salesOrgCd,
       useYn: operateFilter.key
     }
+    setLoading(true);
     api.getCornerList(request)
         .then(result => {
           if (result.data.responseBody != null) {
@@ -44,7 +47,7 @@ export default function CornerListScreen() {
         })
         .catch(error => {
           console.log("getCornerList error:" + error)
-        });
+        }).finally(() => setLoading(false));
   };
 
   const openDetail = (corner: Corner) => {
@@ -163,8 +166,6 @@ export default function CornerListScreen() {
 
       <Table data={cornerList} columns={mainColumns}/>
 
-      <View style={commonStyles.sectionDivider} />
-
       <Modal visible={isDetailVisible} animationType="fade" transparent>
         <View style={commonStyles.modalOverlay}>
           <View style={commonStyles.modalCard}>
@@ -184,6 +185,7 @@ export default function CornerListScreen() {
           </View>
         </View>
       </Modal>
+      {loading && (<LoadingOverlay />)}
     </SafeAreaView>
   );
 }

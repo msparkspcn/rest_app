@@ -435,12 +435,12 @@ export default function MonthlySalesReport() {
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>조회월</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('from')}>
-                        <Text style={styles.selectText}>{formattedMonth(fromSaleMonth)}</Text>
+                        <Text style={commonStyles.selectText}>{formattedMonth(fromSaleMonth)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                     <Text>-</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('to')}>
-                        <Text style={styles.selectText}>{formattedMonth(toSaleMonth)}</Text>
+                        <Text style={commonStyles.selectText}>{formattedMonth(toSaleMonth)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -510,9 +510,5 @@ export default function MonthlySalesReport() {
 }
 
 const styles = StyleSheet.create({
-    selectText: {
-        fontSize: 16,
-        color: '#333',
-    },
     totalText: {fontWeight: '700', color: '#222'},
 });

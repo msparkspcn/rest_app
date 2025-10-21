@@ -9,6 +9,7 @@ import Const from "../../constants/Const";
 import {useUser} from "../../contexts/UserContext";
 import * as api from "../../services/api/api";
 import {User} from "../../types";
+import LoadingOverlay from "../../components/LoadingOverlay";
 type VendorRow = {
   cmpCd: string;
   outSdCmpNm: string;
@@ -32,27 +33,27 @@ export default function VendorListScreen() {
   const [vendorList, setVendorList] = useState(null);
   const [vendorItemList, setVendorItemList] = useState(null);
   const {user}:User = useUser();
+  const [loading, setLoading] = useState(false);
 
   const onSearch = () => {
-    console.log('user:'+JSON.stringify(user.cmpCd));
-    console.log('useYn:'+registerFilter.key);
     const request = {
       cmpCd: user.cmpCd,
       salesOrgCd: user.salesOrgCd,
       schValue: vendorQuery,
       useYn: registerFilter.key
     }
+    setLoading(true);
+
     api.getVendorList(request)
         .then(result => {
           if (result.data.responseBody != null) {
             const vendorList = result.data.responseBody;
-            // console.log('List:' + JSON.stringify(vendorList))
             setVendorList(vendorList);
           }
         })
         .catch(error => {
           console.log("getVendorList error:" + error)
-        });
+        }).finally(() => setLoading(false));
   };
 
   const openDetail = (vendor: VendorRow) => {
@@ -60,11 +61,7 @@ export default function VendorListScreen() {
       cmpCd: vendor.cmpCd,
       salesOrgCd: user.salesOrgCd,
       outSdCmpCd: vendor.outSdCmpCd,
-      itemCd: "",
-      itemNm: "",
-      page: 0,
-      registered: true,
-      size: 100000
+      registered: true
     }
     console.log('request:'+JSON.stringify(request))
     api.getVendorItemList(request)
@@ -196,6 +193,7 @@ export default function VendorListScreen() {
           </View>
         </View>
       </Modal>
+      {loading && (<LoadingOverlay />)}
     </SafeAreaView>
   );
 }

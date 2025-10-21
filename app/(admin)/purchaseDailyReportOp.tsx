@@ -42,11 +42,7 @@ export default function PurchaseDailyReportScreen() {
     },[]);
 
     const getSalesOrgList = () => {
-        const request = {
-            cmpCd: user.cmpCd,
-            operType: '',
-            restValue: '',
-        }
+        const request = { cmpCd: user.cmpCd }
         console.log("request:"+JSON.stringify(request))
         api.getSalsOrgList(request)
             .then(result => {
@@ -206,7 +202,7 @@ export default function PurchaseDailyReportScreen() {
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>사업장명</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowSalesOrgListModal(true)}>
-                        <Text style={styles.selectText}>
+                        <Text style={commonStyles.selectText}>
                             {salesOrgList.find(g => g.salesOrgCd === selectedSalesOrgCd)?.salesOrgNm || Const.ALL}
                         </Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
@@ -218,12 +214,12 @@ export default function PurchaseDailyReportScreen() {
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>조회일자</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('from')}>
-                        <Text style={styles.selectText}>{formattedDate(fromPurchaseDt)}</Text>
+                        <Text style={commonStyles.selectText}>{formattedDate(fromPurchaseDt)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                     <Text style={commonStyles.tilde}>~</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('to')}>
-                        <Text style={styles.selectText}>{formattedDate(toPurchaseDt)}</Text>
+                        <Text style={commonStyles.selectText}>{formattedDate(toPurchaseDt)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -285,11 +281,6 @@ export default function PurchaseDailyReportScreen() {
 };
 
 const styles = StyleSheet.create({
-    selectText: {
-        fontSize: 14,
-        color: '#333',
-    },
-
     totalText: {
         fontWeight: '700',
         color: '#222',
