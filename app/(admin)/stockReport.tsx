@@ -50,7 +50,7 @@ export default function StockReport() {
     const getSalesOrgList = () => {
         const request = {
             cmpCd: user.cmpCd,
-            operType: '',
+            operDiv: '',
             restValue: '',
         }
         console.log("request:"+JSON.stringify(request))

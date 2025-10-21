@@ -54,21 +54,15 @@ export default function tlgReportByPeriodOp() {
     const getSalesOrgList = () => {
         const request = {
             cmpCd: user.cmpCd,
-            operType: '',
+            operDiv: '',
             restValue: '',
         }
-        console.log("request:"+JSON.stringify(request))
         api.getSalsOrgList(request)
             .then(result => {
                 console.log("result:"+JSON.stringify(result))
                 if (result.data.responseBody != null) {
                     const salesOrgList = result.data.responseBody;
-                    console.log('salesOrgList:' + JSON.stringify(salesOrgList))
-                    setSalesOrgList([
-                            {salesOrgCd:'', salesOrgNm: '전체'},
-                            ...salesOrgList
-                        ]
-                    );
+                    setSalesOrgList([{salesOrgCd:'', salesOrgNm: '전체'}, ...salesOrgList]);
                 }
             })
             .catch(error => {

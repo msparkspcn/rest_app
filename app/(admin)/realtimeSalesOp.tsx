@@ -73,18 +73,14 @@ export default function RealtimeSalesScreen() {
     const getSalesOrgList = () => {
         const request = {
             cmpCd: user.cmpCd,
-            operType: '',
+            operDiv: '',
             restValue: '',
         }
         api.getSalsOrgList(request)
             .then(result => {
                 if (result.data.responseBody != null) {
                     const salesOrgList = result.data.responseBody;
-                    setSalesOrgList([
-                            {salesOrgCd:'', salesOrgNm: '전체'},
-                            ...salesOrgList
-                        ]
-                    );
+                    setSalesOrgList([{salesOrgCd:'', salesOrgNm: '전체'}, ...salesOrgList]);
                 }
             })
             .catch(error => {

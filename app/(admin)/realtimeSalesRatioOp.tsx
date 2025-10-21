@@ -51,7 +51,7 @@ export default function RealtimeSalesRatio() {
     const getSalesOrgList = () => {
         const request = {
             cmpCd: user.cmpCd,
-            operType: '',
+            operDiv: '',
             restValue: '',
         }
         console.log("request:"+JSON.stringify(request))
