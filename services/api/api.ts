@@ -78,6 +78,11 @@ export function getVendorItemList(params) {
     return post(request, params);
 }
 
+export function getKioskItemList(params) { // 휴게소 키오스크품절관리(휴) 조회
+    const request = host + "/api/v1/did/item";
+    return post(request, params);
+}
+
 export function updateSoldoutYn(params) {
     const request = host + "/api/v1/item/soldout";
     return post(request, params);

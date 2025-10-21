@@ -8,19 +8,27 @@ import ListModal from "../../components/ListModal";
 import {useUser} from "../../contexts/UserContext";
 import * as api from "../../services/api/api";
 import {Corner, User} from "../../types";
+import {ColumnDef} from "../../types/table";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 type ProductRow = {
+    cornerCd: string;
+    storCd: string;
     itemNm: string;
     itemCd: string;
-    useYn: 'Y' | 'N'
+    soldoutYn: '0' | '1';
+    sortOrder: number;
 };
 
 export default function KioskSoldOutScreen() {
     const [cornerList, setCornerList] = useState<Corner[]>([]);
 
-    const [selectedCornerCd, setSelectedCornerCd] = useState<string | null>(null);
+    const [selectedCornerCd, setSelectedCornerCd] = useState<string>('');
     const [showCornerModal, setShowCornerModal] = useState(false);
     const {user}:User = useUser();
+    const [selectedCorner, setSelectedCorner] = useState<Corner>();
+    const [loading, setLoading] = useState(false);
+    const [itemList, setItemList] = useState<ProductRow[]>([]);
 
     useEffect(() => {
         console.log('user:'+JSON.stringify(user.cmpCd));
@@ -40,42 +48,37 @@ export default function KioskSoldOutScreen() {
             });
     },[])
 
-
-    const productData: ProductRow[] = useMemo(
-        () =>
-            Array.from({length: 60}).map((_, index) => ({
-                itemNm: `상품 ${index + 1}`,
-                itemCd: `코드 ${index + 1}`,
-                useYn: index % 3 === 0 ? 'N' : 'Y',
-            })),
-        []
-    );
-
-    const filteredData: ProductRow[] = useMemo(() => {
-        return productData.map(
-            (p, idx): ProductRow => ({
-                ...p,
-                useYn: (idx % 4 === 0 ? 'N' : 'Y') as 'Y' | 'N',
-            })
-        );
-    }, [productData]);
-
-    const onSearch = () => {
-        if (selectedCornerCd == '') {
+    const onSearch = (storCd: string, cornerCd: string) => {
+        console.log('조회 클릭 storCd:'+storCd+", cornerCd:"+cornerCd);
+        //getKioskItemList
+        if (!cornerCd) {
             Alert.alert(Const.ERROR, Const.NO_SALES_ORG_MSG);
             return;
         }
+
+        const request = {
+            cmpCd: user.cmpCd,
+            cornerCd: cornerCd,
+            salesOrgCd: user.salesOrgCd,
+            storCd: storCd
+        }
+        console.log("request:"+JSON.stringify(request))
+        setLoading(true);
+        api.getKioskItemList(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const itemList = result.data.responseBody;
+                    console.log('itemList:' + JSON.stringify(itemList))
+                    setItemList(itemList);
+                }
+                setLoading(false);
+            })
+            .catch(error => {
+                console.log("getKioskItemList error:" + error);
+                setLoading(false);
+            });
     };
 
-    type Align = 'left' | 'center' | 'right';
-    type ColumnDef<T> = {
-        key: keyof T | string;
-        title: string;
-        flex: number;
-        align?: Align;
-        headerAlign?: Align;
-        cellAlign?: Align;
-    };
     const mainColumns: ColumnDef<ProductRow>[] = useMemo(() => ([
         {
             key: 'no', title: Const.NO, flex: 0.3,
@@ -85,11 +88,11 @@ export default function KioskSoldOutScreen() {
         },
         {key: 'itemNm', title: '상품명', flex: 2, align: 'left'},
         {
-            key: 'useYn', title: '사용여부', flex: 0.5, align: 'center',
+            key: 'soldoutYn', title: '사용여부', flex: 0.5, align: 'center',
             renderCell: (item) => (
                 <Pressable style={commonStyles.columnPressable} onPress={() => updateSoldoutYn(item)}>
                     <Text style={[commonStyles.cell, commonStyles.linkText, {textAlign: 'center'}]}>
-                        {item.useYn === 'Y' ? '출력' : '품절'}
+                        {item.soldoutYn === '0' ? '출력' : '품절'}
                     </Text>
                 </Pressable>
             ),
@@ -100,19 +103,21 @@ export default function KioskSoldOutScreen() {
         const request = [{
             cmpCd: user.cmpCd,
             salesOrgCd: user.salesOrgCd,
-            cornerCd: "CIBA",
-            itemCd: "abcdsefdf",
-            itemSeq: "A001",
-            soldoutYn: "0",
-            storCd: "5000511"
+            cornerCd: item.cornerCd,
+            itemCd: item.itemCd.slice(0, 10),
+            itemSeq: item.itemCd.slice(10),
+            soldoutYn: item.soldoutYn === "1" ? "0" : "1",
+            storCd: item.storCd
         }];
-        console.log('item:'+JSON.stringify(item)+', request:'+JSON.stringify(request));
+        console.log('item:'+JSON.stringify(item));
+        console.log('request:'+JSON.stringify(request));
+
         api.updateSoldoutYn(request)
             .then(result => {
                 if (result.data.responseBody != null) {
                     const res = result.data.responseBody;
                     console.log('res:' + JSON.stringify(res));
-                    onSearch();
+                    onSearch(item.storCd, item.cornerCd);
                     // Alert.alert('완료', '완료되었습니다.');
                 }
             })
@@ -132,19 +137,19 @@ export default function KioskSoldOutScreen() {
                         style={commonStyles.selectInput}
                         onPress={() => setShowCornerModal(true)}
                     >
-                        <Text style={[styles.selectText, !selectedCornerCd && styles.placeholderText]}>
+                        <Text style={[commonStyles.selectText, !selectedCornerCd && styles.placeholderText]}>
                             {cornerList.find((s) => s.cornerCd === selectedCornerCd)?.cornerNm || Const.SELECT}
                         </Text>
                         <Text style={commonStyles.selectArrow}>▼</Text>
                     </TouchableOpacity>
-                    <Pressable style={commonStyles.searchButton} onPress={onSearch}>
+                    <Pressable style={commonStyles.searchButton} onPress={() => onSearch(selectedCorner.storCd, selectedCorner.cornerCd)}>
                         <Text style={commonStyles.searchButtonText}>{Const.SEARCH}</Text>
                     </Pressable>
                 </View>
             </View>
             <View style={commonStyles.sectionDivider}/>
 
-            <Table data={filteredData} columns={mainColumns}/>
+            <Table data={itemList} columns={mainColumns}/>
 
             <ListModal
                 visible={showCornerModal}
@@ -154,20 +159,17 @@ export default function KioskSoldOutScreen() {
                 labelField="cornerNm"
                 onClose={() => setShowCornerModal(false)}
                 onSelect={(item) => {
-                    setSelectedCornerCd(item.cornerCd);
+                    setSelectedCorner(item);
+                    setSelectedCornerCd(item.cornerCd)
                     setShowCornerModal(false);
                 }}
             />
-
+            {loading && (<LoadingOverlay />)}
         </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    selectText: {
-        fontSize: 16,
-        color: '#333',
-    },
     placeholderText: {
         color: '#999',
     }
