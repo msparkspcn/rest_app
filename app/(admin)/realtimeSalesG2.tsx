@@ -360,7 +360,3 @@ export default function RealtimeSalesScreen() {
         </SafeAreaView>
     );
 };
-
-const styles = StyleSheet.create({
-    selectText: {fontSize: 14, color: '#333'}
-});

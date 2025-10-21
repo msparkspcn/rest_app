@@ -11,6 +11,7 @@ import ListModal from "../../components/ListModal";
 import {useUser} from "../../contexts/UserContext";
 import * as api from "../../services/api/api";
 import {User, Stor} from "../../types";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 type SaleRow = { tmzonDiv: string; totalAmt: number, billCnt: number };
 type ListItem = {
@@ -32,6 +33,7 @@ export default function SalesReportByTimezoneScreen() {
     const [showStorModal, setShowStorModal] = useState(false);
     const [saleList, setSaleList] = useState<[] | null>(null);
     const {user}:User = useUser();
+    const [loading, setLoading] = useState(false);
 
     useEffect(()=> {
         getStorList();
@@ -49,11 +51,7 @@ export default function SalesReportByTimezoneScreen() {
             .then(result => {
                 if (result.data.responseBody != null) {
                     const storList = result.data.responseBody;
-                    setStorList([
-                            {storCd:'', storNm: '전체'},
-                            ...storList
-                        ]
-                    );
+                    setStorList([{storCd:'', storNm: '전체'}, ...storList]);
                 }
             })
             .catch(error => {
@@ -71,6 +69,8 @@ export default function SalesReportByTimezoneScreen() {
             toSaleDt: saleDate
         }
         console.log('request:'+JSON.stringify(request))
+        setLoading(true);
+
         api.restStorTimeZoneSale(request)
             .then(result => {
                 if (result.data.responseBody != null) {
@@ -82,7 +82,8 @@ export default function SalesReportByTimezoneScreen() {
             })
             .catch(error => {
                 console.log("restStorTimeZoneSale error:" + error)
-            });
+            })
+            .finally(() => setLoading(false));
     };
 
     const openDatePicker = () => {
@@ -239,6 +240,7 @@ export default function SalesReportByTimezoneScreen() {
                     setShowStorModal(false);
                 }}
             />
+            {loading && (<LoadingOverlay />)}
         </SafeAreaView>
     );
 }
