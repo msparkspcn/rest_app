@@ -93,10 +93,11 @@ export default function RealtimeSalesScreen() {
                     const saleStatList = result.data.responseBody;
                     console.log('saleStatList:' + JSON.stringify(saleStatList))
                     setSaleStatList(saleStatList);
-                    setLoading(false);
                 }
+                setLoading(false);
             })
             .catch(error => {
+                setLoading(false);
                 console.log("mobOilRealTimeSaleStat error:" + error)
             });
     }

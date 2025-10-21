@@ -12,6 +12,7 @@ import {User, SalesOrg} from "../../types";
 import {useUser} from "../../contexts/UserContext";
 import * as api from "../../services/api/api";
 import {AntDesign} from "@expo/vector-icons";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 type SaleRow = {
     no: number;
@@ -60,11 +61,12 @@ export default function RealtimeSalesScreen() {
 
     const [selectedSalesOrgCd, setSelectedSalesOrgCd] = useState<string>('');
     const [selectedSalesOrg, setSelectedSalesOrg] = useState<SaleRow | null>(null);
-    const [saleList, setSaleList] = useState<[] | null>(null);
+    const [saleList, setSaleList] = useState<SaleRow[]>([]);
     const [saleStatList ,setSaleStatList] = useState<[] | null>([]);
     const [saleDetailList, setSaleDetailList] = useState<[] | null>([]);
     const [oilSaleDetailList, setOilSaleDetailList] = useState<[] | null>([]);
     const [selectedOperDiv, setSelectedOperDiv] = useState("01");
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         getSalesOrgList();
@@ -101,14 +103,19 @@ export default function RealtimeSalesScreen() {
             toSaleDt: ""
         }
         console.log('request:'+JSON.stringify(request));
-        // setLoading(true);
+        setLoading(true);
         api.mobOperRealTimeSale(request)
             .then(result => {
                 if (result.data.responseBody != null) {
                     const saleList = result.data.responseBody;
                     console.log('saleList:' + JSON.stringify(saleList))
                     setSaleList(saleList);
-                    mobOperRealTimeSaleStat();
+                    if(saleList.length > 0) {
+                        mobOperRealTimeSaleStat();
+                    }
+                    else {
+                        setLoading(false);
+                    }
                 }
             })
             .catch(error => {
@@ -135,8 +142,10 @@ export default function RealtimeSalesScreen() {
                     console.log('saleStatList:' + JSON.stringify(saleStatList))
                     setSaleStatList(saleStatList);
                 }
+                setLoading(false);
             })
             .catch(error => {
+                setLoading(false);
                 console.log("mobOperRealTimeSaleStat error:" + error)
             });
     };
@@ -522,7 +531,98 @@ export default function RealtimeSalesScreen() {
         setDcIncludedChecked(!dcIncludedChecked)
     }
 
+    const renderListHeader = () => {
+        if (saleList.length == 0) return null;
+        return (
+            <View>
+                {saleStatList.map(row => {
+                    let saleValue1;
+                    let saleValue2;
+                    console.log('row:'+JSON.stringify(row));
 
+                    if (appliedVatChecked && appliedDcChecked) {
+                        saleValue1 = row.saleAmt1 - row.vatAmt1;
+                        saleValue2 = row.saleAmt2 - row.vatAmt2;
+
+                    } //부가세 적용, DC적용 X
+                    if (appliedVatChecked && !appliedDcChecked) {
+                        saleValue1 = row.netSaleAmt1;
+                        saleValue2 = row.netSaleAmt2;
+                    } //부가세 적용, DC적용
+                    if (!appliedVatChecked && appliedDcChecked) {
+                        saleValue1 = row.saleAmt1;
+                        saleValue2 = row.saleAmt2;
+                    } //부가세 적용X, DC적용 X 총 매출
+                    if (!appliedVatChecked && !appliedDcChecked) {
+                        saleValue1 = row.actualSaleAmt1;
+                        saleValue2 = row.actualSaleAmt2;
+                    }
+                    let lastWeekIsUp = saleValue1 > 0;
+                    let yesDayIsUp = saleValue2 > 0
+                    console.log('saleValue1:'+saleValue1+', saleValue2:'+saleValue2);
+                    return (
+                        <View
+                            key={row.sortOrder}
+                            style={[commonStyles.tableRow, commonStyles.summaryRow,
+                                {
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    paddingHorizontal: 0,
+                                    width: '100%'
+                                },
+                            ]}
+                        >
+                            <View style={[{flex: 1, justifyContent: 'center'}, commonStyles.tableRightBorder]}>
+                                <Text style={[{paddingLeft: 10}, styles.cell, styles.summaryLabelText]}>
+                                    {row.label}
+                                </Text>
+                            </View>
+                            <View style={[{flex: 2, flexDirection: 'row', alignItems: 'center', justifyContent:'flex-end'}]}>
+                                {(row.sortOrder === '1') && (
+                                    <View style={{flexDirection: 'row', alignItems:'center'}}>
+                                        <Text style={{fontSize: 12, paddingRight: 5}}>
+                                            {saleValue1.toLocaleString()}  /  </Text>
+                                        <Text style={{fontSize: 12, paddingRight: 5}}>
+                                            {saleValue2.toLocaleString()}
+                                        </Text>
+                                    </View>
+                                )}
+                                {(row.sortOrder === '2') && (
+                                    <View style={{flexDirection: 'row', alignItems:'center'}}>
+                                        <Text style={{fontSize: 12}}>
+                                            {saleValue1.toLocaleString()}
+                                        </Text>
+                                        <AntDesign
+                                            name={lastWeekIsUp ? 'caretup' : 'caretdown'}
+                                            size={13}
+                                            color={lastWeekIsUp ? 'red' : 'blue'}
+                                            style={{paddingHorizontal: 5}}
+                                        />
+                                        <Text style={{fontSize: 12}}>  /  {saleValue2.toLocaleString()}
+                                        </Text>
+                                        <AntDesign
+                                            name={yesDayIsUp ? 'caretup' : 'caretdown'}
+                                            size={13}
+                                            color={yesDayIsUp ? 'red' : 'blue'}
+                                            style={{paddingHorizontal: 5}}
+                                        />
+                                    </View>
+                                )}
+                                {(row.sortOrder === '3') && (
+                                    <View style={{flexDirection: 'row', alignItems:'center'}}>
+                                        <Text style={{fontSize: 12, paddingRight: 5}}>
+                                            {saleValue1.toLocaleString()}
+                                        </Text>
+                                    </View>
+                                )}
+                            </View>
+                        </View>
+                    )
+                })}
+            </View>
+        )
+    }
 
     return (
         <SafeAreaView style={commonStyles.container}>
@@ -577,95 +677,7 @@ export default function RealtimeSalesScreen() {
             <Table
                 data={tableData}
                 columns={mainColumns}
-                listHeader={() => (
-                    <View>
-                        {saleStatList.map(row => {
-                            let saleValue1;
-                            let saleValue2;
-                            console.log('row:'+JSON.stringify(row));
-
-                            if (appliedVatChecked && appliedDcChecked) {
-                                saleValue1 = row.saleAmt1 - row.vatAmt1;
-                                saleValue2 = row.saleAmt2 - row.vatAmt2;
-
-                            } //부가세 적용, DC적용 X
-                            if (appliedVatChecked && !appliedDcChecked) {
-                                saleValue1 = row.netSaleAmt1;
-                                saleValue2 = row.netSaleAmt2;
-                            } //부가세 적용, DC적용
-                            if (!appliedVatChecked && appliedDcChecked) {
-                                saleValue1 = row.saleAmt1;
-                                saleValue2 = row.saleAmt2;
-                            } //부가세 적용X, DC적용 X 총 매출
-                            if (!appliedVatChecked && !appliedDcChecked) {
-                                saleValue1 = row.actualSaleAmt1;
-                                saleValue2 = row.actualSaleAmt2;
-                            }
-                            let lastWeekIsUp = saleValue1 > 0;
-                            let yesDayIsUp = saleValue2 > 0
-                            console.log('saleValue1:'+saleValue1+', saleValue2:'+saleValue2);
-                            return (
-                                <View
-                                    key={row.sortOrder}
-                                    style={[commonStyles.tableRow, commonStyles.summaryRow,
-                                        {
-                                            flexDirection: 'row',
-                                            alignItems: 'center',
-                                            justifyContent: 'space-between',
-                                            paddingHorizontal: 0,
-                                            width: '100%'
-                                        },
-                                    ]}
-                                >
-                                    <View style={[{flex: 1, justifyContent: 'center'}, commonStyles.tableRightBorder]}>
-                                        <Text style={[{paddingLeft: 10}, styles.cell, styles.summaryLabelText]}>
-                                            {row.label}
-                                        </Text>
-                                    </View>
-                                    <View style={[{flex: 2, flexDirection: 'row', alignItems: 'center', justifyContent:'flex-end'}]}>
-                                        {(row.sortOrder === '1') && (
-                                            <View style={{flexDirection: 'row', alignItems:'center'}}>
-                                                <Text style={{fontSize: 12, paddingRight: 5}}>
-                                                    {saleValue1.toLocaleString()}  /  </Text>
-                                                <Text style={{fontSize: 12, paddingRight: 5}}>
-                                                    {saleValue2.toLocaleString()}
-                                                </Text>
-                                            </View>
-                                        )}
-                                        {(row.sortOrder === '2') && (
-                                            <View style={{flexDirection: 'row', alignItems:'center'}}>
-                                                <Text style={{fontSize: 12}}>
-                                                    {saleValue1.toLocaleString()}
-                                                </Text>
-                                                <AntDesign
-                                                    name={lastWeekIsUp ? 'caretup' : 'caretdown'}
-                                                    size={13}
-                                                    color={lastWeekIsUp ? 'red' : 'blue'}
-                                                    style={{paddingHorizontal: 5}}
-                                                />
-                                                <Text style={{fontSize: 12}}>  /  {saleValue2.toLocaleString()}
-                                                </Text>
-                                                <AntDesign
-                                                    name={yesDayIsUp ? 'caretup' : 'caretdown'}
-                                                    size={13}
-                                                    color={yesDayIsUp ? 'red' : 'blue'}
-                                                    style={{paddingHorizontal: 5}}
-                                                />
-                                            </View>
-                                        )}
-                                        {(row.sortOrder === '3') && (
-                                            <View style={{flexDirection: 'row', alignItems:'center'}}>
-                                                <Text style={{fontSize: 12, paddingRight: 5}}>
-                                                    {saleValue1.toLocaleString()}
-                                                </Text>
-                                            </View>
-                                        )}
-                                    </View>
-                                </View>
-                            )
-                        })}
-                    </View>
-                )}
+                listHeader={renderListHeader}
             />
 
             <DatePickerModal
@@ -715,6 +727,7 @@ export default function RealtimeSalesScreen() {
                     </View>
                 </View>
             </Modal>
+            {loading && (<LoadingOverlay />)}
         </SafeAreaView>
     );
 }

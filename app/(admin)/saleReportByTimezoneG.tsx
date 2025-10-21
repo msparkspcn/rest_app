@@ -10,6 +10,7 @@ import { dateToYmd, formattedDate, getTodayYmd } from "../../utils/DateUtils";
 import * as api from "../../services/api/api";
 import {User} from "../../types";
 import {useUser} from "../../contexts/UserContext";
+import LoadingOverlay from "../../components/LoadingOverlay";
 type SaleRow = { tmzonDiv: string; saleAmt: number, billCnt: number };
 type ListItem = {
     type: "summaryTotals";
@@ -37,18 +38,11 @@ export default function SalesReportByTimezoneScreen() {
     const [saleList, setSaleList] = useState<SaleRow[]>([]);
 
     const {user}: User = useUser();
-
+    const [loading, setLoading] = useState(false);
 
     const onSearch = () => {
-        posGroupByOilHourlySale();
-    };
+        console.log('조회 클릭');
 
-    const openDatePicker = () => {
-        setTempDate(new Date());
-        setShowDatePicker(true);
-    };
-
-    const posGroupByOilHourlySale = () => {
         const request = {
             cmpCd: user.cmpCd,
             salesOrgCd: '8100',
@@ -57,19 +51,27 @@ export default function SalesReportByTimezoneScreen() {
             storCd: selectedStorCd.id
         }
         console.log("request:"+JSON.stringify(request))
+        setLoading(true);
         api.posGroupByOilHourlySale(request)
             .then(result => {
                 console.log("result:"+JSON.stringify(result.data))
                 if (result.data.responseBody != null) {
                     const saleList = result.data.responseBody;
-                    console.log('salesOrgList:' + JSON.stringify(saleList))
+                    console.log('saleList:' + JSON.stringify(saleList))
                     setSaleList(saleList);
                 }
+                setLoading(false);
             })
             .catch(error => {
-                console.log("getSalsOrgList error:" + error)
+                console.log("posGroupByOilHourlySale error:" + error);
+                setLoading(false);
             });
-    }
+    };
+
+    const openDatePicker = () => {
+        setTempDate(new Date());
+        setShowDatePicker(true);
+    };
 
     const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => ([
         {key: 'tmzonDiv', title: '시간대', flex: 0.8, align: 'center',
@@ -149,6 +151,33 @@ export default function SalesReportByTimezoneScreen() {
         return [row1, row2, row3, row4];
     }, [saleList]);
 
+    const renderListHeader = () => {
+        if (saleList.length == 0) return null;
+        return (
+            <View>
+                {summaryRows.map(row => (
+                    <View key={row.key} style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+                        <View style={[{flex: 0.8}, commonStyles.tableRightBorder]}>
+                            <Text style={styles.summaryLabelText}>{row.label}</Text>
+                        </View>
+
+                        <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                            <Text style={commonStyles.numberCell}>
+                                {row.totalAmt.toLocaleString()}
+                            </Text>
+                        </View>
+
+                        <View style={{ flex: 0.5 }}>
+                            <Text style={commonStyles.numberCell}>
+                                {row.billCnt.toLocaleString()}
+                            </Text>
+                        </View>
+                    </View>
+                ))}
+            </View>
+        )
+    }
+
     return (
         <SafeAreaView style={commonStyles.container}>
             <StatusBar style="dark"/>
@@ -187,29 +216,7 @@ export default function SalesReportByTimezoneScreen() {
             <Table
                 data={saleList}
                 columns={mainColumns}
-                // listHeader={() => (
-                //     <View>
-                //         {summaryRows.map(row => (
-                //             <View key={row.key} style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-                //                 <View style={[{flex: 0.8}, commonStyles.tableRightBorder]}>
-                //                     <Text style={styles.summaryLabelText}>{row.label}</Text>
-                //                 </View>
-                //
-                //                 <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
-                //                     <Text style={commonStyles.numberCell}>
-                //                         {/*{row.saleAmt.toLocaleString()}*/}
-                //                     </Text>
-                //                 </View>
-                //
-                //                 <View style={{ flex: 0.5 }}>
-                //                     <Text style={commonStyles.numberCell}>
-                //                         {row.billCnt.toLocaleString()}
-                //                     </Text>
-                //                 </View>
-                //             </View>
-                //         ))}
-                //     </View>
-                // )}
+                listHeader={renderListHeader}
             />
 
             <DatePickerModal
@@ -218,9 +225,10 @@ export default function SalesReportByTimezoneScreen() {
                 onClose={() => setShowDatePicker(false)}
                 onConfirm={(date) => setSaleDate(dateToYmd(date))}
             />
+            {loading && (<LoadingOverlay />)}
         </SafeAreaView>
     );
-}
+};
 
 const styles = StyleSheet.create({
     selectText: {fontSize: 14, color: '#333'},
