@@ -12,6 +12,7 @@ import ListModal from "../../components/ListModal";
 import * as api from "../../services/api/api";
 import {useUser} from "../../contexts/UserContext";
 import {User, SalesOrg} from "../../types";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 type SaleRow = {
     no: number;
@@ -51,10 +52,12 @@ export default function RealtimeSalesBySalesOrgScreen() {
     const [showSalesOrgListModal, setShowSalesOrgListModal] = useState(false);
     const [isDetailVisible, setIsDetailVisible] = useState(false);
     const [detailChecked, setDetailChecked] = useState(false);
+    const [appliedDetailChecked, setAppliedDetailChecked] = useState(false);
     const [selectedCorner, setSelectedCorner] = useState<CornerRow | null>(null);
     const [saleList, setSaleList] = useState<[] | null>(null);
     const {user}: User = useUser();
     const [saleDetailList, setSaleDetailList] = useState<[] | null>(null);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         getSalesOrgList();
@@ -63,7 +66,7 @@ export default function RealtimeSalesBySalesOrgScreen() {
     const getSalesOrgList = () => {
         const request = {
             cmpCd: user.cmpCd,
-            operType: Const.OPER_TYPE_REST,
+            operDiv: Const.OPER_TYPE_REST,
             restValue: user.salesOrgCd,
         }
         console.log("request:"+JSON.stringify(request))
@@ -120,6 +123,7 @@ export default function RealtimeSalesBySalesOrgScreen() {
             Alert.alert(Const.ERROR, Const.NO_SALES_ORG_MSG);
             return;
         }
+        setAppliedDetailChecked(detailChecked);
         console.log("조회 클릭 saleDate:"+saleDate)
         const request = {
             cmpCd: user.cmpCd,
@@ -128,6 +132,8 @@ export default function RealtimeSalesBySalesOrgScreen() {
             storCd: "",
             toSaleDt: saleDate
         }
+        setLoading(true);
+
         api.mobRestSaleAnalysis(request)
             .then(result => {
                 if (result.data.responseBody != null) {
@@ -138,7 +144,7 @@ export default function RealtimeSalesBySalesOrgScreen() {
             })
             .catch(error => {
                 console.log("mobRestSaleAnalysis error:" + error)
-            });
+            }).finally(() => setLoading(false));
     };
 
     const openDatePicker = () => {
@@ -231,22 +237,28 @@ export default function RealtimeSalesBySalesOrgScreen() {
         }
 
         return commonCols;
-    }, [detailChecked]);
+    }, [appliedDetailChecked]);
 
     const saleDetailColumns: ColumnDef<SaleDetailRow>[] = useMemo(() => ([
-        {key: 'itemNm', title: '상품명', flex: 1, align: 'center'},
-        {
-            key: 'todaySaleQty', title: Const.QTY, flex: 0.6,
+        {key: 'itemNm', title: '상품명', flex: 1.1, align: 'center',
             renderCell: (item) => (
-                <Text style={[styles.cell, commonStyles.numberSmallCell]}>
+                <Text style={[commonStyles.cell, {paddingLeft: 5}]}>
+                    {item.itemNm}
+                </Text>
+            ),
+        },
+        {
+            key: 'todaySaleQty', title: Const.QTY, flex: 0.7,
+            renderCell: (item) => (
+                <Text style={[commonStyles.numberSmallCell]}>
                     {item.todaySaleQty.toLocaleString()}
                 </Text>
             )
         },
         {
-            key: 'todayActualSaleAmt', title: '금액', flex: 0.6,
+            key: 'todayActualSaleAmt', title: '금액', flex: 0.8,
             renderCell: (item) => (
-                <Text style={[styles.cell, commonStyles.numberSmallCell]}>
+                <Text style={[commonStyles.numberSmallCell]}>
                     {Math.round(item.todayActualSaleAmt / 1000).toLocaleString()}
                 </Text>
             )
@@ -254,28 +266,29 @@ export default function RealtimeSalesBySalesOrgScreen() {
         {
             key: 'monthlySaleQty', title: '월누계\n수량', flex: 0.9,
             renderCell: (item) => (
-                <Text style={[styles.cell, commonStyles.numberSmallCell]}>
+                <Text style={[commonStyles.numberSmallCell]}>
                     {item.monthlySaleQty.toLocaleString()}
                 </Text>
             )
         },
         {
-            key: 'monthlyActualSaleAmt', title: '월누계금액', flex: 1.5,
+            key: 'monthlyActualSaleAmt', title: '월누계금액', flex: 1.2,
             renderCell: (item) => (
-                <Text style={[styles.cell, commonStyles.numberSmallCell]}>
+                <Text style={[commonStyles.numberSmallCell]}>
                     {Math.round(item.monthlyActualSaleAmt / 1000).toLocaleString()}
                 </Text>
             )
         },
         {
-            key: 'yearActualSaleAmt', title: '년누계금액', flex: 1.5,
+            key: 'yearActualSaleAmt', title: '년누계금액', flex: 1.2,
             renderCell: (item) => (
-                <Text style={[styles.cell, commonStyles.numberSmallCell]}>
+                <Text style={[commonStyles.numberSmallCell]}>
                     {Math.round(item.yearActualSaleAmt / 1000).toLocaleString()}
                 </Text>
             )
         },
     ]), []);
+
     const summaryRow = useMemo(() => {
         if (!(saleDetailList) || saleDetailList.length === 0) {
             return {
@@ -308,27 +321,28 @@ export default function RealtimeSalesBySalesOrgScreen() {
             </View>
         );
     };
+
     const renderDetailFooterRow = () => {
         return (
             <View style={[commonStyles.modalTableRow, commonStyles.summaryRow]}>
-                <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                <View style={[{flex: 1.1}, commonStyles.tableRightBorder]}>
                     <Text style={[commonStyles.modalCell, {textAlign: 'center', fontSize: 13, fontWeight: 'bold'}]}>
                         합계
                     </Text>
                 </View>
-                <View style={[{flex: 0.6}, commonStyles.tableRightBorder]}>
+                <View style={[{flex: 0.7}, commonStyles.tableRightBorder]}>
                     <Text style={commonStyles.numberSmallCell}>{summaryRow.totalQty.toLocaleString()}</Text>
                 </View>
-                <View style={[{flex: 0.6}, commonStyles.tableRightBorder]}>
+                <View style={[{flex: 0.8}, commonStyles.tableRightBorder]}>
                     <Text style={commonStyles.numberSmallCell}>{Math.round(summaryRow.totalAmt / 1000).toLocaleString()}</Text>
                 </View>
                 <View style={[{flex: 0.9}, commonStyles.tableRightBorder]}>
                     <Text style={commonStyles.numberSmallCell}>{summaryRow.totalMonthlySaleQty.toLocaleString()}</Text>
                 </View>
-                <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
+                <View style={[{flex: 1.2}, commonStyles.tableRightBorder]}>
                     <Text style={commonStyles.numberSmallCell}>{Math.round(summaryRow.totalMonthAmt / 1000).toLocaleString()}</Text>
                 </View>
-                <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
+                <View style={[{flex: 1.2}, commonStyles.tableRightBorder]}>
                     <Text style={commonStyles.numberSmallCell}>{Math.round(summaryRow.totalYearAmt / 1000).toLocaleString()}</Text>
                 </View>
             </View>
@@ -376,10 +390,10 @@ export default function RealtimeSalesBySalesOrgScreen() {
 
             <Text style={{textAlign: 'right', paddingHorizontal: 10, paddingTop: 10}}>(단위:천원)</Text>
             <Table
-                data={saleList}
+                data={appliedDetailChecked ? saleList : saleList ? [aggregateSales(saleList)] : []}
                 columns={mainColumns}
                 listFooter={
-                    detailChecked
+                    appliedDetailChecked
                         ? () => (
                             <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
                                 <View style={[{flex: 1.3}, commonStyles.tableRightBorder]}>
@@ -453,6 +467,7 @@ export default function RealtimeSalesBySalesOrgScreen() {
                     </View>
                 </View>
             </Modal>
+            {loading && (<LoadingOverlay />)}
         </SafeAreaView>
     );
 }
