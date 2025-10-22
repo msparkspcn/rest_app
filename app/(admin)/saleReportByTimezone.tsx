@@ -210,7 +210,7 @@ export default function SalesReportByTimezoneScreen() {
                                         {row.label}
                                     </Text>
                                 </View>
-                                <View style={[{flex: 1}, commonStyles.tableRightBorder ]}>
+                                <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
                                     <Text style={commonStyles.numberCell}>{row.totalAmt.toLocaleString()}</Text>
                                 </View>
                                 <View style={[{flex: 0.5}, commonStyles.tableRightBorder]}>

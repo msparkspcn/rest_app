@@ -295,7 +295,15 @@ export default function RealtimeSalesByCornerOp() {
                 <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
             ),
         },
-        {key: 'itemNm', title: Const.ITEM_NM, flex: 1.5},
+        {key: 'itemNm', title: Const.ITEM_NM, flex: 1.5,
+            renderCell: (item) => (
+                <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
+                    <Text style={[commonStyles.cell,{paddingLeft: 5}]}>
+                        {item.itemNm}
+                    </Text>
+                </Pressable>
+            ),
+        },
         {
             key: 'saleQty', title: Const.QTY, flex: 0.6, align: 'center',
             renderCell: (item) => (
@@ -487,5 +495,3 @@ export default function RealtimeSalesByCornerOp() {
 const styles = StyleSheet.create({
     totalText: {fontWeight: '700', color: '#222'},
 });
-
-

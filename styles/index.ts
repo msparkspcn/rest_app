@@ -139,7 +139,7 @@ export const commonStyles = StyleSheet.create({
         width: '100%',
     },
     numberCell: {
-        fontSize: 13,
+        fontSize: 12,
         color: '#444',
         width: '100%',
         paddingRight:5,

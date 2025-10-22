@@ -66,7 +66,7 @@ export default function AdminHomeScreen() {
         { title: '기간별 매출현황(주)', route: '/(admin)/salesReportByPeriodG', userRoleType: DEP_G },
         { title: '기간별 매출현황(통합)', route: '/(admin)/salesReportByPeriodOp', userRoleType: DEP_OP },
         { title: '시간대별 매출현황(통합)', route: '/(admin)/saleReportByTimezoneOp', userRoleType: DEP_OP },
-        { title: '기간별 모바일주문현황(휴)', route: '/(admin)/mobileOrderReportByPeriod', userRoleType: DEP_OP },
+        // { title: '기간별 모바일주문현황(휴)', route: '/(admin)/mobileOrderReportByPeriod', userRoleType: DEP_OP },
         { title: '실시간 매출현황(통합비율)', route: '/(admin)/realtimeSalesRatioOp', userRoleType: DEP_OP },
         { title: '월 매출현황(휴)', route: '/(admin)/monthlySalesReport', userRoleType: DEP_R },
         { title: '시설별 실시간 매출(통합)', route: '/(admin)/realtimeSalesBySalesOrgG', userRoleType: DEP_G },

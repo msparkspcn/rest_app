@@ -10,6 +10,7 @@ import Const from "../../constants/Const";
 import * as api from "../../services/api/api";
 import {useUser} from "../../contexts/UserContext";
 import {User} from "../../types/user";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 type SaleRow = {
     no: number;
@@ -40,6 +41,7 @@ export default function RealtimeSalesBySalesOrgScreen() {
     const [saleList, setSaleList] = useState<[] | null>(null);
     const {user}: User = useUser();
     const [saleDetailList, setSaleDetailList] = useState<[] | null>(null);
+    const [loading, setLoading] = useState(false);
 
     const handleCheckbox = () => {
         setDetailChecked(!detailChecked);
@@ -66,6 +68,8 @@ export default function RealtimeSalesBySalesOrgScreen() {
             storCd: "",
             toSaleDt: saleDate
         }
+        console.log('request:'+JSON.stringify(request))
+        setLoading(true);
 
         api.mobOilSaleAnalysis(request)
             .then(result => {
@@ -77,7 +81,8 @@ export default function RealtimeSalesBySalesOrgScreen() {
             })
             .catch(error => {
                 console.log("mobRestSaleAnalysis error:" + error)
-            });
+            })
+            .finally(() => setLoading(false));
     };
 
     const openDatePicker = () => {
@@ -249,6 +254,7 @@ export default function RealtimeSalesBySalesOrgScreen() {
                 onClose={() => setShowDatePicker(false)}
                 onConfirm={(date) => setSaleDate(dateToYmd(date))}
             />
+            {loading && (<LoadingOverlay />)}
         </SafeAreaView>
     );
 }

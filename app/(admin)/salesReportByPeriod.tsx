@@ -6,7 +6,6 @@ import {
     Modal,
     Pressable,
     SafeAreaView,
-    StyleSheet,
     Text,
     TouchableOpacity,
     View
@@ -20,6 +19,7 @@ import Const from "../../constants/Const";
 import ListModal from "../../components/ListModal";
 import {useUser} from "../../contexts/UserContext";
 import {User, Corner} from "../../types";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 type SaleRow = {
     cmpCd: string;
@@ -49,6 +49,7 @@ export default function SalesReportByPeriod() {
     const [tempDate, setTempDate] = useState<Date | null>(null);
     const [showCornerModal, setShowCornerModal] = useState(false);
     const [selectedCornerCd, setSelectedCornerCd] = useState<string | null>('');
+    const [selectedCorner, setSelectedCorner] = useState<Corner>({"cornerCd":"", "storCd":""});
     const [fromSaleDt, setFromSaleDt] = useState(getTodayYmd());
     const [toSaleDt, setToSaleDt] = useState(getTodayYmd());
     const [currentPickerType, setCurrentPickerType] = useState('from')
@@ -57,6 +58,7 @@ export default function SalesReportByPeriod() {
     const {user}:User = useUser();
     const [appliedCornerCd, setAppliedCornerCd] = useState<string | null>('');
     const [saleDetailList, setSaleDetailList] = useState<ProductSaleRow | null>(null);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         getCornerList();
@@ -82,18 +84,20 @@ export default function SalesReportByPeriod() {
             });
     }
 
-    const restDailyCornerSale = () => {
+    const onSearch = (storCd: string, cornerCd: string) => {
         console.log("restDailyCornerSale 조회 클릭 fromSaleDt:"+fromSaleDt+", toSaleDt:"+toSaleDt)
         const request = {
             cmpCd: user.cmpCd,
-            cornerCd: selectedCornerCd,
-            detailDiv: "string",
+            cornerCd: cornerCd,
             fromSaleDt: fromSaleDt,
             itemClassCd: "",
             salesOrgCd: user.salesOrgCd,
-            storCd: "5000511",
+            storCd: storCd,
             toSaleDt: toSaleDt
         }
+        setLoading(true);
+        console.log('request:'+JSON.stringify(request));
+
         api.restDailyCornerSale(request)
             .then(result => {
                 if (result.data.responseBody != null) {
@@ -105,11 +109,7 @@ export default function SalesReportByPeriod() {
             })
             .catch(error => {
                 console.log("restDailyCornerSale error:" + error)
-            });
-    }
-
-    const onSearch = () => {
-        restDailyCornerSale();
+            }).finally(() => setLoading(false));
     };
 
     const openDetail = (sale: SaleRow) => {
@@ -369,7 +369,10 @@ export default function SalesReportByPeriod() {
                             style={commonStyles.selectText}>{cornerList.find(g => g.cornerCd === selectedCornerCd)?.cornerNm || Const.ALL}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
-                    <Pressable style={commonStyles.searchButton} onPress={onSearch}>
+                    <Pressable
+                        style={commonStyles.searchButton}
+                        onPress={() => onSearch(selectedCorner.storCd, selectedCorner.cornerCd)}
+                    >
                         <Text style={commonStyles.searchButtonText}>{Const.SEARCH}</Text>
                     </Pressable>
                 </View>
@@ -393,6 +396,7 @@ export default function SalesReportByPeriod() {
                 labelField="cornerNm"
                 onClose={() => setShowCornerModal(false)}
                 onSelect={(item) => {
+                    setSelectedCorner(item);
                     setSelectedCornerCd(item.cornerCd);
                     setShowCornerModal(false);
                 }}
@@ -429,6 +433,7 @@ export default function SalesReportByPeriod() {
                     else setToSaleDt(dateToYmd(date));
                 }}
             />
+            {loading && (<LoadingOverlay />)}
         </SafeAreaView>
     );
 }

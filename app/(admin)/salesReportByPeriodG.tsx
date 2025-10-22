@@ -19,6 +19,7 @@ import {DatePickerModal} from "../../components/DatePickerModal";
 import Const from "../../constants/Const";
 import {useUser} from "../../contexts/UserContext";
 import {User} from "../../types/user";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 type SaleRow = {
     saleDt: string;
@@ -54,6 +55,7 @@ export default function SalesReportByPeriod() {
     );
     const [selectedStorCd, setSelectedStorCd] = useState<StoreGroup>(storeGroups[0]);
     const {user}:User = useUser();
+    const [loading, setLoading] = useState(false);
 
     const onSearch = () => {
         console.log("조회 클릭")
@@ -65,6 +67,8 @@ export default function SalesReportByPeriod() {
             storCd: selectedStorCd.id,
             toSaleDt: toSaleDt
         }
+        setLoading(true);
+
         api.posGroupByOilDailySale(request)
             .then(result => {
                 if (result.data.responseBody != null) {
@@ -73,18 +77,19 @@ export default function SalesReportByPeriod() {
                     setSaleList(saleList);
                 }
             })
-            .catch(error => {console.log("posGroupByOilDailySale error:"+error)});
+            .catch(error => {console.log("posGroupByOilDailySale error:"+error)})
+            .finally(() => setLoading(false));
     };
 
     const openDetail = (sale: SaleRow) => {
         setSelectedSale(sale);
-        console.log("매장 클릭")
+        console.log("매장 클릭 sale:"+JSON.stringify(sale))
         const request = {
             cmpCd: user.cmpCd,
             cornerCd: "",
             fromSaleDt: sale.saleDt,
             salesOrgCd: "8100",
-            storCd: "",
+            storCd: sale.storCd,
             toSaleDt: sale.saleDt,
         }
         console.log('request:'+JSON.stringify(request))
@@ -109,11 +114,11 @@ export default function SalesReportByPeriod() {
             renderCell: (item) => (
                 <Text style={[commonStyles.cell, {textAlign:'center'}]}>{ymdToDateWithDay(item.saleDt)}</Text>
             )},
-        { key: 'cornerNm',     title: Const.CORNER,   flex: 1,   align: 'left',
+        { key: 'storNm',     title: Const.CORNER,   flex: 1,   align: 'left',
             renderCell: (item) => (
                 <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
                     <Text style={[commonStyles.cell, commonStyles.linkText,{textAlign: 'center'}]}>
-                        {selectedStorCd.name}
+                        {item.storNm}
                     </Text>
                 </Pressable>
             ),   },
@@ -334,6 +339,7 @@ export default function SalesReportByPeriod() {
                     else setToSaleDt(dateToYmd(date));
                 }}
             />
+            {loading && (<LoadingOverlay />)}
         </SafeAreaView>
     );
 }

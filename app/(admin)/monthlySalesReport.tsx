@@ -24,6 +24,7 @@ import Const from "../../constants/Const";
 import ListModal from "../../components/ListModal";
 import {useUser} from "../../contexts/UserContext";
 import {User, Corner} from "../../types";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 type SaleRow = {
     cmpCd: string;
@@ -60,6 +61,7 @@ export default function MonthlySalesReport() {
     const [tempDate, setTempDate] = useState<Date | null>(null);
     const [showCornerModal, setShowCornerModal] = useState(false);
     const [selectedCornerCd, setSelectedCornerCd] = useState<string | null>('');
+    const [selectedCorner, setSelectedCorner] = useState<Corner>({"cornerCd":"", "storCd":""});
     const [fromSaleMonth, setFromSaleMonth] = useState(getTodayYm());
     const [toSaleMonth, setToSaleMonth] = useState(getTodayYm());
     const [currentPickerType, setCurrentPickerType] = useState('from')
@@ -68,6 +70,7 @@ export default function MonthlySalesReport() {
     const [detailType, setDetailType] = useState<DetailType>('daily');
     const [saleDetailList, setSaleDetailList] = useState<[] | null>(null);
     const {user}:User = useUser();
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         getCornerList();
@@ -94,13 +97,14 @@ export default function MonthlySalesReport() {
     }
 
     const restMonthlySale = (sale: SaleRow) => {
-        console.log("restMonthlySale 조회 클릭 fromSaleMonth:"+fromSaleMonth+', toSaleMonth:'+toSaleMonth)
+        console.log("조회 클릭");
+        console.log("sale:"+JSON.stringify(sale));
         const request = {
             cmpCd: sale.cmpCd,
             cornerCd: sale.cornerCd,
             fromSaleMonth: fromSaleMonth,
             salesOrgCd: user.salesOrgCd,
-            storCd: "5000511",
+            storCd: sale.storCd,
             toSaleMonth: toSaleMonth
         }
         api.restMonthlySale(request)
@@ -118,17 +122,15 @@ export default function MonthlySalesReport() {
     }
 
     const restCornerByDailySale = (sale: SaleRow) => {
-        console.log("restCornerByDailySale 조회 클릭 fromSaleMonth:"
-            +fromSaleMonth+', toSaleMonth:'+toSaleMonth)
+        console.log("restCornerByDailySale 조회 클릭");
 
         const request = {
             cmpCd: sale.cmpCd,
             cornerCd: sale.cornerCd,
-            detailDiv: "",
             fromSaleDt: fromSaleMonth+"01",
             itemClassCd:"",
             salesOrgCd: user.salesOrgCd,
-            storCd: "5000511",
+            storCd: sale.storCd,
             toSaleDt: toSaleMonth == getTodayYm() ? getTodayYmd(): toSaleMonth+"31"
         }
         console.log('request:'+JSON.stringify(request));
@@ -146,16 +148,19 @@ export default function MonthlySalesReport() {
             });
     }
 
-    const onSearch = () => {
+    const onSearch = (storCd: string, cornerCd: string) => {
         console.log("조회 클릭 fromSaleMonth:"+fromSaleMonth)
         const request = {
             cmpCd: user.cmpCd,
-            cornerCd: selectedCornerCd,
+            cornerCd: cornerCd,
             fromSaleMonth: fromSaleMonth,
             salesOrgCd: user.salesOrgCd,
-            storCd: "5000511",
+            storCd: storCd,
             toSaleMonth: toSaleMonth
         }
+        setLoading(true);
+        console.log('request:'+JSON.stringify(request));
+
         api.restMonthlyCornerSale(request)
             .then(result => {
                 if (result.data.responseBody != null) {
@@ -166,7 +171,7 @@ export default function MonthlySalesReport() {
             })
             .catch(error => {
                 console.log("restMonthlyCornerSale error:" + error)
-            });
+            }).finally(() => setLoading(false));
     };
 
     const openDetail = useCallback((sale: SaleRow, type: DetailType) => {
@@ -451,7 +456,7 @@ export default function MonthlySalesReport() {
                             style={commonStyles.selectText}>{cornerList.find(g => g.cornerCd === selectedCornerCd)?.cornerNm || Const.ALL}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
-                    <Pressable style={commonStyles.searchButton} onPress={onSearch}>
+                    <Pressable style={commonStyles.searchButton} onPress={() => onSearch(selectedCorner.storCd, selectedCorner.cornerCd)}>
                         <Text style={commonStyles.searchButtonText}>{Const.SEARCH}</Text>
                     </Pressable>
                 </View>
@@ -470,6 +475,7 @@ export default function MonthlySalesReport() {
                 labelField="cornerNm"
                 onClose={() => setShowCornerModal(false)}
                 onSelect={(item) => {
+                    setSelectedCorner(item);
                     setSelectedCornerCd(item.cornerCd);
                     setShowCornerModal(false);
                 }}
@@ -505,6 +511,7 @@ export default function MonthlySalesReport() {
                     else setToSaleMonth(dateToYm(date));
                 }}
             />
+            {loading && (<LoadingOverlay />)}
         </SafeAreaView>
     );
 }

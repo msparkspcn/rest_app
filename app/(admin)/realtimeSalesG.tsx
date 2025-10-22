@@ -1,6 +1,6 @@
 import {StatusBar} from 'expo-status-bar';
 import React, {useMemo, useState} from 'react';
-import {Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {Pressable, SafeAreaView, Text, TouchableOpacity, View} from 'react-native';
 import {commonStyles} from "../../styles/index";
 import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
 import {Table} from "../../components/Table";
@@ -94,12 +94,10 @@ export default function RealtimeSalesScreen() {
                     console.log('saleStatList:' + JSON.stringify(saleStatList))
                     setSaleStatList(saleStatList);
                 }
-                setLoading(false);
             })
             .catch(error => {
-                setLoading(false);
                 console.log("mobOilRealTimeSaleStat error:" + error)
-            });
+            }).finally(() => setLoading(false));
     }
 
     const openDatePicker = () => {
@@ -200,7 +198,7 @@ export default function RealtimeSalesScreen() {
         console.log("result11:"+JSON.stringify(result));
 
         return result;
-    }, [saleList]);
+    }, [saleStatList]);
 
     const renderListHeader = () => {
         if (saleList.length == 0) return null;

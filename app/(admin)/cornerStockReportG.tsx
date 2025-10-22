@@ -101,7 +101,7 @@ export default function CornerStockReportScreen() {
             itemClassCd: "",
             itemValue: stock.itemCd,
             salesOrgCd: "8100",
-            storCd: stock.storCd,
+            storCd: "",
             toSaleDt: toSaleDt
         }
         console.log('request:'+JSON.stringify(request))
@@ -129,7 +129,7 @@ export default function CornerStockReportScreen() {
             key: 'itemNm', title: Const.ITEM_NM, flex: 1.5,
             renderCell: (item) => (
                 <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
-                    <Text style={[commonStyles.cell, commonStyles.linkText,{paddingLeft: 10}]}>
+                    <Text style={[commonStyles.cell, commonStyles.linkText,{paddingLeft: 5}]}>
                         {item.itemNm}
                     </Text>
                 </Pressable>

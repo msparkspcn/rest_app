@@ -17,11 +17,12 @@ import Const from "../../constants/Const";
 import * as api from "../../services/api/api";
 import {useUser} from "../../contexts/UserContext";
 import {User} from "../../types/user";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 type StockRow = {
     itemNm: string;
     inStockQty: number;
-    saleQty: number;
+    outStockQty: number;
     prevStockQty: number;
     currentStockQty: number;
 };
@@ -33,24 +34,23 @@ export default function RealtimeStockReportScreen() {
     const [itemNm, setItemNm] = useState('');
     const [stockList, setStockList] = useState<[] | null>(null);
     const {user}:User = useUser();
+    const [loading, setLoading] = useState(false);
 
     const onSearch = () => {
-        oilTotalStockStatusList();
-    };
-
-    const oilTotalStockStatusList = () => {
-        console.log("oilTotalStockStatusList1 조회 클릭 fromSaleDt:"+saleDate+", itemNm:"+itemNm);
+        console.log("mobOilRealTimeStock 조회 클릭 fromSaleDt:"+saleDate+", itemNm:"+itemNm);
         const request = {
             cmpCd: user.cmpCd,
             fromSaleDt: saleDate,
             itemClassCd: "",
             itemValue: itemNm,
             salesOrgCd: "8100",
-            storCd: "5000511",
+            storCd: "",
             toSaleDt: saleDate
         }
         console.log('request:'+JSON.stringify(request))
-        api.oilTotalStockStatusList(request)
+        setLoading(true);
+
+        api.mobOilRealTimeStock(request)
             .then(result => {
                 if (result.data.responseBody != null) {
                     const stockList = result.data.responseBody;
@@ -60,9 +60,10 @@ export default function RealtimeStockReportScreen() {
                 }
             })
             .catch(error => {
-                console.log("oilTotalStockStatusList error:" + error)
-            });
-    }
+                console.log("mobOilRealTimeStock error:" + error)
+            })
+            .finally(() => setLoading(false));
+    };
 
     const openDatePicker = () => {
         setTempDate(new Date());
@@ -78,7 +79,7 @@ export default function RealtimeStockReportScreen() {
         {
             key: 'itemNm', title: Const.ITEM_NM, flex: 1.5,
             renderCell: (item) => (
-                <Text style={[commonStyles.cell,{paddingLeft: 10}]}>
+                <Text style={[commonStyles.cell,{paddingLeft: 5}]}>
                     {item.itemNm}
                 </Text>
             ),
@@ -96,9 +97,9 @@ export default function RealtimeStockReportScreen() {
             )
         },
         {
-            key: 'saleQty', title: Const.GO_QTY, flex: 1,
+            key: 'outStockQty', title: Const.GO_QTY, flex: 1,
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.saleQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.outStockQty.toLocaleString()}</Text>
             )
         },
         {
@@ -152,6 +153,7 @@ export default function RealtimeStockReportScreen() {
                 onClose={() => setShowDatePicker(false)}
                 onConfirm={(date) => setSaleDate(dateToYmd(date))}
             />
+            {loading && (<LoadingOverlay />)}
         </SafeAreaView>
     );
 };
