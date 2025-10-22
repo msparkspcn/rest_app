@@ -19,12 +19,13 @@ import Const from "../../constants/Const";
 import * as api from "../../services/api/api";
 import {useUser} from "../../contexts/UserContext";
 import {User} from "../../types/user";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 type StockRow = {
     itemNm: string;
-    giQty: number;
-    goQty: number;
-    totalStockQty: number;
+    inStockQty: number;
+    outStockQty: number;
+    prevStockQty: number;
     currentStockQty: number;
 };
 
@@ -49,31 +50,35 @@ export default function CornerStockReportScreen() {
     const [stockList, setStockList] = useState<[] | null>(null);
     const [stockDetailList, setStockDetailList] = useState<[] | null>(null);
     const {user}:User = useUser();
-
-    const baseData: StockRow[] = useMemo(
-        () =>
-            Array.from({length: 15}).map((_, idx) => {
-                const giQty = 7 + (idx % 5);
-                const totalStockQty = 20 + (idx % 7);
-                const goQty = 30 + (idx % 5);
-                const currentStockQty = totalStockQty + giQty - goQty;
-                return {
-                    itemNm: `상품 ${((idx % 6) + 1)}`,
-                    giQty: giQty,
-                    totalStockQty: totalStockQty,
-                    goQty: goQty,
-                    currentStockQty: currentStockQty,
-                };
-            }),
-        []
-    );
-
-    const filteredData = useMemo(() => {
-        return baseData;
-    }, [baseData]);
+    const [loading, setLoading] = useState(false);
 
     const onSearch = () => {
-        // 데모: 현재는 선택 값만으로 필터링 적용
+        console.log("조회 클릭");
+        const request = {
+            cmpCd: user.cmpCd,
+            fromSaleDt: fromSaleDt,
+            itemClassCd: "",
+            itemValue: itemValue,
+            salesOrgCd: "8100",
+            storCd: "",
+            toSaleDt: toSaleDt
+        }
+        console.log('request:'+JSON.stringify(request));
+        setLoading(true);
+
+        api.mobOilPeriodStock(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const stockList = result.data.responseBody;
+                    console.log('size:'+stockList.length);
+                    console.log('stockList:' + JSON.stringify(stockList))
+                    setStockList(stockList);
+                }
+            })
+            .catch(error => {
+                console.log("mobOilPeriodStock error:" + error)
+            })
+            .finally(() => setLoading(false));
     };
 
     const openDatePicker = (pickerType: string) => {
@@ -89,18 +94,18 @@ export default function CornerStockReportScreen() {
     };
 
     const oilTotalStockStatusList = (stock: StockRow) => {
-        console.log("oilTotalStockStatusList1 조회 클릭 stock:"+JSON.stringify(stock)+", itemValue:"+itemValue);
+        console.log("mobOilDailyItemStock 조회 클릭 stock:"+JSON.stringify(stock)+", itemValue:"+itemValue);
         const request = {
             cmpCd: user.cmpCd,
             fromSaleDt: fromSaleDt,
             itemClassCd: "",
-            itemValue: "별미곰탕",
-            salesOrgCd: user.salesOrgCd,
-            storCd: "5000511",
+            itemValue: stock.itemCd,
+            salesOrgCd: "8100",
+            storCd: stock.storCd,
             toSaleDt: toSaleDt
         }
         console.log('request:'+JSON.stringify(request))
-        api.oilTotalStockStatusList(request)
+        api.mobOilDailyItemStock(request)
             .then(result => {
                 if (result.data.responseBody != null) {
                     const stockList = result.data.responseBody;
@@ -110,7 +115,7 @@ export default function CornerStockReportScreen() {
                 }
             })
             .catch(error => {
-                console.log("oilTotalStockStatusList error:" + error)
+                console.log("mobOilDailyItemStock error:" + error)
             });
     }
 
@@ -131,21 +136,21 @@ export default function CornerStockReportScreen() {
             ),
         },
         {
-            key: 'totalStockQty', title: Const.TOTAL_STOCK_QTY, flex: 1,
+            key: 'prevStockQty', title: Const.TOTAL_STOCK_QTY, flex: 1,
             renderCell: (item) => (
-                <Text style={commonStyles.numberSmallCell}>{item.totalStockQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberSmallCell}>{item.prevStockQty.toLocaleString()}</Text>
             )
         },
         {
-            key: 'giQty', title: Const.GI_QTY, flex: 1,
+            key: 'inStockQty', title: Const.GI_QTY, flex: 1,
             renderCell: (item) => (
-                <Text style={commonStyles.numberSmallCell}>{item.giQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberSmallCell}>{item.inStockQty.toLocaleString()}</Text>
             )
         },
         {
-            key: 'goQty', title: Const.GO_QTY, flex: 1,
+            key: 'outStockQty', title: Const.GO_QTY, flex: 1,
             renderCell: (item) => (
-                <Text style={commonStyles.numberSmallCell}>{item.goQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberSmallCell}>{item.outStockQty.toLocaleString()}</Text>
             )
         },
         {
@@ -177,9 +182,9 @@ export default function CornerStockReportScreen() {
             )
         },
         {
-            key: 'saleQty', title: Const.SALE, flex: 1,
+            key: 'outStockQty', title: Const.SALE, flex: 1,
             renderCell: (item) => (
-                <Text style={commonStyles.numberSmallCell}>{item.saleQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberSmallCell}>{item.outStockQty.toLocaleString()}</Text>
             )
         },
         {
@@ -190,25 +195,25 @@ export default function CornerStockReportScreen() {
         },
     ]), []);
 
-    const detailTotalStockQty = useMemo(() => {
+    const detailTotalPrevStockQty = useMemo(() => {
         if(stockDetailList) {
-            return stockDetailList.reduce((acc, row) => acc, 0);
+            return stockDetailList.reduce((acc, row) => acc + row.prevStockQty, 0);
         }
 
     }, [stockDetailList]);
-    const detailTotalGiQty = useMemo(() => {
+    const detailTotalInStockQty = useMemo(() => {
         if(stockDetailList) {
             return stockDetailList.reduce((acc, row) => acc + row.inStockQty, 0);
         }
         }, [stockDetailList]);
     const detailTotalSaleQty = useMemo(() => {
         if(stockDetailList) {
-            return stockDetailList.reduce((acc, row) => acc + row.saleQty, 0);
+            return stockDetailList.reduce((acc, row) => acc + row.outStockQty, 0);
         }
         }, [stockDetailList]);
     const detailTotalCurStockQty = useMemo(() => {
         if(stockDetailList) {
-            return stockDetailList.reduce((acc, row) => row.prevStockQty, 0);
+            return stockDetailList.reduce((acc, row) => row.currentStockQty, 0);
         }
         }, [stockDetailList]);
 
@@ -221,12 +226,12 @@ export default function CornerStockReportScreen() {
             </View>
             <View style={[{flex: 1.1}, commonStyles.tableRightBorder]}>
                 <Text style={commonStyles.numberSmallCell}>
-                    {detailTotalStockQty.toLocaleString()}
+                    {detailTotalPrevStockQty.toLocaleString()}
                 </Text>
             </View>
             <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
                 <Text style={commonStyles.numberSmallCell}>
-                    {detailTotalGiQty.toLocaleString()}
+                    {detailTotalInStockQty.toLocaleString()}
                 </Text>
             </View>
             <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
@@ -250,12 +255,12 @@ export default function CornerStockReportScreen() {
                 <View style={commonStyles.filterRowFront}>
                     <Text style={commonStyles.filterLabel}>조회일자</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('from')}>
-                        <Text style={styles.selectText}>{formattedDate(fromSaleDt)}</Text>
+                        <Text style={commonStyles.selectText}>{formattedDate(fromSaleDt)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                     <Text>-</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('to')}>
-                        <Text style={styles.selectText}>{formattedDate(toSaleDt)}</Text>
+                        <Text style={commonStyles.selectText}>{formattedDate(toSaleDt)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -278,7 +283,7 @@ export default function CornerStockReportScreen() {
             <View style={commonStyles.sectionDivider}/>
 
             <Table
-                data={filteredData}
+                data={stockList}
                 columns={mainColumns}
             />
 
@@ -316,12 +321,12 @@ export default function CornerStockReportScreen() {
                     </View>
                 </View>
             </Modal>
+            {loading && (<LoadingOverlay />)}
         </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
-    selectText: {fontSize: 14, color: '#333'},
     modalTotalText: {
         fontWeight: '700',
         color: '#222',

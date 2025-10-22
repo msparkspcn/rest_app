@@ -11,6 +11,7 @@ import ListModal from "../../components/ListModal";
 import {useUser} from "../../contexts/UserContext";
 import * as api from "../../services/api/api";
 import {User, Corner} from "../../types";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 type SaleRow = {
     storCd: string;
@@ -35,20 +36,17 @@ export default function RealtimeSalesByCornerScreen() {
     const [tempDate, setTempDate] = useState<Date | null>(null);
 
     const [cornerList, setCornerList] = useState<Corner[]>([]);
-    const [selectedCornerCd, setSelectedCornerCd] = useState<string | null>(null);
+    const [selectedCornerCd, setSelectedCornerCd] = useState<string>('');
+    const [selectedCorner, setSelectedCorner] = useState<Corner>({"cornerCd":"", "storCd":""});
     const [showCornerListModal, setShowCornerListModal] = useState(false);
     const [isDetailVisible, setIsDetailVisible] = useState(false);
     const [selectedSale, setSelectedSale] = useState<SaleRow | null>(null);
     const [saleList, setSaleList] = useState<[] | null>(null);
     const {user}: User = useUser();
     const [saleDetailList, setSaleDetailList] = useState<[] | null>(null);
-
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        getCornerList();
-    },[]);
-
-    const getCornerList = () => {
         const request = {
             cmpCd: user.cmpCd,
             salesOrgCd: user.salesOrgCd
@@ -66,18 +64,20 @@ export default function RealtimeSalesByCornerScreen() {
             .catch(error => {
                 console.log("getCornerList error:" + error)
             });
-    }
+    },[]);
 
-    const onSearch = () => {
+    const onSearch = (storCd: string, cornerCd: string) => {
         console.log("조회 클릭 saleDate11:"+saleDate)
         const request = {
             cmpCd: user.cmpCd,
-            cornerCd: "",
+            cornerCd: cornerCd,
             fromSaleDt: saleDate,
             salesOrgCd: user.salesOrgCd,
-            storCd: "",
+            storCd: storCd,
             toSaleDt: saleDate
         }
+        setLoading(true);
+
         api.mobRestRealTimeSaleNews(request)
             .then(result => {
                 if (result.data.responseBody != null) {
@@ -88,7 +88,7 @@ export default function RealtimeSalesByCornerScreen() {
             })
             .catch(error => {
                 console.log("mobRestRealTimeSaleNews error:" + error)
-            });
+            }).finally(() => setLoading(false));
     };
 
     const openDatePicker = () => {
@@ -124,9 +124,9 @@ export default function RealtimeSalesByCornerScreen() {
 
     const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => ([
         {
-            key: 'cornerNm', title: Const.CORNER_NM, flex: 1.5,
+            key: 'cornerNm', title: Const.CORNER_NM, flex: 1.4,
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {paddingLeft: 10}]}>
+                <Text style={[commonStyles.cell, {paddingLeft: 5}]}>
                     {item.cornerNm}
                 </Text>
             ),
@@ -142,9 +142,9 @@ export default function RealtimeSalesByCornerScreen() {
             )
         },
         {
-            key: 'dailySaleRatio', title: Const.COMP_RATIO, flex: 0.5,
+            key: 'dailySaleRatio', title: Const.COMP_RATIO, flex: 0.6,
             renderCell: (item) => (
-                <Text style={commonStyles.numberSmallCell}>{item.dailySaleRatio.toLocaleString()}%</Text>
+                <Text style={commonStyles.numberSmallCell}>{item.dailySaleRatio.toFixed(1)}%</Text>
             )
         },
         {
@@ -154,12 +154,12 @@ export default function RealtimeSalesByCornerScreen() {
             )
         },
         {
-            key: 'monthlySaleRatio', title: Const.COMP_RATIO, flex: 0.5,
+            key: 'monthlySaleRatio', title: Const.COMP_RATIO, flex: 0.6,
             renderCell: (item) => (
-                <Text style={commonStyles.numberSmallCell}>{item.monthlySaleRatio.toLocaleString()}%</Text>
+                <Text style={commonStyles.numberSmallCell}>{item.monthlySaleRatio.toFixed(1)}%</Text>
             )
         },
-    ]), [])
+    ]), [saleDate]);
 
     const totalSaleAmt = useMemo(
         () => (saleList ?? []).reduce((acc, r) => acc + r.actualSaleAmt, 0), [saleList]);
@@ -168,17 +168,17 @@ export default function RealtimeSalesByCornerScreen() {
 
     const renderFooter = () => (
         <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-            <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
+            <View style={[{flex: 1.4}, commonStyles.tableRightBorder]}>
                 <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.totalText, {fontSize: 13, fontWeight: 'bold'}]}>
                     전체 합계
                 </Text>
             </View>
-            <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
+            <View style={[{flex: 1.6}, commonStyles.tableRightBorder]}>
                 <Text style={[commonStyles.numberSmallCell]}>
                     {totalSaleAmt.toLocaleString()}
                 </Text>
             </View>
-            <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
+            <View style={[{flex: 1.6}, commonStyles.tableRightBorder]}>
                 <Text style={[commonStyles.numberSmallCell]}>
                     {totalMonthSaleAmt.toLocaleString()}
                 </Text>
@@ -205,7 +205,11 @@ export default function RealtimeSalesByCornerScreen() {
                 <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
             ),
         },
-        {key: 'itemNm', title: Const.ITEM_NM, flex: 2},
+        {key: 'itemNm', title: Const.ITEM_NM, flex: 2,
+            renderCell: (item) => (
+                <Text style={[commonStyles.cell, {paddingLeft: 5}]}>{item.itemNm}</Text>
+            )
+        },
         {
             key: 'saleQty', title: Const.QTY, flex: 1,
             renderCell: (item) => (
@@ -221,7 +225,7 @@ export default function RealtimeSalesByCornerScreen() {
         {
             key: 'saleRatio', title: Const.COMP_RATIO, flex: 1, align: 'right',
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.saleRatio.toLocaleString()}%</Text>
+                <Text style={commonStyles.numberCell}>{item.saleRatio.toFixed(1)}%</Text>
             )
         },
     ]), []);
@@ -278,7 +282,7 @@ export default function RealtimeSalesByCornerScreen() {
                         </Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
-                    <Pressable style={commonStyles.searchButton} onPress={onSearch}>
+                    <Pressable style={commonStyles.searchButton} onPress={() => onSearch(selectedCorner.storCd, selectedCorner.cornerCd)}>
                         <Text style={commonStyles.searchButtonText}>{Const.SEARCH}</Text>
                     </Pressable>
                 </View>
@@ -307,6 +311,7 @@ export default function RealtimeSalesByCornerScreen() {
                 labelField="cornerNm"
                 onClose={() => setShowCornerListModal(false)}
                 onSelect={(item) => {
+                    setSelectedCorner(item);
                     setSelectedCornerCd(item.cornerCd);
                     setShowCornerListModal(false);
                 }}
@@ -335,6 +340,7 @@ export default function RealtimeSalesByCornerScreen() {
                     </View>
                 </View>
             </Modal>
+            {loading && (<LoadingOverlay />)}
         </SafeAreaView>
     );
 }

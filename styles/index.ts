@@ -146,7 +146,7 @@ export const commonStyles = StyleSheet.create({
         textAlign: 'right'
     },
     numberSmallCell:  {
-        fontSize: 13,
+        fontSize: 12,
         color: '#444',
         width: '100%',
         paddingRight:5,

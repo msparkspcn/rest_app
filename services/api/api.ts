@@ -205,6 +205,11 @@ export function mobOilPeriodStock(params) {   //재고현황(주)
     return post(request, params);
 }
 
+export function mobOilDailyItemStock(params) {   //재고현황(주) > 상세
+    const request = host + "/api/v1/oilstock/mobOilDailyItemStock";
+    return post(request, params);
+}
+
 export function mobOilRealTimeStock(params) {   //실시간 재고현황(주)
     const request = host + "/api/v1/oilstock/mobOilRealTimeStock";
     return post(request, params);

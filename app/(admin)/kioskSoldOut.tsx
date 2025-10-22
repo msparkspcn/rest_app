@@ -26,7 +26,7 @@ export default function KioskSoldOutScreen() {
     const [selectedCornerCd, setSelectedCornerCd] = useState<string>('');
     const [showCornerModal, setShowCornerModal] = useState(false);
     const {user}:User = useUser();
-    const [selectedCorner, setSelectedCorner] = useState<Corner>();
+    const [selectedCorner, setSelectedCorner] = useState<Corner>({"cornerCd":"", "storCd":""});
     const [loading, setLoading] = useState(false);
     const [itemList, setItemList] = useState<ProductRow[]>([]);
 
