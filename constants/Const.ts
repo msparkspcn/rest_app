@@ -64,5 +64,7 @@ export default {
     NO_SALES_ORG_MSG: '사업장을 선택해주세요.',
     NO_CORNER_MSG: '매장을 선택해주세요.',
     OPER_TYPE_REST: '01',
-    OPER_TYPE_OIL: '02'
+    OPER_TYPE_OIL: '02',
+    OIL_SUMMARY: '주유소 소계',
+    GAS_SUMMARY: '충전소 소계',
 }

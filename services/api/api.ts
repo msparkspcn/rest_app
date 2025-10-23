@@ -88,6 +88,16 @@ export function updateSoldoutYn(params) {
     return post(request, params);
 }
 
+export function getPurchaseSummary(params) {
+    const request = host + "/api/purchase/vendor/summary"; // (모바일)거래처별 총매입금액 조회
+    return post(request, params);
+}
+
+export function getPurchaseItem(params) {
+    const request = host + "/api/purchase/vendor/items"; // (모바일)상품별 매입현황 조회
+    return post(request, params);
+}
+
 export function restDailySale(params) {
     const request = host + "/api/v1/rest/sale/restDailySale";
     return post(request, params);
