@@ -98,6 +98,11 @@ export function getPurchaseItem(params) {
     return post(request, params);
 }
 
+export function getPurchaseSummaryOp(params) {
+    const request = host + "/api/purchase/salesorg/summary"; // 운영업체 일자별 매입현황(통합)
+    return post(request, params);
+}
+
 export function restDailySale(params) {
     const request = host + "/api/v1/rest/sale/restDailySale";
     return post(request, params);
