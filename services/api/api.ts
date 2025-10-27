@@ -89,17 +89,17 @@ export function updateSoldoutYn(params) {
 }
 
 export function getPurchaseSummary(params) {
-    const request = host + "/api/purchase/vendor/summary"; // (모바일)거래처별 총매입금액 조회
+    const request = host + "/api/v1/purchase/vendor/summary"; // (모바일)거래처별 총매입금액 조회
     return post(request, params);
 }
 
 export function getPurchaseItem(params) {
-    const request = host + "/api/purchase/vendor/items"; // (모바일)상품별 매입현황 조회
+    const request = host + "/api/v1/purchase/vendor/items"; // (모바일)상품별 매입현황 조회
     return post(request, params);
 }
 
 export function getPurchaseSummaryOp(params) {
-    const request = host + "/api/purchase/salesorg/summary"; // 운영업체 일자별 매입현황(통합)
+    const request = host + "/api/v1/purchase/salesorg/summary"; // 운영업체 일자별 매입현황(통합)
     return post(request, params);
 }
 

@@ -1,7 +1,7 @@
 import {StatusBar} from 'expo-status-bar';
 import React, {useMemo, useState} from 'react';
 import {Modal, Pressable, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
-import {commonStyles} from "../../styles/index";
+import {commonStyles} from '@/styles';
 import {Table} from "../../components/Table";
 import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
 import {ColumnDef} from "../../types/table";
@@ -16,13 +16,13 @@ type PurchaseRow = {
     dlvDt: string;
     outSdCmpCd: string;
     outSdCmpNm: string;
-    totalAmount: number
+    totalOrdAmt: number;
 };
 type PurchaseDetailRow = {
     itemNm: string,
     ordQty: number,
     ordPrc: number,
-    ordTotalAmt: number
+    ordAmt: number
 };
 
 export default function PurchaseDailyReportScreen() {
@@ -42,7 +42,6 @@ export default function PurchaseDailyReportScreen() {
     const mainColumns: ColumnDef<PurchaseRow>[] = useMemo(() => ([
         {key: 'dlvDt', title: '일자', flex: 1, align: 'center',
             renderCell: (item) => {
-
                 return (
                     <Text style={[commonStyles.cell, {textAlign: 'center'}]}>
                         {formattedDate(item.dlvDt)}
@@ -53,7 +52,10 @@ export default function PurchaseDailyReportScreen() {
         {
             key: 'outSdCmpNm', title: '거래처', flex: 2,
             renderCell: (item) => (
-                <Pressable style={commonStyles.columnPressable} onPress={() => openVendorDetail(item)}>
+                <Pressable
+                    style={commonStyles.columnPressable}
+                    onPress={() => openVendorDetail(item)}
+                >
                     <Text style={[commonStyles.cell, commonStyles.linkText, {paddingLeft: 10}]}>
                         {item.outSdCmpNm}
                     </Text>
@@ -61,29 +63,29 @@ export default function PurchaseDailyReportScreen() {
             ),
         },
         {
-            key: 'totalAmount', title: '금액', flex: 1,
+            key: 'totalOrdAmt', title: '금액', flex: 1,
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.totalAmount.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.totalOrdAmt.toLocaleString()}</Text>
             )
         },
     ]), []);
 
     const renderFooter = () => (
-        <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+        <View style={commonStyles.summaryRow}>
             <View style={[{flex: 3 }, commonStyles.columnContainer]}>
-                <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.totalText]}>
+                <Text style={[commonStyles.cell, commonStyles.summaryLabelText, commonStyles.alignCenter]}>
                     합계
                 </Text>
             </View>
             <View style={[{flex:1}, commonStyles.columnContainer]}>
-                <Text style={commonStyles.numberCell}>
-                    {totalAmount.toLocaleString()}
+                <Text style={commonStyles.summaryNumberCell}>
+                    {totalOrdAmt.toLocaleString()}
                 </Text>
             </View>
         </View>
     );
 
-    const totalAmount = useMemo(() => (purchaseList ?? []).reduce((acc, r) => acc + r.totalAmount, 0), [purchaseList]);
+    const totalOrdAmt = useMemo(() => (purchaseList ?? []).reduce((acc, r) => acc + r.totalOrdAmt, 0), [purchaseList]);
 
     const onSearch = () => {
         console.log("조회 클릭 fromPurchaseDt:"+fromPurchaseDt)
@@ -132,15 +134,15 @@ export default function PurchaseDailyReportScreen() {
             )
         },
         {
-            key: 'ordTotalAmt', title: '금액', flex: 2, align: 'right',
+            key: 'ordAmt', title: '금액', flex: 2, align: 'right',
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.ordTotalAmt.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.ordAmt.toLocaleString()}</Text>
             )
         },
     ]), []);
 
     const renderDetailFooter = () => (
-        <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+        <View style={commonStyles.summaryRow}>
             <View style={[{flex: 2.2}, commonStyles.columnContainer]}>
                 <Text
                     style={[commonStyles.modalCell,
@@ -158,7 +160,7 @@ export default function PurchaseDailyReportScreen() {
             </View>
             <View style={[{flex: 3.5}, commonStyles.columnContainer]}>
                 <Text style={commonStyles.numberCell}>
-                    {detailTotalAmount.toLocaleString()}
+                    {detailTotalOrdAmt.toLocaleString()}
                 </Text>
             </View>
         </View>
@@ -195,8 +197,8 @@ export default function PurchaseDailyReportScreen() {
             });
     };
 
-    const detailTotalAmount = useMemo(() => {
-        return (purchaseItemList ?? []).reduce((acc, row) => acc + row.ordTotalAmt, 0);
+    const detailTotalOrdAmt = useMemo(() => {
+        return (purchaseItemList ?? []).reduce((acc, row) => acc + row.ordAmt, 0);
     }, [purchaseItemList]);
     const detailTotalQty = useMemo(() => {
         return (purchaseItemList ?? []).reduce((acc, row) => acc + row.ordQty, 0);
@@ -278,16 +280,3 @@ export default function PurchaseDailyReportScreen() {
         </SafeAreaView>
     );
 };
-
-const styles = StyleSheet.create({
-    totalText: {
-        fontWeight: '700',
-        color: '#222',
-    },
-    modalTotalText: {
-        fontWeight: '700',
-        color: '#222',
-    }
-});
-
-

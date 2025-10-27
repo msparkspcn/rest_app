@@ -77,14 +77,16 @@ export const commonStyles = StyleSheet.create({
         shadowOffset: {width: 0, height: 2},
         shadowOpacity: 0.08,
         elevation: 2,
-        borderWidth: StyleSheet.hairlineWidth,
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderLeftWidth: StyleSheet.hairlineWidth,
         borderColor: '#aaa',
     },
     tableHeaderRow: {
         flexDirection: 'row',
         backgroundColor: '#f0f3f7',
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: '#e0e0e0',
+        borderRightWidth: StyleSheet.hairlineWidth,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderColor: '#aaa',
         minHeight: 35
     },
     headerCell: {
@@ -103,8 +105,6 @@ export const commonStyles = StyleSheet.create({
     tableRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: '#aaa',
         minHeight: 35,
     },
     columnContainer: {
@@ -112,7 +112,8 @@ export const commonStyles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         height: '100%',
-        borderWidth: StyleSheet.hairlineWidth,
+        borderRightWidth: StyleSheet.hairlineWidth,
+        borderBottomWidth: StyleSheet.hairlineWidth,
         borderColor: '#aaa'
     },
     cellDivider: {
@@ -151,6 +152,14 @@ export const commonStyles = StyleSheet.create({
         width: '100%',
         paddingRight:5,
         textAlign: 'right'
+    },
+    summaryNumberCell: {
+        fontSize: 11,
+        color: '#000',
+        width: '100%',
+        paddingRight:5,
+        textAlign: 'right',
+        fontWeight: '600'
     },
     modalOverlay: {
         flex: 1,
@@ -231,7 +240,10 @@ export const commonStyles = StyleSheet.create({
         flex: 1,
         padding: 10,
         overflow: 'hidden',
-        backgroundColor: '#fff'
+        backgroundColor: '#fff',
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderLeftWidth: StyleSheet.hairlineWidth,
+        borderColor: '#aaa',
     },
     modalHeaderContainer: {
         flexDirection: 'row',
@@ -322,10 +334,6 @@ export const commonStyles = StyleSheet.create({
     },
     modalItemText: {fontSize: 16, color: '#333'},
     modalOkButtonText: {color: '#fff', fontWeight: '600', fontSize: 14},
-    headerCellDivider: {
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: '#b0b0b0'
-    },
     linkText: {
         color: '#007AFF',
     },
@@ -396,15 +404,18 @@ export const commonStyles = StyleSheet.create({
         color: '#333',
     },
     summaryRow: {
-        height: 35,
+        flexDirection: 'row',
+        alignItems: 'center',
+        height: 32,
         backgroundColor: '#fff7e6'
     },
     listEmptyComponent: {
         minHeight:35,
         justifyContent:'center',
         alignItems: 'center',
+        borderRightWidth: StyleSheet.hairlineWidth,
         borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: '#aaa'
+        borderColor: '#aaa'
     },
     tableRightBorder: {
         justifyContent: 'center',
@@ -413,8 +424,8 @@ export const commonStyles = StyleSheet.create({
         height: '100%',
     },
     summaryLabelText: {
-        fontWeight: '700',
-        color: '#333'
+        fontWeight: '500',
+        color: '#000'
     },
     selectText: {
         fontSize: 14,

@@ -7,31 +7,33 @@ import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
 import {ColumnDef} from "../../types/table";
 import {DatePickerModal} from "../../components/DatePickerModal";
 import Const from "../../constants/Const";
+import LoadingOverlay from "../../components/LoadingOverlay";
+import * as api from "../../services/api/api";
+import {User} from "../../types/user";
+import {useUser} from "../../contexts/UserContext";
 
-type PurchaseRow = { date: string; vendor: string; amount: number };
-type PurchaseDetailRow = { itemNm: string, qty: number, price: number, totalAmt: number };
+type PurchaseRow = { date: string; outSdCmpNm: string; totalOrdAmt: number };
+type PurchaseDetailRow = {
+    itemNm: string,
+    ordQty: number,
+    ordPrc: number,
+    ordAmt: number,
+    ordDgre: number
+};
 
 export default function PurchaseDailyReportScreen() {
     const [fromPurchaseDt, setFromPurchaseDt] = useState(getTodayYmd());
     const [toPurchaseDt, setToPurchaseDt] = useState(getTodayYmd());
     const [vendorQuery, setVendorQuery] = useState('');
-    const [submitted, setSubmitted] = useState({from: '2025/08/01', to: '2025/08/04', vendor: ''});
     const [isDetailVisible, setIsDetailVisible] = useState(false);
     const [selectedVendorName, setSelectedVendorName] = useState<string | null>(null);
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [currentPickerType, setCurrentPickerType] = useState('from');
     const [tempDate, setTempDate] = useState<Date | null>(null);
-
-    const baseData: PurchaseRow[] = useMemo(
-        () =>
-            Array.from({length: 9}).map((_, idx) => {
-                return {
-                    date: `2025/09/0${idx + 1}`,
-                    vendor: `거래처${idx +1}`,
-                    amount: idx * 10000,
-                };
-            }), []
-    );
+    const [loading, setLoading] = useState(false);
+    const [purchaseList, setPurchaseList] = useState<[] | null>(null);
+    const [purchaseItemList, setPurchaseItemList] = useState<[] | null>(null);
+    const {user}: User = useUser();
 
     const mainColumns: ColumnDef<PurchaseRow>[] = useMemo(() => ([
         {key: 'no', title: Const.NO, flex: 0.5,
@@ -39,98 +41,121 @@ export default function PurchaseDailyReportScreen() {
                 <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
             ),
         },
-        {key: 'date', title: '일자', flex: 1.5, align: 'center'},
+        {key: 'date', title: '일자', flex: 1.5, align: 'center',
+            renderCell: (item) => {
+
+                return (
+                    <Text style={[commonStyles.cell, {textAlign: 'center'}]}>
+                        {formattedDate(item.dlvDt)}
+                    </Text>
+                )
+            },
+        },
         {
-            key: 'vendor', title: '거래처', flex: 2, align: 'left',
+            key: 'outSdCmpNm', title: '거래처', flex: 2, align: 'left',
             renderCell: (item) => (
-                <Pressable style={commonStyles.columnPressable} onPress={() => openVendorDetail(item.vendor)}>
+                <Pressable
+                    style={commonStyles.columnPressable}
+                    onPress={() => openVendorDetail(item)}
+                >
                     <Text style={[commonStyles.cell, commonStyles.linkText, {paddingLeft: 10}]}>
-                        {item.vendor}
+                        {item.outSdCmpNm}
                     </Text>
                 </Pressable>
             ),
         },
         {
-            key: 'amount', title: '금액', flex: 1.5, align: 'right',
+            key: 'totalOrdAmt', title: '금액', flex: 1.5, align: 'right',
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.amount.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.totalOrdAmt.toLocaleString()}</Text>
             )
         },
     ]), []);
 
     const renderFooter = () => (
-        <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-            <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
-                <Text style={[commonStyles.cell, styles.summaryLabelText, {textAlign:'center'}]}>
+        <View style={commonStyles.summaryRow}>
+            <View style={[{flex: 2}, commonStyles.columnContainer]}>
+                <Text style={[commonStyles.cell, commonStyles.summaryLabelText, {textAlign:'center'}]}>
                     합계
                 </Text>
             </View>
-            <View style={[{flex:3.5}, commonStyles.tableRightBorder]}>
-                <Text
-                    style={[
-                        commonStyles.cell,
-                        commonStyles.numberCell,
-                        styles.totalText,
-                    ]}
-                >
-                    {totalAmount.toLocaleString()}
+            <View style={[{flex:3.5}, commonStyles.columnContainer]}>
+                <Text style={commonStyles.summaryNumberCell}>
+                    {totalOrdAmt.toLocaleString()}
                 </Text>
             </View>
         </View>
     );
 
-    const filteredData = useMemo(() => {
-        return baseData;
 
-    }, [baseData, submitted]);
-
-    const totalAmount = useMemo(() => filteredData.reduce((acc, r) => acc + r.amount, 0), [filteredData]);
+    const totalOrdAmt = useMemo(() => (purchaseList ?? []).reduce((acc, r) => acc + r.totalOrdAmt, 0), [purchaseList]);
 
     const onSearch = () => {
-        setSubmitted({from: fromPurchaseDt, to: toPurchaseDt, vendor: vendorQuery});
+        console.log("조회 클릭");
+        const request = {
+            cmpCd: user.cmpCd,
+            outSdCmpCd: vendorQuery,
+            fromDate: fromPurchaseDt,
+            salesOrgCd: user.salesOrgCd,
+            toDate: toPurchaseDt
+        }
+        console.log('request:'+JSON.stringify(request));
+        setLoading(true);
+
+        api.getPurchaseSummary(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const purchaseList = result.data.responseBody;
+                    console.log('purchaseList:' + JSON.stringify(purchaseList))
+                    setPurchaseList(purchaseList);
+                }
+            })
+            .catch(error => {
+                console.log("getPurchaseSummary error:" + error)
+            }).finally(() => setLoading(false));
     };
 
     const PurchaseDetailColumns: ColumnDef<PurchaseDetailRow>[] = useMemo(() => ([
         {key: 'itemNm', title: '상품', flex: 2, align: 'left'},
-        {key: 'seq', title: '일련\n번호', flex: 1, align: 'left',
+        {key: 'ordDgre', title: '일련\n번호', flex: 1, align: 'left',
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.no.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.ordDgre.toLocaleString()}</Text>
             )
         },
         {
-            key: 'price', title: Const.PRICE, flex: 1.5, align: 'right',
+            key: 'ordPrc', title: Const.PRICE, flex: 1.5, align: 'right',
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.price.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.ordPrc.toLocaleString()}</Text>
             )
         },
         {
-            key: 'qty', title: Const.QTY, flex: 1.5, align: 'right',
+            key: 'ordQty', title: Const.QTY, flex: 1.5, align: 'right',
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.qty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.ordQty.toLocaleString()}</Text>
             )
         },
         {
-            key: 'totalAmt', title: '금액', flex: 2, align: 'right',
+            key: 'ordAmt', title: '금액', flex: 2, align: 'right',
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.totalAmt.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.ordAmt.toLocaleString()}</Text>
             )
         },
     ]), []);
 
     const renderDetailFooter = () => (
-        <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-            <View style={[{flex: 3}, commonStyles.tableRightBorder]}>
-                <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.modalTotalText]}>
+        <View style={commonStyles.summaryRow}>
+            <View style={[{flex: 3}, commonStyles.columnContainer]}>
+                <Text style={[commonStyles.cell, commonStyles.alignCenter, commonStyles.summaryLabelText]}>
                     합계
                 </Text>
             </View>
-            <View style={[{flex: 3}, commonStyles.tableRightBorder]}>
-                <Text style={[commonStyles.numberCell, styles.modalTotalText]}>
+            <View style={[{flex: 3}, commonStyles.columnContainer]}>
+                <Text style={commonStyles.summaryNumberCell}>
                     {detailTotalQty.toLocaleString()}
                 </Text>
             </View>
-            <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
-                <Text style={[commonStyles.cell, , commonStyles.numberCell, styles.modalTotalText]}>
+            <View style={[{flex: 2}, commonStyles.columnContainer]}>
+                <Text style={commonStyles.summaryNumberCell}>
                     {detailTotalAmount.toLocaleString()}
                 </Text>
             </View>
@@ -143,34 +168,37 @@ export default function PurchaseDailyReportScreen() {
         setShowDatePicker(true);
     };
 
-    const openVendorDetail = (vendorName: string) => {
-        setSelectedVendorName(vendorName);
-        setIsDetailVisible(true);
+    const openVendorDetail = (purchase: PurchaseRow) => {
+        setSelectedVendorName(purchase.outSdCmpNm);
+        console.log('거래처 클릭 purchase:'+JSON.stringify(purchase));
+        const request = {
+            cmpCd: user.cmpCd,
+            outSdCmpCd: purchase.outSdCmpCd,
+            dlvDt: purchase.dlvDt,
+            salesOrgCd: user.salesOrgCd,
+        }
+        console.log('request:'+JSON.stringify(request));
+
+        api.getPurchaseItem(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const purchaseItemList = result.data.responseBody;
+                    console.log('purchaseList:' + JSON.stringify(purchaseItemList))
+                    setPurchaseItemList(purchaseItemList);
+                    setIsDetailVisible(true);
+                }
+            })
+            .catch(error => {
+                console.log("getPurchaseItem error:" + error)
+            });
     };
 
-    type DetailRow = { no: number; itemNm: string; qty: number; price: number; totalAmt: number };
-    const detailData: DetailRow[] = useMemo(
-        () =>
-            Array.from({length: 5}).map((_, idx) => {
-                const qty = (idx % 5) + 10000;
-                const price = 1200 + (idx % 7) * 300;
-                return {
-                    no: idx + 1,
-                    itemNm: `상품 ${idx + 1}`,
-                    qty,
-                    price,
-                    totalAmt: qty * price,
-                };
-            }),
-        []
-    );
-
     const detailTotalAmount = useMemo(() => {
-        return detailData.reduce((acc, row) => acc + row.totalAmt, 0);
-    }, [detailData]);
+        return (purchaseItemList ?? []).reduce((acc, row) => acc + row.ordAmt, 0);
+    }, [purchaseItemList]);
     const detailTotalQty = useMemo(() => {
-        return detailData.reduce((acc, row) => acc + row.qty, 0);
-    }, [detailData]);
+        return (purchaseItemList ?? []).reduce((acc, row) => acc + row.ordQty, 0);
+    }, [purchaseItemList]);
 
     return (
         <SafeAreaView style={commonStyles.container}>
@@ -209,7 +237,7 @@ export default function PurchaseDailyReportScreen() {
 
             <View style={commonStyles.sectionDivider}/>
 
-            <Table data={filteredData} columns={mainColumns} listFooter={renderFooter}/>
+            <Table data={purchaseList} columns={mainColumns} listFooter={renderFooter}/>
 
             <DatePickerModal
                 visible={showDatePicker}
@@ -237,7 +265,7 @@ export default function PurchaseDailyReportScreen() {
                         </View>
 
                         <Table
-                            data={detailData}
+                            data={purchaseItemList}
                             columns={PurchaseDetailColumns}
                             isModal={true}
                             listFooter={renderDetailFooter}
@@ -245,24 +273,7 @@ export default function PurchaseDailyReportScreen() {
                     </View>
                 </View>
             </Modal>
+            {loading && (<LoadingOverlay />)}
         </SafeAreaView>
     );
 };
-
-const styles = StyleSheet.create({
-    totalText: {
-        fontWeight: '700',
-        color: '#222',
-    },
-
-    modalTotalText: {
-        fontWeight: '700',
-        color: '#222',
-    },
-    summaryLabelText: {
-        fontWeight: '700',
-        color: '#333'
-    },
-});
-
-
