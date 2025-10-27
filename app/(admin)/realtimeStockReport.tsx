@@ -43,7 +43,7 @@ export default function RealtimeStockReportScreen() {
             fromSaleDt: saleDate,
             itemClassCd: "",
             itemValue: itemNm,
-            salesOrgCd: "8100",
+            salesOrgCd: user.salesOrgCd,
             storCd: "",
             toSaleDt: saleDate
         }

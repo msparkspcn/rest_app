@@ -64,7 +64,7 @@ export default function RealtimeSalesBySalesOrgScreen() {
         const request = {
             cmpCd: user.cmpCd,
             fromSaleDt: saleDate,
-            salesOrgCd: '8100',
+            salesOrgCd: user.salesOrgCd,
             storCd: "",
             toSaleDt: saleDate
         }
@@ -129,7 +129,7 @@ export default function RealtimeSalesBySalesOrgScreen() {
                     renderCell: (item) => (
                         <Text style={[commonStyles.cell, {
                             textAlign: 'left',
-                            paddingLeft: 10
+                            paddingLeft: 5
                         }]}>
                             {item.cornerNm}
                         </Text>
@@ -215,29 +215,29 @@ export default function RealtimeSalesBySalesOrgScreen() {
                 listFooter={
                     appliedDetailChecked
                         ? () => (
-                            <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-                                <View style={[{flex: 1.2}, commonStyles.tableRightBorder]}>
+                            <View style={commonStyles.summaryRow}>
+                                <View style={[{flex: 1.2}, commonStyles.columnContainer]}>
                                     <Text style={[commonStyles.cell, commonStyles.summaryLabelText,
                                         {textAlign:'center'}]}>합계</Text>
                                 </View>
-                                <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                                <View style={[{flex: 1}, commonStyles.columnContainer]}>
                                     <Text style={[commonStyles.cell, commonStyles.summaryLabelText, commonStyles.numberCell]}>
                                         {Math.round(aggregateSales(saleList).yesterdayActualSaleAmt / 1000).toLocaleString()}
                                     </Text>
                                 </View>
 
-                                <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                                <View style={[{flex: 1}, commonStyles.columnContainer]}>
                                     <Text style={[commonStyles.cell, commonStyles.summaryLabelText, commonStyles.numberCell]}>
                                         {Math.round(aggregateSales(saleList).todayActualSaleAmt / 1000).toLocaleString()}
                                     </Text>
                                 </View>
 
-                                <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                                <View style={[{flex: 1}, commonStyles.columnContainer]}>
                                     <Text style={[commonStyles.cell, commonStyles.summaryLabelText, commonStyles.numberCell]}>
                                         {Math.round(aggregateSales(saleList).monthlyActualSaleAmt / 1000).toLocaleString()}
                                     </Text>
                                 </View>
-                                <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                                <View style={[{flex: 1}, commonStyles.columnContainer]}>
                                     <Text style={[commonStyles.cell, commonStyles.summaryLabelText, commonStyles.numberCell]}>
                                         {Math.round(aggregateSales(saleList).yearActualSaleAmt / 1000).toLocaleString()}
                                     </Text>

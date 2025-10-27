@@ -63,7 +63,7 @@ export default function SalesReportByPeriod() {
             cmpCd: user.cmpCd,
             cornerCd: "",
             fromSaleDt: fromSaleDt,
-            salesOrgCd: "8100",
+            salesOrgCd: user.salesOrgCd,
             storCd: selectedStorCd.id,
             toSaleDt: toSaleDt
         }
@@ -88,7 +88,7 @@ export default function SalesReportByPeriod() {
             cmpCd: user.cmpCd,
             cornerCd: "",
             fromSaleDt: sale.saleDt,
-            salesOrgCd: "8100",
+            salesOrgCd: user.salesOrgCd,
             storCd: sale.storCd,
             toSaleDt: sale.saleDt,
         }
@@ -139,17 +139,17 @@ export default function SalesReportByPeriod() {
 
 
     const renderFooter = () => (
-        <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-            <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
+        <View style={commonStyles.summaryRow}>
+            <View style={[{flex: 2}, commonStyles.columnContainer]}>
                 <Text style={[commonStyles.cell, commonStyles.summaryLabelText,
                     {textAlign: 'center'}]}>합계</Text>
             </View>
-            <View style={[{flex: 1.2}, commonStyles.tableRightBorder]}>
+            <View style={[{flex: 1.2}, commonStyles.columnContainer]}>
                 <Text style={commonStyles.numberCell}>
                     {totalQty.toLocaleString()}
                 </Text>
             </View>
-            <View style={[{flex: 1.2}, commonStyles.tableRightBorder]}>
+            <View style={[{flex: 1.2}, commonStyles.columnContainer]}>
                 <Text style={commonStyles.numberCell}>
                     {totalAmt.toLocaleString()}
                 </Text>
@@ -206,7 +206,7 @@ export default function SalesReportByPeriod() {
 
     const renderSummaryRow = () => {
         return (
-            <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+            <View style={commonStyles.summaryRow}>
                 <View
                     style={[{
                         flex: 0.7 + 2.2,
@@ -219,7 +219,7 @@ export default function SalesReportByPeriod() {
                     <Text
                         style={[commonStyles.modalCell, commonStyles.alignCenter,
                             {fontSize: 13, fontWeight: 'bold',
-                                paddingLeft: 10,
+                                paddingLeft: 5,
                             }
                         ]}>합계</Text>
                 </View>

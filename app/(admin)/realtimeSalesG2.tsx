@@ -84,8 +84,8 @@ export default function RealtimeSalesScreen() {
             cmpCd: user.cmpCd,
             cornerCd: "",
             fromSaleDt: saleDate,
-            salesOrgCd: "8100",
-            // salesOrgCd: selectedSalesOrgCd,
+            // salesOrgCd: user.salesOrgCd,
+            salesOrgCd: selectedSalesOrgCd,
             storCd: selectedStorCd.id,
             toSaleDt: ""
         }
@@ -215,8 +215,8 @@ export default function RealtimeSalesScreen() {
 
                 if(selectedStorCd.id=="") {
                     let summaryName = '';
-                    if (storCd === '01') summaryName = '주유소 소계';
-                    else if (storCd === '02') summaryName = '충전소 소계';
+                    if (storCd === '01') summaryName = Const.OIL_SUMMARY;
+                    else if (storCd === '02') summaryName = Const.GAS_SUMMARY;
                     sumNo -= 1;
                     result.push({
                         no: sumNo,
@@ -243,7 +243,7 @@ export default function RealtimeSalesScreen() {
                 {saleStatList.map(row => (
                     <View
                         key={row.sortOrder}
-                        style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+                        style={commonStyles.summaryRow}>
                         {row.sortOrder === '1' || row.sortOrder === '2' ? (
                             <>
                                 <View style={[{flex: 1.3}, commonStyles.columnContainer]}>

@@ -183,20 +183,20 @@ export default function SalesReportByTimezoneScreen() {
         return (
             <View>
                 {summaryRows.map(row => (
-                    <View key={row.key} style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-                        <View style={[{flex: 1}, commonStyles.columnContainer, commonStyles.tableRightBorder]}>
-                            <Text style={[commonStyles.cell, styles.summaryLabelText, {textAlign: 'center'}]}>
+                    <View key={row.key} style={commonStyles.summaryRow}>
+                        <View style={[{flex: 1}, commonStyles.columnContainer, commonStyles.columnContainer]}>
+                            <Text style={[commonStyles.cell, commonStyles.summaryLabelText, {textAlign: 'center'}]}>
                                 {row.label}
                             </Text>
                         </View>
-                        <View style={[{flex: 1}, commonStyles.columnContainer, commonStyles.tableRightBorder]}>
+                        <View style={[{flex: 1}, commonStyles.columnContainer, commonStyles.columnContainer]}>
                             <Text style={commonStyles.numberCell}>
                                 {row.totalAmt.toLocaleString()}
                             </Text>
                         </View>
                         <View style={[{
                             flex: 0.5,
-                        }, commonStyles.columnContainer, commonStyles.tableRightBorder]}>
+                        }, commonStyles.columnContainer, commonStyles.columnContainer]}>
                             <Text style={commonStyles.numberCell}>
                                 {row.totalSaleRatio.toFixed(2)}%
                             </Text>
@@ -212,17 +212,17 @@ export default function SalesReportByTimezoneScreen() {
 
 
     const renderFooter = () => (
-        <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-            <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+        <View style={commonStyles.summaryRow}>
+            <View style={[{flex: 1}, commonStyles.columnContainer]}>
                 <Text style={[commonStyles.cell, commonStyles.summaryLabelText,
                     {textAlign: 'center'}]}>합계</Text>
             </View>
-            <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+            <View style={[{flex: 1}, commonStyles.columnContainer]}>
                 <Text style={commonStyles.numberCell}>
                     {totalAmt.toLocaleString()}
                 </Text>
             </View>
-            <View style={[{flex: 0.5}, commonStyles.tableRightBorder]}>
+            <View style={[{flex: 0.5}, commonStyles.columnContainer]}>
                 <Text style={commonStyles.numberCell}>
                     {totalSaleRatio.toFixed(2)}%
                 </Text>
@@ -295,10 +295,3 @@ export default function SalesReportByTimezoneScreen() {
         </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    summaryRow: {backgroundColor: '#fff7e6'},
-    summaryLabelText: {fontWeight: '600', fontSize: 12, color: '#333'},
-});
-
-

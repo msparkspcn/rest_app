@@ -167,18 +167,19 @@ export default function RealtimeSalesByCornerScreen() {
 
 
     const renderFooter = () => (
-        <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-            <View style={[{flex: 1.4}, commonStyles.tableRightBorder]}>
-                <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.totalText, {fontSize: 13, fontWeight: 'bold'}]}>
+        <View style={commonStyles.summaryRow}>
+            <View style={[{flex: 1.4}, commonStyles.columnContainer]}>
+                <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.totalText,
+                    {fontSize: 13, fontWeight: 'bold'}]}>
                     전체 합계
                 </Text>
             </View>
-            <View style={[{flex: 1.6}, commonStyles.tableRightBorder]}>
+            <View style={[{flex: 1.6}, commonStyles.columnContainer]}>
                 <Text style={[commonStyles.numberSmallCell]}>
                     {totalSaleAmt.toLocaleString()}
                 </Text>
             </View>
-            <View style={[{flex: 1.6}, commonStyles.tableRightBorder]}>
+            <View style={[{flex: 1.6}, commonStyles.columnContainer]}>
                 <Text style={[commonStyles.numberSmallCell]}>
                     {totalMonthSaleAmt.toLocaleString()}
                 </Text>
@@ -232,8 +233,8 @@ export default function RealtimeSalesByCornerScreen() {
 
     const renderDetailFooterRow = () => {
         return (
-            <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-                <View style={[{flex: 2.5}, commonStyles.tableRightBorder]}>
+            <View style={commonStyles.summaryRow}>
+                <View style={[{flex: 2.5}, commonStyles.columnContainer]}>
                     <Text
                         style={[commonStyles.modalCell,
                             {
@@ -243,17 +244,17 @@ export default function RealtimeSalesByCornerScreen() {
                             }
                         ]}>합계</Text>
                 </View>
-                <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                <View style={[{flex: 1}, commonStyles.columnContainer]}>
                     <Text style={[commonStyles.numberCell]}>
                         {summaryRow.totalQty.toLocaleString()}
                     </Text>
                 </View>
-                <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
+                <View style={[{flex: 1.5}, commonStyles.columnContainer]}>
                     <Text style={[commonStyles.numberCell]}>
                         {summaryRow.totalSaleAmt.toLocaleString()}
                     </Text>
                 </View>
-                <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                <View style={[{flex: 1}, commonStyles.columnContainer]}>
                     <Text style={[commonStyles.numberCell]}>
                         {summaryRow.totalCompRatio.toLocaleString()}%
                     </Text>

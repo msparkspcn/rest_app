@@ -59,7 +59,7 @@ export default function CornerStockReportScreen() {
             fromSaleDt: fromSaleDt,
             itemClassCd: "",
             itemValue: itemValue,
-            salesOrgCd: "8100",
+            salesOrgCd: user.salesOrgCd,
             storCd: "",
             toSaleDt: toSaleDt
         }
@@ -100,7 +100,7 @@ export default function CornerStockReportScreen() {
             fromSaleDt: fromSaleDt,
             itemClassCd: "",
             itemValue: stock.itemCd,
-            salesOrgCd: "8100",
+            salesOrgCd: user.salesOrgCd,
             storCd: "",
             toSaleDt: toSaleDt
         }
@@ -218,28 +218,28 @@ export default function CornerStockReportScreen() {
         }, [stockDetailList]);
 
     const renderDetailFooter = () => (
-        <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-            <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
+        <View style={commonStyles.summaryRow}>
+            <View style={[{flex: 1.5}, commonStyles.columnContainer]}>
                 <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.modalTotalText]}>
                     합계
                 </Text>
             </View>
-            <View style={[{flex: 1.1}, commonStyles.tableRightBorder]}>
+            <View style={[{flex: 1.1}, commonStyles.columnContainer]}>
                 <Text style={commonStyles.numberSmallCell}>
                     {detailTotalPrevStockQty.toLocaleString()}
                 </Text>
             </View>
-            <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+            <View style={[{flex: 1}, commonStyles.columnContainer]}>
                 <Text style={commonStyles.numberSmallCell}>
                     {detailTotalInStockQty.toLocaleString()}
                 </Text>
             </View>
-            <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+            <View style={[{flex: 1}, commonStyles.columnContainer]}>
                 <Text style={commonStyles.numberSmallCell}>
                     {detailTotalSaleQty.toLocaleString()}
                 </Text>
             </View>
-            <View style={[{flex: 1.1}, commonStyles.tableRightBorder]}>
+            <View style={[{flex: 1.1}, commonStyles.columnContainer]}>
                 <Text style={commonStyles.numberSmallCell}>
                     {detailTotalCurStockQty.toLocaleString()}
                 </Text>

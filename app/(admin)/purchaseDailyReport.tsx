@@ -56,7 +56,7 @@ export default function PurchaseDailyReportScreen() {
                     style={commonStyles.columnPressable}
                     onPress={() => openVendorDetail(item)}
                 >
-                    <Text style={[commonStyles.cell, commonStyles.linkText, {paddingLeft: 10}]}>
+                    <Text style={[commonStyles.cell, commonStyles.linkText, {paddingLeft: 5}]}>
                         {item.outSdCmpNm}
                     </Text>
                 </Pressable>

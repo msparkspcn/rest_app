@@ -204,16 +204,16 @@ export default function SalesReportByTimezoneScreen() {
                 listHeader={() => (
                     <View>
                         {summaryRows.map(row => (
-                            <View key={row.key} style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-                                <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                            <View key={row.key} style={commonStyles.summaryRow}>
+                                <View style={[{flex: 1}, commonStyles.columnContainer]}>
                                     <Text style={[styles.cell, styles.summaryLabelText, {textAlign: 'center'}]}>
                                         {row.label}
                                     </Text>
                                 </View>
-                                <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                                <View style={[{flex: 1}, commonStyles.columnContainer]}>
                                     <Text style={commonStyles.numberCell}>{row.totalAmt.toLocaleString()}</Text>
                                 </View>
-                                <View style={[{flex: 0.5}, commonStyles.tableRightBorder]}>
+                                <View style={[{flex: 0.5}, commonStyles.columnContainer]}>
                                     <Text style={commonStyles.numberCell}>{row.billCnt.toLocaleString()}</Text>
                                 </View>
                             </View>

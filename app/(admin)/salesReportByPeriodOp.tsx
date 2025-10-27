@@ -81,7 +81,7 @@ export default function SalesReportByPeriodOp() {
         () => (saleList ?? []).reduce((acc, r) => acc + r.actualSaleAmt, 0), [saleList]);
 
     const renderFooter = () => (
-        <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+        <View style={commonStyles.summaryRow}>
             <View style={[{flex: 2.5, paddingLeft:0.5}, commonStyles.columnContainer]}>
                 <Text style={[commonStyles.cell, styles.summaryLabelText,
                     {textAlign: 'center'}]}>합계</Text>
@@ -181,7 +181,7 @@ export default function SalesReportByPeriodOp() {
                 if(!selectedSalesOrgCd) {
                     let summaryName = '';
                     if (operDiv === '01') summaryName = '휴게소 소계';
-                    else if (operDiv === '02') summaryName = '주유소 소계';
+                    else if (operDiv === '02') summaryName = Const.OIL_SUMMARY;
                     sumNo -= 1;
                     result.push({
                         no: sumNo,
@@ -216,7 +216,7 @@ export default function SalesReportByPeriodOp() {
                 <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
                     <Text style={[commonStyles.cell,
                         item.isSummary ? {fontWeight: 'bold', textAlign: 'center'}
-                        : commonStyles.linkText, {paddingLeft: 10}]}>
+                        : commonStyles.linkText, {paddingLeft: 5}]}>
                         {item.salesOrgNm}
                     </Text>
                 </Pressable>
@@ -321,38 +321,24 @@ export default function SalesReportByPeriodOp() {
 
     const renderRestSummaryRow = () => {
         return (
-            <View style={[commonStyles.modalTableRow, styles.summaryRow]}>
-                <View style={[{flex: 1}, commonStyles.modalCellDivider]}>
+            <View style={[commonStyles.summaryRow]}>
+                <View style={[{flex: 1}, commonStyles.columnContainer]}>
                     <Text
                         style={[commonStyles.modalCell, commonStyles.alignCenter,
                             {fontSize: 13, fontWeight: 'bold'}
                         ]}>합계</Text>
                 </View>
-                <View
-                    style={[
-                        {flex: 1},
-                        commonStyles.modalColumnContainer,
-                        commonStyles.modalCellDivider,
-                    ]}
-                >
+                <View style={[{flex: 1}, commonStyles.columnContainer]}>
                     <Text style={[commonStyles.numberSmallCell]}>
                         {summaryRow.totalTaxAmt.toLocaleString()}
                     </Text>
                 </View>
-                <View
-                    style={[
-                        {flex: 1},
-                        commonStyles.modalColumnContainer,
-                        commonStyles.modalCellDivider,
-                    ]}
-                >
+                <View style={[{flex: 1}, commonStyles.columnContainer]}>
                     <Text style={[commonStyles.numberSmallCell]}>
                         {summaryRow.totalDutyFreeAmt.toLocaleString()}
                     </Text>
                 </View>
-                <View
-                    style={[{flex: 1},]}
-                >
+                <View style={[{flex: 1}, commonStyles.columnContainer]}>
                     <Text style={[commonStyles.numberSmallCell]}>
                         {summaryRow.totalAmt.toLocaleString()}
                     </Text>
@@ -364,17 +350,17 @@ export default function SalesReportByPeriodOp() {
     const renderOilSummaryRow = () => {
         return (
             <View style={[commonStyles.modalTableRow, styles.summaryRow]}>
-                <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                <View style={[{flex: 1}, commonStyles.columnContainer]}>
                     <Text style={[commonStyles.modalCell, {textAlign: 'center', fontSize: 13, fontWeight: 'bold'}]}>
                         합계
                     </Text>
                 </View>
-                <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                <View style={[{flex: 1}, commonStyles.columnContainer]}>
                     <Text style={[commonStyles.numberSmallCell]}>
                         {summaryRow.totalQty.toLocaleString()}
                     </Text>
                 </View>
-                <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                <View style={[{flex: 1}, commonStyles.columnContainer]}>
                     <Text style={[commonStyles.numberSmallCell]}>
                         {summaryRow.totalAmt.toLocaleString()}
                     </Text>

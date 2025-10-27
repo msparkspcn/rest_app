@@ -84,7 +84,7 @@ export const commonStyles = StyleSheet.create({
     tableHeaderRow: {
         flexDirection: 'row',
         backgroundColor: '#f0f3f7',
-        borderRightWidth: StyleSheet.hairlineWidth,
+        // borderRightWidth: StyleSheet.hairlineWidth,
         borderBottomWidth: StyleSheet.hairlineWidth,
         borderColor: '#aaa',
         minHeight: 35

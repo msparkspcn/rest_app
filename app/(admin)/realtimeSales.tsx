@@ -172,7 +172,7 @@ export default function RealtimeSales() {
             key: 'storNm', title: '포스그룹', flex: 1, align: 'center',
             renderCell: (item) => (
                 <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
-                    <Text style={[commonStyles.cell, commonStyles.linkText, {paddingLeft: 10}]}>
+                    <Text style={[commonStyles.cell, commonStyles.linkText, {paddingLeft: 5}]}>
                         {item.storNm}
                     </Text>
                 </Pressable>
@@ -266,7 +266,7 @@ export default function RealtimeSales() {
                     return (
                         <View
                             key={row.sortOrder}
-                            style={[commonStyles.tableRow, commonStyles.summaryRow]}
+                            style={commonStyles.summaryRow}
                         >
                             {(row.sortOrder === '1' || row.sortOrder === '2') && (
                                 <View style={[{flex: 1.5}, commonStyles.columnContainer]}>
@@ -284,7 +284,16 @@ export default function RealtimeSales() {
                                 </View>
                             )}
                             {row.sortOrder === '2' && (
-                                <View style={[{flex: 3.2, flexDirection: 'row', alignItems: 'center', justifyContent:'flex-end'}]}>
+                                <View style={[{
+                                    flex: 3.2,
+                                    height: '100%',
+                                    borderRightWidth: StyleSheet.hairlineWidth,
+                                    borderBottomWidth: StyleSheet.hairlineWidth,
+                                    borderColor: '#aaa',
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    justifyContent:'flex-end'
+                                }]}>
                                     <Text style={{fontSize: 12, color:'#444'}}>
                                         {row.saleAmt1.toLocaleString()}
                                     </Text>
@@ -294,7 +303,7 @@ export default function RealtimeSales() {
                                         color={lastWeekIsUp ? 'red' : 'blue'}
                                         style={{paddingHorizontal: 5}}
                                     />
-                                    <Text style={{fontSize: 12, color:'#444'}}> / {row.saleAmt2.toLocaleString()}
+                                    <Text style={{fontSize: 12, color:'#444'}}> /  {row.saleAmt2.toLocaleString()}
                                     </Text>
                                     <AntDesign
                                         name={yesDayIsUp ? 'caretup' : 'caretdown'}
@@ -306,7 +315,7 @@ export default function RealtimeSales() {
                             )}
                             {row.sortOrder === '3' && (
                                 <>
-                                    <View style={[{flex: 1.5, paddingRight: 1}, commonStyles.columnContainer]}>
+                                    <View style={[{flex: 1.5}, commonStyles.columnContainer]}>
                                         <Text
                                             style={[commonStyles.cell, commonStyles.summaryLabelText, {textAlign: 'center'}]}>
                                             {row.label}
@@ -338,8 +347,8 @@ export default function RealtimeSales() {
 
     const renderDetailFooterRow = () => {
         return (
-            <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-                <View style={[{flex: 2.5}, commonStyles.tableRightBorder]}>
+            <View style={commonStyles.summaryRow}>
+                <View style={[{flex: 2.5}, commonStyles.columnContainer]}>
                     <Text
                         style={[commonStyles.modalCell,
                             {
@@ -349,12 +358,12 @@ export default function RealtimeSales() {
                             }
                         ]}>합계</Text>
                 </View>
-                <View style={[{flex: 0.5}, commonStyles.tableRightBorder]}>
+                <View style={[{flex: 0.5}, commonStyles.columnContainer]}>
                     <Text style={[commonStyles.numberSmallCell]}>
                         {detailSummaryRow.totalQty.toLocaleString()}
                     </Text>
                 </View>
-                <View style={[{flex: 2.2}, commonStyles.tableRightBorder]}>
+                <View style={[{flex: 2.2}, commonStyles.columnContainer]}>
                     <Text style={[commonStyles.numberSmallCell]}>
                         {detailSummaryRow.totalSaleAmt.toLocaleString()}
                     </Text>

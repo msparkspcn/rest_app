@@ -197,7 +197,7 @@ export default function MonthlySalesReport() {
             key: 'cornerNm', title: Const.CORNER_NM, flex: 2, align: 'left',
             renderCell: (item) => (
                 <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item, 'daily')}>
-                    <Text style={[commonStyles.cell, commonStyles.linkText, {paddingLeft: 10}]}>
+                    <Text style={[commonStyles.cell, commonStyles.linkText, {paddingLeft: 5}]}>
                         {item.cornerNm}
                     </Text>
                 </Pressable>
@@ -230,22 +230,21 @@ export default function MonthlySalesReport() {
     ]), [openDetail]);
 
     const renderFooter = () => (
-        <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-            <View style={[{flex: 2},
-                commonStyles.tableRightBorder, commonStyles.cell, styles.totalText]}>
+        <View style={commonStyles.summaryRow}>
+            <View style={[{flex: 2}, commonStyles.columnContainer, styles.totalText]}>
                 <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.totalText]}>전체 합계</Text>
             </View>
-            <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
+            <View style={[{flex: 2}, commonStyles.columnContainer]}>
                 <Text style={commonStyles.numberCell}>
                     {totalAmt.toLocaleString()}
                 </Text>
             </View>
-            <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
+            <View style={[{flex: 1.5}, commonStyles.columnContainer]}>
                 <Text style={commonStyles.numberCell}>
                     {totalVatAmt.toLocaleString()}
                 </Text>
             </View>
-            <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
+            <View style={[{flex: 2}, commonStyles.columnContainer]}>
                 <Text style={commonStyles.numberCell}>
                     {totalNetAmt.toLocaleString()}
                 </Text>
@@ -323,22 +322,22 @@ export default function MonthlySalesReport() {
         if (type === 'daily') {
             return (
                 <View style={[commonStyles.modalTableRow, commonStyles.summaryRow]}>
-                    <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
+                    <View style={[{flex: 2}, commonStyles.columnContainer]}>
                         <Text style={[commonStyles.modalCell, {textAlign: 'center', fontSize: 13, fontWeight: 'bold'}]}>
                             합계
                         </Text>
                     </View>
-                    <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
+                    <View style={[{flex: 2}, commonStyles.columnContainer]}>
                         <Text style={commonStyles.numberSmallCell}>
                             {summaryRow.totalSaleAmt.toLocaleString()}
                         </Text>
                     </View>
-                    <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
+                    <View style={[{flex: 1.5}, commonStyles.columnContainer]}>
                         <Text style={commonStyles.numberSmallCell}>
                             {summaryRow.totalTaxSaleAmt.toLocaleString()}
                         </Text>
                     </View>
-                    <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
+                    <View style={[{flex: 2}, commonStyles.columnContainer]}>
                         <Text style={commonStyles.numberSmallCell}>
                             {summaryRow.totalNetSaleAmt.toLocaleString()}
                         </Text>
@@ -348,27 +347,27 @@ export default function MonthlySalesReport() {
         } else if (type === 'monthly') {
             return (
                 <View style={[commonStyles.modalTableRow, commonStyles.summaryRow]}>
-                    <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
+                    <View style={[{flex: 1.5}, commonStyles.columnContainer]}>
                         <Text style={[commonStyles.modalCell, {textAlign: 'center', fontSize: 13, fontWeight: 'bold'}]}>
                             합계
                         </Text>
                     </View>
-                    <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                    <View style={[{flex: 1}, commonStyles.columnContainer]}>
                         <Text style={commonStyles.numberSmallCell}>
                             {monthlySummaryRow.totalQty.toLocaleString()}
                         </Text>
                     </View>
-                    <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
+                    <View style={[{flex: 2}, commonStyles.columnContainer]}>
                         <Text style={commonStyles.numberSmallCell}>
                             {monthlySummaryRow.totalAmt.toLocaleString()}
                         </Text>
                     </View>
-                    <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
+                    <View style={[{flex: 1.5}, commonStyles.columnContainer]}>
                         <Text style={commonStyles.numberSmallCell}>
                             {monthlySummaryRow.totalVatAmt.toLocaleString()}
                         </Text>
                     </View>
-                    <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
+                    <View style={[{flex: 2}, commonStyles.columnContainer]}>
                         <Text style={commonStyles.numberSmallCell}>
                             {monthlySummaryRow.totalNetSaleAmt.toLocaleString()}
                         </Text>

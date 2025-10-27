@@ -45,7 +45,7 @@ export default function SalesReportByTimezoneScreen() {
 
         const request = {
             cmpCd: user.cmpCd,
-            salesOrgCd: '8100',
+            salesOrgCd: user.salesOrgCd,
             fromSaleDt: saleDate,
             toSaleDt: saleDate,
             storCd: selectedStorCd.id
@@ -156,12 +156,12 @@ export default function SalesReportByTimezoneScreen() {
         return (
             <View>
                 {summaryRows.map(row => (
-                    <View key={row.key} style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-                        <View style={[{flex: 0.8}, commonStyles.tableRightBorder]}>
+                    <View key={row.key} style={commonStyles.summaryRow}>
+                        <View style={[{flex: 0.8}, commonStyles.columnContainer]}>
                             <Text style={styles.summaryLabelText}>{row.label}</Text>
                         </View>
 
-                        <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                        <View style={[{flex: 1}, commonStyles.columnContainer]}>
                             <Text style={commonStyles.numberCell}>
                                 {row.totalAmt.toLocaleString()}
                             </Text>

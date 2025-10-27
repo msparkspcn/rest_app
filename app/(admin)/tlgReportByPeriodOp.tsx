@@ -105,7 +105,7 @@ export default function tlgReportByPeriodOp() {
         {
             key: 'salesOrgNm', title: '사업장', flex: 1.5, align: 'center',
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {paddingLeft: 10}]}>
+                <Text style={[commonStyles.cell, {paddingLeft: 5}]}>
                     {item.salesOrgNm}
                 </Text>
             ),

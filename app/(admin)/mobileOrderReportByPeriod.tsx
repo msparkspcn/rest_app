@@ -142,7 +142,7 @@ export default function MobileOrderReportByPeriod() {
                                openDetail(item)
                            }}
                 >
-                    <Text style={[commonStyles.cell, commonStyles.linkText, {paddingLeft: 10}]}>
+                    <Text style={[commonStyles.cell, commonStyles.linkText, {paddingLeft: 5}]}>
                         {item.storNm}
                     </Text>
                 </Pressable>
@@ -212,22 +212,22 @@ export default function MobileOrderReportByPeriod() {
     const totalAmount = useMemo(() => baseData.reduce((acc, r) => acc + r.totalAmt, 0), [baseData]);
 
     const renderFooter = () => (
-        <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-            <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
+        <View style={commonStyles.summaryRow}>
+            <View style={[{flex: 1.5}, commonStyles.columnContainer]}>
                 <Text style={[commonStyles.cell, styles.summaryLabelText,
                     {textAlign: 'center'}]}>전체 합계</Text>
             </View>
-            <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+            <View style={[{flex: 1}, commonStyles.columnContainer]}>
                 <Text style={commonStyles.numberCell}>
                     {totalAmount.toLocaleString()}
                 </Text>
             </View>
-            <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+            <View style={[{flex: 1}, commonStyles.columnContainer]}>
                 <Text style={commonStyles.numberCell}>
                     {totalAmount.toLocaleString()}
                 </Text>
             </View>
-            <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+            <View style={[{flex: 1}, commonStyles.columnContainer]}>
                 <Text style={commonStyles.numberCell}>
                     {totalAmount.toLocaleString()}
                 </Text>
@@ -236,22 +236,22 @@ export default function MobileOrderReportByPeriod() {
     );
 
     const renderDetailFooter = () => (
-        <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-            <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
+        <View style={commonStyles.summaryRow}>
+            <View style={[{flex: 1.5}, commonStyles.columnContainer]}>
                 <Text style={[commonStyles.cell, styles.summaryLabelText,
                     {textAlign: 'center'}]}>전체 합계</Text>
             </View>
-            <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+            <View style={[{flex: 1}, commonStyles.columnContainer]}>
                 <Text style={commonStyles.numberCell}>
                     {totalAmount.toLocaleString()}
                 </Text>
             </View>
-            <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+            <View style={[{flex: 1}, commonStyles.columnContainer]}>
                 <Text style={commonStyles.numberCell}>
                     {totalAmount.toLocaleString()}
                 </Text>
             </View>
-            <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+            <View style={[{flex: 1}, commonStyles.columnContainer]}>
                 <Text style={commonStyles.numberCell}>
                     {totalAmount.toLocaleString()}
                 </Text>

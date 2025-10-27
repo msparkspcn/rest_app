@@ -136,7 +136,7 @@ export default function CornerWhStockReportScreen() {
         {
             key: 'itemNm', title: Const.ITEM_NM, flex: 1.5,
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {paddingLeft: 10}]}>
+                <Text style={[commonStyles.cell, {paddingLeft: 5}]}>
                     {item.itemNm}
                 </Text>
             ),

@@ -232,7 +232,7 @@ export default function SalesReportByPeriod() {
                     <Pressable style={commonStyles.columnPressable} onPress={() => {openDetail(item)}}>
                         <Text style={[commonStyles.cell,
                             item.isSummary ? {fontWeight: 'bold', textAlign: 'center'}
-                            : [commonStyles.linkText, {paddingLeft: 10}]]}>
+                            : [commonStyles.linkText, {paddingLeft: 5}]]}>
                             {item.cornerNm}
                         </Text>
                     </Pressable>
@@ -254,13 +254,13 @@ export default function SalesReportByPeriod() {
     const renderTotalRow = useMemo(() => {
         if (!totalSumRow) return null;
         return (
-            <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-                <View style={[{ flex: 2.5 }, commonStyles.tableRightBorder]}>
+            <View style={commonStyles.summaryRow}>
+                <View style={[{ flex: 2.5 }, commonStyles.columnContainer]}>
                     <Text style={[commonStyles.cell, commonStyles.summaryLabelText, { textAlign: 'center' }]}>
                         합계
                     </Text>
                 </View>
-                <View style={[{ flex: 1.5 }, commonStyles.tableRightBorder]}>
+                <View style={[{ flex: 1.5 }, commonStyles.columnContainer]}>
                     <Text style={commonStyles.numberCell}>
                         {totalSumRow.saleAmt.toLocaleString()}
                     </Text>
@@ -287,13 +287,16 @@ export default function SalesReportByPeriod() {
         {
             key: 'price', title: Const.PRICE, flex: 1, align: 'right',
             renderCell: (item) => (
-                <Text style={commonStyles.numberSmallCell}>{(item.actualSaleAmt/item.saleQty).toLocaleString()}</Text>
+                <Text style={commonStyles.numberSmallCell}>
+                    {(item.actualSaleAmt/item.saleQty).toLocaleString()}
+                </Text>
             )
         },
         {
             key: 'actualSaleAmt', title: '금액', flex: 1.5, align: 'right',
             renderCell: (item) => (
-                <Text style={commonStyles.numberSmallCell}>{item.actualSaleAmt.toLocaleString()}</Text>
+                <Text style={commonStyles.numberSmallCell}>
+                    {item.actualSaleAmt.toLocaleString()}</Text>
             )
         },
     ]), []);
@@ -325,19 +328,19 @@ export default function SalesReportByPeriod() {
 
     const renderSummaryRow = useMemo(() => {
         return (
-            <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-                <View style={[{flex: 2.7}, commonStyles.tableRightBorder]}>
+            <View style={commonStyles.summaryRow}>
+                <View style={[{flex: 2.7}, commonStyles.columnContainer]}>
                     <Text
                         style={[commonStyles.modalCell, commonStyles.alignCenter,
                             {fontSize: 13, fontWeight: 'bold'}
                         ]}>합계</Text>
                 </View>
-                <View style={[{flex: 0.8}, commonStyles.tableRightBorder]}>
+                <View style={[{flex: 0.8}, commonStyles.columnContainer]}>
                     <Text style={commonStyles.numberSmallCell}>
                         {summaryRow.totalQty.toLocaleString()}
                     </Text>
                 </View>
-                <View style={[{flex: 2.5}, commonStyles.tableRightBorder]}>
+                <View style={[{flex: 2.5}, commonStyles.columnContainer]}>
                     <Text style={commonStyles.numberSmallCell}>
                         {summaryRow.totalAmt.toLocaleString()}
                     </Text>
