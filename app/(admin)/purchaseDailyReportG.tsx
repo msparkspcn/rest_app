@@ -106,7 +106,12 @@ export default function PurchaseDailyReportScreen() {
             .then(result => {
                 if (result.data.responseBody != null) {
                     const purchaseList = result.data.responseBody;
-                    console.log('purchaseList:' + JSON.stringify(purchaseList))
+                    purchaseList.sort((a, b) => {
+                        if (a.dlvDt < b.dlvDt) return -1;
+                        if (a.dlvDt > b.dlvDt) return 1;
+                        return 0;
+                    });
+                    console.log('purchaseList:' + JSON.stringify(purchaseList));
                     setPurchaseList(purchaseList);
                 }
             })
