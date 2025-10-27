@@ -19,6 +19,7 @@ import * as api from "../../services/api/api";
 import {useUser} from "../../contexts/UserContext";
 import {User, SalesOrg} from "../../types";
 import ListModal from "../../components/ListModal";
+import LoadingOverlay from "../../components/LoadingOverlay";
 type PurchaseRow = {
     salesOrgCd: string;
     salesOrgNm: string;
@@ -91,11 +92,11 @@ export default function PurchaseDailyReportScreen() {
             key: 'salesOrgNm', title: '사업장', flex: 2, align: 'left',
             renderCell: (item) => (
                 <Pressable style={commonStyles.columnPressable}
-                           onPress={() => opensalesOrgNmDetail(item)}
+                           onPress={() => openDetail(item)}
                 >
                     <Text style={[commonStyles.cell,
 
-                        item.isPurchaseSummary ? {fontWeight: 'bold', textAlign: 'center'} :commonStyles.linkText, {paddingLeft: 10}]}>
+                        item.isPurchaseSummary ? {fontWeight: 'bold', textAlign: 'center'} :commonStyles.linkText, {paddingLeft: 5}]}>
                         {item.salesOrgNm}
                     </Text>
                 </Pressable>
@@ -162,7 +163,7 @@ export default function PurchaseDailyReportScreen() {
     }, [purchaseList]);
 
     const renderFooter = () => (
-        <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+        <View style={commonStyles.summaryRow}>
             <View style={[{flex: 2.5},commonStyles.columnContainer]}>
                 <Text style={[commonStyles.cell, styles.summaryLabelText,
                     {textAlign:'center'}]}>합계</Text>
@@ -186,12 +187,12 @@ export default function PurchaseDailyReportScreen() {
     const onSearch = () => {
         const request = {
             cmpCd: user.cmpCd,
-            outSdCmpCd: "",
             fromDate: fromPurchaseDt,
-            // salesOrgCd: user.salesOrgCd,
+            operDiv: "",
+            salesOrgCd: selectedSalesOrgCd,
             toDate: toPurchaseDt
         }
-        console.log('request:'+JSON.stringify(request));
+        console.log('request1:'+JSON.stringify(request));
         setLoading(true);
 
         api.getPurchaseSummaryOp(request)
@@ -226,7 +227,7 @@ export default function PurchaseDailyReportScreen() {
     ]), []);
 
     const renderDetailFooter = () => (
-        <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+        <View style={commonStyles.summaryRow}>
             <View style={[{flex: 1}, commonStyles.columnContainer]}>
                 <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.modalTotalText]}>
                     합계
@@ -246,7 +247,7 @@ export default function PurchaseDailyReportScreen() {
         setShowDatePicker(true);
     };
 
-    const opensalesOrgNmDetail = (purchase: PurchaseRow) => {
+    const openDetail = (purchase: PurchaseRow) => {
         setSelectedsalesOrgNm(purchase.salesOrgNm);
         console.log('거래처 클릭 purchase:'+JSON.stringify(purchase));
         const request = {
@@ -262,7 +263,12 @@ export default function PurchaseDailyReportScreen() {
             .then(result => {
                 if (result.data.responseBody != null) {
                     const purchaseItemList = result.data.responseBody;
-                    console.log('purchaseList:' + JSON.stringify(purchaseItemList))
+                    purchaseItemList.sort((a, b) => {
+                        if (a.dlvDt < b.dlvDt) return -1;
+                        if (a.dlvDt > b.dlvDt) return 1;
+                        return 0;
+                    });
+                    console.log('purchaseItemList:' + JSON.stringify(purchaseItemList));
                     setPurchaseItemList(purchaseItemList);
                     setIsDetailVisible(true);
                 }
@@ -358,6 +364,7 @@ export default function PurchaseDailyReportScreen() {
                     </View>
                 </View>
             </Modal>
+            {loading && (<LoadingOverlay />)}
         </SafeAreaView>
     );
 };

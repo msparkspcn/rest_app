@@ -179,7 +179,7 @@ export default function RealtimeSalesScreen() {
                 if(!selectedSalesOrgCd) {
                     let summaryName = '';
                     if (operDiv === '01') summaryName = '휴게소 소계';
-                    else if (operDiv === '02') summaryName = '주유소 소계';
+                    else if (operDiv === '02') summaryName = Const.OIL_SUMMARY;
                     sumNo -= 1;
                     result.push({
                         no: sumNo,
@@ -231,8 +231,8 @@ export default function RealtimeSalesScreen() {
                 });
                 if(!selectedSalesOrgCd) {
                     let summaryName = '';
-                    if (storCd === '01') summaryName = '주유소 소계';
-                    else if (storCd === '02') summaryName = '충전소 소계';
+                    if (storCd === '01') summaryName = Const.OIL_SUMMARY;
+                    else if (storCd === '02') summaryName = Const.GAS_SUMMARY;
                     sumNo -= 1;
                     result.push({
                         no: sumNo,
@@ -337,7 +337,7 @@ export default function RealtimeSalesScreen() {
                 <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
                     <Text style={[commonStyles.cell,
                         item.isSummary ? {fontWeight: 'bold', textAlign: 'center'}
-                            : commonStyles.linkText, {paddingLeft: 10}]}>
+                            : commonStyles.linkText, {paddingLeft: 5}]}>
                         {item.salesOrgNm}
                     </Text>
                 </Pressable>
@@ -367,7 +367,7 @@ export default function RealtimeSalesScreen() {
                 <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
                     <Text style={[commonStyles.cell,
                         item.isSummary ? {fontWeight: 'bold', textAlign: 'center'}
-                            : commonStyles.linkText, {paddingLeft: 10}]}>
+                            : commonStyles.linkText, {paddingLeft: 5}]}>
                         {item.storNm}
                     </Text>
                 </Pressable>
@@ -469,17 +469,17 @@ export default function RealtimeSalesScreen() {
     const renderOilSaleDetailFooterRow = () => {
         return (
             <View style={[commonStyles.modalTableRow, commonStyles.summaryRow]}>
-                <View style={[{flex: 2.5}, commonStyles.tableRightBorder]}>
+                <View style={[{flex: 2.5}, commonStyles.columnContainer]}>
                     <Text style={[commonStyles.modalCell, {textAlign: 'center', fontWeight: 'bold'}]}>
                         합계
                     </Text>
                 </View>
-                <View style={[{flex: 1.1}, commonStyles.tableRightBorder]}>
+                <View style={[{flex: 1.1}, commonStyles.columnContainer]}>
                     <Text style={[commonStyles.modalCell, commonStyles.numberSmallCell]}>
                         {oilSaleSummaryRow.totalSaleQty.toLocaleString()}
                     </Text>
                 </View>
-                <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
+                <View style={[{flex: 1.5}, commonStyles.columnContainer]}>
                     <Text style={[commonStyles.modalCell, commonStyles.numberSmallCell]}>
                         {oilSaleSummaryRow.totalSaleAmt.toLocaleString()}
                     </Text>
@@ -491,7 +491,7 @@ export default function RealtimeSalesScreen() {
     const renderRestSaleDetailFooterRow = () => {
         return (
             <View style={[commonStyles.modalTableRow, commonStyles.summaryRow]}>
-                <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
+                <View style={[{flex: 2}, commonStyles.columnContainer]}>
                     <Text
                         style={[commonStyles.modalCell,
                             {
@@ -501,17 +501,17 @@ export default function RealtimeSalesScreen() {
                             }
                         ]}>합계</Text>
                 </View>
-                <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                <View style={[{flex: 1}, commonStyles.columnContainer]}>
                     <Text style={[commonStyles.modalCell, commonStyles.numberSmallCell]}>
                         {restSaleSummaryRow.totalCashAmt.toLocaleString()}
                     </Text>
                 </View>
-                <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+                <View style={[{flex: 1}, commonStyles.columnContainer]}>
                     <Text style={[commonStyles.modalCell, commonStyles.numberSmallCell]}>
                         {restSaleSummaryRow.totalEtcPayAmt.toLocaleString()}
                     </Text>
                 </View>
-                <View style={[{flex: 1.3}, commonStyles.tableRightBorder]}>
+                <View style={[{flex: 1.3}, commonStyles.columnContainer]}>
                     <Text style={[commonStyles.modalCell, commonStyles.numberSmallCell]}>
                         {restSaleSummaryRow.totalSaleAmt.toLocaleString()}
                     </Text>
@@ -530,11 +530,11 @@ export default function RealtimeSalesScreen() {
     const renderListHeader = () => {
         if (saleList.length == 0) return null;
         return (
-            <View>
+            <View style={{borderBottomWidth: StyleSheet.hairlineWidth, borderColor: '#aaa', backgroundColor:'red'}}>
                 {saleStatList.map(row => {
                     let saleValue1;
                     let saleValue2;
-                    console.log('row:'+JSON.stringify(row));
+                    console.log('row1:'+JSON.stringify(row));
 
                     if (appliedVatChecked && appliedDcChecked) {
                         saleValue1 = row.saleAmt1 - row.vatAmt1;
@@ -559,7 +559,7 @@ export default function RealtimeSalesScreen() {
                     return (
                         <View
                             key={row.sortOrder}
-                            style={[commonStyles.tableRow, commonStyles.summaryRow,
+                            style={[commonStyles.summaryRow,
                                 {
                                     flexDirection: 'row',
                                     alignItems: 'center',
@@ -569,12 +569,16 @@ export default function RealtimeSalesScreen() {
                                 },
                             ]}
                         >
-                            <View style={[{flex: 1, justifyContent: 'center'}, commonStyles.tableRightBorder]}>
-                                <Text style={[{paddingLeft: 10}, styles.cell, styles.summaryLabelText]}>
+                            <View style={[{flex: 1, justifyContent: 'center'}, commonStyles.columnContainer]}>
+                                <Text style={[{paddingLeft: 5}, styles.cell, styles.summaryLabelText]}>
                                     {row.label}
                                 </Text>
                             </View>
-                            <View style={[{flex: 2, flexDirection: 'row', alignItems: 'center', justifyContent:'flex-end'}]}>
+                            <View style={[{flex: 2, flexDirection: 'row', alignItems: 'center', justifyContent:'flex-end',
+                                height: '100%',
+                                borderRightWidth: StyleSheet.hairlineWidth,
+                                borderBottomWidth: StyleSheet.hairlineWidth,
+                                borderColor: '#aaa'}]}>
                                 {(row.sortOrder === '1') && (
                                     <View style={{flexDirection: 'row', alignItems:'center'}}>
                                         <Text style={{fontSize: 12, paddingRight: 5}}>

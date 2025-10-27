@@ -2,6 +2,7 @@ import React from 'react';
 import { FlatList, View, Text, Pressable, StyleSheet } from 'react-native';
 import { commonStyles } from '@/styles';
 import Const from "../constants/Const";
+import {AntDesign} from "@expo/vector-icons";
 
 type Align = 'left' | 'center' | 'right';
 type ColumnDef<T> = {
@@ -21,11 +22,10 @@ type TableProps<T> = {
     isModal?: boolean; // 모달 내부에 사용되는지 여부
     listHeader?: React.ReactNode;
     listFooter?: React.ReactNode;
-    hasSearched?: boolean;
 };
 
 const alignStyles = {
-    left: { ...commonStyles.alignLeft, paddingLeft: 10 },
+    left: { ...commonStyles.alignLeft, paddingLeft: 5 },
     center: commonStyles.alignCenter,
     right: { textAlign: 'right' },
 } as const;
@@ -36,8 +36,7 @@ export function Table<T>({
      onRowPress,
      isModal,
      listHeader,
-     listFooter,
-    hasSearched = false,
+     listFooter
 }: TableProps<T>) {
     const renderHeader = () => (
         <View style={commonStyles.tableHeaderRow}>
@@ -47,7 +46,7 @@ export function Table<T>({
                     style={[
                         { flex: col.flex },
                         commonStyles.columnContainer,
-                        commonStyles.headerCellDivider,
+                        // i === columns.length - 1 && { borderRightWidth: 0}
                     ]}
                 >
                     <Text style={commonStyles.headerCell}>
@@ -62,9 +61,12 @@ export function Table<T>({
         if ((item as any).isSummary) {
             const summaryItem = item as any; // 타입 단순화
             return (
-                <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
+                <View style={[commonStyles.summaryRow,
+
+                ]}>
                     <View style={[{flex: 2.5}, commonStyles.columnContainer]}>
-                        <Text style={[commonStyles.summaryLabelText, {textAlign: 'center', fontSize: 13 }]}>
+                        <Text style={[commonStyles.summaryLabelText,
+                            {textAlign: 'center', fontSize: 13 }]}>
                             {summaryItem.orgNm}
                         </Text>
                     </View>
@@ -83,6 +85,69 @@ export function Table<T>({
                 </View>
             );
         }
+        if ((item as any).isRatioSummary) {
+            const summaryItem = item as any; // 타입 단순화
+            return (
+                <View style={[commonStyles.summaryRow]}>
+                    <View style={[{flex: 1.9}, commonStyles.columnContainer]}>
+                        <Text style={[{textAlign:'center'}, commonStyles.cell, commonStyles.summaryLabelText]}>
+                            {summaryItem.orgNm}
+                        </Text>
+                    </View>
+                    <View style={[commonStyles.columnContainer,
+                        {flex: 1, justifyContent:'flex-end'}]}
+                    >
+                        <Text style={commonStyles.numberCell}>
+                            {summaryItem.lastWeekActualSaleRatio.toLocaleString()}
+                        </Text>
+                        <AntDesign
+                            name={summaryItem.lastWeekActualSaleRatio>0 ? 'caretup' : 'caretdown'}
+                            size={13}
+                            color={summaryItem.lastWeekActualSaleRatio>0 ? 'red' : 'blue'}
+                            style={{marginRight: 2}}
+                        />
+                    </View>
+                    <View style={[commonStyles.columnContainer,
+                        {flex: 1, justifyContent:'flex-end'}]}
+                    >
+                        <Text style={commonStyles.numberCell}>
+                            {summaryItem.yesterdayActualSaleRatio.toLocaleString()}
+                        </Text>
+                        <AntDesign
+                            name={summaryItem.yesterdayActualSaleRatio > 0 ? 'caretup' : 'caretdown'}
+                            size={13}
+                            color={summaryItem.yesterdayActualSaleRatio > 0 ? 'red' : 'blue'}
+                            style={{marginRight: 2}}
+                        />
+                    </View>
+                    <View style={[{flex: 1.3}, commonStyles.columnContainer]}>
+                        <Text style={[commonStyles.numberSmallCell]}>
+                            {summaryItem.actualSaleAmt.toLocaleString()}
+                        </Text>
+                    </View>
+                </View>
+            );
+        }
+        if ((item as any).isPurchaseSummary) {
+            const summaryItem = item as any; // 타입 단순화
+            return (
+                <View style={[commonStyles.summaryRow,
+                    {borderBottomWidth: '3', borderColor:'#aaa'},
+                ]}>
+                    <View style={[{flex: 2.5}, commonStyles.columnContainer]}>
+                        <Text style={[commonStyles.summaryLabelText,
+                            {textAlign: 'center', fontSize: 13 }]}>
+                            {summaryItem.salesOrgNm}
+                        </Text>
+                    </View>
+                    <View style={[{flex: 1}, commonStyles.columnContainer]}>
+                        <Text style={[commonStyles.numberSmallCell]}>
+                            {summaryItem.totalOrdAmt.toLocaleString()}
+                        </Text>
+                    </View>
+                </View>
+            );
+        }
 
         const rowContent = (
             <View style={[
@@ -92,7 +157,9 @@ export function Table<T>({
                 {columns.map((col, i) => (
                     <View
                         key={String(col.key)}
-                        style={[{ flex: col.flex }, commonStyles.columnContainer]}
+                        style={[{ flex: col.flex },
+                            commonStyles.columnContainer
+                        ]}
                     >
                         {col.renderCell ? (
                             col.renderCell(item, index)
@@ -117,11 +184,9 @@ export function Table<T>({
         }
         return rowContent;
     };
-    // console.log("isModal:"+isModal)
-    // console.log("data:"+data)
 
     return (
-        <View style={[isModal ? commonStyles.modalTableContainer : commonStyles.tableContainer]}>
+        <View style={[commonStyles.tableContainer]}>
             {renderHeader()}
             <FlatList
                 data={data}

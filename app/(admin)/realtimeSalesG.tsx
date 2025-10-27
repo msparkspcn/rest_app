@@ -1,6 +1,6 @@
 import {StatusBar} from 'expo-status-bar';
 import React, {useMemo, useState} from 'react';
-import {Pressable, SafeAreaView, Text, TouchableOpacity, View} from 'react-native';
+import {Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {commonStyles} from "../../styles/index";
 import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
 import {Table} from "../../components/Table";
@@ -11,6 +11,7 @@ import * as api from "../../services/api/api";
 import {useUser} from "../../contexts/UserContext";
 import {User} from "../../types/user";
 import LoadingOverlay from "../../components/LoadingOverlay";
+import {AntDesign} from "@expo/vector-icons";
 
 type SaleRow = {
     no: number;
@@ -51,7 +52,7 @@ export default function RealtimeSalesScreen() {
             cmpCd: user.cmpCd,
             cornerCd: "",
             fromSaleDt: saleDate,
-            salesOrgCd: "8100",
+            salesOrgCd: user.salesOrgCd,
             storCd: selectedStorCd.id,
             toSaleDt: ""
         }
@@ -82,7 +83,7 @@ export default function RealtimeSalesScreen() {
             cmpCd: user.cmpCd,
             cornerCd: "",
             fromSaleDt: saleDate,
-            salesOrgCd: "8100",
+            salesOrgCd: user.salesOrgCd,
             storCd: selectedStorCd.id,
             toSaleDt: ""
         }
@@ -179,8 +180,8 @@ export default function RealtimeSalesScreen() {
 
                 if(selectedStorCd.id=="") {
                     let summaryName = '';
-                    if (storCd === '01') summaryName = '주유소 소계';
-                    else if (storCd === '02') summaryName = '충전소 소계';
+                    if (storCd === '01') summaryName = Const.OIL_SUMMARY;
+                    else if (storCd === '02') summaryName = Const.GAS_SUMMARY;
                     sumNo -= 1;
                     result.push({
                         no: sumNo,
@@ -207,21 +208,52 @@ export default function RealtimeSalesScreen() {
                 {saleStatList.map(row => (
                     <View
                         key={row.sortOrder}
-                        style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-                        {row.sortOrder === '1' || row.sortOrder === '2' ? (
-                            <>
+                        style={commonStyles.summaryRow}>
+                        {row.sortOrder === '1' && (
+                                <>
+                                    <View style={[{flex: 1.3}, commonStyles.columnContainer]}>
+                                        <Text style={[commonStyles.cell, commonStyles.summaryLabelText, {textAlign:'center'}]}>
+                                            {row.label}
+                                        </Text>
+                                    </View>
+                                    <View style={[{flex: 3.8}, commonStyles.columnContainer]}>
+                                        <Text style={[commonStyles.numberSmallCell]}>
+                                            {row.saleQty.toLocaleString()} / {row.saleAmt.toLocaleString()}
+                                        </Text>
+                                    </View>
+                                </>
+                        )}
+                        {row.sortOrder === '2' && (
+                            <View style={[{flex: 1.3, flexDirection: 'row', alignItems: 'center'}, commonStyles.columnContainer]}>
                                 <View style={[{flex: 1.3}, commonStyles.columnContainer]}>
                                     <Text style={[commonStyles.cell, commonStyles.summaryLabelText, {textAlign:'center'}]}>
-                                        {row.label}
+                                        전주/전일 매출
                                     </Text>
                                 </View>
-                                <View style={[{flex: 3.8}, commonStyles.columnContainer]}>
-                                    <Text style={[commonStyles.numberSmallCell]}>
-                                        {row.saleQty.toLocaleString()} / {row.saleAmt.toLocaleString()}
+                                <View style={[{flex: 3.8, flexDirection:'row',borderWidth: StyleSheet.hairlineWidth,
+                                    borderColor: '#aaa', height: '100%', alignItems:'center', justifyContent:'flex-end',
+                                    marginRight:-1}]}>
+                                    <Text style={{fontSize: 12, color: '#444'}}>
+                                        {row.saleQty.toLocaleString()}
                                     </Text>
+                                    <AntDesign
+                                        name={row.saleQty > 0 ? 'caretup' : 'caretdown'}
+                                        size={13}
+                                        color={row.saleQty > 0 ? 'red' : 'blue'}
+                                        style={{paddingHorizontal: 5}}
+                                    />
+                                    <Text style={{fontSize: 12, color: '#444'}}> /  {row.saleAmt.toLocaleString()}
+                                    </Text>
+                                    <AntDesign
+                                        name={row.saleQty > 0 ? 'caretup' : 'caretdown'}
+                                        size={13}
+                                        color={row.saleQty > 0 ? 'red' : 'blue'}
+                                        style={{paddingHorizontal: 5}}
+                                    />
                                 </View>
-                            </>
-                        ) : (
+                            </View>
+                        )}
+                        {row.sortOrder != '1' && row.sortOrder !='2' && (
                             <>
                                 <View style={[{flex: 1.3,paddingLeft:0.5}, commonStyles.columnContainer]}>
                                     <Text style={[commonStyles.cell, commonStyles.summaryLabelText, {textAlign:'center'}]}>
