@@ -154,12 +154,12 @@ export default function LoginScreen() {
             <Text style={styles.loginButtonText}>{Const.LOGIN}</Text>
           </TouchableOpacity>
 
-          <View style={styles.registerContainer}>
-            <Text style={styles.registerText}>{Const.NO_ID_MSG}</Text>
-            <TouchableOpacity onPress={handleRegister}>
-              <Text style={styles.registerLink}> {Const.SIGN_UP}</Text>
-            </TouchableOpacity>
-          </View>
+          {/*<View style={styles.registerContainer}>*/}
+          {/*  <Text style={styles.registerText}>{Const.NO_ID_MSG}</Text>*/}
+          {/*  <TouchableOpacity onPress={handleRegister}>*/}
+          {/*    <Text style={styles.registerLink}> {Const.SIGN_UP}</Text>*/}
+          {/*  </TouchableOpacity>*/}
+          {/*</View>*/}
         </View>
       </View>
     </KeyboardAvoidingView>

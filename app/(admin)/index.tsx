@@ -32,7 +32,7 @@ export default function AdminHomeScreen() {
       title: '마스터',
       icon: '📁',
       children: [
-        { title: '사용자 정보수정', route: '/(admin)/users', userRoleType: 'all_except_001' },
+        // { title: '사용자 정보수정', route: '/(admin)/users', userRoleType: 'all_except_001' },
         { title: '매장현황(휴)', route: '/(admin)/cornerList', userRoleType: DEP_R },
         { title: '거래처현황(휴)', route: '/(admin)/vendorList', userRoleType: DEP_R },
         { title: '거래처현황(주)', route: '/(admin)/vendorList', userRoleType: DEP_G },
