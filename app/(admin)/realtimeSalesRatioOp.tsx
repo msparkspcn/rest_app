@@ -15,12 +15,39 @@ import {AntDesign} from "@expo/vector-icons";
 import LoadingOverlay from "../../components/LoadingOverlay";
 
 type SaleRow = {
-    salesOrgNm: string;
     salesOrgCd: string;
-    lastWeekActualSaleRatio: number;
-    yesterdayActualSaleRatio: string;
+    orgNm: string;
+    no: number;
+
+    lastWeekActualSaleRatio: number; //부가세 적용X, DC적용 -> 기본값
+    yesterdayActualSaleRatio: number;
+
     actualSaleAmt: number
+    totalSaleAmt: number
 };
+
+type Sale = {
+    salesOrgCd: string;
+    salesOrgNm: string;
+    lastWeekSaleRatio: number;  //부가세 적용X, DC적용 X 총 매출
+    yesterdaySaleRatio: number;
+
+    lastWeekActualSaleRatio: number; //부가세 적용X, DC적용 -> 기본값
+    yesterdayActualSaleRatio: number;
+
+    lastWeekNetSaleRatio: number;  //부가세 적용, DC적용
+    yesterdayNetSaleRatio: number;
+
+    lastWeekExceptVatRatio: number; // 부가세 적용, DC 적용 X
+    yesterdayExceptVatRatio: number;
+
+    saleAmt: number;
+    actualSaleAmt: number;
+    netSaleAmt: number;
+    saleExceptVatAmt: number;
+    vatAmt: number;
+    totalSaleAmt: number;
+}
 
 export default function RealtimeSalesRatio() {
     const [saleDate, setSaleDate] = useState(getTodayYmd());
@@ -38,7 +65,7 @@ export default function RealtimeSalesRatio() {
     const [appliedDcChecked, setAppliedDcChecked] = useState(false);
 
     const [selectedSalesOrgCd, setSelectedSalesOrgCd] = useState<string>('');
-    const [saleList, setSaleList] = useState<SaleRow[]>([]);
+    const [saleList, setSaleList] = useState<Sale[]>([]);
     const [saleStatList ,setSaleStatList] = useState<[] | null>([]);
     const [loading, setLoading] = useState(false);
 
@@ -50,7 +77,6 @@ export default function RealtimeSalesRatio() {
         const request = { cmpCd: user.cmpCd }
         api.getSalsOrgList(request)
             .then(result => {
-                console.log("result:"+JSON.stringify(result))
                 if (result.data.responseBody != null) {
                     const salesOrgList = result.data.responseBody;
                     setSalesOrgList([{salesOrgCd:'', salesOrgNm: '전체'}, ...salesOrgList]);
@@ -62,7 +88,7 @@ export default function RealtimeSalesRatio() {
     }
 
     const onSearch = () => {
-        console.log("조회 클릭");
+        console.log("조회 클릭 selectedSalesOrgCd:"+selectedSalesOrgCd.length);
         setAppliedDcChecked(dcIncludedChecked);
         setAppliedVatChecked(vatExcludedChecked);
 
@@ -112,7 +138,7 @@ export default function RealtimeSalesRatio() {
             .then(result => {
                 if (result.data.responseBody != null) {
                     const saleStatList = result.data.responseBody;
-                    console.log('saleStatList:' + JSON.stringify(saleStatList))
+                    // console.log('saleStatList:' + JSON.stringify(saleStatList))
                     setSaleStatList(saleStatList);
                     setLoading(false);
                 }
@@ -128,32 +154,57 @@ export default function RealtimeSalesRatio() {
         setShowDatePicker(true);
     };
 
-    const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => ([
+    const mainColumns: ColumnDef<SaleRow & { isRatioSummary?: boolean; }>[] = useMemo(() => {
+        let saleAmt = 0;
+        let lastWeekSaleRatio = 0;
+        let yesterdaySaleRatio = 0;
+        const calcSaleValue = (row: any) => {
+            if (appliedVatChecked && appliedDcChecked) {
+                saleAmt = row.saleExceptVatAmt;
+                lastWeekSaleRatio = row.lastWeekExceptVatRatio;
+                yesterdaySaleRatio = row.yesterdayExceptVatRatio;
+            } else if (appliedVatChecked && !appliedDcChecked) {
+                saleAmt = row.netSaleAmt;
+                lastWeekSaleRatio = row.lastWeekNetSaleRatio;
+                yesterdaySaleRatio = row.yesterdayNetSaleRatio;
+            } else if (!appliedVatChecked && appliedDcChecked) {
+                saleAmt = row.saleAmt;
+                lastWeekSaleRatio = row.lastWeekSaleRatio;
+                yesterdaySaleRatio = row.yesterdaySaleRatio;
+            } else {
+                saleAmt = row.actualSaleAmt;
+                lastWeekSaleRatio = row.lastWeekActualSaleRatio;
+                yesterdaySaleRatio = row.yesterdayActualSaleRatio;
+            }
+
+            return { saleAmt, lastWeekSaleRatio, yesterdaySaleRatio };
+        };
+            return [
         {key: 'no', title: Const.NO, flex: 0.4,
-            renderCell: (_item, index) => (
-                <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
+            renderCell: (_item) => (
+                <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{_item.no}</Text>
             ),
         },
         {
             key: 'salesOrgNm', title: '사업소', flex: 1.5,
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {paddingLeft: 10}]}>
+                <Text style={[commonStyles.cell, {paddingLeft: 5}]}>
                     {item.salesOrgNm}
                 </Text>
             ),
         },
         {key: 'lastWeekActualSaleRatio', title: '전주대비', flex: 1,
             renderCell: (item) => {
-                const value = item.lastWeekActualSaleRatio;
-                const isUp = value > 0;
+                const { lastWeekSaleRatio } = calcSaleValue(item);
+                const isUp = lastWeekSaleRatio > 0;
                 return (
                     <View style={{flexDirection: 'row', alignItems: 'center', justifyContent:'flex-end'}}>
                         <Text style={commonStyles.numberCell}>
-                            {item.lastWeekActualSaleRatio.toLocaleString()}
+                            {lastWeekSaleRatio.toLocaleString()}
                         </Text>
                         <AntDesign
                             name={isUp ? 'caretup' : 'caretdown'}
-                            size={12}
+                            size={13}
                             color={isUp ? 'red' : 'blue'}
                             style={{marginRight: 2}}
                         />
@@ -164,16 +215,16 @@ export default function RealtimeSalesRatio() {
         {
             key: 'yesterdayActualSaleRatio', title: '전일대비', flex: 1,
             renderCell: (item) => {
-                const value = item.yesterdayActualSaleRatio;
-                const isUp = value > 0;
+                const { yesterdaySaleRatio } = calcSaleValue(item);
+                const isUp = yesterdaySaleRatio > 0;
                 return (
                     <View style={{flexDirection: 'row', alignItems: 'center', justifyContent:'flex-end'}}>
                         <Text style={commonStyles.numberCell}>
-                            {item.yesterdayActualSaleRatio.toLocaleString()}
+                            {yesterdaySaleRatio.toLocaleString()}
                         </Text>
                         <AntDesign
                             name={isUp ? 'caretup' : 'caretdown'}
-                            size={12}
+                            size={13}
                             color={isUp ? 'red' : 'blue'}
                             style={{marginRight: 2}}
                         />
@@ -182,20 +233,23 @@ export default function RealtimeSalesRatio() {
             }
         },
         {key: 'actualSaleAmt', title: '총매출', flex: 1.3,
-            renderCell: (item) => (
+            renderCell: (item) => {
+                const { saleAmt } = calcSaleValue(item);
+            return (
                     <Text style={commonStyles.numberCell}>
-                        {item.actualSaleAmt.toLocaleString()}
+                        {saleAmt.toLocaleString()}
                     </Text>
                 )
+            }
         },
-    ]), []);
+    ]}, [appliedVatChecked, appliedDcChecked]);
 
     const tableData = useMemo(() => {
         if (!saleList) return []; // null 방지
 
-        const result: (SaleRow & { isSummary?: boolean })[] = [];
+        const result: (SaleRow & { isRatioSummary?: boolean })[] = [];
 
-        const grouped: Record<string, SaleRow[]> = {};
+        const grouped: Record<string, Sale[]> = {};
         saleList.forEach(item => {
             if (!grouped[item.operDiv]) grouped[item.operDiv] = [];
             grouped[item.operDiv].push(item);
@@ -208,40 +262,63 @@ export default function RealtimeSalesRatio() {
             .forEach(operDiv => {
                 const rows = grouped[operDiv];
                 let storSum = 0;
-                let netSaleSum = 0;
+                let yesDaySum = 0;
+                let lastWeekSum = 0;
                 rows.forEach((item) => {
-                    if (appliedVatChecked && appliedDcChecked) storSum += item.saleAmt - item.vatAmt; //부가세 적용, DC적용 X
-                    else if (appliedVatChecked && !appliedDcChecked) storSum += item.netSaleAmt; //부가세 적용, DC적용
-                    else if (!appliedVatChecked && appliedDcChecked) storSum += item.saleAmt; //부가세 적용X, DC적용 X 총 매출
-                    else if (!appliedVatChecked && !appliedDcChecked) storSum += item.actualSaleAmt; //부가세 적용X, DC적용 -> 기본값
+                    if (appliedVatChecked && appliedDcChecked) {
+                        storSum += item.saleExceptVatAmt;
+                        yesDaySum += storSum / (1 + (item.yesterdayExceptVatRatio/100));
+                        lastWeekSum += storSum / (1 + (item.lastWeekExceptVatRatio/100));
+                        console.log('1,1');
+                    } //부가세 적용, DC적용 X -> 1,1 -> X
+                    else if (appliedVatChecked && !appliedDcChecked) {
+                        storSum += item.netSaleAmt;
+                        yesDaySum += storSum / (1 + (item.yesterdayNetSaleRatio/100));
+                        lastWeekSum += storSum / (1 + (item.lastWeekNetSaleRatio/100));
+                        console.log('1,0');
+                    } //부가세 적용, DC적용 O 순매출 -> 1,0 -> X *982,196,933
+                    else if (!appliedVatChecked && appliedDcChecked) {
+                        storSum += item.saleAmt;
+                        yesDaySum += storSum / (1 + (item.yesterdaySaleRatio/100));
+                        lastWeekSum += storSum / (1 + (item.lastWeekSaleRatio/100));
+                        console.log('0,1');
+                    } //부가세 적용X, DC적용 X 총 매출(기본) -> 0,1 -> O *1,086,037,629
+                    else if (!appliedVatChecked && !appliedDcChecked) {
+                        storSum += item.actualSaleAmt;
+                        yesDaySum += storSum / (1 + (item.yesterdayActualSaleRatio/100));
+                        lastWeekSum += storSum / (1 + (item.lastWeekActualSaleRatio/100));
+                        console.log('0,0');
+                    } //부가세 적용X, DC적용 시재 O -> 0,0 -> O *1,085,737,849
                     no += 1;
                     result.push({
                         ...item,
                         no: no
                     });
                 });
-                if(!selectedSalesOrgCd) {
+                console.log('storSum:'+storSum);
+                console.log('yesDaySum:'+yesDaySum);
+                console.log('lastWeekSum:'+lastWeekSum);
+                if(selectedSalesOrgCd.length == 0) {
                     let summaryName = '';
                     if (operDiv === '01') summaryName = '휴게소 소계';
-                    else if (operDiv === '02') summaryName = '주유소 소계';
+                    else if (operDiv === '02') summaryName = Const.OIL_SUMMARY;
                     sumNo -= 1;
                     result.push({
-                        no: sumNo,
-                        salesOrgCd: '',
+                        salesOrgCd: "",
                         orgNm: summaryName,
-                        saleAmt: 0,
-                        actualSaleAmt: 0,
+                        no: sumNo,
+                        actualSaleAmt: storSum,
                         totalSaleAmt: storSum,
-                        operDiv:'',
-                        isSummary: true,
-                        vatAmt: 1, netSaleAmt: 0
+                        isRatioSummary: true,
+                        lastWeekActualSaleRatio: (storSum - lastWeekSum) / lastWeekSum * 100,
+                        yesterdayActualSaleRatio: (storSum - yesDaySum) / yesDaySum * 100,
                     });
                 }
             });
         // console.log("result:"+JSON.stringify(result));
 
         return result;
-    }, [saleList]);
+    }, [saleList, appliedVatChecked, appliedDcChecked]);
 
     const handleVatExcludedToggle = () => {
         setVatExcludedChecked(!vatExcludedChecked);
@@ -257,85 +334,87 @@ export default function RealtimeSalesRatio() {
                 {saleStatList.map(row => {
                     let saleValue1;
                     let saleValue2;
-                    console.log('row:' + JSON.stringify(row));
 
                     if (appliedVatChecked && appliedDcChecked) {
                         saleValue1 = row.saleAmt1 - row.vatAmt1;
                         saleValue2 = row.saleAmt2 - row.vatAmt2;
 
                     } //부가세 적용, DC적용 X
+
                     if (appliedVatChecked && !appliedDcChecked) {
                         saleValue1 = row.netSaleAmt1;
                         saleValue2 = row.netSaleAmt2;
                     } //부가세 적용, DC적용
+
                     if (!appliedVatChecked && appliedDcChecked) {
                         saleValue1 = row.saleAmt1;
                         saleValue2 = row.saleAmt2;
                     } //부가세 적용X, DC적용 X 총 매출
+
                     if (!appliedVatChecked && !appliedDcChecked) {
                         saleValue1 = row.actualSaleAmt1;
                         saleValue2 = row.actualSaleAmt2;
                     }
                     let lastWeekIsUp = saleValue1 > 0;
                     let yesDayIsUp = saleValue2 > 0;
-                    console.log('saleValue1:' + saleValue1 + ', saleValue2:' + saleValue2);
+                    // console.log('saleValue1:' + saleValue1 + ', saleValue2:' + saleValue2);
                     return (
                         <View
                             key={row.sortOrder}
-                            style={[commonStyles.tableRow, commonStyles.summaryRow,
+                            style={[commonStyles.summaryRow,
                                 {
                                     flexDirection: 'row',
                                     alignItems: 'center',
                                     justifyContent: 'space-between',
                                     paddingHorizontal: 0,
-                                    width: '100%'
+                                    width: '100%',
                                 },
                             ]}
                         >
-                            <View style={[{flex: 1.9, justifyContent: 'center'}, commonStyles.tableRightBorder]}>
-                                <Text style={[{textAlign:'center'}, commonStyles.cell, commonStyles.summaryLabelText]}>
+                            <View style={[{flex: 1.9, justifyContent: 'center'},
+                                commonStyles.columnContainer]}>
+                                <Text style={[{textAlign:'center'}, commonStyles.cell,
+                                    commonStyles.summaryLabelText]}>
                                     {row.label}
                                 </Text>
                             </View>
-                            <View style={[{
-                                flex: 3.3,
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                justifyContent: 'flex-end'
-                            }]}>
+                            <View style={[{flex: 3.3}]}>
                                 {(row.sortOrder === '1') && (
-                                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                                        <Text style={{fontSize: 12, paddingRight: 5}}>
-                                            {saleValue1.toLocaleString()} / </Text>
-                                        <Text style={{fontSize: 12, paddingRight: 5}}>
+                                    <View style={[commonStyles.columnContainer, {justifyContent:'flex-end'}]}>
+                                        <Text style={commonStyles.numberCell}>
+                                            {saleValue1.toLocaleString()} /</Text>
+                                        <Text style={{color: '#444',fontSize: 12, textAlign:'right', paddingRight: 5}}>
                                             {saleValue2.toLocaleString()}
                                         </Text>
                                     </View>
                                 )}
                                 {(row.sortOrder === '2') && (
-                                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                                        <Text style={{fontSize: 12}}>
+                                    <View style={[commonStyles.columnContainer, {justifyContent:'flex-end'}]}>
+                                        <Text style={commonStyles.numberCell}>
                                             {saleValue1.toLocaleString()}
                                         </Text>
                                         <AntDesign
                                             name={lastWeekIsUp ? 'caretup' : 'caretdown'}
                                             size={13}
                                             color={lastWeekIsUp ? 'red' : 'blue'}
-                                            style={{paddingHorizontal: 5}}
+                                            style={{paddingRight: 5}}
                                         />
-                                        <Text style={{fontSize: 12}}> / {saleValue2.toLocaleString()}
+                                        <Text style={{fontSize: 12,
+                                            color: '#444',
+                                            paddingRight:5,
+                                            textAlign: 'right'}}> /  {saleValue2.toLocaleString()}
                                         </Text>
                                         <AntDesign
                                             name={yesDayIsUp ? 'caretup' : 'caretdown'}
                                             size={13}
                                             color={yesDayIsUp ? 'red' : 'blue'}
-                                            style={{paddingHorizontal: 5}}
+                                            style={{paddingRight: 5}}
                                         />
                                     </View>
                                 )}
                                 {(row.sortOrder === '3') && (
-                                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                                        <Text style={{fontSize: 12, paddingRight: 5}}>
+                                    <View style={[commonStyles.columnContainer, {justifyContent:'flex-end'}]}>
+                                        <Text style={commonStyles.numberCell}>
                                             {saleValue1.toLocaleString()}
                                         </Text>
                                     </View>
@@ -401,7 +480,7 @@ export default function RealtimeSalesRatio() {
             <View style={commonStyles.sectionDivider}/>
 
             <Table
-                data={saleList}
+                data={selectedSalesOrgCd.length > 0 ? saleList : tableData}
                 columns={mainColumns}
                 listHeader={renderHeader}
             />

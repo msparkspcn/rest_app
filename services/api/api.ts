@@ -98,6 +98,16 @@ export function getPurchaseItem(params) {
     return post(request, params);
 }
 
+export function getPurchaseListByItem(params) {
+    const request = host + "/api/v1/purchase/item/summary"; // 휴게소 상품별 매입현황(휴)
+    return post(request, params);
+}
+
+export function getPurchaseDetailListByItem(params) {
+    const request = host + "/api/v1/purchase/item/detail"; // 휴게소 상품별 매입현황(휴) > 상세
+    return post(request, params);
+}
+
 export function getPurchaseSummaryOp(params) {
     const request = host + "/api/v1/purchase/salesorg/summary"; // 운영업체 일자별 매입현황(통합)
     return post(request, params);
