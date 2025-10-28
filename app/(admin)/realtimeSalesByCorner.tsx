@@ -1,18 +1,18 @@
-import {StatusBar} from 'expo-status-bar';
-import React, {useEffect, useMemo, useState} from 'react';
-import {Modal, Pressable, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {commonStyles} from "../../styles/index";
-import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
-import {Table} from "../../components/Table";
-import {ColumnDef} from "../../types/table";
-import {DatePickerModal} from "../../components/DatePickerModal";
-import Const from "../../constants/Const";
+import { DatePickerModal } from "../../components/DatePickerModal";
 import ListModal from "../../components/ListModal";
-import {useUser} from "../../contexts/UserContext";
-import * as api from "../../services/api/api";
-import {User, Corner} from "../../types";
 import LoadingOverlay from "../../components/LoadingOverlay";
+import { Table } from "../../components/Table";
+import Const from "../../constants/Const";
+import { useUser } from "../../contexts/UserContext";
+import * as api from "../../services/api/api";
+import { commonStyles } from "../../styles/index";
+import { Corner, User } from "../../types";
+import { ColumnDef } from "../../types/table";
+import { dateToYmd, formattedDate, getTodayYmd } from "../../utils/DateUtils";
 
 type SaleRow = {
     storCd: string;
@@ -46,6 +46,7 @@ export default function RealtimeSalesByCornerScreen() {
     const {user}: User = useUser();
     const [saleDetailList, setSaleDetailList] = useState<[] | null>(null);
     const [loading, setLoading] = useState(false);
+    const [hasSearched, setHasSearched] = useState(false);
 
     useEffect(() => {
         const request = {
@@ -85,11 +86,14 @@ export default function RealtimeSalesByCornerScreen() {
                     const saleList = result.data.responseBody;
                     console.log('saleList:' + JSON.stringify(saleList))
                     setSaleList(saleList);
+                    setHasSearched(true);
                 }
             })
             .catch(error => {
                 console.log("mobRestRealTimeSaleNews error:" + error)
-            }).finally(() => setLoading(false));
+            }).finally(() => {
+                setLoading(false);
+            });
     };
 
     const openDatePicker = () => {
@@ -145,19 +149,25 @@ export default function RealtimeSalesByCornerScreen() {
         {
             key: 'dailySaleRatio', title: Const.COMP_RATIO, flex: 0.6,
             renderCell: (item) => (
-                <Text style={commonStyles.numberSmallCell}>{item.dailySaleRatio.toFixed(1)}%</Text>
+                <Text style={commonStyles.numberSmallCell}>
+                    {item.dailySaleRatio.toFixed(1)}%
+                </Text>
             )
         },
         {
             key: 'monthlyActualSaleAmt', title: Const.MONTH_TOTAL_AMT, flex: 1,
             renderCell: (item) => (
-                <Text style={commonStyles.numberSmallCell}>{item.monthlyActualSaleAmt.toLocaleString()}</Text>
+                <Text style={commonStyles.numberSmallCell}>
+                    {item.monthlyActualSaleAmt.toLocaleString()}
+                </Text>
             )
         },
         {
             key: 'monthlySaleRatio', title: Const.COMP_RATIO, flex: 0.6,
             renderCell: (item) => (
-                <Text style={commonStyles.numberSmallCell}>{item.monthlySaleRatio.toFixed(1)}%</Text>
+                <Text style={commonStyles.numberSmallCell}>
+                    {item.monthlySaleRatio.toFixed(1)}%
+                </Text>
             )
         },
     ]), [saleDate]);
@@ -296,6 +306,7 @@ export default function RealtimeSalesByCornerScreen() {
                 data={saleList}
                 columns={mainColumns}
                 listFooter={renderFooter}
+                hasSearched={hasSearched}
             />
 
             <DatePickerModal
@@ -338,6 +349,7 @@ export default function RealtimeSalesByCornerScreen() {
                             columns={saleDetailColumns}
                             isModal={true}
                             listFooter={renderDetailFooterRow}
+                            hasSearched={isDetailVisible}
                         />
                     </View>
                 </View>

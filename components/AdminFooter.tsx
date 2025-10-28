@@ -60,7 +60,8 @@ export default function AdminFooter({ onReset, onLogoutPress, onHome }: AdminFoo
 const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
-    paddingVertical: 15,
+    paddingTop: 15,
+    paddingBottom:  15,
     paddingHorizontal: 20,
     backgroundColor: '#f8f8f8',
     justifyContent: 'space-between',
@@ -74,7 +75,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   footerSeparator: {
-    width: 1,
+    width: StyleSheet.hairlineWidth,
     height: 18,
     backgroundColor: '#b0b0b0',
     alignSelf: 'center',

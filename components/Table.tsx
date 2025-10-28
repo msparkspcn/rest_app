@@ -22,6 +22,7 @@ type TableProps<T> = {
     isModal?: boolean; // 모달 내부에 사용되는지 여부
     listHeader?: React.ReactNode;
     listFooter?: React.ReactNode;
+    hasSearched?: boolean;
 };
 
 const alignStyles = {
@@ -36,6 +37,7 @@ export function Table<T>({
      onRowPress,
      isModal,
      listHeader,
+     hasSearched = false,
      listFooter
 }: TableProps<T>) {
     const renderHeader = () => (
@@ -61,9 +63,7 @@ export function Table<T>({
         if ((item as any).isSummary) {
             const summaryItem = item as any; // 타입 단순화
             return (
-                <View style={[commonStyles.summaryRow,
-
-                ]}>
+                <View style={[commonStyles.summaryRow]}>
                     <View style={[{flex: 2.5}, commonStyles.columnContainer]}>
                         <Text style={[commonStyles.summaryLabelText,
                             {textAlign: 'center', fontSize: 13 }]}>
@@ -101,7 +101,7 @@ export function Table<T>({
                             {summaryItem.lastWeekActualSaleRatio.toLocaleString()}
                         </Text>
                         <AntDesign
-                            name={summaryItem.lastWeekActualSaleRatio>0 ? 'caretup' : 'caretdown'}
+                            name={summaryItem.lastWeekActualSaleRatio>0 ? 'caret-up' : 'caret-down'}
                             size={13}
                             color={summaryItem.lastWeekActualSaleRatio>0 ? 'red' : 'blue'}
                             style={{marginRight: 2}}
@@ -114,7 +114,7 @@ export function Table<T>({
                             {summaryItem.yesterdayActualSaleRatio.toLocaleString()}
                         </Text>
                         <AntDesign
-                            name={summaryItem.yesterdayActualSaleRatio > 0 ? 'caretup' : 'caretdown'}
+                            name={summaryItem.yesterdayActualSaleRatio > 0 ? 'caret-up' : 'caret-down'}
                             size={13}
                             color={summaryItem.yesterdayActualSaleRatio > 0 ? 'red' : 'blue'}
                             style={{marginRight: 2}}
@@ -186,7 +186,7 @@ export function Table<T>({
     };
 
     return (
-        <View style={[commonStyles.tableContainer]}>
+        <View style={commonStyles.tableContainer}>
             {renderHeader()}
             <FlatList
                 data={data}
@@ -197,7 +197,7 @@ export function Table<T>({
                 ListEmptyComponent={
                     <View style={commonStyles.listEmptyComponent}>
                         <Text style={{ color: '#888' }}>
-                            {data === null ? Const.ENTER_SEARCH_COND_MSG : Const.NO_RESULT_MSG}
+                            {!hasSearched ? Const.ENTER_SEARCH_COND_MSG : Const.NO_RESULT_MSG}
                         </Text>
                     </View>
                 }

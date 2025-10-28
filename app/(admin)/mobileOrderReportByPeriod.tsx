@@ -1,17 +1,17 @@
-import {StatusBar} from 'expo-status-bar';
-import React, {useEffect, useMemo, useState} from 'react';
-import {Alert, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Alert, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {commonStyles} from "../../styles/index";
-import {dateToYmd, formattedDate, getTodayYmd, ymdToDateWithDayShort} from "../../utils/DateUtils";
-import {Table} from "../../components/Table";
-import {ColumnDef} from "../../types/table";
-import {DatePickerModal} from "../../components/DatePickerModal";
-import Const from "../../constants/Const";
+import { DatePickerModal } from "../../components/DatePickerModal";
 import ListModal from "../../components/ListModal";
-import {User, SalesOrg, Stor} from "../../types";
-import {useUser} from "../../contexts/UserContext";
+import { Table } from "../../components/Table";
+import Const from "../../constants/Const";
+import { useUser } from "../../contexts/UserContext";
 import * as api from "../../services/api/api";
+import { commonStyles } from "../../styles/index";
+import { SalesOrg, Stor, User } from "../../types";
+import { ColumnDef } from "../../types/table";
+import { dateToYmd, formattedDate, getTodayYmd, ymdToDateWithDayShort } from "../../utils/DateUtils";
 
 type SaleRow = {
     storNm: string;
@@ -34,6 +34,7 @@ export default function MobileOrderReportByPeriod() {
     const {user}: User = useUser();
     const [salesOrgList, setSalesOrgList] = useState<SalesOrg[]>([]);
     const [storList, setStorList] = useState<Stor[]>([]);
+    const [hasSearched, setHasSearched] = useState(false);
 
     const [selectedStor, setSelectedStor] = useState<Stor | null>(null);
     const [showStorModal, setShowStorModal] = useState(false);
@@ -95,6 +96,7 @@ export default function MobileOrderReportByPeriod() {
                             ...storList
                         ]
                     );
+                    setHasSearched(true)
                 }
             })
             .catch(error => {
@@ -308,6 +310,7 @@ export default function MobileOrderReportByPeriod() {
                 data={baseData}
                 columns={mainColumns}
                 listFooter={renderFooter}
+                hasSearched={hasSearched}
             />
 
             <DatePickerModal

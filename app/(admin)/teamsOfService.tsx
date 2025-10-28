@@ -57,10 +57,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingVertical: 20,
+        paddingVertical: 13,
         paddingHorizontal: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: '#eee',
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: '#aaa',
     },
     scrollContent: {
         flex: 1,
@@ -102,13 +102,15 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     termContent: {
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: '#aaa',
         backgroundColor: '#f8f8f8',
         paddingVertical: 10,
         paddingHorizontal: 10,
-        marginHorizontal: 15,
+        marginHorizontal: 10,
         marginBottom: 15,
-        marginLeft: 22,
-        height: 220
+        minHeight: 250,
+        maxHeight: 300
     },
     termContentText: {
         fontSize: 14,

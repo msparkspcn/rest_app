@@ -1,9 +1,11 @@
+import { AntDesign } from "@expo/vector-icons";
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Modal, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { DatePickerModal } from "../../components/DatePickerModal";
 import ListModal from "../../components/ListModal";
+import LoadingOverlay from "../../components/LoadingOverlay";
 import { Table } from "../../components/Table";
 import Const from "../../constants/Const";
 import { useUser } from "../../contexts/UserContext";
@@ -12,8 +14,6 @@ import { commonStyles } from "../../styles/index";
 import { Stor, User } from "../../types";
 import { ColumnDef } from "../../types/table";
 import { dateToYmd, formattedDate, getTodayYmd } from "../../utils/DateUtils";
-import LoadingOverlay from "../../components/LoadingOverlay";
-import {AntDesign} from "@expo/vector-icons";
 
 type SaleRow = {
     saleDt: string;
@@ -47,6 +47,7 @@ export default function RealtimeSales() {
     const [saleDetailList, setSaleDetailList] = useState<SaleDetailRow[]>([]);
     const [saleStatList ,setSaleStatList] = useState<[] | null>([]);
     const [loading, setLoading] = useState(false);
+    const [hasSearched, setHasSearched] = useState(false);
 
     useEffect(()=> {
         getStorList();
@@ -123,6 +124,7 @@ export default function RealtimeSales() {
                     console.log('saleStatList:' + JSON.stringify(saleStatList))
                     setSaleStatList(saleStatList);
                     setLoading(false);
+                    setHasSearched(true);
                 }
             })
             .catch(error => {
@@ -269,14 +271,15 @@ export default function RealtimeSales() {
                             key={row.sortOrder}
                             style={commonStyles.summaryRow}
                         >
-                            {(row.sortOrder === '1' || row.sortOrder === '2') && (
-                                <View style={[{flex: 1.5}, commonStyles.columnContainer]}>
-                                    <Text
-                                        style={[{textAlign: 'center'}, commonStyles.cell, commonStyles.summaryLabelText]}>
-                                        {row.label}
-                                    </Text>
-                                </View>
-                            )}
+
+                            <View style={[{flex: 1.5}, commonStyles.columnContainer]}>
+                                <Text
+                                    style={[{textAlign: 'center'}, commonStyles.cell,
+                                        commonStyles.summaryLabelText]}>
+                                    {row.label}
+                                </Text>
+                            </View>
+
                             {row.sortOrder === '1' && (
                                 <View style={[{flex: 3.2}, commonStyles.columnContainer]}>
                                     <Text style={commonStyles.numberCell}>
@@ -289,7 +292,7 @@ export default function RealtimeSales() {
                                     flex: 3.2,
                                     height: '100%',
                                     borderRightWidth: StyleSheet.hairlineWidth,
-                                    borderBottomWidth: StyleSheet.hairlineWidth,
+                                    borderBottomWidth: Platform.OS === 'android' ? 1 : StyleSheet.hairlineWidth,
                                     borderColor: '#aaa',
                                     flexDirection: 'row',
                                     alignItems: 'center',
@@ -299,7 +302,7 @@ export default function RealtimeSales() {
                                         {row.saleAmt1.toLocaleString()}
                                     </Text>
                                     <AntDesign
-                                        name={lastWeekIsUp ? 'caretup' : 'caretdown'}
+                                        name={lastWeekIsUp ? 'caret-up' : 'caret-down'}
                                         size={13}
                                         color={lastWeekIsUp ? 'red' : 'blue'}
                                         style={{paddingHorizontal: 5}}
@@ -307,7 +310,7 @@ export default function RealtimeSales() {
                                     <Text style={{fontSize: 12, color:'#444'}}> /  {row.saleAmt2.toLocaleString()}
                                     </Text>
                                     <AntDesign
-                                        name={yesDayIsUp ? 'caretup' : 'caretdown'}
+                                        name={yesDayIsUp ? 'caret-up' : 'caret-down'}
                                         size={13}
                                         color={yesDayIsUp ? 'red' : 'blue'}
                                         style={{paddingHorizontal: 5}}
@@ -316,12 +319,6 @@ export default function RealtimeSales() {
                             )}
                             {row.sortOrder === '3' && (
                                 <>
-                                    <View style={[{flex: 1.5}, commonStyles.columnContainer]}>
-                                        <Text
-                                            style={[commonStyles.cell, commonStyles.summaryLabelText, {textAlign: 'center'}]}>
-                                            {row.label}
-                                        </Text>
-                                    </View>
                                     <View style={[{flex: 1}, commonStyles.columnContainer]}>
                                         <Text style={[commonStyles.numberSmallCell]}>
                                             {summaryRow.totalCashAmt.toLocaleString()}
@@ -404,6 +401,7 @@ export default function RealtimeSales() {
                 data={saleList}
                 columns={mainColumns}
                 listHeader={renderListHeader}
+                hasSearched={hasSearched}
             />
 
             <DatePickerModal
@@ -447,6 +445,7 @@ export default function RealtimeSales() {
                             columns={saleDetailColumns}
                             isModal={true}
                             listFooter={renderDetailFooterRow}
+                            hasSearched={isDetailVisible}
                         />
                     </View>
                 </View>

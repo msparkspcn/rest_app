@@ -417,10 +417,10 @@ const styles = StyleSheet.create({
   },
   footerLinks: {
     flexDirection: 'row',
-    marginBottom: 0,
+    marginBottom: 5,
   },
   footerLinkText: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#666',
     textDecorationLine: 'underline',
   },
@@ -429,7 +429,7 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   copyrightText: {
-    fontSize: 10,
+    fontSize: 11,
     color: '#999',
   },
   modalTosContent: {

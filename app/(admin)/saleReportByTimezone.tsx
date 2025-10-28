@@ -1,18 +1,18 @@
-import {StatusBar} from 'expo-status-bar';
-import React, {useEffect, useMemo, useState} from 'react';
-import {Pressable, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {commonStyles} from "../../styles/index";
-import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
-import {Table} from "../../components/Table";
-import {ColumnDef} from "../../types/table";
-import {DatePickerModal} from "../../components/DatePickerModal";
-import Const from "../../constants/Const";
+import { DatePickerModal } from "../../components/DatePickerModal";
 import ListModal from "../../components/ListModal";
-import {useUser} from "../../contexts/UserContext";
-import * as api from "../../services/api/api";
-import {User, Stor} from "../../types";
 import LoadingOverlay from "../../components/LoadingOverlay";
+import { Table } from "../../components/Table";
+import Const from "../../constants/Const";
+import { useUser } from "../../contexts/UserContext";
+import * as api from "../../services/api/api";
+import { commonStyles } from "../../styles/index";
+import { Stor, User } from "../../types";
+import { ColumnDef } from "../../types/table";
+import { dateToYmd, formattedDate, getTodayYmd } from "../../utils/DateUtils";
 
 type SaleRow = { tmzonDiv: string; totalAmt: number, billCnt: number };
 type ListItem = {
@@ -35,6 +35,7 @@ export default function SalesReportByTimezoneScreen() {
     const [saleList, setSaleList] = useState<[] | null>(null);
     const {user}:User = useUser();
     const [loading, setLoading] = useState(false);
+    const [hasSearched, setHasSearched] = useState(false);
 
     useEffect(()=> {
         getStorList();
@@ -79,12 +80,15 @@ export default function SalesReportByTimezoneScreen() {
                     console.log('size:'+saleList.length);
                     console.log('saleList:' + JSON.stringify(saleList))
                     setSaleList(saleList);
+                    setHasSearched(true);
                 }
             })
             .catch(error => {
                 console.log("restStorTimeZoneSale error:" + error)
             })
-            .finally(() => setLoading(false));
+            .finally(() => {
+                setLoading(false);
+            });
     };
 
     const openDatePicker = () => {
@@ -207,7 +211,7 @@ export default function SalesReportByTimezoneScreen() {
                         {summaryRows.map(row => (
                             <View key={row.key} style={commonStyles.summaryRow}>
                                 <View style={[{flex: 1}, commonStyles.columnContainer]}>
-                                    <Text style={[styles.cell, styles.summaryLabelText, {textAlign: 'center'}]}>
+                                    <Text style={[commonStyles.cell, styles.summaryLabelText, {textAlign: 'center'}]}>
                                         {row.label}
                                     </Text>
                                 </View>
@@ -221,6 +225,7 @@ export default function SalesReportByTimezoneScreen() {
                         ))}
                     </View>
                 )}
+                hasSearched={hasSearched}
             />
 
             <DatePickerModal

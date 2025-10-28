@@ -1,17 +1,17 @@
-import {StatusBar} from 'expo-status-bar';
-import React, {useMemo, useState} from 'react';
-import {Modal, Pressable, Text, TextInput, TouchableOpacity, View} from 'react-native';
+import { commonStyles } from '@/styles';
+import { StatusBar } from 'expo-status-bar';
+import React, { useMemo, useState } from 'react';
+import { Modal, Pressable, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {commonStyles} from '@/styles';
-import {Table} from "../../components/Table";
-import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
-import {ColumnDef} from "../../types/table";
-import {DatePickerModal} from "../../components/DatePickerModal";
-import Const from "../../constants/Const";
-import * as api from "../../services/api/api";
-import {useUser} from "../../contexts/UserContext";
-import {User} from "../../types/user";
+import { DatePickerModal } from "../../components/DatePickerModal";
 import LoadingOverlay from "../../components/LoadingOverlay";
+import { Table } from "../../components/Table";
+import Const from "../../constants/Const";
+import { useUser } from "../../contexts/UserContext";
+import * as api from "../../services/api/api";
+import { ColumnDef } from "../../types/table";
+import { User } from "../../types/user";
+import { dateToYmd, formattedDate, getTodayYmd } from "../../utils/DateUtils";
 
 type PurchaseRow = {
     dlvDt: string;
@@ -39,6 +39,7 @@ export default function PurchaseDailyReportScreen() {
     const [purchaseList, setPurchaseList] = useState<[] | null>(null);
     const [purchaseItemList, setPurchaseItemList] = useState<[] | null>(null);
     const [loading, setLoading] = useState(false);
+    const [hasSearched, setHasSearched] = useState(false);
 
     const mainColumns: ColumnDef<PurchaseRow>[] = useMemo(() => ([
         {key: 'dlvDt', title: '일자', flex: 1, align: 'center',
@@ -113,11 +114,14 @@ export default function PurchaseDailyReportScreen() {
                     });
                     console.log('purchaseList:' + JSON.stringify(purchaseList));
                     setPurchaseList(purchaseList);
+                    setHasSearched(true);
                 }
             })
             .catch(error => {
                 console.log("getPurchaseSummary error:" + error)
-            }).finally(() => setLoading(false));
+            }).finally(() => {
+                setLoading(false);
+            });
     };
 
     const PurchaseDetailColumns: ColumnDef<PurchaseDetailRow>[] = useMemo(() => ([
@@ -248,7 +252,12 @@ export default function PurchaseDailyReportScreen() {
 
             <View style={commonStyles.sectionDivider}/>
 
-            <Table data={purchaseList} columns={mainColumns} listFooter={renderFooter}/>
+            <Table
+                data={purchaseList}
+                columns={mainColumns}
+                listFooter={renderFooter}
+                hasSearched={hasSearched}
+            />
 
             <DatePickerModal
                 visible={showDatePicker}
@@ -279,6 +288,7 @@ export default function PurchaseDailyReportScreen() {
                             columns={PurchaseDetailColumns}
                             isModal={true}
                             listFooter={renderDetailFooter}
+                            hasSearched={isDetailVisible}
                         />
                     </View>
                 </View>

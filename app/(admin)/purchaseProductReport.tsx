@@ -1,17 +1,17 @@
-import {StatusBar} from 'expo-status-bar';
-import React, {useMemo, useState} from 'react';
-import {Modal, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import React, { useMemo, useState } from 'react';
+import { Modal, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {commonStyles} from "../../styles/index";
-import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
-import {Table} from "../../components/Table";
-import {ColumnDef} from "../../types/table";
-import {DatePickerModal} from "../../components/DatePickerModal";
-import Const from "../../constants/Const";
-import * as api from "../../services/api/api";
-import {User} from "../../types/user";
-import {useUser} from "../../contexts/UserContext";
+import { DatePickerModal } from "../../components/DatePickerModal";
 import LoadingOverlay from "../../components/LoadingOverlay";
+import { Table } from "../../components/Table";
+import Const from "../../constants/Const";
+import { useUser } from "../../contexts/UserContext";
+import * as api from "../../services/api/api";
+import { commonStyles } from "../../styles/index";
+import { ColumnDef } from "../../types/table";
+import { User } from "../../types/user";
+import { dateToYmd, formattedDate, getTodayYmd } from "../../utils/DateUtils";
 
 type PurchaseRow = {
     itemCd: string;
@@ -38,6 +38,7 @@ export default function PurchaseProductReportScreen() {
     const [purchaseList, setPurchaseList] = useState<[] | null>(null);
     const [purchaseItemList, setPurchaseItemList] = useState<[] | null>(null);
     const {user}: User = useUser();
+    const [hasSearched, setHasSearched] = useState(false);
 
     const totalOrdAmt = useMemo(() => (purchaseList ?? []).reduce((acc, r) => acc + r.ordAmt, 0), [purchaseList]);
 
@@ -59,6 +60,7 @@ export default function PurchaseProductReportScreen() {
                     const purchaseList = result.data.responseBody;
                     console.log('purchaseList:' + JSON.stringify(purchaseList));
                     setPurchaseList(purchaseList);
+                    setHasSearched(true);
                 }
             })
             .catch(error => {
@@ -256,7 +258,7 @@ export default function PurchaseProductReportScreen() {
 
             <View style={commonStyles.sectionDivider}/>
 
-            <Table data={purchaseList} columns={mainColumns} listFooter={renderFooter}/>
+            <Table data={purchaseList} columns={mainColumns} listFooter={renderFooter} hasSearched={hasSearched}/>
 
             <DatePickerModal
                 visible={showDatePicker}
@@ -287,6 +289,7 @@ export default function PurchaseProductReportScreen() {
                             columns={PurchaseDetailColumns}
                             isModal={true}
                             listFooter={renderDetailFooter}
+                            hasSearched={isDetailVisible}
                         />
                     </View>
                 </View>

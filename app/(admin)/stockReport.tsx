@@ -41,6 +41,7 @@ export default function StockReport() {
     const {user}: User = useUser();
     const [salesOrgList, setSalesOrgList] = useState<SalesOrg[]>([]);
     const [stockList, setStockList] = useState<[] | null>([]);
+    const [hasSearched, setHasSearched] = useState(false);
 
     useEffect(() => {
         getSalesOrgList();
@@ -76,6 +77,7 @@ export default function StockReport() {
             Alert.alert(Const.ERROR, Const.NO_SALES_ORG_MSG);
             return;
         }
+        setHasSearched(true);
     };
 
     const openDatePicker = (pickerType: string) => {
@@ -170,7 +172,7 @@ export default function StockReport() {
 
             <View style={commonStyles.sectionDivider}/>
 
-            <Table data={stockList} columns={mainColumns} />
+            <Table data={stockList} columns={mainColumns} hasSearched={hasSearched}/>
 
             <DatePickerModal
                 visible={showDatePicker}

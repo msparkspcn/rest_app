@@ -27,6 +27,7 @@ type SaleRow = {
     salesOrgCd: string; //임시
     storCd: string;
     cornerCd: string;
+    cornerNm: string;
     orgNm: string;
     saleAmt: number;
     taxSaleAmt: number;
@@ -37,7 +38,6 @@ type ProductSaleRow = {
     no: number;
     itemNm: string,
     saleQty: number,
-    // price: number,
     actualSaleAmt: number
 };
 
@@ -59,6 +59,7 @@ export default function SalesReportByPeriod() {
     const [appliedCornerCd, setAppliedCornerCd] = useState<string | null>('');
     const [saleDetailList, setSaleDetailList] = useState<ProductSaleRow | null>(null);
     const [loading, setLoading] = useState(false);
+    const [hasSearched, setHasSearched] = useState(false);
 
     useEffect(() => {
         getCornerList();
@@ -105,6 +106,7 @@ export default function SalesReportByPeriod() {
                     console.log('saleList:' + JSON.stringify(saleList))
                     setSaleList(saleList);
                     setAppliedCornerCd(selectedCornerCd);
+                    setHasSearched(true);
                 }
             })
             .catch(error => {
@@ -194,6 +196,7 @@ export default function SalesReportByPeriod() {
                         salesOrgCd: '',
                         storCd: '',
                         cornerCd: '',
+                        cornerNm: '',
                         orgNm: `${formattedDate(date)} 소계`,
                         taxSaleAmt: 0,
                         saleAmt: dateSum,
@@ -382,11 +385,12 @@ export default function SalesReportByPeriod() {
             </View>
             <View style={commonStyles.sectionDivider}/>
 
-            <Table
+            <Table  /*매장 전체일 경우 합계 상단에*/
                 data={tableData}
                 columns={mainColumns}
                 listHeader={!appliedCornerCd ? renderTotalRow : null}
                 listFooter={appliedCornerCd ? renderTotalRow : null}
+                hasSearched={hasSearched}
             />
 
             <View style={commonStyles.sectionDivider}/>
@@ -410,7 +414,7 @@ export default function SalesReportByPeriod() {
                     <View style={commonStyles.modalCard}>
                         <View style={commonStyles.modalHeader}>
                             <Text style={commonStyles.modalTitle}>
-                                {formattedDate(selectedSale?.saleDt)}  {selectedSale?.orgNm}
+                                {formattedDate(selectedSale?.saleDt)}  {selectedSale?.cornerNm}
                             </Text>
                             <Pressable onPress={closeDetail} hitSlop={8}>
                                 <Ionicons name="close" size={24} color="#333"/>
@@ -422,6 +426,7 @@ export default function SalesReportByPeriod() {
                             columns={productColumns}
                             isModal={true}
                             listHeader={renderSummaryRow}
+                            hasSearched={isDetailVisible}
                         />
                     </View>
                 </View>

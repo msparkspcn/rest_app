@@ -2,7 +2,7 @@ import { commonStyles } from '@/styles';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import React, {useMemo, useState} from 'react';
-import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import {Modal, Platform, Pressable, StyleSheet, Text, TextInput, View} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
@@ -35,6 +35,7 @@ export default function VendorListScreen() {
   const [vendorItemList, setVendorItemList] = useState(null);
   const {user}:User = useUser();
   const [loading, setLoading] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
 
   const onSearch = () => {
     const request = {
@@ -50,6 +51,7 @@ export default function VendorListScreen() {
           if (result.data.responseBody != null) {
             const vendorList = result.data.responseBody;
             setVendorList(vendorList);
+            setHasSearched(true);
           }
         })
         .catch(error => {
@@ -125,8 +127,11 @@ export default function VendorListScreen() {
   ]), []);
 
   const VendorNmRow = () => {
+    if (vendorItemList.length === 0) return null;
     return (
-        <View style={{ borderWidth: StyleSheet.hairlineWidth, borderColor: '#aaa' }}>
+        <View style={{ borderRightWidth: 0.2,
+          borderBottomWidth: Platform.OS === 'android' ? 1 : StyleSheet.hairlineWidth,
+          borderColor: '#aaa' }}>
           <Text style={styles.modalStoreName}>{selectedVendor?.outSdCmpNm}</Text>
         </View>
     );
@@ -173,7 +178,7 @@ export default function VendorListScreen() {
 
       <View style={commonStyles.sectionDivider} />
 
-      <Table data={vendorList} columns={mainColumns}/>
+      <Table data={vendorList} columns={mainColumns} hasSearched={hasSearched}/>
 
       <Modal visible={isDetailVisible} animationType="fade" transparent>
         <View style={commonStyles.modalOverlay}>
@@ -190,6 +195,7 @@ export default function VendorListScreen() {
                 columns={vendorColumns}
                 isModal={true}
                 listHeader={VendorNmRow}
+                hasSearched={isDetailVisible}
             />
           </View>
         </View>

@@ -30,6 +30,7 @@ export default function KioskSoldOutScreen() {
     const [selectedCorner, setSelectedCorner] = useState<Corner>({"cornerCd":"", "storCd":""});
     const [loading, setLoading] = useState(false);
     const [itemList, setItemList] = useState<ProductRow[]>([]);
+    const [hasSearched, setHasSearched] = useState(false);
 
     useEffect(() => {
         console.log('user:'+JSON.stringify(user.cmpCd));
@@ -71,6 +72,7 @@ export default function KioskSoldOutScreen() {
                     const itemList = result.data.responseBody;
                     console.log('itemList:' + JSON.stringify(itemList))
                     setItemList(itemList);
+                    setHasSearched(true);
                 }
                 setLoading(false);
             })
@@ -150,7 +152,7 @@ export default function KioskSoldOutScreen() {
             </View>
             <View style={commonStyles.sectionDivider}/>
 
-            <Table data={itemList} columns={mainColumns}/>
+            <Table data={itemList} columns={mainColumns} hasSearched={hasSearched}/>
 
             <ListModal
                 visible={showCornerModal}

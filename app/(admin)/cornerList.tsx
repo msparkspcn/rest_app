@@ -2,15 +2,15 @@ import { commonStyles } from '@/styles';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import React, { useMemo, useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
-import * as api from "../../services/api/api";
-import {Table} from "../../components/Table";
-import Const from "../../constants/Const";
-import {useUser} from "../../contexts/UserContext";
-import {User, Corner} from "../../types";
-import {ColumnDef} from "../../types/table";
+import { Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from "react-native-safe-area-context";
 import LoadingOverlay from "../../components/LoadingOverlay";
-import {SafeAreaView} from "react-native-safe-area-context";
+import { Table } from "../../components/Table";
+import Const from "../../constants/Const";
+import { useUser } from "../../contexts/UserContext";
+import * as api from "../../services/api/api";
+import { Corner, User } from "../../types";
+import { ColumnDef } from "../../types/table";
 
 type OperateFilter = { key: string; name: string; }
 
@@ -30,6 +30,7 @@ export default function CornerListScreen() {
   const [cornerList, setCornerList] = useState<Corner[]>([]);
   const [cornerItemList, setCornerItemList] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
 
   const onSearch = () => {
     console.log('user:'+JSON.stringify(user.cmpCd));
@@ -44,6 +45,7 @@ export default function CornerListScreen() {
           if (result.data.responseBody != null) {
             const cornerList = result.data.responseBody;
             setCornerList(cornerList);
+            setHasSearched(true);
           }
         })
         .catch(error => {
@@ -133,8 +135,15 @@ export default function CornerListScreen() {
   ]), []);
 
   const CornerNmRow = () => {
+    if (cornerItemList.length === 0 ) return null;
     return (
-        <View style={{ borderWidth: StyleSheet.hairlineWidth, borderColor: '#aaa' }}>
+        <View
+            style={{
+              borderRightWidth: 0.2,
+              borderBottomWidth: Platform.OS === 'android' ? 1 : StyleSheet.hairlineWidth,
+              borderColor: '#aaa' }
+            }
+        >
           <Text style={styles.modalCornerNm}>{selectedCorner?.cornerNm}</Text>
         </View>
     );
@@ -167,7 +176,7 @@ export default function CornerListScreen() {
       </View>
       <View style={commonStyles.sectionDivider} />
 
-      <Table data={cornerList} columns={mainColumns}/>
+      <Table data={cornerList} columns={mainColumns} hasSearched={hasSearched}/>
 
       <Modal visible={isDetailVisible} animationType="fade" transparent>
         <View style={commonStyles.modalOverlay}>
@@ -184,6 +193,7 @@ export default function CornerListScreen() {
                 columns={itemColumns}
                 isModal={true}
                 listHeader={CornerNmRow}
+                hasSearched={isDetailVisible}
             />
           </View>
         </View>
@@ -197,7 +207,7 @@ const styles = StyleSheet.create({
   modalCornerNm: {
     fontSize: 14,
     color: '#555',
-    paddingHorizontal: 10,
+    paddingHorizontal: 5,
     paddingVertical: 8,
   },
 });

@@ -1,7 +1,7 @@
-import {commonStyles} from '@/styles';
-import {Ionicons} from '@expo/vector-icons';
-import {StatusBar} from 'expo-status-bar';
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import { commonStyles } from '@/styles';
+import { Ionicons } from '@expo/vector-icons';
+import { StatusBar } from 'expo-status-bar';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
     Modal,
     Pressable,
@@ -11,20 +11,20 @@ import {
     View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { DatePickerModal } from "../../components/DatePickerModal";
+import ListModal from "../../components/ListModal";
+import LoadingOverlay from "../../components/LoadingOverlay";
+import { Table } from "../../components/Table";
+import Const from "../../constants/Const";
+import { useUser } from "../../contexts/UserContext";
 import * as api from "../../services/api/api";
+import { Corner, User } from "../../types";
+import { ColumnDef } from "../../types/table";
 import {
     dateToYm, formattedDate,
     formattedMonth,
     getTodayYm, getTodayYmd
 } from "../../utils/DateUtils";
-import {Table} from "../../components/Table";
-import {ColumnDef} from "../../types/table";
-import {DatePickerModal} from "../../components/DatePickerModal";
-import Const from "../../constants/Const";
-import ListModal from "../../components/ListModal";
-import {useUser} from "../../contexts/UserContext";
-import {User, Corner} from "../../types";
-import LoadingOverlay from "../../components/LoadingOverlay";
 
 type SaleRow = {
     cmpCd: string;
@@ -71,6 +71,7 @@ export default function MonthlySalesReport() {
     const [saleDetailList, setSaleDetailList] = useState<[] | null>(null);
     const {user}:User = useUser();
     const [loading, setLoading] = useState(false);
+    const [hasSearched, setHasSearched] = useState(false);
 
     useEffect(() => {
         getCornerList();
@@ -167,11 +168,14 @@ export default function MonthlySalesReport() {
                     const saleList = result.data.responseBody;
                     console.log('111:' + JSON.stringify(saleList))
                     setSaleList(saleList);
+                    setHasSearched(true);
                 }
             })
             .catch(error => {
                 console.log("restMonthlyCornerSale error:" + error)
-            }).finally(() => setLoading(false));
+            }).finally(() => {
+                setLoading(false);
+            });
     };
 
     const openDetail = useCallback((sale: SaleRow, type: DetailType) => {
@@ -462,7 +466,12 @@ export default function MonthlySalesReport() {
             </View>
             <View style={commonStyles.sectionDivider}/>
 
-            <Table data={saleList} columns={mainColumns} listFooter={renderFooter}/>
+            <Table
+                data={saleList}
+                columns={mainColumns}
+                listFooter={renderFooter}
+                hasSearched={hasSearched}
+            />
 
             <View style={commonStyles.sectionDivider}/>
 
@@ -495,6 +504,7 @@ export default function MonthlySalesReport() {
                             columns={detailColumns}
                             isModal={true}
                             listFooter={() => renderDetailFooterRow(detailType)}
+                            hasSearched={isDetailVisible}
                         />
                     </View>
                 </View>

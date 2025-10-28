@@ -1,19 +1,19 @@
-import {StatusBar} from 'expo-status-bar';
-import React, {useEffect, useMemo, useState} from 'react';
-import {Alert, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import { Ionicons } from "@expo/vector-icons";
+import { StatusBar } from 'expo-status-bar';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Alert, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {commonStyles} from "../../styles/index";
-import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
-import {Table} from "../../components/Table";
-import {ColumnDef} from "../../types/table";
-import {DatePickerModal} from "../../components/DatePickerModal";
-import {Ionicons} from "@expo/vector-icons";
-import Const from "../../constants/Const";
+import { DatePickerModal } from "../../components/DatePickerModal";
 import ListModal from "../../components/ListModal";
-import * as api from "../../services/api/api";
-import {useUser} from "../../contexts/UserContext";
-import {User, SalesOrg} from "../../types";
 import LoadingOverlay from "../../components/LoadingOverlay";
+import { Table } from "../../components/Table";
+import Const from "../../constants/Const";
+import { useUser } from "../../contexts/UserContext";
+import * as api from "../../services/api/api";
+import { commonStyles } from "../../styles/index";
+import { SalesOrg, User } from "../../types";
+import { ColumnDef } from "../../types/table";
+import { dateToYmd, formattedDate, getTodayYmd } from "../../utils/DateUtils";
 
 type SaleRow = {
     no: number;
@@ -40,7 +40,6 @@ type CornerRow = {
     cornerNm: string;
     cornerCd: string;
     posGroup: string;
-    useYn: 'Y' | 'N';
 };
 
 export default function RealtimeSalesBySalesOrgScreen() {
@@ -59,6 +58,7 @@ export default function RealtimeSalesBySalesOrgScreen() {
     const {user}: User = useUser();
     const [saleDetailList, setSaleDetailList] = useState<[] | null>(null);
     const [loading, setLoading] = useState(false);
+    const [hasSearched, setHasSearched] = useState(false);
 
     useEffect(() => {
         getSalesOrgList();
@@ -141,6 +141,7 @@ export default function RealtimeSalesBySalesOrgScreen() {
                     const saleList = result.data.responseBody;
                     console.log('111:' + JSON.stringify(saleList))
                     setSaleList(saleList);
+                    setHasSearched(true);
                 }
             })
             .catch(error => {
@@ -193,25 +194,33 @@ export default function RealtimeSalesBySalesOrgScreen() {
             {
                 key: 'yesterdayActualSaleAmt', title: '전일매출', flex: 1,
                 renderCell: (item) => (
-                    <Text style={commonStyles.numberSmallCell}>{Math.round(item.yesterdayActualSaleAmt / 1000).toLocaleString()}</Text>
+                    <Text style={commonStyles.numberSmallCell}>
+                        {Math.round(item.yesterdayActualSaleAmt / 1000).toLocaleString()}
+                    </Text>
                 )
             },
             {
                 key: 'todayActualSaleAmt', title: '당일매출', flex: 1,
                 renderCell: (item) => (
-                    <Text style={commonStyles.numberSmallCell}>{Math.round(item.todayActualSaleAmt / 1000).toLocaleString()}</Text>
+                    <Text style={commonStyles.numberSmallCell}>
+                        {Math.round(item.todayActualSaleAmt / 1000).toLocaleString()}
+                    </Text>
                 )
             },
             {
                 key: 'monthlyActualSaleAmt', title: '월누계매출', flex: 1.1,
                 renderCell: (item) => (
-                    <Text style={commonStyles.numberSmallCell}>{Math.round(item.monthlyActualSaleAmt / 1000).toLocaleString()}</Text>
+                    <Text style={commonStyles.numberSmallCell}>
+                        {Math.round(item.monthlyActualSaleAmt / 1000).toLocaleString()}
+                    </Text>
                 )
             },
             {
                 key: 'yearActualSaleAmt', title: '년누계', flex: 1.3,
                 renderCell: (item) => (
-                    <Text style={commonStyles.numberSmallCell}>{Math.round(item.yearActualSaleAmt / 1000).toLocaleString()}</Text>
+                    <Text style={commonStyles.numberSmallCell}>
+                        {Math.round(item.yearActualSaleAmt / 1000).toLocaleString()}
+                    </Text>
                 )
             },
         ];
@@ -332,19 +341,28 @@ export default function RealtimeSalesBySalesOrgScreen() {
                     </Text>
                 </View>
                 <View style={[{flex: 0.7}, commonStyles.columnContainer]}>
-                    <Text style={commonStyles.numberSmallCell}>{summaryRow.totalQty.toLocaleString()}</Text>
+                    <Text style={commonStyles.numberSmallCell}>
+                        {summaryRow.totalQty.toLocaleString()}</Text>
                 </View>
                 <View style={[{flex: 0.8}, commonStyles.columnContainer]}>
-                    <Text style={commonStyles.numberSmallCell}>{Math.round(summaryRow.totalAmt / 1000).toLocaleString()}</Text>
+                    <Text style={commonStyles.numberSmallCell}>
+                        {Math.round(summaryRow.totalAmt / 1000).toLocaleString()}
+                    </Text>
                 </View>
                 <View style={[{flex: 0.9}, commonStyles.columnContainer]}>
-                    <Text style={commonStyles.numberSmallCell}>{summaryRow.totalMonthlySaleQty.toLocaleString()}</Text>
+                    <Text style={commonStyles.numberSmallCell}>
+                        {summaryRow.totalMonthlySaleQty.toLocaleString()}
+                    </Text>
                 </View>
                 <View style={[{flex: 1.2}, commonStyles.columnContainer]}>
-                    <Text style={commonStyles.numberSmallCell}>{Math.round(summaryRow.totalMonthAmt / 1000).toLocaleString()}</Text>
+                    <Text style={commonStyles.numberSmallCell}>
+                        {Math.round(summaryRow.totalMonthAmt / 1000).toLocaleString()}
+                    </Text>
                 </View>
                 <View style={[{flex: 1.2}, commonStyles.columnContainer]}>
-                    <Text style={commonStyles.numberSmallCell}>{Math.round(summaryRow.totalYearAmt / 1000).toLocaleString()}</Text>
+                    <Text style={commonStyles.numberSmallCell}>
+                        {Math.round(summaryRow.totalYearAmt / 1000).toLocaleString()}
+                    </Text>
                 </View>
             </View>
         )
@@ -426,6 +444,7 @@ export default function RealtimeSalesBySalesOrgScreen() {
                         )
                         : undefined
                 }
+                hasSearched={hasSearched}
             />
 
             <DatePickerModal
@@ -464,6 +483,7 @@ export default function RealtimeSalesBySalesOrgScreen() {
                             columns={saleDetailColumns}
                             isModal={true}
                             listFooter={() => renderDetailFooterRow()}
+                            hasSearched={isDetailVisible}
                         />
                     </View>
                 </View>
@@ -474,11 +494,6 @@ export default function RealtimeSalesBySalesOrgScreen() {
 }
 
 const styles = StyleSheet.create({
-    cell: {
-        fontSize: 11,
-        color: '#444',
-        width: '100%'
-    },
     subTitle: {
         fontSize: 16,
         fontWeight: '700',

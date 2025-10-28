@@ -60,9 +60,11 @@ export default function tlgReportScreen() {
     const filteredData = useMemo(() => {
         return baseData;
     }, [baseData]);
+    const [hasSearched, setHasSearched] = useState(false);
 
     const onSearch = () => {
         // 데모: 현재는 선택 값만으로 필터링 적용
+        setHasSearched(true);
     };
 
     const openDatePicker = (pickerType: string) => {
@@ -158,6 +160,7 @@ export default function tlgReportScreen() {
             <Table
                 data={filteredData}
                 columns={mainColumns}
+                hasSearched={hasSearched}
             />
 
             <DatePickerModal

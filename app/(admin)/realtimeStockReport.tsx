@@ -1,5 +1,5 @@
-import {StatusBar} from 'expo-status-bar';
-import React, {useMemo, useState} from 'react';
+import { StatusBar } from 'expo-status-bar';
+import React, { useMemo, useState } from 'react';
 import {
     Pressable,
     Text, TextInput,
@@ -7,16 +7,16 @@ import {
     View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {commonStyles} from "../../styles/index";
-import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
-import {Table} from "../../components/Table";
-import {ColumnDef} from "../../types/table";
-import {DatePickerModal} from "../../components/DatePickerModal";
-import Const from "../../constants/Const";
-import * as api from "../../services/api/api";
-import {useUser} from "../../contexts/UserContext";
-import {User} from "../../types/user";
+import { DatePickerModal } from "../../components/DatePickerModal";
 import LoadingOverlay from "../../components/LoadingOverlay";
+import { Table } from "../../components/Table";
+import Const from "../../constants/Const";
+import { useUser } from "../../contexts/UserContext";
+import * as api from "../../services/api/api";
+import { commonStyles } from "../../styles/index";
+import { ColumnDef } from "../../types/table";
+import { User } from "../../types/user";
+import { dateToYmd, formattedDate, getTodayYmd } from "../../utils/DateUtils";
 
 type StockRow = {
     itemNm: string;
@@ -34,6 +34,7 @@ export default function RealtimeStockReportScreen() {
     const [stockList, setStockList] = useState<[] | null>(null);
     const {user}:User = useUser();
     const [loading, setLoading] = useState(false);
+    const [hasSearched, setHasSearched] = useState(false);
 
     const onSearch = () => {
         console.log("mobOilRealTimeStock 조회 클릭 fromSaleDt:"+saleDate+", itemNm:"+itemNm);
@@ -56,6 +57,7 @@ export default function RealtimeStockReportScreen() {
                     console.log('size:'+stockList.length);
                     // console.log('stockList:' + JSON.stringify(stockList))
                     setStockList(stockList);
+                    setHasSearched(true);
                 }
             })
             .catch(error => {
@@ -144,6 +146,7 @@ export default function RealtimeStockReportScreen() {
             <Table
                 data={stockList}
                 columns={mainColumns}
+                hasSearched={hasSearched}
             />
 
             <DatePickerModal

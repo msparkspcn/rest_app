@@ -1,4 +1,4 @@
-import {StyleSheet} from 'react-native';
+import {Platform, StyleSheet} from 'react-native';
 
 export const commonStyles = StyleSheet.create({
     container: {
@@ -31,7 +31,7 @@ export const commonStyles = StyleSheet.create({
         color: '#555',
     },
     segmented: {
-        height: 35,
+        minHeight: 35,
         flexDirection: 'row',
         backgroundColor: '#e8e8e8',
         borderRadius: 8,
@@ -69,6 +69,7 @@ export const commonStyles = StyleSheet.create({
     tableContainer: {
         flex: 1,
         backgroundColor: '#fff',
+        minHeight: 30,
         maxHeight: 580,
         marginTop: 10,
         marginHorizontal: 10,
@@ -77,8 +78,10 @@ export const commonStyles = StyleSheet.create({
         shadowOffset: {width: 0, height: 2},
         shadowOpacity: 0.08,
         elevation: 2,
-        borderTopWidth: StyleSheet.hairlineWidth,
-        borderLeftWidth: StyleSheet.hairlineWidth,
+        borderWidth: StyleSheet.hairlineWidth,
+        // borderTopWidth: StyleSheet.hairlineWidth,
+        // borderLeftWidth: StyleSheet.hairlineWidth,
+        // borderRightWidth: StyleSheet.hairlineWidth,
         borderColor: '#aaa',
     },
     tableHeaderRow: {
@@ -89,12 +92,29 @@ export const commonStyles = StyleSheet.create({
         borderColor: '#aaa',
         minHeight: 35
     },
+    columnContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100%',
+        borderRightWidth: StyleSheet.hairlineWidth,
+        // borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomWidth: Platform.OS === 'android' ? 1 : StyleSheet.hairlineWidth,
+        borderColor: '#aaa'
+    },
     headerCell: {
         fontSize: 13,
         fontWeight: '700',
         color: '#333',
         width: '100%',
         textAlign: 'center',
+    },
+    summaryRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        minHeight: 32,
+        maxHeight: 38,
+        backgroundColor: '#fff7e6'
     },
     tableRowEven: {
         backgroundColor: '#ffffff',
@@ -107,15 +127,7 @@ export const commonStyles = StyleSheet.create({
         alignItems: 'center',
         minHeight: 35,
     },
-    columnContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100%',
-        borderRightWidth: StyleSheet.hairlineWidth,
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderColor: '#aaa'
-    },
+
     cellDivider: {
         borderRightWidth: StyleSheet.hairlineWidth,
         borderRightColor: '#aaa',
@@ -342,7 +354,7 @@ export const commonStyles = StyleSheet.create({
         backgroundColor: '#fff'
     },
     modalTableListContent: {
-        paddingBottom: 8,
+        paddingBottom: 10,
         backgroundColor: '#fff'
     },
     selectArrow: {
@@ -395,7 +407,7 @@ export const commonStyles = StyleSheet.create({
     },
     input: {
         flex: 1,
-        height: 35,
+        minHeight: 35,
         backgroundColor: '#fff',
         borderWidth: 1,
         borderColor: '#ddd',
@@ -403,12 +415,7 @@ export const commonStyles = StyleSheet.create({
         paddingHorizontal: 12,
         color: '#333',
     },
-    summaryRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        height: 32,
-        backgroundColor: '#fff7e6'
-    },
+
     listEmptyComponent: {
         minHeight:35,
         justifyContent:'center',
