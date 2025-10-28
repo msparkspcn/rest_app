@@ -1,6 +1,6 @@
 import { router, Href } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React, { useMemo, useState } from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 import {
   Modal,
   SafeAreaView,
@@ -21,6 +21,7 @@ type MenuGroup = { key: string; title: string; icon: string; children: MenuChild
 export default function AdminHomeScreen() {
   const { user } = useUser();
   const [isTOSOpen, setIsTOSOpen] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
   // console.log('user:'+JSON.stringify(user))
   if(user==null) {
 
@@ -132,10 +133,22 @@ export default function AdminHomeScreen() {
 
   };
 
-  const handleMenuPress = (route: Href) => {
-    router.push(route);
-  };
+  const handleMenuPress = useCallback(
+      async (route: Href) => {
+        if (isNavigating) {
+          console.log('이동중')
+          return;
+        }
 
+        setIsNavigating(true);
+        try {
+          await router.push(route);
+        } finally {
+          setTimeout(() => setIsNavigating(false), 500);
+        }
+      },
+      [isNavigating]
+  );
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
