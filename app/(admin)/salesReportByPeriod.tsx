@@ -5,11 +5,11 @@ import React, {useEffect, useMemo, useState} from 'react';
 import {
     Modal,
     Pressable,
-    SafeAreaView,
     Text,
     TouchableOpacity,
     View
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import * as api from "../../services/api/api";
 import {formattedDate, ymdToDateWithDay, getTodayYmd, dateToYmd} from "../../utils/DateUtils";
 import {Table} from "../../components/Table";
@@ -349,7 +349,7 @@ export default function SalesReportByPeriod() {
         );
     }, [saleDetailList]);
     return (
-        <SafeAreaView style={commonStyles.container}>
+        <SafeAreaView style={commonStyles.container} edges={[]}>
             <StatusBar style="dark"/>
 
             <View style={commonStyles.topBar}>

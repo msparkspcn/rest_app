@@ -1,6 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Modal, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { DatePickerModal } from "../../components/DatePickerModal";
 import ListModal from "../../components/ListModal";
 import { Table } from "../../components/Table";
@@ -195,7 +196,7 @@ export default function RealtimeSales() {
             )
         },
         {
-            key: 'actualSaleAmt', title: '총매출', flex: 1.2, align: 'center',
+            key: 'actualSaleAmt', title: '총매출', flex: 1.2,
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>
                     {item.actualSaleAmt.toLocaleString()}
@@ -373,7 +374,7 @@ export default function RealtimeSales() {
     }
 
     return (
-        <SafeAreaView style={commonStyles.container}>
+        <SafeAreaView style={commonStyles.container} edges={[]}>
             <StatusBar style="dark"/>
 
             <View style={commonStyles.topBar}>

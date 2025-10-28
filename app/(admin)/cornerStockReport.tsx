@@ -3,14 +3,13 @@ import React, {useEffect, useMemo, useState} from 'react';
 import {
     Alert,
     Pressable,
-    SafeAreaView,
-    StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
     View
 } from 'react-native';
 import {commonStyles} from "../../styles/index";
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
 import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
@@ -175,7 +174,7 @@ export default function CornerStockReportScreen() {
     ]), [])
 
     return (
-        <SafeAreaView style={commonStyles.container}>
+        <SafeAreaView style={commonStyles.container} edges={[]}>
             <StatusBar style="dark"/>
 
             <View style={commonStyles.topBar}>
@@ -261,9 +260,5 @@ export default function CornerStockReportScreen() {
         </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    selectText: {fontSize: 14, color: '#333'},
-});
 
 

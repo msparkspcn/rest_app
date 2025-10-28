@@ -3,13 +3,13 @@ import { StatusBar } from 'expo-status-bar';
 import React, {useCallback, useMemo, useState} from 'react';
 import {
   Modal,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { DEP_G, DEP_OP, DEP_R } from '../../constants/RoleTypes';
 import { useUser } from '../../contexts/UserContext';
 import TeamsOfService from "./teamsOfService";

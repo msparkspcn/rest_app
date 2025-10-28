@@ -2,7 +2,8 @@ import { commonStyles } from '@/styles';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import React, {useMemo, useState} from 'react';
-import { Modal, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {Table} from "../../components/Table";
 import {ColumnDef} from "../../types/table";
 import Const from "../../constants/Const";
@@ -132,7 +133,7 @@ export default function VendorListScreen() {
   };
 
   return (
-    <SafeAreaView style={commonStyles.container}>
+    <SafeAreaView style={commonStyles.container} edges={[]}>
       <StatusBar style="dark" />
 
       <View style={commonStyles.topBar}>

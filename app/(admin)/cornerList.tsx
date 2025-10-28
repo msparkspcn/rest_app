@@ -2,7 +2,7 @@ import { commonStyles } from '@/styles';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import React, { useMemo, useState } from 'react';
-import { Modal, Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import * as api from "../../services/api/api";
 import {Table} from "../../components/Table";
 import Const from "../../constants/Const";
@@ -10,6 +10,7 @@ import {useUser} from "../../contexts/UserContext";
 import {User, Corner} from "../../types";
 import {ColumnDef} from "../../types/table";
 import LoadingOverlay from "../../components/LoadingOverlay";
+import {SafeAreaView} from "react-native-safe-area-context";
 
 type OperateFilter = { key: string; name: string; }
 
@@ -91,7 +92,9 @@ export default function CornerListScreen() {
     { key: 'cornerNm', title: Const.CORNER_NM, flex: 2,
       renderCell: (item) => (
           <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
-            <Text style={[commonStyles.cell, commonStyles.linkText,{paddingLeft:10}]}>{item.cornerNm}</Text>
+            <Text style={[commonStyles.cell, commonStyles.linkText, {paddingLeft:10}]}>
+              {item.cornerNm}
+            </Text>
           </Pressable>
       ),   },
     { key: 'cornerCd', title: '코드', flex: 1.2, align: 'center'},
@@ -114,19 +117,19 @@ export default function CornerListScreen() {
 
 
   const itemColumns: ColumnDef<ItemRow>[] = useMemo(() => ([
-    { key: 'no',          title: Const.NO,     flex: 0.4,
+    { key: 'no', title: Const.NO, flex: 0.4,
       renderCell: (_item, index) => (
           <Text style={[commonStyles.cell, { textAlign: 'center' }]}>{index + 1}</Text>
       ),
     },
-    { key: 'itemCd', title: Const.ITEM_CD,  flex: 1.8, align: 'left',
+    { key: 'itemCd', title: Const.ITEM_CD, flex: 1.8,
       renderCell: (_item) => (
           <Text style={[commonStyles.cell, { textAlign: 'center' }]}>
             {_item.itemCd} {_item.itemSeq}
           </Text>
       ),
     },
-    { key: 'itemNm', title: Const.ITEM_NM,   flex: 2.2, align: 'left'},
+    { key: 'itemNm', title: Const.ITEM_NM, flex: 2.2},
   ]), []);
 
   const CornerNmRow = () => {
@@ -137,7 +140,7 @@ export default function CornerListScreen() {
     );
   };
   return (
-    <SafeAreaView style={commonStyles.container}>
+    <SafeAreaView style={commonStyles.container} edges={[]}>
       <StatusBar style="dark" />
 
       <View style={commonStyles.topBar}>

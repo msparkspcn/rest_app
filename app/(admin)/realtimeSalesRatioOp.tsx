@@ -1,6 +1,7 @@
 import {StatusBar} from 'expo-status-bar';
 import React, {useEffect, useMemo, useState} from 'react';
-import {Pressable, SafeAreaView, Text, TouchableOpacity, View} from 'react-native';
+import {Pressable, Text, TouchableOpacity, View} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {commonStyles} from "../../styles/index";
 import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
 import {Table} from "../../components/Table";
@@ -430,7 +431,7 @@ export default function RealtimeSalesRatio() {
 
 
     return (
-        <SafeAreaView style={commonStyles.container}>
+        <SafeAreaView style={commonStyles.container} edges={[]}>
             <StatusBar style="dark"/>
 
             <View style={commonStyles.topBar}>

@@ -5,12 +5,12 @@ import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
     Modal,
     Pressable,
-    SafeAreaView,
     StyleSheet,
     Text,
     TouchableOpacity,
     View
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import * as api from "../../services/api/api";
 import {
     dateToYm, formattedDate,
@@ -432,7 +432,7 @@ export default function MonthlySalesReport() {
     );
 
     return (
-        <SafeAreaView style={commonStyles.container}>
+        <SafeAreaView style={commonStyles.container} edges={[]}>
             <StatusBar style="dark"/>
 
             <View style={commonStyles.topBar}>
