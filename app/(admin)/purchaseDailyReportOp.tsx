@@ -1,34 +1,35 @@
-import {StatusBar} from 'expo-status-bar';
-import React, {useEffect, useMemo, useState} from 'react';
+import { StatusBar } from 'expo-status-bar';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
     Modal,
     Pressable,
-    StyleSheet,
     Text,
     TouchableOpacity,
     View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {commonStyles} from "../../styles/index";
-import {Table} from "../../components/Table";
-import {dateToYmd, formattedDate, getTodayYmd, ymdToDateWithDay} from "../../utils/DateUtils";
-import {ColumnDef} from "../../types/table";
-import {DatePickerModal} from "../../components/DatePickerModal";
-import Const from "../../constants/Const";
-import * as api from "../../services/api/api";
-import {useUser} from "../../contexts/UserContext";
-import {User, SalesOrg} from "../../types";
+import { DatePickerModal } from "../../components/DatePickerModal";
 import ListModal from "../../components/ListModal";
 import LoadingOverlay from "../../components/LoadingOverlay";
+import { Table } from "../../components/Table";
+import Const from "../../constants/Const";
+import { useUser } from "../../contexts/UserContext";
+import * as api from "../../services/api/api";
+import { commonStyles } from "../../styles/index";
+import { SalesOrg, User } from "../../types";
+import { ColumnDef } from "../../types/table";
+import { dateToYmd, formattedDate, getTodayYmd, ymdToDateWithDay } from "../../utils/DateUtils";
+
 type PurchaseRow = {
     salesOrgCd: string;
     salesOrgNm: string;
     operDiv: string;
-    totalOrderCount: number,
-    totalOrdAmt: number,
-    totalReturnAmt: number,
-    totalOrdVat: number,
-    totalAmount: number
+    totalOrderCount: number;
+    totalOrdAmt: number;
+    totalReturnAmt: number;
+    totalOrdVat: number;
+    totalAmount: number;
+    no: number;
 };
 type PurchaseDetailRow = {
     dlvDt: string;
@@ -41,7 +42,6 @@ export default function PurchaseDailyReportScreen() {
     const [fromPurchaseDt, setFromPurchaseDt] = useState(getTodayYmd());
     const [toPurchaseDt, setToPurchaseDt] = useState(getTodayYmd());
     const [isDetailVisible, setIsDetailVisible] = useState(false);
-    const [selectedsalesOrgNm, setSelectedsalesOrgNm] = useState<string | null>(null);
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [currentPickerType, setCurrentPickerType] = useState('from');
     const [tempDate, setTempDate] = useState<Date | null>(null);
@@ -49,11 +49,13 @@ export default function PurchaseDailyReportScreen() {
     const [salesOrgList, setSalesOrgList] = useState<SalesOrg[]>([]);
 
     const [selectedSalesOrgCd, setSelectedSalesOrgCd] = useState<string>('');
+    const [selectedPurchase, setSelectedPurchase] = useState<PurchaseRow | null>(null);
     const {user}: User = useUser();
 
-    const [purchaseList, setPurchaseList] = useState<[] | null>(null);
-    const [purchaseItemList, setPurchaseItemList] = useState<[] | null>(null);
+    const [purchaseList, setPurchaseList] = useState<PurchaseRow[]>([]);
+    const [purchaseItemList, setPurchaseItemList] = useState<PurchaseDetailRow[]>([]);
     const [loading, setLoading] = useState(false);
+    const [hasSearched, setHasSearched] = useState(false);
 
     useEffect(() => {
         getSalesOrgList();
@@ -62,11 +64,10 @@ export default function PurchaseDailyReportScreen() {
     const getSalesOrgList = () => {
         const request = { cmpCd: user.cmpCd }
         console.log("request:"+JSON.stringify(request))
-        api.getSalsOrgList(request)
+        api.getSalesOrgList(request)
             .then(result => {
                 if (result.data.responseBody != null) {
                     const salesOrgList = result.data.responseBody;
-                    console.log('salesOrgList:' + JSON.stringify(salesOrgList))
                     setSalesOrgList([
                             {salesOrgCd:'', salesOrgNm: '전체'},
                             ...salesOrgList
@@ -74,28 +75,23 @@ export default function PurchaseDailyReportScreen() {
                     );
                 }
             })
-            .catch(error => {
-                console.log("getSalsOrgList error:" + error)
-            });
+            .catch(error => console.log("getSalesOrgList error:" + error));
     }
 
-    const mainColumns: ColumnDef<PurchaseRow& { isPurchaseSummary?: boolean; }>[] = useMemo(() => ([
+    const mainColumns: ColumnDef<PurchaseRow & { isPurchaseSummary?: boolean }>[] = useMemo(() => ([
         {key: 'no', title: Const.NO, flex: 0.5,
-            renderCell: (item) => {
-                if (item.isPurchaseSummary) return null;
-                return (
-                    <Text style={[commonStyles.cell, {textAlign: 'center'}]}>{item.no}</Text>
-                )
-            }
+            renderCell: item => !item.isPurchaseSummary && (
+                <Text style={[commonStyles.cell, {textAlign: 'center'}]}>{item.no}</Text>
+            )
         },
         {
-            key: 'salesOrgNm', title: '사업장', flex: 2, align: 'left',
+            key: 'salesOrgNm', title: Const.SALES_ORG_NM, flex: 2,
             renderCell: (item) => (
-                <Pressable style={commonStyles.columnPressable}
-                           onPress={() => openDetail(item)}
+                <Pressable
+                    style={commonStyles.columnPressable}
+                    onPress={() => openDetail(item)}
                 >
                     <Text style={[commonStyles.cell,
-
                         item.isPurchaseSummary ? {fontWeight: 'bold', textAlign: 'center'} :commonStyles.linkText, {paddingLeft: 5}]}>
                         {item.salesOrgNm}
                     </Text>
@@ -103,9 +99,10 @@ export default function PurchaseDailyReportScreen() {
             ),
         },
         {
-            key: 'totalAmount', title: '금액', flex: 1, align: 'right',
+            key: 'totalAmount', title: '금액', flex: 1,
             renderCell: (item) => (
-                <Text style={[commonStyles.numberCell, item.isPurchaseSummary ? { fontWeight: 'bold' } : null]}>
+                <Text style={[commonStyles.numberCell,
+                    item.isPurchaseSummary ? { fontWeight: 'bold' } : null]}>
                     {item.totalAmount.toLocaleString()}
                 </Text>
             )
@@ -133,20 +130,16 @@ export default function PurchaseDailyReportScreen() {
                 rows.forEach((item) => {
                     operSum += item.totalAmount;
                     no += 1;
-                    result.push({
-                        ...item,
-                        no: no
-                    });
+                    result.push({...item, no: no});
                 });
                 if(!selectedSalesOrgCd) {
-                    let summaryName = '';
-                    if (operDiv === '01') summaryName = '휴게소 소계';
-                    else if (operDiv === '02') summaryName = Const.OIL_SUMMARY;
+                    const summaryNm = operDiv === '01' ?  Const.REST_SUMMARY : Const.OIL_SUMMARY;
+
                     sumNo -= 1;
                     result.push({
                         no: sumNo,
                         salesOrgCd: '',
-                        salesOrgNm: summaryName,
+                        salesOrgNm: summaryNm,
                         operDiv: '',
                         totalOrderCount: 0,
                         totalOrdAmt: 0,
@@ -157,7 +150,6 @@ export default function PurchaseDailyReportScreen() {
                     });
                 }
             });
-        // console.log("result:"+JSON.stringify(result));
 
         return result;
     }, [purchaseList]);
@@ -165,24 +157,21 @@ export default function PurchaseDailyReportScreen() {
     const renderFooter = () => (
         <View style={commonStyles.summaryRow}>
             <View style={[{flex: 2.5},commonStyles.columnContainer]}>
-                <Text style={[commonStyles.cell, styles.summaryLabelText,
+                <Text style={[commonStyles.cell, commonStyles.summaryLabelText,
                     {textAlign:'center'}]}>합계</Text>
             </View>
             <View style={[{flex:1}, commonStyles.columnContainer]}>
-                <Text
-                    style={[
-                        commonStyles.cell,
-                        commonStyles.numberCell,
-                        styles.totalText,
-                    ]}
-                >
+                <Text style={[commonStyles.numberCell, commonStyles.summaryLabelText]}>
                     {totalAmount.toLocaleString()}
                 </Text>
             </View>
         </View>
     );
 
-    const totalAmount = useMemo(() => (purchaseList ?? []).reduce((acc, r) => acc + r.totalAmount, 0), [purchaseList]);
+    const totalAmount = useMemo(
+        () => purchaseList.reduce((acc, r) => acc + r.totalAmount, 0),
+        [purchaseList]
+    );
 
     const onSearch = () => {
         const request = {
@@ -201,6 +190,7 @@ export default function PurchaseDailyReportScreen() {
                     const purchaseList = result.data.responseBody;
                     console.log('purchaseList:' + JSON.stringify(purchaseList))
                     setPurchaseList(purchaseList);
+                    setHasSearched(true);
                 }
             })
             .catch(error => {
@@ -219,7 +209,7 @@ export default function PurchaseDailyReportScreen() {
         },
         {key: 'outSdCmpNm', title: '거래처', flex: 1.8, align: 'left'},
         {
-            key: 'totalAmount', title: '금액', flex: 1.5, align: 'right',
+            key: 'totalAmount', title: '금액', flex: 1.5,
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>{item.totalAmount.toLocaleString()}</Text>
             )
@@ -229,26 +219,27 @@ export default function PurchaseDailyReportScreen() {
     const renderDetailFooter = () => (
         <View style={commonStyles.summaryRow}>
             <View style={[{flex: 1}, commonStyles.columnContainer]}>
-                <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.modalTotalText]}>
+                <Text style={[commonStyles.cell, commonStyles.alignCenter, commonStyles.summaryLabelText]}>
                     합계
                 </Text>
             </View>
             <View style={[{flex: 3.3}, commonStyles.columnContainer]}>
-                <Text style={[commonStyles.numberCell, styles.modalTotalText]}>
+                <Text style={[commonStyles.numberCell, commonStyles.summaryLabelText]}>
                     {detailTotalAmount.toLocaleString()}
                 </Text>
             </View>
         </View>
     );
 
-    const openDatePicker = (pickerType: string) => {
+    const openDatePicker = (pickerType: 'from' | 'to') => {
         setTempDate(new Date());
         setCurrentPickerType(pickerType);
         setShowDatePicker(true);
     };
 
     const openDetail = (purchase: PurchaseRow) => {
-        setSelectedsalesOrgNm(purchase.salesOrgNm);
+        setSelectedPurchase(purchase);
+
         console.log('거래처 클릭 purchase:'+JSON.stringify(purchase));
         const request = {
             cmpCd: user.cmpCd,
@@ -273,14 +264,13 @@ export default function PurchaseDailyReportScreen() {
                     setIsDetailVisible(true);
                 }
             })
-            .catch(error => {
-                console.log("getPurchaseSummary error:" + error)
-            });
+            .catch(error => console.log("getPurchaseSummary error:" + error));
     };
 
-    const detailTotalAmount = useMemo(() => {
-        return (purchaseItemList ?? []).reduce((acc, row) => acc + row.totalAmount, 0);
-    }, [purchaseItemList]);
+    const detailTotalAmount = useMemo(
+        () => purchaseItemList.reduce((acc, row) => acc + row.totalAmount, 0),
+        [purchaseItemList]
+    );
 
     return (
         <SafeAreaView style={commonStyles.container} edges={[]}>
@@ -300,7 +290,7 @@ export default function PurchaseDailyReportScreen() {
                     </Pressable>
                 </View>
                 <View style={commonStyles.filterRowFront}>
-                    <Text style={commonStyles.filterLabel}>조회일자</Text>
+                    <Text style={commonStyles.filterLabel}>{Const.SEARCH_DT}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('from')}>
                         <Text style={commonStyles.selectText}>{formattedDate(fromPurchaseDt)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
@@ -315,15 +305,21 @@ export default function PurchaseDailyReportScreen() {
 
             <View style={commonStyles.sectionDivider}/>
 
-            <Table data={tableData} columns={mainColumns} listFooter={renderFooter}/>
+            <Table
+                data={tableData}
+                columns={mainColumns}
+                listFooter={renderFooter}
+                hasSearched={hasSearched}
+            />
 
             <DatePickerModal
                 visible={showDatePicker}
                 initialDate={tempDate}
                 onClose={() => setShowDatePicker(false)}
                 onConfirm={(date) => {
-                    if (currentPickerType === 'from') setFromPurchaseDt(dateToYmd(date));
-                    else setToPurchaseDt(dateToYmd(date));
+                    currentPickerType === 'from'
+                        ? setFromPurchaseDt(dateToYmd(date))
+                        : setToPurchaseDt(dateToYmd(date))
                 }}
             />
 
@@ -341,14 +337,15 @@ export default function PurchaseDailyReportScreen() {
             />
 
             <Modal visible={isDetailVisible}
-                   transparent animationType="fade"
+                   transparent
+                   animationType="fade"
                    onRequestClose={() => setIsDetailVisible(false)}
             >
                 <View style={commonStyles.modalOverlay}>
                     <View style={commonStyles.modalCard}>
                         <View style={commonStyles.modalHeader}>
-                            {selectedsalesOrgNm && (
-                                <Text style={commonStyles.modalTitle}>{selectedsalesOrgNm}</Text>
+                            {selectedPurchase && (
+                                <Text style={commonStyles.modalTitle}>{selectedPurchase.salesOrgNm}</Text>
                             )}
                             <TouchableOpacity onPress={() => setIsDetailVisible(false)}>
                                 <Text style={commonStyles.modalClose}>✕</Text>
@@ -368,21 +365,3 @@ export default function PurchaseDailyReportScreen() {
         </SafeAreaView>
     );
 };
-
-const styles = StyleSheet.create({
-    totalText: {
-        fontWeight: '700',
-        color: '#222',
-    },
-
-    modalTotalText: {
-        fontWeight: '700',
-        color: '#222',
-    },
-    summaryLabelText: {
-        fontWeight: '700',
-        color: '#333'
-    },
-});
-
-

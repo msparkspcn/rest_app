@@ -1,19 +1,19 @@
-import {StatusBar} from 'expo-status-bar';
-import React, {useEffect, useMemo, useState} from 'react';
-import {Alert, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Alert, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {commonStyles} from "../../styles/index";
-import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
-import {Table} from "../../components/Table";
-import {ColumnDef} from "../../types/table";
-import {DatePickerModal} from "../../components/DatePickerModal";
-import Const from "../../constants/Const";
-import MyRadioGroup from "../../components/ui/RadioGroup";
-import {User, SalesOrg, Corner} from "../../types";
-import {useUser} from "../../contexts/UserContext";
-import * as api from "../../services/api/api";
+import { DatePickerModal } from "../../components/DatePickerModal";
 import ListModal from "../../components/ListModal";
 import LoadingOverlay from "../../components/LoadingOverlay";
+import { Table } from "../../components/Table";
+import MyRadioGroup from "../../components/ui/RadioGroup";
+import Const from "../../constants/Const";
+import { useUser } from "../../contexts/UserContext";
+import * as api from "../../services/api/api";
+import { commonStyles } from "../../styles/index";
+import { Corner, SalesOrg, User } from "../../types";
+import { ColumnDef } from "../../types/table";
+import { dateToYmd, formattedDate, getTodayYmd } from "../../utils/DateUtils";
 type SaleRow = {
     storCd: string;
     cornerCd: string;
@@ -58,6 +58,7 @@ export default function RealtimeSalesByCornerOp() {
     const [saleList, setSaleList] = useState<[] | null>(null);
     const [saleDetailList, setSaleDetailList] = useState<[] | null>(null);
     const [loading, setLoading] = useState(false);
+    const [hasSearched, setHasSearched] = useState(false);
 
     useEffect(() => {
         getSalesOrgList();
@@ -74,7 +75,7 @@ export default function RealtimeSalesByCornerOp() {
             restValue: '',
         }
         console.log("request:"+JSON.stringify(request))
-        api.getSalsOrgList(request)
+        api.getSalesOrgList(request)
             .then(result => {
                 if (result.data.responseBody != null) {
                     const salesOrgList = result.data.responseBody;
@@ -82,9 +83,7 @@ export default function RealtimeSalesByCornerOp() {
                     setSalesOrgList(salesOrgList);
                 }
             })
-            .catch(error => {
-                console.log("getSalsOrgList error:" + error)
-            });
+            .catch(error => console.log("getSalesOrgList error:" + error));
     }
 
     const getCornerList = (salesOrgCd: string) => {
@@ -103,9 +102,7 @@ export default function RealtimeSalesByCornerOp() {
                     ]);
                 }
             })
-            .catch(error => {
-                console.log("getCornerList error:" + error)
-            });
+            .catch(error => console.log("getCornerList error:" + error));
     };
 
     const onSearch = () => {
@@ -146,13 +143,11 @@ export default function RealtimeSalesByCornerOp() {
                     else {
                         setSaleList(saleList);
                     }
-                    setLoading(false);
+                    setHasSearched(true)
                 }
             })
-            .catch(error => {
-                setLoading(false);
-                console.log("mobRestRealTimeSaleNews error:" + error)
-            });
+            .catch(error => console.log("mobRestRealTimeSaleNews error:" + error))
+            .finally(() => setLoading(false));
     };
 
     const openDatePicker = () => {
@@ -183,9 +178,7 @@ export default function RealtimeSalesByCornerOp() {
                     setIsDetailVisible(true);
                 }
             })
-            .catch(error => {
-                console.log("mobRestRealTimeItemSale error:" + error)
-            });
+            .catch(error => console.log("mobRestRealTimeItemSale error:" + error));
     }
 
     const handleDcIncludedToggle = () => {
@@ -383,7 +376,7 @@ export default function RealtimeSalesByCornerOp() {
                     </TouchableOpacity>
                 </View>
                 <View style={commonStyles.filterRowFront}>
-                    <Text style={commonStyles.filterLabel}>조회일자</Text>
+                    <Text style={commonStyles.filterLabel}>{Const.SEARCH_DT}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={openDatePicker}>
                         <Text style={commonStyles.selectText}>{formattedDate(saleDate)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
@@ -430,6 +423,8 @@ export default function RealtimeSalesByCornerOp() {
                 data={saleList}
                 columns={mainColumns}
                 listFooter={renderFooter}
+                hasSearched={hasSearched}
+                maxHeight={450}
             />
 
             <DatePickerModal
@@ -484,6 +479,7 @@ export default function RealtimeSalesByCornerOp() {
                             columns={saleDetailColumns}
                             isModal={true}
                             listFooter={renderDetailFooterRow}
+                            hasSearched={isDetailVisible}
                         />
                     </View>
                 </View>

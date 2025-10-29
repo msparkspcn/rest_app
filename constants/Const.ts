@@ -39,7 +39,7 @@ export default {
     NO_RESULT_MSG: '검색결과가 없습니다.',
     CASH: '현금',
     CARD_ETC: '카드 외',
-    SALES_ORG: '사업장',
+    SALES_ORG_NM: '사업장',
     NET_AMT: '과세매출',
     DUTY_FREE_AMT: '면세매출',
     TOTAL_SALE_AMT: '총매출',
@@ -65,6 +65,7 @@ export default {
     NO_CORNER_MSG: '매장을 선택해주세요.',
     OPER_TYPE_REST: '01',
     OPER_TYPE_OIL: '02',
+    REST_SUMMARY: '휴게소 소계',
     OIL_SUMMARY: '주유소 소계',
     GAS_SUMMARY: '충전소 소계',
 }

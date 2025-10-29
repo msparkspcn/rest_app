@@ -1,19 +1,19 @@
-import {StatusBar} from 'expo-status-bar';
-import React, {useEffect, useMemo, useState} from 'react';
-import {Modal, Pressable, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import { AntDesign } from "@expo/vector-icons";
+import { StatusBar } from 'expo-status-bar';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {commonStyles} from "../../styles/index";
-import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
-import {Table} from "../../components/Table";
-import {ColumnDef} from "../../types/table";
-import {DatePickerModal} from "../../components/DatePickerModal";
-import Const from "../../constants/Const";
+import { DatePickerModal } from "../../components/DatePickerModal";
 import ListModal from "../../components/ListModal";
-import {User, SalesOrg} from "../../types";
-import {useUser} from "../../contexts/UserContext";
-import * as api from "../../services/api/api";
-import {AntDesign} from "@expo/vector-icons";
 import LoadingOverlay from "../../components/LoadingOverlay";
+import { Table } from "../../components/Table";
+import Const from "../../constants/Const";
+import { useUser } from "../../contexts/UserContext";
+import * as api from "../../services/api/api";
+import { commonStyles } from "../../styles/index";
+import { SalesOrg, User } from "../../types";
+import { ColumnDef } from "../../types/table";
+import { dateToYmd, formattedDate, getTodayYmd } from "../../utils/DateUtils";
 
 type SaleRow = {
     no: number;
@@ -68,6 +68,7 @@ export default function RealtimeSalesScreen() {
     const [oilSaleDetailList, setOilSaleDetailList] = useState<[] | null>([]);
     const [selectedOperDiv, setSelectedOperDiv] = useState("01");
     const [loading, setLoading] = useState(false);
+    const [hasSearched, setHasSearched] = useState(false);
 
     useEffect(() => {
         getSalesOrgList();
@@ -75,7 +76,7 @@ export default function RealtimeSalesScreen() {
 
     const getSalesOrgList = () => {
         const request = { cmpCd: user.cmpCd }
-        api.getSalsOrgList(request)
+        api.getSalesOrgList(request)
             .then(result => {
                 if (result.data.responseBody != null) {
                     const salesOrgList = result.data.responseBody;
@@ -83,7 +84,7 @@ export default function RealtimeSalesScreen() {
                 }
             })
             .catch(error => {
-                console.log("getSalsOrgList error:" + error)
+                console.log("getSalesOrgList error:" + error)
             });
     }
 
@@ -140,6 +141,7 @@ export default function RealtimeSalesScreen() {
                     setSaleStatList(saleStatList);
                 }
                 setLoading(false);
+                setHasSearched(true);
             })
             .catch(error => {
                 setLoading(false);
@@ -178,14 +180,14 @@ export default function RealtimeSalesScreen() {
                     });
                 });
                 if(!selectedSalesOrgCd) {
-                    let summaryName = '';
-                    if (operDiv === '01') summaryName = '휴게소 소계';
-                    else if (operDiv === '02') summaryName = Const.OIL_SUMMARY;
+                    let summaryNm = '';
+                    if (operDiv === '01') summaryNm = Const.REST_SUMMARY;
+                    else if (operDiv === '02') summaryNm = Const.OIL_SUMMARY;
                     sumNo -= 1;
                     result.push({
                         no: sumNo,
                         salesOrgCd: '',
-                        orgNm: summaryName,
+                        orgNm: summaryNm,
                         saleAmt: 0,
                         actualSaleAmt: 0,
                         totalSaleAmt: storSum,
@@ -231,14 +233,14 @@ export default function RealtimeSalesScreen() {
                     });
                 });
                 if(!selectedSalesOrgCd) {
-                    let summaryName = '';
-                    if (storCd === '01') summaryName = Const.OIL_SUMMARY;
-                    else if (storCd === '02') summaryName = Const.GAS_SUMMARY;
+                    let summaryNm = '';
+                    if (storCd === '01') summaryNm = Const.OIL_SUMMARY;
+                    else if (storCd === '02') summaryNm = Const.GAS_SUMMARY;
                     sumNo -= 1;
                     result.push({
                         no: sumNo,
                         storCd: '',
-                        orgNm: summaryName,
+                        orgNm: summaryNm,
                         gaugeNm: '',
                         saleQty: saleQtySum,
                         actualSaleAmt: storSum,
@@ -595,7 +597,7 @@ export default function RealtimeSalesScreen() {
                                             {saleValue1.toLocaleString()}
                                         </Text>
                                         <AntDesign
-                                            name={lastWeekIsUp ? 'caretup' : 'caretdown'}
+                                            name={lastWeekIsUp ? 'caret-up' : 'caret-down'}
                                             size={13}
                                             color={lastWeekIsUp ? 'red' : 'blue'}
                                             style={{paddingHorizontal: 5}}
@@ -603,7 +605,7 @@ export default function RealtimeSalesScreen() {
                                         <Text style={{fontSize: 12}}>  /  {saleValue2.toLocaleString()}
                                         </Text>
                                         <AntDesign
-                                            name={yesDayIsUp ? 'caretup' : 'caretdown'}
+                                            name={yesDayIsUp ? 'caret-up' : 'caret-down'}
                                             size={13}
                                             color={yesDayIsUp ? 'red' : 'blue'}
                                             style={{paddingHorizontal: 5}}
@@ -631,7 +633,7 @@ export default function RealtimeSalesScreen() {
 
             <View style={commonStyles.topBar}>
                 <View style={commonStyles.filterRowFront}>
-                    <Text style={commonStyles.filterLabel}>사업장</Text>
+                    <Text style={commonStyles.filterLabel}>{Const.SALES_ORG_NM}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowSalesOrgListModal(true)}>
                         <Text style={commonStyles.selectText}>
                             {salesOrgList.find(g => g.salesOrgCd === selectedSalesOrgCd)?.salesOrgNm || Const.ALL}
@@ -640,7 +642,7 @@ export default function RealtimeSalesScreen() {
                     </TouchableOpacity>
                 </View>
                 <View style={[commonStyles.filterRowFront]}>
-                    <Text style={commonStyles.filterLabel}>조회일자</Text>
+                    <Text style={commonStyles.filterLabel}>{Const.SEARCH_DT}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={openDatePicker}>
                         <Text style={commonStyles.selectText}>{formattedDate(saleDate)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
@@ -679,6 +681,7 @@ export default function RealtimeSalesScreen() {
                 data={tableData}
                 columns={mainColumns}
                 listHeader={renderListHeader}
+                hasSearched={hasSearched}
             />
 
             <DatePickerModal

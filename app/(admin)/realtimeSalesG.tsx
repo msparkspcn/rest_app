@@ -183,13 +183,13 @@ export default function RealtimeSalesScreen() {
                 });
 
                 if(selectedStorCd.id=="") {
-                    let summaryName = '';
-                    if (storCd === '01') summaryName = Const.OIL_SUMMARY;
-                    else if (storCd === '02') summaryName = Const.GAS_SUMMARY;
+                    let summaryNm = '';
+                    if (storCd === '01') summaryNm = Const.OIL_SUMMARY;
+                    else if (storCd === '02') summaryNm = Const.GAS_SUMMARY;
                     sumNo -= 1;
                     result.push({
                         no: sumNo,
-                        orgNm: summaryName,
+                        orgNm: summaryNm,
                         storCd: '',
                         gaugeNm: '',
                         actualSaleAmt: dateSum,
@@ -288,7 +288,7 @@ export default function RealtimeSalesScreen() {
 
             <View style={commonStyles.topBar}>
                 <View style={[commonStyles.filterRowFront]}>
-                    <Text style={commonStyles.filterLabel}>조회일자</Text>
+                    <Text style={commonStyles.filterLabel}>{Const.SEARCH_DT}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={openDatePicker}>
                         <Text style={commonStyles.selectText}>{formattedDate(saleDate)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>

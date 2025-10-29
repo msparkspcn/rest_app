@@ -23,6 +23,7 @@ type TableProps<T> = {
     listHeader?: React.ReactNode;
     listFooter?: React.ReactNode;
     hasSearched?: boolean;
+    maxHeight?: number;
 };
 
 const alignStyles = {
@@ -38,7 +39,8 @@ export function Table<T>({
      isModal,
      listHeader,
      hasSearched = false,
-     listFooter
+     listFooter,
+    maxHeight
 }: TableProps<T>) {
     const renderHeader = () => (
         <View style={commonStyles.tableHeaderRow}>
@@ -131,9 +133,7 @@ export function Table<T>({
         if ((item as any).isPurchaseSummary) {
             const summaryItem = item as any; // 타입 단순화
             return (
-                <View style={[commonStyles.summaryRow,
-                    {borderBottomWidth: '3', borderColor:'#aaa'},
-                ]}>
+                <View style={[commonStyles.summaryRow]}>
                     <View style={[{flex: 2.5}, commonStyles.columnContainer]}>
                         <Text style={[commonStyles.summaryLabelText,
                             {textAlign: 'center', fontSize: 13 }]}>
@@ -184,9 +184,11 @@ export function Table<T>({
         }
         return rowContent;
     };
+    // console.log('data11:'+JSON.stringify(data));
 
     return (
-        <View style={commonStyles.tableContainer}>
+        <View style={[commonStyles.tableContainer,
+            maxHeight !== undefined && { maxHeight }]}>
             {renderHeader()}
             <FlatList
                 data={data}

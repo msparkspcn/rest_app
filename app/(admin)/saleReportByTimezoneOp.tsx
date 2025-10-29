@@ -1,18 +1,18 @@
-import {StatusBar} from 'expo-status-bar';
-import React, {useEffect, useMemo, useState} from 'react';
-import {Pressable, Text, TouchableOpacity, View} from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Pressable, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {commonStyles} from "../../styles/index";
-import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
-import {Table} from "../../components/Table";
-import {ColumnDef} from "../../types/table";
-import {DatePickerModal} from "../../components/DatePickerModal";
-import Const from "../../constants/Const";
-import {User, SalesOrg} from "../../types";
-import * as api from "../../services/api/api";
-import {useUser} from "../../contexts/UserContext";
+import { DatePickerModal } from "../../components/DatePickerModal";
 import ListModal from "../../components/ListModal";
 import LoadingOverlay from "../../components/LoadingOverlay";
+import { Table } from "../../components/Table";
+import Const from "../../constants/Const";
+import { useUser } from "../../contexts/UserContext";
+import * as api from "../../services/api/api";
+import { commonStyles } from "../../styles/index";
+import { SalesOrg, User } from "../../types";
+import { ColumnDef } from "../../types/table";
+import { dateToYmd, formattedDate, getTodayYmd } from "../../utils/DateUtils";
 
 type SaleRow = { tmzonDiv: string; actualSaleAmt: number, saleRatio: number };
 type ListItem = {
@@ -37,6 +37,7 @@ export default function SalesReportByTimezoneScreen() {
     const [salesOrgList, setSalesOrgList] = useState<SalesOrg[]>([]);
     const [saleList, setSaleList] = useState<SaleRow[]>([]);
     const [loading, setLoading] = useState(false);
+    const [hasSearched, setHasSearched] = useState(false);
 
     useEffect(() => {
         getSalesOrgList();
@@ -45,7 +46,7 @@ export default function SalesReportByTimezoneScreen() {
     const getSalesOrgList = () => {
         const request = { cmpCd: user.cmpCd }
         console.log("request:"+JSON.stringify(request))
-        api.getSalsOrgList(request)
+        api.getSalesOrgList(request)
             .then(result => {
                 if (result.data.responseBody != null) {
                     const salesOrgList = result.data.responseBody;
@@ -58,7 +59,7 @@ export default function SalesReportByTimezoneScreen() {
                 }
             })
             .catch(error => {
-                console.log("getSalsOrgList error:" + error)
+                console.log("getSalesOrgList error:" + error)
             });
     }
 
@@ -86,7 +87,7 @@ export default function SalesReportByTimezoneScreen() {
             .catch(error => {
                 setLoading(false);
                 console.log("mobOperTmzonSale error:" + error)
-            });
+            }).finally(() => setHasSearched(true));
     };
 
     const openDatePicker = (pickerType: string) => {
@@ -249,7 +250,7 @@ export default function SalesReportByTimezoneScreen() {
                     </TouchableOpacity>
                 </View>
                 <View style={commonStyles.filterRow}>
-                    <Text style={commonStyles.filterLabel}>사업장</Text>
+                    <Text style={commonStyles.filterLabel}>{Const.SALES_ORG_NM}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowSalesOrgListModal(true)}>
                         <Text style={commonStyles.selectText}>
                             {salesOrgList.find(g => g.salesOrgCd === selectedSalesOrgCd)?.salesOrgNm || Const.ALL}
@@ -268,6 +269,7 @@ export default function SalesReportByTimezoneScreen() {
                 columns={mainColumns}
                 listHeader={renderListHeader}
                 listFooter={renderFooter}
+                hasSearched={hasSearched}
             />
 
             <DatePickerModal

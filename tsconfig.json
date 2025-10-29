@@ -10,7 +10,8 @@
     "types": [
     "react",
     "react-native",
-    "@react-native-community/datetimepicker"
+    "@react-native-community/datetimepicker",
+      "expo-router"
   ]
   },
   "include": [

@@ -54,7 +54,7 @@ export default function StockReport() {
             restValue: '',
         }
         console.log("request:"+JSON.stringify(request))
-        api.getSalsOrgList(request)
+        api.getSalesOrgList(request)
             .then(result => {
                 console.log("result:"+JSON.stringify(result))
                 if (result.data.responseBody != null) {
@@ -68,7 +68,7 @@ export default function StockReport() {
                 }
             })
             .catch(error => {
-                console.log("getSalsOrgList error:" + error)
+                console.log("getSalesOrgList error:" + error)
             });
     }
 
@@ -134,7 +134,7 @@ export default function StockReport() {
 
             <View style={commonStyles.topBar}>
                 <View style={commonStyles.filterRowFront}>
-                    <Text style={commonStyles.filterLabel}>사업장</Text>
+                    <Text style={commonStyles.filterLabel}>{Const.SALES_ORG_NM}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowSalesOrgListModal(true)}>
                         <Text style={commonStyles.selectText}>
                             {salesOrgList.find(g => g.salesOrgCd === selectedSalesOrgCd)?.salesOrgNm || Const.SELECT}
@@ -143,7 +143,7 @@ export default function StockReport() {
                     </TouchableOpacity>
                 </View>
                 <View style={commonStyles.filterRowFront}>
-                    <Text style={commonStyles.filterLabel}>조회일자</Text>
+                    <Text style={commonStyles.filterLabel}>{Const.SEARCH_DT}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('from')}>
                         <Text style={commonStyles.selectText}>{formattedDate(fromSaleDt)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>

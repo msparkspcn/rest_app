@@ -1,5 +1,5 @@
-import {StatusBar} from 'expo-status-bar';
-import React, {useEffect, useMemo, useState} from 'react';
+import { StatusBar } from 'expo-status-bar';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
     Pressable,
     Text,
@@ -7,17 +7,17 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import {commonStyles} from "../../styles/index";
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
-import {Table} from "../../components/Table";
-import {ColumnDef} from "../../types/table";
-import {DatePickerModal} from "../../components/DatePickerModal";
-import Const from "../../constants/Const";
+import { DatePickerModal } from "../../components/DatePickerModal";
 import ListModal from "../../components/ListModal";
-import {useUser} from "../../contexts/UserContext";
+import { Table } from "../../components/Table";
+import Const from "../../constants/Const";
+import { useUser } from "../../contexts/UserContext";
 import * as api from "../../services/api/api";
-import {User, Corner} from "../../types";
+import { commonStyles } from "../../styles/index";
+import { Corner, User } from "../../types";
+import { ColumnDef } from "../../types/table";
+import { dateToYmd, formattedDate, getTodayYmd } from "../../utils/DateUtils";
 
 type StockRow = {
     itemNm: string;
@@ -48,10 +48,12 @@ export default function CornerWhStockReportScreen() {
     const [selectedCorner, setSelectedCorner] = useState<string | null>(cornerList[0]?.cornerCd ?? null);
     const {user}:User = useUser();
     const [stockList, setStockList] = useState<[] | null>(null);
+    const [hasSearched, setHasSearched] = useState(false);
 
     useEffect(() => {
         getCornerList();
         getVendorList();
+        setHasSearched(true);
     },[]);
 
     const getCornerList = () => {
@@ -176,7 +178,7 @@ export default function CornerWhStockReportScreen() {
 
             <View style={commonStyles.topBar}>
                 <View style={commonStyles.filterRowFront}>
-                    <Text style={commonStyles.filterLabel}>조회일자</Text>
+                    <Text style={commonStyles.filterLabel}>{Const.SEARCH_DT}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={openDatePicker}>
                         <Text style={commonStyles.selectText}>{formattedDate(saleDate)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
@@ -219,6 +221,7 @@ export default function CornerWhStockReportScreen() {
             <Table
                 data={filteredData}
                 columns={mainColumns}
+                hasSearched={hasSearched}
             />
 
             <DatePickerModal

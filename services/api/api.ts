@@ -58,7 +58,7 @@ export function getStorList(params) {
     return post(request, params);
 }
 
-export function getSalsOrgList(params) {
+export function getSalesOrgList(params) {
     const request = host + "/api/v1/rest/list";
     return post(request, params);
 }
