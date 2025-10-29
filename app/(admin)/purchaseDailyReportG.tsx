@@ -1,17 +1,17 @@
-import {StatusBar} from 'expo-status-bar';
-import React, {useMemo, useState} from 'react';
-import {Modal, Pressable, Text, TextInput, TouchableOpacity, View} from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import React, { useMemo, useState } from 'react';
+import { Modal, Pressable, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {commonStyles} from "../../styles/index";
-import {Table} from "../../components/Table";
-import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
-import {ColumnDef} from "../../types/table";
-import {DatePickerModal} from "../../components/DatePickerModal";
-import Const from "../../constants/Const";
+import { DatePickerModal } from "../../components/DatePickerModal";
 import LoadingOverlay from "../../components/LoadingOverlay";
+import { Table } from "../../components/Table";
+import Const from "../../constants/Const";
+import { useUser } from "../../contexts/UserContext";
 import * as api from "../../services/api/api";
-import {User} from "../../types/user";
-import {useUser} from "../../contexts/UserContext";
+import { commonStyles } from "../../styles/index";
+import { ColumnDef } from "../../types/table";
+import { User } from "../../types/user";
+import { dateToYmd, formattedDate, getTodayYmd } from "../../utils/DateUtils";
 
 type PurchaseRow = { date: string; outSdCmpNm: string; totalOrdAmt: number };
 type PurchaseDetailRow = {
@@ -35,6 +35,7 @@ export default function PurchaseDailyReportScreen() {
     const [purchaseList, setPurchaseList] = useState<[] | null>(null);
     const [purchaseItemList, setPurchaseItemList] = useState<[] | null>(null);
     const {user}: User = useUser();
+    const [hasSearched, setHasSearched] = useState(false);
 
     const mainColumns: ColumnDef<PurchaseRow>[] = useMemo(() => ([
         {key: 'no', title: Const.NO, flex: 0.5,
@@ -114,6 +115,7 @@ export default function PurchaseDailyReportScreen() {
                     });
                     console.log('purchaseList:' + JSON.stringify(purchaseList));
                     setPurchaseList(purchaseList);
+                    setHasSearched(true);
                 }
             })
             .catch(error => {
@@ -243,7 +245,12 @@ export default function PurchaseDailyReportScreen() {
 
             <View style={commonStyles.sectionDivider}/>
 
-            <Table data={purchaseList} columns={mainColumns} listFooter={renderFooter}/>
+            <Table
+                data={purchaseList}
+                columns={mainColumns}
+                listFooter={renderFooter}
+                hasSearched={hasSearched}
+            />
 
             <DatePickerModal
                 visible={showDatePicker}

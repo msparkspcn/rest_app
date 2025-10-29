@@ -215,6 +215,7 @@ export const commonStyles = StyleSheet.create({
         borderBottomColor: '#eee',
     },
     modalTitle: {
+        maxWidth: 300,
         fontSize: 20,
         fontWeight: '700',
         color: '#333',

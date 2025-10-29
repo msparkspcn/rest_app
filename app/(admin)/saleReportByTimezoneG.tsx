@@ -3,15 +3,15 @@ import React, { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { DatePickerModal } from "../../components/DatePickerModal";
+import LoadingOverlay from "../../components/LoadingOverlay";
 import { Table } from "../../components/Table";
 import Const from "../../constants/Const";
+import { useUser } from "../../contexts/UserContext";
+import * as api from "../../services/api/api";
 import { commonStyles } from "../../styles/index";
+import { User } from "../../types";
 import { ColumnDef } from "../../types/table";
 import { dateToYmd, formattedDate, getTodayYmd } from "../../utils/DateUtils";
-import * as api from "../../services/api/api";
-import {User} from "../../types";
-import {useUser} from "../../contexts/UserContext";
-import LoadingOverlay from "../../components/LoadingOverlay";
 type SaleRow = { tmzonDiv: string; saleAmt: number, billCnt: number };
 type ListItem = {
     type: "summaryTotals";
@@ -40,6 +40,7 @@ export default function SalesReportByTimezoneScreen() {
 
     const {user}: User = useUser();
     const [loading, setLoading] = useState(false);
+    const [hasSearched, setHasSearched] = useState(false);
 
     const onSearch = () => {
         console.log('조회 클릭');
@@ -60,13 +61,12 @@ export default function SalesReportByTimezoneScreen() {
                     const saleList = result.data.responseBody;
                     console.log('saleList:' + JSON.stringify(saleList))
                     setSaleList(saleList);
+                    setHasSearched(true);
                 }
-                setLoading(false);
             })
             .catch(error => {
                 console.log("posGroupByOilHourlySale error:" + error);
-                setLoading(false);
-            });
+            }).finally(() => setLoading(false));
     };
 
     const openDatePicker = () => {
@@ -168,7 +168,7 @@ export default function SalesReportByTimezoneScreen() {
                             </Text>
                         </View>
 
-                        <View style={{ flex: 0.5 }}>
+                        <View style={[{ flex: 0.5 }, commonStyles.columnContainer]}>
                             <Text style={commonStyles.numberCell}>
                                 {row.billCnt.toLocaleString()}
                             </Text>
@@ -218,6 +218,7 @@ export default function SalesReportByTimezoneScreen() {
                 data={saleList}
                 columns={mainColumns}
                 listHeader={renderListHeader}
+                hasSearched={hasSearched}
             />
 
             <DatePickerModal

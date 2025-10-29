@@ -56,6 +56,7 @@ export default function SalesReportByPeriod() {
     const [selectedStorCd, setSelectedStorCd] = useState<StoreGroup>(storeGroups[0]);
     const {user}:User = useUser();
     const [loading, setLoading] = useState(false);
+    const [hasSearched, setHasSearched] = useState(false);
 
     const onSearch = () => {
         console.log("조회 클릭")
@@ -75,6 +76,7 @@ export default function SalesReportByPeriod() {
                     const saleList = result.data.responseBody;
                     console.log('111:' + JSON.stringify(saleList))
                     setSaleList(saleList);
+                    setHasSearched(true);
                 }
             })
             .catch(error => {console.log("posGroupByOilDailySale error:"+error)})
@@ -207,15 +209,7 @@ export default function SalesReportByPeriod() {
     const renderSummaryRow = () => {
         return (
             <View style={commonStyles.summaryRow}>
-                <View
-                    style={[{
-                        flex: 0.7 + 2.2,
-                        justifyContent:'center',
-                        borderRightWidth:StyleSheet.hairlineWidth,
-                        borderRightColor: '#aaa',
-                        height:'100%'
-                    }]}
-                >
+                <View style={[{flex: 0.7 + 2.2}, commonStyles.columnContainer]}>
                     <Text
                         style={[commonStyles.modalCell, commonStyles.alignCenter,
                             {fontSize: 13, fontWeight: 'bold',
@@ -223,38 +217,12 @@ export default function SalesReportByPeriod() {
                             }
                         ]}>합계</Text>
                 </View>
-                <View
-                    style={[
-                        { flex: 1.2,
-                            justifyContent:'center',
-                            borderRightWidth:StyleSheet.hairlineWidth,
-                            borderRightColor: '#aaa',
-                            height:'100%'
-                            // backgroundColor:'red'
-                        },
-                        // commonStyles.modalColumnContainer,
-                        // commonStyles.modalCellDivider,
-                        commonStyles.summaryCell,
-                    ]}
-                >
-                    <Text style={[
-                        commonStyles.modalCell,
-                        commonStyles.numberCell,{
-
-                    }]}>
+                <View style={[{ flex: 1.2}, commonStyles.columnContainer]}>
+                    <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
                         {summaryRow.totalQty.toLocaleString()}
                     </Text>
                 </View>
-                <View
-                    style={[
-                        { flex: 1.5 + 2,
-                            justifyContent:'center',
-                            borderRightWidth:StyleSheet.hairlineWidth,
-                            borderRightColor: '#aaa',
-                            height:'100%'},
-                        commonStyles.summaryCell,
-                    ]}
-                >
+                <View style={[{ flex: 1.5 + 2}, commonStyles.columnContainer]}>
                     <Text style={[commonStyles.modalCell, commonStyles.numberCell]}>
                         {summaryRow.totalAmt.toLocaleString()}
                     </Text>
@@ -306,6 +274,7 @@ export default function SalesReportByPeriod() {
                 data={saleList}
                 columns={mainColumns}
                 listFooter={renderFooter}
+                hasSearched={hasSearched}
             />
 
             <View style={commonStyles.sectionDivider} />
@@ -325,6 +294,7 @@ export default function SalesReportByPeriod() {
                             columns={saleDetailColumns}
                             isModal={true}
                             listFooter={renderSummaryRow}
+                            hasSearched={isDetailVisible}
                         />
                     </View>
                 </View>
