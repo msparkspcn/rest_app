@@ -1,5 +1,5 @@
-import {StatusBar} from 'expo-status-bar';
-import React, {useEffect, useMemo, useState} from 'react';
+import { StatusBar } from 'expo-status-bar';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
     Modal,
     Pressable,
@@ -10,34 +10,35 @@ import {
     View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {commonStyles} from "../../styles/index";
-import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
-import {Table} from "../../components/Table";
-import {ColumnDef} from "../../types/table";
-import {DatePickerModal} from "../../components/DatePickerModal";
-import Const from "../../constants/Const";
+import { DatePickerModal } from "../../components/DatePickerModal";
 import ListModal from "../../components/ListModal";
-import {useUser} from "../../contexts/UserContext";
+import { Table } from "../../components/Table";
+import Const from "../../constants/Const";
+import { useUser } from "../../contexts/UserContext";
 import * as api from "../../services/api/api";
-import {User} from "../../types";
+import { commonStyles } from "../../styles/index";
+import { User } from "../../types";
+import { ColumnDef } from "../../types/table";
+import { dateToYmd, formattedDate, getTodayYmd } from "../../utils/DateUtils";
 
 type StockRow = {
     cornerNm: string;
+    itemCd: string;
     itemNm: string;
-    giQty: number;
-    goQty: number;
+    stockIn: number;
+    stockOut: number;
     // cornerNm: string;
-    totalStockQty: number;
-    curStockQty: number;
+    prevStock: number;
+    currentStock: number;
 };
 
 type StockDetailRow = {
     cornerNm: string;
     stockDt: string;
-    totalStockQty: number;
-    giQty: number;
-    saleQty: number;
-    curStockQty: number;
+    prevStock: number;
+    stockIn: number;
+    stockOut: number;
+    currentStock: number;
 }
 
 type Vendor = {
@@ -45,9 +46,11 @@ type Vendor = {
     outSdCmpCd: string;
     outSdCmpNm: string
 };
+
+
 type ItemClass = {
-    id: string;
-    name: string;
+    itemClassCd: string;
+    itemClassNm: string;
 }
 
 export default function WarehouseStockReportScreen() {
@@ -58,24 +61,49 @@ export default function WarehouseStockReportScreen() {
     const [currentPickerType, setCurrentPickerType] = useState('from')
 
     const [vendorList, setVendorList] = useState<Vendor[]>([]);
-    const itemClasses: ItemClass[] = useMemo(
-        () => Array.from({length: 6}).map((_, i) => ({id: `G${i + 1}`, name: `상품분류 ${i + 1}`})),
-        []
-    );
+    const [itemClassList, setItemClassList] = useState<ItemClass[]>([]);
 
     const [selectedOutSdCmpCd, setSelectedOutSdCmpCd] = useState<string | null>(null);
     const [showVendorModal, setShowVendorModal] = useState(false);
     const [showItemClassModal, setShowItemClassModal] = useState(false);
     const [itemQuery, setItemQuery] = useState('');
-    const [selectedItemClass, setSelectedItemClass] = useState<string | null>(itemClasses[0]?.id ?? null);
+    const [selectedItemClass, setSelectedItemClass] = useState<string | null>(itemClassList[0]?.itemClassCd ?? null);
     const [showExistStockChecked, setShowExistStockChecked] = useState(false);
     const [isDetailVisible, setIsDetailVisible] = useState(false);
     const [selectedItem, setSelectedItem] = useState<StockRow | null>(null);
     const {user}:User = useUser();
+    const [stockList, setStockList] = useState<[] | null>(null);
+    const [stockDetailList, setStockDetailList] = useState<[] | null>(null);
+    const [hasSearched, setHasSearched] = useState(false);
 
     useEffect(() => {
+        getItemClassList();
         getVendorList();
     },[]);
+
+    const getItemClassList = () => {
+        const request = {
+            cmpCd: user.cmpCd,
+            itemClassLvlType: "L",
+            itemClassTypeCd: "00",
+            useYn: "1",
+        }
+        api.getItemClassList(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const itemClassList = result.data.responseBody;
+                    // console.log('List:' + JSON.stringify(itemClassList));
+                    console.log('size:' + itemClassList.length);
+                    setItemClassList([
+                        { itemClassCd: '', itemClassNm: '전체' },
+                        ...itemClassList
+                    ]);
+                }
+            })
+            .catch(error => {
+                console.log("getItemClassList error:" + error)
+            });
+    }
 
     const getVendorList = () => {
         const request = {
@@ -87,7 +115,6 @@ export default function WarehouseStockReportScreen() {
             .then(result => {
                 if (result.data.responseBody != null) {
                     const vendorList = result.data.responseBody;
-                    console.log('List:' + JSON.stringify(vendorList))
                     setVendorList([
                         { outSdCmpCd: '', outSdCmpNm: '전체' },
                         ...vendorList
@@ -102,44 +129,6 @@ export default function WarehouseStockReportScreen() {
     const handleCheckbox = () => {
         setShowExistStockChecked(!showExistStockChecked)
     }
-    const baseData: StockRow[] = useMemo(
-        () =>
-            Array.from({length: 15}).map((_, idx) => {
-                const giQty = 7 + (idx % 5);
-                const totalStockQty = 20 + (idx % 7);
-                const goQty = 30 + (idx % 5);
-                const curStockQty = totalStockQty + giQty - goQty;
-                return {
-                    cornerNm: '파스쿠찌',
-                    itemNm: `상품 ${((idx % 6) + 1)}`,
-                    giQty: giQty,
-                    totalStockQty: totalStockQty,
-                    goQty: goQty,
-                    curStockQty: curStockQty,
-                };
-            }),
-        []
-    );
-
-    const filteredData = useMemo(() => {
-        return baseData;
-    }, [baseData]);
-
-    const detailData: StockDetailRow[] = useMemo(
-        () =>
-            Array.from({length: 10}).map((_, idx) => {
-                const qty = (idx % 4) + 1;
-                return {
-                    cornerNm: '파스쿠찌',
-                    stockDt: `2025/09/0${idx + 1}`,
-                    totalStockQty: qty,
-                    giQty: qty,
-                    saleQty: qty,
-                    curStockQty: qty
-                };
-            }),
-        []
-    );
 
     const StockDetailColumns: ColumnDef<StockDetailRow>[] = useMemo(() => ([
         {key: 'stockDt', title: Const.DATE, flex: 2,
@@ -148,34 +137,60 @@ export default function WarehouseStockReportScreen() {
             )
         },
         {
-            key: 'totalStockQty', title: Const.TOTAL_STOCK_QTY, flex: 1,
+            key: 'prevStock', title: Const.TOTAL_STOCK_QTY, flex: 1,
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.totalStockQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.prevStock.toLocaleString()}</Text>
             )
         },
         {
-            key: 'giQty', title: Const.GI_QTY, flex: 1.5,
+            key: 'stockIn', title: Const.GI_QTY, flex: 1.5,
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.giQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.stockIn.toLocaleString()}</Text>
             )
         },
         {
-            key: 'saleQty', title: Const.SALE, flex: 1,
+            key: 'stockOut', title: Const.SALE, flex: 1,
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.saleQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.stockOut.toLocaleString()}</Text>
             )
         },
         {
-            key: 'curStockQty', title: Const.CUR_STOCK_QTY, flex: 1,
+            key: 'currentStock', title: Const.CUR_STOCK_QTY, flex: 1,
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.curStockQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.currentStock.toLocaleString()}</Text>
             )
         },
     ]), []);
 
     const onSearch = () => {
-        // 데모: 현재는 선택 값만으로 필터링 적용
+        restWarehouseStockList();
     };
+
+    const restWarehouseStockList = () => {
+        console.log("조회 클릭 fromSaleDt:"+fromSaleDt)
+        const request = {
+            cmpCd: user.cmpCd,
+            dateFrom: fromSaleDt,
+            dateTo: toSaleDt,
+            itemCategory: selectedItemClass,
+            itemNm: itemQuery,
+            outSdCmpCd: selectedOutSdCmpCd,
+            salesOrgCd: user.salesOrgCd,
+            stockExistsOnly: showExistStockChecked
+        }
+        console.log('request:' + JSON.stringify(request))
+        api.restWarehouseStockList(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const stockList = result.data.responseBody;
+                    console.log('111:' + JSON.stringify(stockList))
+                    setStockList(stockList);
+                }
+            })
+            .catch(error => {
+                console.log("restWarehouseStockList error:" + error)
+            }).finally(() => setHasSearched(true));
+    }
 
     const openDatePicker = (pickerType: string) => {
         setTempDate(new Date());
@@ -183,12 +198,37 @@ export default function WarehouseStockReportScreen() {
         setShowDatePicker(true);
     };
 
-    const openDetail = (
-        item: StockRow
-    ) => {
+    const openDetail = (item: StockRow) => {
         console.log('item:' + JSON.stringify(item))
         setSelectedItem(item)
-        setIsDetailVisible(true);
+        restWarehouseStockList2(item);
+    }
+
+    const restWarehouseStockList2 = (item: StockRow) => {
+        console.log("restWarehouseStockList2 조회 클릭 stock:"+JSON.stringify(item));
+        const request = {
+            cmpCd: user.cmpCd,
+            dateFrom: fromSaleDt,
+            dateTo: toSaleDt,
+            itemCd: item.itemCd,
+            salesOrgCd: user.salesOrgCd,
+            storCd: "00000000",
+
+        }
+        console.log('request:'+JSON.stringify(request))
+        api.restWarehouseStockList2(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const stockList = result.data.responseBody;
+                    console.log('size:'+stockList.length);
+                    console.log('stockList:' + JSON.stringify(stockList))
+                    setStockDetailList(stockList);
+                    setIsDetailVisible(true);
+                }
+            })
+            .catch(error => {
+                console.log("restWarehouseStockList2 error:" + error)
+            });
     }
 
     const mainColumns: ColumnDef<StockRow>[] = useMemo(() => ([
@@ -201,35 +241,35 @@ export default function WarehouseStockReportScreen() {
             key: 'itemNm', title: Const.ITEM_NM, flex: 2,
             renderCell: (item) => (
                 <Pressable style={commonStyles.columnPressable} onPress={() => openDetail(item)}>
-                    <Text style={[commonStyles.cell, commonStyles.linkText, {paddingLeft: 10}]}>
+                    <Text style={[commonStyles.cell, commonStyles.linkText, {paddingLeft: 5}]}>
                         {item.itemNm}
                     </Text>
                 </Pressable>
             ),
         },
         {
-            key: 'totalStockQty', title: Const.TOTAL_STOCK_QTY, flex: 0.7,
+            key: 'prevStock', title: Const.TOTAL_STOCK_QTY, flex: 0.7,
             renderCell: (item) => (
-                <Text style={commonStyles.numberSmallCell}>{item.totalStockQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberSmallCell}>{item.prevStock.toLocaleString()}</Text>
             )
         },
         {
-            key: 'giQty', title: Const.GI_QTY, flex: 0.5,
+            key: 'stockIn', title: Const.GI_QTY, flex: 0.5,
             renderCell: (item) => (
-                <Text style={commonStyles.numberSmallCell}>{item.giQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberSmallCell}>{item.stockIn.toLocaleString()}</Text>
             )
         },
         {
-            key: 'goQty', title: Const.GO_QTY, flex: 0.5,
+            key: 'stockOut', title: Const.GO_QTY, flex: 0.5,
             renderCell: (item) => (
-                <Text style={commonStyles.numberSmallCell}>{item.goQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberSmallCell}>{item.stockOut.toLocaleString()}</Text>
             )
         },
         {
-            key: 'curStockQty', title: Const.CUR_STOCK_QTY, flex: 0.7,
+            key: 'currentStock', title: Const.CUR_STOCK_QTY, flex: 0.7,
             renderCell: (item) => (
-                <Text style={[commonStyles.numberSmallCell, {color: item.curStockQty < 0 ? 'red' : 'black'}]}>
-                    {item.curStockQty.toLocaleString()}
+                <Text style={[commonStyles.numberSmallCell, {color: item.currentStock < 0 ? 'red' : 'black'}]}>
+                    {item.currentStock.toLocaleString()}
                 </Text>
             )
         },
@@ -243,42 +283,46 @@ export default function WarehouseStockReportScreen() {
         );
     };
 
-    const detailTotalStockQty = useMemo(() => {
-        return detailData.reduce((acc, row) => acc + row.totalStockQty, 0);
-    }, [detailData]);
-    const detailTotalGiQty = useMemo(() => {
-        return detailData.reduce((acc, row) => acc + row.giQty, 0);
-    }, [detailData]);
-    const detailTotalSaleQty = useMemo(() => {
-        return detailData.reduce((acc, row) => acc + row.saleQty, 0);
-    }, [detailData]);
-    const detailTotalCurStockQty = useMemo(() => {
-        return detailData.reduce((acc, row) => acc + row.curStockQty, 0);
-    }, [detailData]);
+    const detailTotalStockQty = useMemo(
+        () => (stockDetailList ?? []).reduce((acc, row) => acc + row.prevStock, 0),
+        [stockDetailList]
+    );
+    const detailTotalStockIn = useMemo(
+        () => (stockDetailList ?? []).reduce((acc, row) => acc + row.stockIn, 0),
+    [stockDetailList]
+    );
+    const detailTotalStockOut = useMemo(
+        () => (stockDetailList ?? []).reduce((acc, row) => acc + row.stockOut, 0),
+    [stockDetailList]
+    );
+    const detailTotalCurStockQty = useMemo(
+        () => (stockDetailList ?? []).reduce((acc, row) => acc + row.currentStock, 0),
+            [stockDetailList]
+        );
 
     const renderDetailFooter = () => (
-        <View style={[commonStyles.tableRow, commonStyles.summaryRow]}>
-            <View style={[{flex: 2}, commonStyles.tableRightBorder]}>
+        <View style={commonStyles.summaryRow}>
+            <View style={[{flex: 2}, commonStyles.columnContainer]}>
                 <Text style={[commonStyles.cell, commonStyles.alignCenter, styles.modalTotalText]}>
                     합계
                 </Text>
             </View>
-            <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+            <View style={[{flex: 1}, commonStyles.columnContainer]}>
                 <Text style={[commonStyles.numberCell, {color: detailTotalStockQty < 0 ? 'red' : ''}]}>
                     {detailTotalStockQty.toLocaleString()}
                 </Text>
             </View>
-            <View style={[{flex: 1.5}, commonStyles.tableRightBorder]}>
+            <View style={[{flex: 1.5}, commonStyles.columnContainer]}>
                 <Text style={[commonStyles.numberCell]}>
-                    {detailTotalGiQty.toLocaleString()}
+                    {detailTotalStockIn.toLocaleString()}
                 </Text>
             </View>
-            <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+            <View style={[{flex: 1}, commonStyles.columnContainer]}>
                 <Text style={[commonStyles.numberCell]}>
-                    {detailTotalSaleQty.toLocaleString()}
+                    {detailTotalStockOut.toLocaleString()}
                 </Text>
             </View>
-            <View style={[{flex: 1}, commonStyles.tableRightBorder]}>
+            <View style={[{flex: 1}, commonStyles.columnContainer]}>
                 <Text style={[commonStyles.numberCell, {color: detailTotalCurStockQty < 0 ? 'red' : ''}]}>
                     {detailTotalCurStockQty.toLocaleString()}
                 </Text>
@@ -292,14 +336,14 @@ export default function WarehouseStockReportScreen() {
 
             <View style={commonStyles.topBar}>
                 <View style={commonStyles.filterRowFront}>
-                    <Text style={commonStyles.filterLabel}>조회일자</Text>
+                    <Text style={commonStyles.filterLabel}>{Const.SEARCH_DT}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('from')}>
-                        <Text style={styles.selectText}>{formattedDate(fromSaleDt)}</Text>
+                        <Text style={commonStyles.selectText}>{formattedDate(fromSaleDt)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                     <Text>-</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('to')}>
-                        <Text style={styles.selectText}>{formattedDate(toSaleDt)}</Text>
+                        <Text style={commonStyles.selectText}>{formattedDate(toSaleDt)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -307,7 +351,7 @@ export default function WarehouseStockReportScreen() {
                     <Text style={commonStyles.filterLabel}>{Const.ITEM_CLASS}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowItemClassModal(true)}>
                         <Text
-                            style={styles.selectText}>{itemClasses.find(g => g.id === selectedItemClass)?.name || Const.SELECT}</Text>
+                            style={commonStyles.selectText}>{itemClassList.find(g => g.itemClassCd === selectedItemClass)?.itemClassNm || Const.SELECT}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -326,7 +370,7 @@ export default function WarehouseStockReportScreen() {
                     <Text style={commonStyles.filterLabel}>{Const.VENDOR}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowVendorModal(true)}>
                         <Text
-                            style={styles.selectText}>{vendorList.find(g => g.outSdCmpCd === selectedOutSdCmpCd)?.outSdCmpNm || Const.ALL}</Text>
+                            style={commonStyles.selectText}>{vendorList.find(g => g.outSdCmpCd === selectedOutSdCmpCd)?.outSdCmpNm || Const.ALL}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -351,8 +395,9 @@ export default function WarehouseStockReportScreen() {
             <View style={commonStyles.sectionDivider}/>
 
             <Table
-                data={filteredData}
+                data={stockList}
                 columns={mainColumns}
+                hasSearched={hasSearched}
             />
 
             <DatePickerModal
@@ -368,12 +413,12 @@ export default function WarehouseStockReportScreen() {
             <ListModal
                 visible={showItemClassModal}
                 title="상품분류 선택"
-                data={itemClasses}
-                keyField="id"
-                labelField="name"
+                data={itemClassList}
+                keyField="itemClassCd"
+                labelField="itemClassNm"
                 onClose={() => setShowItemClassModal(false)}
                 onSelect={(item) => {
-                    setSelectedItemClass(item.id);
+                    setSelectedItemClass(item.itemClassCd);
                     setShowItemClassModal(false);
                 }}
             />
@@ -407,7 +452,7 @@ export default function WarehouseStockReportScreen() {
                         </View>
 
                         <Table
-                            data={detailData}
+                            data={stockDetailList}
                             columns={StockDetailColumns}
                             isModal={true}
                             listHeader={CornerNmRow}
@@ -422,7 +467,6 @@ export default function WarehouseStockReportScreen() {
 };
 
 const styles = StyleSheet.create({
-    selectText: {fontSize: 14, color: '#333'},
     input: {
         flex: 1,
         backgroundColor: '#fff',

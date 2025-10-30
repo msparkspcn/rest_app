@@ -41,7 +41,7 @@ export default function LoginScreen() {
     loadSavedLogin();
   }, []);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!id) {
       Alert.alert(Const.ERROR, Const.ID_INPUT_MSG);
       return;
@@ -53,32 +53,43 @@ export default function LoginScreen() {
 
     console.log('로그인 시도:', { id, password });
 
-    api.login(id, password)
-        .then(response => {
-          if(response.data.responseBody!=null) {
-            // console.log("response:"+JSON.stringify(response.data.responseBody));
-            if(response.data.responseCode=="200") {
-              console.log("getStoreInfo success data:"+JSON.stringify(response.data));
-              login(response.data.responseBody)
-              router.replace('/(admin)');
-            }
-            else {
-              console.log(Const.ERROR, response.data.responseMessage);
-              if(response.data.responseMessage) {
-                Alert.alert(Const.ERROR, response.data.responseMessage);
-              }
-              else {
-                Alert.alert(Const.ERROR, '비밀번호를 확인해주세요');
-              }
+    try {
+      const response = await api.login(id, password);
 
-            }
+      if(response.data.responseBody!=null) {
+        // console.log("response:"+JSON.stringify(response.data.responseBody));
+        if(response.data.responseCode=="200") {
+          console.log("getStoreInfo success data:"+JSON.stringify(response.data));
+          login(response.data.responseBody)
+          router.replace('/(admin)');
+
+          if (checkedLoginSave) {
+            await AsyncStorage.setItem('savedLoginSaveYn', 'Y');
+            await AsyncStorage.setItem('userId', id);
+            await AsyncStorage.setItem('password', password);
+          } else {
+            await AsyncStorage.setItem('savedLoginSaveYn', 'N');
+            await AsyncStorage.removeItem('userId');
+            await AsyncStorage.removeItem('password');
           }
-          else {
-            console.log("failed :"+JSON.stringify(response.data));
+        }
+        else {
+          console.log(Const.ERROR, response.data.responseMessage);
+          if(response.data.responseMessage) {
             Alert.alert(Const.ERROR, response.data.responseMessage);
           }
-        })
-        .catch(error => console.log("error:"+error))
+          else {
+            Alert.alert(Const.ERROR, '비밀번호를 확인해주세요');
+          }
+        }
+      }
+      else {
+        console.log("failed :"+JSON.stringify(response.data));
+        Alert.alert(Const.ERROR, response.data.responseMessage);
+      }
+    } catch (error) {
+      console.log("error:"+error)
+    }
   };
 
   const handleRegister = () => {
@@ -86,18 +97,9 @@ export default function LoginScreen() {
   };
 
   const saveLoginInfo = async () => {
-    if(!checkedLoginSave) {
-      await AsyncStorage.setItem('savedLoginSaveYn', 'Y');
-      await AsyncStorage.setItem('userId', id);
-      await AsyncStorage.setItem('password', password);
-    }
-    else {
-      await AsyncStorage.setItem('savedLoginSaveYn', 'N');
-      await AsyncStorage.setItem('userId', '');
-      await AsyncStorage.setItem('password', '');
-    }
-    setCheckedLoginSave(!checkedLoginSave);
-
+    const newValue = !checkedLoginSave;
+    setCheckedLoginSave(newValue);
+    await AsyncStorage.setItem('savedLoginSaveYn', newValue ? 'Y' : 'N');
   };
 
   return (

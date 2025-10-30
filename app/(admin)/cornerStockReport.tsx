@@ -1,5 +1,5 @@
-import {StatusBar} from 'expo-status-bar';
-import React, {useEffect, useMemo, useState} from 'react';
+import { StatusBar } from 'expo-status-bar';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
     Alert,
     Pressable,
@@ -8,25 +8,24 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import {commonStyles} from "../../styles/index";
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
-import {Table} from "../../components/Table";
-import {ColumnDef} from "../../types/table";
-import {DatePickerModal} from "../../components/DatePickerModal";
-import Const from "../../constants/Const";
+import { DatePickerModal } from "../../components/DatePickerModal";
 import ListModal from "../../components/ListModal";
-import {useUser} from "../../contexts/UserContext";
+import { Table } from "../../components/Table";
+import Const from "../../constants/Const";
+import { useUser } from "../../contexts/UserContext";
 import * as api from "../../services/api/api";
-import {User, Corner} from "../../types";
+import { commonStyles } from "../../styles/index";
+import { Corner, User } from "../../types";
+import { ColumnDef } from "../../types/table";
+import { dateToYmd, formattedDate, getTodayYmd } from "../../utils/DateUtils";
 
 type StockRow = {
     itemNm: string;
-    giQty: number;
-    saleQty: number;
-    // cornerNm: string;
-    totalStockQty: number;
-    curStockQty: number;
+    stockIn: number;
+    stockOut: number;
+    prevStock: number;
+    currentStock: number;
 };
 
 type Vendor = {
@@ -43,18 +42,14 @@ export default function CornerStockReportScreen() {
     const [vendorList, setVendorList] = useState<Vendor[]>([]);
     const [cornerList, setCornerList] = useState<Corner[]>([]);
 
-    const searchCond: SearchCond[] = [
-        { id: "realtime", name: "실시간 기준" },
-        { id: "closing", name: "영업 마감 기준" }
-    ]
     const [selectedOutSdCmpCd, setSelectedOutSdCmpCd] = useState<string | null>(null);
     const [showVendorModal, setShowVendorModal] = useState(false);
     const [showCornerModal, setShowCornerModal] = useState(false);
-    const [showSearchCond, setShowSearchCond] = useState(false);
     const [itemQuery, setItemQuery] = useState('');
-    const [selectedSearchCond, setSelectedSearchCond] = useState<string | null>(searchCond[0]?.id ?? null);
     const [selectedCornerCd, setSelectedCornerCd] = useState<string | null>('');
     const {user}:User = useUser();
+    const [stockList, setStockList] = useState<[] | null>(null);
+    const [hasSearched, setHasSearched] = useState(false);
 
     useEffect(() => {
         getCornerList();
@@ -100,30 +95,34 @@ export default function CornerStockReportScreen() {
             });
     };
 
-    const baseData: StockRow[] = useMemo(
-        () =>
-            Array.from({length: 15}).map((_, idx) => {
-                const giQty = 7 + (idx % 5);
-                const totalStockQty = 20 + (idx % 7);
-                const saleQty = 30 + (idx % 5);
-                const curStockQty = totalStockQty + giQty - saleQty;
-                return {
-                    itemNm: `상품 ${((idx % 6) + 1)}`,
-                    giQty: giQty,
-                    totalStockQty: totalStockQty,
-                    saleQty: saleQty,
-                    curStockQty: curStockQty,
-                };
-            }),
-        []
-    );
-
-    const filteredData = useMemo(() => {
-        return baseData;
-    }, [baseData]);
-
     const onSearch = () => {
-        // 데모: 현재는 선택 값만으로 필터링 적용
+        if(selectedCornerCd == '') {
+            Alert.alert(Const.ERROR, Const.NO_CORNER_MSG);
+            return;
+        }
+        console.log("조회 클릭")
+        const request = {
+            cmpCd: user.cmpCd,
+            itemNm: itemQuery,
+            outSdCmpCd: selectedOutSdCmpCd,
+            salesOrgCd: user.salesOrgCd,
+            stockDate: saleDate,
+            storCd: "5000511",
+        }
+        console.log('params:'+JSON.stringify(request));
+        api.restCornerStockList(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const stockList = result.data.responseBody;
+                    // console.log('111:' + JSON.stringify(stockList))
+                    console.log('length:' + stockList.length)
+                    setStockList(stockList);
+                    setHasSearched(true);
+                }
+            })
+            .catch(error => {
+                console.log("restCornerStockList error:" + error)
+            });
     };
 
     const openDatePicker = () => {
@@ -140,34 +139,34 @@ export default function CornerStockReportScreen() {
         {
             key: 'itemNm', title: Const.ITEM_NM, flex: 2,
             renderCell: (item) => (
-                <Text style={[commonStyles.cell, {paddingLeft: 10}]}>
+                <Text style={[commonStyles.cell, {paddingLeft: 5}]}>
                     {item.itemNm}
                 </Text>
             ),
         },
         {
-            key: 'totalStockQty', title: Const.TOTAL_STOCK_QTY, flex: 0.7,
+            key: 'prevStock', title: Const.TOTAL_STOCK_QTY, flex: 0.7,
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.totalStockQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.prevStock.toLocaleString()}</Text>
             )
         },
         {
-            key: 'giQty', title: Const.GI_QTY, flex: 0.5,
+            key: 'stockIn', title: Const.GI_QTY, flex: 0.5,
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.giQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.stockIn.toLocaleString()}</Text>
             )
         },
         {
-            key: 'saleQty', title: Const.SALE, flex: 0.5,
+            key: 'stockOut', title: Const.SALE, flex: 0.5,
             renderCell: (item) => (
-                <Text style={commonStyles.numberCell}>{item.saleQty.toLocaleString()}</Text>
+                <Text style={commonStyles.numberCell}>{item.stockOut.toLocaleString()}</Text>
             )
         },
         {
-            key: 'curStockQty', title: Const.CUR_STOCK_QTY, flex: 0.7,
+            key: 'currentStock', title: Const.CUR_STOCK_QTY, flex: 0.7,
             renderCell: (item) => (
-                <Text style={[commonStyles.numberCell, {color: item.curStockQty < 0 ? 'red' : 'black'}]}>
-                    {item.curStockQty.toLocaleString()}
+                <Text style={[commonStyles.numberCell, {color: item.currentStock < 0 ? 'red' : 'black'}]}>
+                    {item.currentStock.toLocaleString()}
                 </Text>
             )
         },
@@ -179,9 +178,9 @@ export default function CornerStockReportScreen() {
 
             <View style={commonStyles.topBar}>
                 <View style={commonStyles.filterRowFront}>
-                    <Text style={commonStyles.filterLabel}>조회일자</Text>
+                    <Text style={commonStyles.filterLabel}>{Const.SEARCH_DT}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={openDatePicker}>
-                        <Text style={styles.selectText}>{formattedDate(saleDate)}</Text>
+                        <Text style={commonStyles.selectText}>{formattedDate(saleDate)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -189,7 +188,7 @@ export default function CornerStockReportScreen() {
                     <Text style={commonStyles.filterLabel}>매장</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowCornerModal(true)}>
                         <Text
-                            style={styles.selectText}>{cornerList.find(g => g.cornerCd === selectedCornerCd)?.cornerNm || Const.SELECT}</Text>
+                            style={commonStyles.selectText}>{cornerList.find(g => g.cornerCd === selectedCornerCd)?.cornerNm || Const.SELECT}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -197,7 +196,7 @@ export default function CornerStockReportScreen() {
                     <Text style={commonStyles.filterLabel}>{Const.VENDOR}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowVendorModal(true)}>
                         <Text
-                            style={styles.selectText}>{vendorList.find(g => g.outSdCmpCd === selectedOutSdCmpCd)?.outSdCmpNm || Const.ALL}</Text>
+                            style={commonStyles.selectText}>{vendorList.find(g => g.outSdCmpCd === selectedOutSdCmpCd)?.outSdCmpNm || Const.ALL}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
                     </TouchableOpacity>
                 </View>
@@ -220,8 +219,9 @@ export default function CornerStockReportScreen() {
             <View style={commonStyles.sectionDivider}/>
 
             <Table
-                data={filteredData}
+                data={stockList}
                 columns={mainColumns}
+                hasSearched={hasSearched}
             />
 
             <DatePickerModal
