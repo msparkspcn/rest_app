@@ -40,10 +40,6 @@ export default function SalesReportByTimezoneScreen() {
     const [hasSearched, setHasSearched] = useState(false);
 
     useEffect(() => {
-        getSalesOrgList();
-    },[]);
-
-    const getSalesOrgList = () => {
         const request = { cmpCd: user.cmpCd }
         console.log("request:"+JSON.stringify(request))
         api.getSalesOrgList(request)
@@ -58,10 +54,8 @@ export default function SalesReportByTimezoneScreen() {
                     );
                 }
             })
-            .catch(error => {
-                console.log("getSalesOrgList error:" + error)
-            });
-    }
+            .catch(error => console.log("getSalesOrgList error:" + error));
+    },[]);
 
     const onSearch = () => {
         console.log('조회 클릭')
@@ -74,6 +68,7 @@ export default function SalesReportByTimezoneScreen() {
         }
         console.log("request:"+JSON.stringify(request));
         setLoading(true);
+
         api.mobOperTmzonSale(request)
             .then(result => {
                 console.log("result:"+JSON.stringify(result.data))
@@ -82,12 +77,10 @@ export default function SalesReportByTimezoneScreen() {
                     console.log('saleList:' + JSON.stringify(saleList))
                     setSaleList(saleList);
                 }
-                setLoading(false);
+                setHasSearched(true);
             })
-            .catch(error => {
-                setLoading(false);
-                console.log("mobOperTmzonSale error:" + error)
-            }).finally(() => setHasSearched(true));
+            .catch(error => console.log("mobOperTmzonSale error:" + error))
+            .finally(() => setLoading(false));
     };
 
     const openDatePicker = (pickerType: string) => {
@@ -97,13 +90,13 @@ export default function SalesReportByTimezoneScreen() {
     };
 
     const mainColumns: ColumnDef<SaleRow>[] = useMemo(() => ([
-        {key: 'tmzonDiv', title: '시간대', flex: 1, align: 'center',
+        {key: 'tmzonDiv', title: '시간대', flex: 1,
             renderCell: (item) => (
                 <Text style={[{textAlign:'center'}, commonStyles.cell]}>{item.tmzonDiv}시</Text>
             )
         },
         {
-            key: 'actualSaleAmt', title: '판매금액', flex: 1, align: 'center',
+            key: 'actualSaleAmt', title: '판매금액', flex: 1,
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>
                     {item.actualSaleAmt.toLocaleString()}
@@ -111,7 +104,7 @@ export default function SalesReportByTimezoneScreen() {
             )
         },
         {
-            key: 'saleRatio', title: '비율', flex: 0.5, align: 'center',
+            key: 'saleRatio', title: '비율', flex: 0.5,
             renderCell: (item) => (
                 <Text style={commonStyles.numberCell}>
                     {item.saleRatio.toFixed(2)}%
@@ -186,19 +179,17 @@ export default function SalesReportByTimezoneScreen() {
             <View>
                 {summaryRows.map(row => (
                     <View key={row.key} style={commonStyles.summaryRow}>
-                        <View style={[{flex: 1}, commonStyles.columnContainer, commonStyles.columnContainer]}>
+                        <View style={[{flex: 1}, commonStyles.columnContainer]}>
                             <Text style={[commonStyles.cell, commonStyles.summaryLabelText, {textAlign: 'center'}]}>
                                 {row.label}
                             </Text>
                         </View>
-                        <View style={[{flex: 1}, commonStyles.columnContainer, commonStyles.columnContainer]}>
+                        <View style={[{flex: 1}, commonStyles.columnContainer]}>
                             <Text style={commonStyles.numberCell}>
                                 {row.totalAmt.toLocaleString()}
                             </Text>
                         </View>
-                        <View style={[{
-                            flex: 0.5,
-                        }, commonStyles.columnContainer, commonStyles.columnContainer]}>
+                        <View style={[{flex: 0.5,}, commonStyles.columnContainer]}>
                             <Text style={commonStyles.numberCell}>
                                 {row.totalSaleRatio.toFixed(2)}%
                             </Text>

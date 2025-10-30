@@ -54,31 +54,26 @@ export default function SalesReportByPeriodOp() {
     const [selectedSale, setSelectedSale] = useState<SaleRow | null>(null);
     const [saleList, setSaleList] = useState<SaleRow[]>([]);
     const {user}: User = useUser();
-    const [saleDetailList, setSaleDetailList] = useState([]);
+    const [saleDetailList, setSaleDetailList] = useState<SaleDetailRow[]>([]);
     const [selectedOperDiv, setSelectedOperDiv] = useState("01");
     const [loading, setLoading] = useState(false);
+    const [hasSearched, setHasSearched] = useState(false);
 
     useEffect(() => {
-        getSalesOrgList();
-    }, []);
-
-    const getSalesOrgList = () => {
         const request = { cmpCd: user.cmpCd }
 
-        api.getSalsOrgList(request)
+        api.getSalesOrgList(request)
             .then(result => {
                 if (result.data.responseBody != null) {
                     const salesOrgList = result.data.responseBody;
                     setSalesOrgList([{salesOrgCd:'', salesOrgNm: '전체'}, ...salesOrgList]);
                 }
             })
-            .catch(error => {
-                console.log("getSalsOrgList error:" + error)
-            });
-    };
+            .catch(error => console.log("getSalesOrgList error:" + error));
+    }, []);
 
     const totalSaleAmt = useMemo(
-        () => (saleList ?? []).reduce((acc, r) => acc + r.actualSaleAmt, 0), [saleList]);
+        () => saleList.reduce((acc, r) => acc + r.actualSaleAmt, 0), [saleList]);
 
     const renderFooter = () => (
         <View style={commonStyles.summaryRow}>
@@ -110,13 +105,14 @@ export default function SalesReportByPeriodOp() {
                     const saleList = result.data.responseBody;
                     // console.log('list:' + JSON.stringify(saleList))
                     setSaleList(saleList);
-                    setLoading(false);
+
                 }
             })
-            .catch(error => {
+            .catch(error => console.log("mobOperPeriodSale error:" + error))
+            .finally(() => {
                 setLoading(false);
-                console.log("mobOperPeriodSale error:" + error)
-            });
+                setHasSearched(true)
+        });
     };
 
 
@@ -147,10 +143,6 @@ export default function SalesReportByPeriodOp() {
             });
     };
 
-    const closeDetail = () => {
-        setIsDetailVisible(false);
-    };
-
     const tableData = useMemo(() => {
         if (!saleList) return []; // null 방지
 
@@ -179,15 +171,15 @@ export default function SalesReportByPeriodOp() {
                     });
                 });
                 if(!selectedSalesOrgCd) {
-                    let summaryName = '';
-                    if (operDiv === '01') summaryName = '휴게소 소계';
-                    else if (operDiv === '02') summaryName = Const.OIL_SUMMARY;
+                    let summaryNm = '';
+                    if (operDiv === '01') summaryNm = Const.REST_SUMMARY;
+                    else if (operDiv === '02') summaryNm = Const.OIL_SUMMARY;
                     sumNo -= 1;
                     result.push({
                         no: sumNo,
                         saleDt: '',
                         salesOrgCd: '',
-                        orgNm: summaryName,
+                        orgNm: summaryNm,
                         actualSaleAmt: dateSum,
                         totalSaleAmt: dateSum,
                         operDiv:'',
@@ -374,7 +366,7 @@ export default function SalesReportByPeriodOp() {
 
             <View style={commonStyles.topBar}>
                 <View style={commonStyles.filterRowFront}>
-                    <Text style={commonStyles.filterLabel}>조회일자</Text>
+                    <Text style={commonStyles.filterLabel}>{Const.SEARCH_DT}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => openDatePicker('from')}>
                         <Text style={commonStyles.selectText}>{formattedDate(fromSaleDt)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
@@ -386,7 +378,7 @@ export default function SalesReportByPeriodOp() {
                     </TouchableOpacity>
                 </View>
                 <View style={commonStyles.filterRow}>
-                    <Text style={commonStyles.filterLabel}>{Const.SALES_ORG}</Text>
+                    <Text style={commonStyles.filterLabel}>{Const.SALES_ORG_NM}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowSalesOrgListModal(true)}>
                         <Text style={commonStyles.selectText}>
                             {salesOrgList.find(g => g.salesOrgCd === selectedSalesOrgCd)?.salesOrgNm || Const.ALL}
@@ -400,7 +392,7 @@ export default function SalesReportByPeriodOp() {
             </View>
             <View style={commonStyles.sectionDivider}/>
 
-            <Table data={tableData} columns={mainColumns} listFooter={renderFooter}/>
+            <Table data={tableData} columns={mainColumns} listFooter={renderFooter} hasSearched={hasSearched}/>
 
             <View style={commonStyles.sectionDivider}/>
 
@@ -422,7 +414,10 @@ export default function SalesReportByPeriodOp() {
                     <View style={commonStyles.modalCard}>
                         <View style={commonStyles.modalHeader}>
                             <Text style={commonStyles.modalTitle}>{selectedSale?.salesOrgNm}</Text>
-                            <Pressable onPress={closeDetail} hitSlop={8}>
+                            <Pressable
+                                onPress={() => setIsDetailVisible(false)}
+                                hitSlop={8}
+                            >
                                 <Ionicons name="close" size={24} color="#333"/>
                             </Pressable>
                         </View>

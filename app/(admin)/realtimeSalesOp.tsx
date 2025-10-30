@@ -33,7 +33,8 @@ type SaleDetailRow = {
     cardAmt: number;
     etcPayAmt: number;
     actualSaleAmt: number;
-}
+};
+
 type OilSaleDetailRow = {
     no: number;
     storCd: string;
@@ -64,17 +65,13 @@ export default function RealtimeSalesScreen() {
     const [selectedSalesOrg, setSelectedSalesOrg] = useState<SaleRow | null>(null);
     const [saleList, setSaleList] = useState<SaleRow[]>([]);
     const [saleStatList ,setSaleStatList] = useState<[] | null>([]);
-    const [saleDetailList, setSaleDetailList] = useState<[] | null>([]);
-    const [oilSaleDetailList, setOilSaleDetailList] = useState<[] | null>([]);
+    const [saleDetailList, setSaleDetailList] = useState<SaleDetailRow[]>([]);
+    const [oilSaleDetailList, setOilSaleDetailList] = useState<OilSaleDetailRow[]>([]);
     const [selectedOperDiv, setSelectedOperDiv] = useState("01");
     const [loading, setLoading] = useState(false);
     const [hasSearched, setHasSearched] = useState(false);
 
     useEffect(() => {
-        getSalesOrgList();
-    },[]);
-
-    const getSalesOrgList = () => {
         const request = { cmpCd: user.cmpCd }
         api.getSalesOrgList(request)
             .then(result => {
@@ -83,16 +80,14 @@ export default function RealtimeSalesScreen() {
                     setSalesOrgList([{salesOrgCd:'', salesOrgNm: '전체'}, ...salesOrgList]);
                 }
             })
-            .catch(error => {
-                console.log("getSalesOrgList error:" + error)
-            });
-    }
+            .catch(error => console.log("getSalesOrgList error:" + error));
+    },[]);
 
-
-    const onSearch = () => {
+    const onSearch = async () => {
         console.log("조회 클릭")
         setAppliedDcChecked(dcIncludedChecked);
         setAppliedVatChecked(vatExcludedChecked);
+
         const request = {
             cmpCd: user.cmpCd,
             fromSaleDt: saleDate,
@@ -102,26 +97,26 @@ export default function RealtimeSalesScreen() {
         }
         console.log('request:'+JSON.stringify(request));
         setLoading(true);
-        api.mobOperRealTimeSale(request)
-            .then(result => {
-                if (result.data.responseBody != null) {
-                    const saleList = result.data.responseBody;
-                    console.log('saleList:' + JSON.stringify(saleList))
-                    setSaleList(saleList);
-                    if(saleList.length > 0) {
-                        mobOperRealTimeSaleStat();
-                    }
-                    else {
-                        setLoading(false);
-                    }
+
+        try {
+            const result = await api.mobOperRealTimeSale(request);
+            if (result.data.responseBody != null) {
+                const saleList = result.data.responseBody;
+                console.log('saleList:' + JSON.stringify(saleList))
+                setSaleList(saleList);
+                if(saleList.length > 0) {
+                    await mobOperRealTimeSaleStat();
                 }
-            })
-            .catch(error => {
-                console.log("mobOilRealTimeSale error:" + error)
-            });
+                setHasSearched(true);
+            }
+        } catch(error) {
+            console.log("mobOilRealTimeSale error:" + error);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const mobOperRealTimeSaleStat = () => {
+    const mobOperRealTimeSaleStat = async () => {
         console.log("실적 조회")
 
         const request = {
@@ -132,21 +127,17 @@ export default function RealtimeSalesScreen() {
             toSaleDt: ""
         }
         console.log('request:'+JSON.stringify(request));
-        // setLoading(true);
-        api.mobOperRealTimeSaleStat(request)
-            .then(result => {
-                if (result.data.responseBody != null) {
-                    const saleStatList = result.data.responseBody;
-                    console.log('saleStatList:' + JSON.stringify(saleStatList))
-                    setSaleStatList(saleStatList);
-                }
-                setLoading(false);
-                setHasSearched(true);
-            })
-            .catch(error => {
-                setLoading(false);
-                console.log("mobOperRealTimeSaleStat error:" + error)
-            });
+
+        try {
+            const result = await api.mobOperRealTimeSaleStat(request);
+            if (result.data.responseBody != null) {
+                const saleStatList = result.data.responseBody;
+                console.log('saleStatList:' + JSON.stringify(saleStatList))
+                setSaleStatList(saleStatList);
+            }
+        } catch(error) {
+            console.log("mobOperRealTimeSaleStat error:" + error);
+        }
     };
 
     const tableData = useMemo(() => {
@@ -167,7 +158,6 @@ export default function RealtimeSalesScreen() {
             .forEach(operDiv => {
                 const rows = grouped[operDiv];
                 let storSum = 0;
-                let netSaleSum = 0;
                 rows.forEach((item) => {
                     if (appliedVatChecked && appliedDcChecked) storSum += item.saleAmt - item.vatAmt; //부가세 적용, DC적용 X
                     else if (appliedVatChecked && !appliedDcChecked) storSum += item.netSaleAmt; //부가세 적용, DC적용
@@ -197,13 +187,13 @@ export default function RealtimeSalesScreen() {
                     });
                 }
             });
-        // console.log("result:"+JSON.stringify(result));
 
         return result;
-    }, [saleList]);
+    }, [saleStatList]);
 
     const oilDetailTableData = useMemo(() => {
         if (!oilSaleDetailList) return []; // null 방지
+
         console.log('data:'+JSON.stringify(oilSaleDetailList));
 
         const result: (OilSaleDetailRow & { isSummary?: boolean })[] = [];
@@ -537,7 +527,6 @@ export default function RealtimeSalesScreen() {
                 {saleStatList.map(row => {
                     let saleValue1;
                     let saleValue2;
-                    console.log('row1:'+JSON.stringify(row));
 
                     if (appliedVatChecked && appliedDcChecked) {
                         saleValue1 = row.saleAmt1 - row.vatAmt1;
@@ -558,7 +547,7 @@ export default function RealtimeSalesScreen() {
                     }
                     let lastWeekIsUp = saleValue1 > 0;
                     let yesDayIsUp = saleValue2 > 0
-                    console.log('saleValue1:'+saleValue1+', saleValue2:'+saleValue2);
+                    // console.log('saleValue1:'+saleValue1+', saleValue2:'+saleValue2);
                     return (
                         <View
                             key={row.sortOrder}
@@ -573,7 +562,8 @@ export default function RealtimeSalesScreen() {
                             ]}
                         >
                             <View style={[{flex: 1, justifyContent: 'center'}, commonStyles.columnContainer]}>
-                                <Text style={[{paddingLeft: 5}, styles.cell, styles.summaryLabelText]}>
+                                <Text style={[{paddingLeft: 5, textAlign: 'center'},
+                                    commonStyles.cell, commonStyles.summaryLabelText]}>
                                     {row.label}
                                 </Text>
                             </View>
@@ -735,10 +725,4 @@ export default function RealtimeSalesScreen() {
         </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    summaryLabelText: {fontWeight: '700', color: '#333'},
-    cell: {fontSize: 13, color: '#444'},
-});
-
 

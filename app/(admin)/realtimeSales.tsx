@@ -72,7 +72,7 @@ export default function RealtimeSales() {
             });
     }
 
-    const onSearch = () => {
+    const onSearch = async () => {
         console.log("조회 클릭")
         const request = {
             cmpCd: user.cmpCd,
@@ -85,29 +85,26 @@ export default function RealtimeSales() {
         console.log('request:'+JSON.stringify(request));
         setLoading(true);
 
-        api.mobRestRealTimeSaleStat(request)
-            .then(result => {
-                if (result.data.responseBody != null) {
-                    const saleList = result.data.responseBody;
-                    console.log('saleList:' + JSON.stringify(saleList))
-                    console.log('length:'+saleList.length);
-                    setSaleList(saleList);
-                    if(saleList.length > 0) {
-                        mobRestRealTimeSaleResult();
-                    }
-                    else {
-                        setLoading(false);
-                    }
+        try {
+            const result = await api.mobRestRealTimeSaleStat(request);
+            if (result.data.responseBody != null) {
+                const saleList = result.data.responseBody;
+                console.log('saleList:' + JSON.stringify(saleList))
+                console.log('length:'+saleList.length);
+                setSaleList(saleList);
+                if(saleList.length > 0) {
+                    await mobRestRealTimeSaleResult();
                 }
-            })
-            .catch(error => {
-                setLoading(false);
-                console.log("mobRestRealTimeSaleStat error:" + error)
-            });
-
+                setHasSearched(true);
+            }
+        } catch(error) {
+            console.log("mobRestRealTimeSaleStat error:" + error)
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const mobRestRealTimeSaleResult = () => {
+    const mobRestRealTimeSaleResult = async () => {
         const request = {
             cmpCd: user.cmpCd,
             cornerCd: "",
@@ -117,19 +114,17 @@ export default function RealtimeSales() {
             toSaleDt: saleDate
         }
         console.log('request2:'+JSON.stringify(request));
-        api.mobRestRealTimeSaleResult(request)
-            .then(result => {
-                if (result.data.responseBody != null) {
-                    const saleStatList = result.data.responseBody;
-                    console.log('saleStatList:' + JSON.stringify(saleStatList))
-                    setSaleStatList(saleStatList);
-                    setLoading(false);
-                    setHasSearched(true);
-                }
-            })
-            .catch(error => {
-                console.log("mobRestRealTimeSaleResult error:" + error)
-            });
+
+        try {
+            const result = api.mobRestRealTimeSaleResult(request);
+            if (result.data.responseBody != null) {
+                const saleStatList = result.data.responseBody;
+                console.log('saleStatList:' + JSON.stringify(saleStatList))
+                setSaleStatList(saleStatList);
+            }
+        } catch (error) {
+            console.log("mobRestRealTimeSaleResult error:" + error)
+        }
     }
 
     const openDatePicker = () => {

@@ -1,19 +1,19 @@
-import {StatusBar} from 'expo-status-bar';
-import React, {useEffect, useMemo, useState} from 'react';
-import {Pressable, Text, TouchableOpacity, View} from 'react-native';
+import { AntDesign } from "@expo/vector-icons";
+import { StatusBar } from 'expo-status-bar';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Pressable, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {commonStyles} from "../../styles/index";
-import {dateToYmd, formattedDate, getTodayYmd} from "../../utils/DateUtils";
-import {Table} from "../../components/Table";
-import {ColumnDef} from "../../types/table";
-import {DatePickerModal} from "../../components/DatePickerModal";
-import Const from "../../constants/Const";
-import {User, SalesOrg} from "../../types";
-import {useUser} from "../../contexts/UserContext";
-import * as api from "../../services/api/api";
+import { DatePickerModal } from "../../components/DatePickerModal";
 import ListModal from "../../components/ListModal";
-import {AntDesign} from "@expo/vector-icons";
 import LoadingOverlay from "../../components/LoadingOverlay";
+import { Table } from "../../components/Table";
+import Const from "../../constants/Const";
+import { useUser } from "../../contexts/UserContext";
+import * as api from "../../services/api/api";
+import { commonStyles } from "../../styles/index";
+import { SalesOrg, User } from "../../types";
+import { ColumnDef } from "../../types/table";
+import { dateToYmd, formattedDate, getTodayYmd } from "../../utils/DateUtils";
 
 type SaleRow = {
     salesOrgCd: string;
@@ -23,8 +23,8 @@ type SaleRow = {
     lastWeekActualSaleRatio: number; //부가세 적용X, DC적용 -> 기본값
     yesterdayActualSaleRatio: number;
 
-    actualSaleAmt: number
-    totalSaleAmt: number
+    actualSaleAmt: number;
+    totalSaleAmt: number;
 };
 
 type Sale = {
@@ -48,6 +48,7 @@ type Sale = {
     saleExceptVatAmt: number;
     vatAmt: number;
     totalSaleAmt: number;
+    operDiv: string;
 }
 
 export default function RealtimeSalesRatio() {
@@ -69,26 +70,21 @@ export default function RealtimeSalesRatio() {
     const [saleList, setSaleList] = useState<Sale[]>([]);
     const [saleStatList ,setSaleStatList] = useState<[] | null>([]);
     const [loading, setLoading] = useState(false);
+    const [hasSearched, setHasSearched] = useState(false);
 
     useEffect(() => {
-        getSalesOrgList();
-    },[]);
-
-    const getSalesOrgList = () => {
         const request = { cmpCd: user.cmpCd }
-        api.getSalsOrgList(request)
+        api.getSalesOrgList(request)
             .then(result => {
                 if (result.data.responseBody != null) {
                     const salesOrgList = result.data.responseBody;
                     setSalesOrgList([{salesOrgCd:'', salesOrgNm: '전체'}, ...salesOrgList]);
                 }
             })
-            .catch(error => {
-                console.log("getSalsOrgList error:" + error)
-            });
-    }
+            .catch(error => console.log("getSalesOrgList error:" + error));
+    },[]);
 
-    const onSearch = () => {
+    const onSearch = async () => {
         console.log("조회 클릭 selectedSalesOrgCd:"+selectedSalesOrgCd.length);
         setAppliedDcChecked(dcIncludedChecked);
         setAppliedVatChecked(vatExcludedChecked);
@@ -103,27 +99,25 @@ export default function RealtimeSalesRatio() {
         console.log('request:'+JSON.stringify(request));
         setLoading(true);
 
-        api.mobOperRealTimeSaleRatio(request)
-            .then(result => {
-                if (result.data.responseBody != null) {
-                    const saleList = result.data.responseBody;
-                    console.log('saleList:' + JSON.stringify(saleList))
-                    setSaleList(saleList);
-                    if(saleList.length > 0) {
-                        mobOperRealTimeSaleStat();
-                    }
-                    else {
-                        setLoading(false);
-                    }
+        try {
+            const result = await api.mobOperRealTimeSaleRatio(request);
+            if (result.data.responseBody != null) {
+                const saleList = result.data.responseBody;
+                console.log('saleList:' + JSON.stringify(saleList))
+                setSaleList(saleList);
+                if(saleList.length > 0) {
+                   await mobOperRealTimeSaleStat();
                 }
-            })
-            .catch(error => {
-                setLoading(false);
-                console.log("mobOperRealTimeSaleRatio error:" + error)
-            });
+                setHasSearched(true);
+            }
+        } catch (error) {
+            console.log("조회 에러:", error);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const mobOperRealTimeSaleStat = () => {
+    const mobOperRealTimeSaleStat = async () => {
         console.log("실적 조회")
 
         const request = {
@@ -134,20 +128,17 @@ export default function RealtimeSalesRatio() {
             toSaleDt: ""
         }
         console.log('request:'+JSON.stringify(request));
-        // setLoading(true);
-        api.mobOperRealTimeSaleStat(request)
-            .then(result => {
-                if (result.data.responseBody != null) {
-                    const saleStatList = result.data.responseBody;
-                    // console.log('saleStatList:' + JSON.stringify(saleStatList))
-                    setSaleStatList(saleStatList);
-                    setLoading(false);
-                }
-            })
-            .catch(error => {
-                setLoading(false);
-                console.log("mobOperRealTimeSaleStat error:" + error)
-            });
+
+        try {
+            const result = await api.mobOperRealTimeSaleStat(request);
+            if (result.data.responseBody != null) {
+                const saleStatList = result.data.responseBody;
+                // console.log('saleStatList:' + JSON.stringify(saleStatList))
+                setSaleStatList(saleStatList);
+            }
+        } catch (error) {
+            console.log("mobOperRealTimeSaleStat error:", error);
+        }
     };
 
     const openDatePicker = () => {
@@ -204,7 +195,7 @@ export default function RealtimeSalesRatio() {
                             {lastWeekSaleRatio.toLocaleString()}
                         </Text>
                         <AntDesign
-                            name={isUp ? 'caretup' : 'caretdown'}
+                            name={isUp ? 'caret-up' : 'caret-down'}
                             size={13}
                             color={isUp ? 'red' : 'blue'}
                             style={{marginRight: 2}}
@@ -224,7 +215,7 @@ export default function RealtimeSalesRatio() {
                             {yesterdaySaleRatio.toLocaleString()}
                         </Text>
                         <AntDesign
-                            name={isUp ? 'caretup' : 'caretdown'}
+                            name={isUp ? 'caret-up' : 'caret-down'}
                             size={13}
                             color={isUp ? 'red' : 'blue'}
                             style={{marginRight: 2}}
@@ -300,13 +291,13 @@ export default function RealtimeSalesRatio() {
                 console.log('yesDaySum:'+yesDaySum);
                 console.log('lastWeekSum:'+lastWeekSum);
                 if(selectedSalesOrgCd.length == 0) {
-                    let summaryName = '';
-                    if (operDiv === '01') summaryName = '휴게소 소계';
-                    else if (operDiv === '02') summaryName = Const.OIL_SUMMARY;
+                    let summaryNm = '';
+                    if (operDiv === '01') summaryNm = Const.REST_SUMMARY;
+                    else if (operDiv === '02') summaryNm = Const.OIL_SUMMARY;
                     sumNo -= 1;
                     result.push({
                         salesOrgCd: "",
-                        orgNm: summaryName,
+                        orgNm: summaryNm,
                         no: sumNo,
                         actualSaleAmt: storSum,
                         totalSaleAmt: storSum,
@@ -319,7 +310,7 @@ export default function RealtimeSalesRatio() {
         // console.log("result:"+JSON.stringify(result));
 
         return result;
-    }, [saleList, appliedVatChecked, appliedDcChecked]);
+    }, [saleStatList, appliedVatChecked, appliedDcChecked]);
 
     const handleVatExcludedToggle = () => {
         setVatExcludedChecked(!vatExcludedChecked);
@@ -395,7 +386,7 @@ export default function RealtimeSalesRatio() {
                                             {saleValue1.toLocaleString()}
                                         </Text>
                                         <AntDesign
-                                            name={lastWeekIsUp ? 'caretup' : 'caretdown'}
+                                            name={lastWeekIsUp ? 'caret-up' : 'caret-down'}
                                             size={13}
                                             color={lastWeekIsUp ? 'red' : 'blue'}
                                             style={{paddingRight: 5}}
@@ -406,7 +397,7 @@ export default function RealtimeSalesRatio() {
                                             textAlign: 'right'}}> /  {saleValue2.toLocaleString()}
                                         </Text>
                                         <AntDesign
-                                            name={yesDayIsUp ? 'caretup' : 'caretdown'}
+                                            name={yesDayIsUp ? 'caret-up' : 'caret-down'}
                                             size={13}
                                             color={yesDayIsUp ? 'red' : 'blue'}
                                             style={{paddingRight: 5}}
@@ -436,7 +427,7 @@ export default function RealtimeSalesRatio() {
 
             <View style={commonStyles.topBar}>
                 <View style={commonStyles.filterRowFront}>
-                    <Text style={commonStyles.filterLabel}>사업장</Text>
+                    <Text style={commonStyles.filterLabel}>{Const.SALES_ORG_NM}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowSalesOrgListModal(true)}>
                         <Text style={commonStyles.selectText}>
                             {salesOrgList.find(g => g.salesOrgCd === selectedSalesOrgCd)?.salesOrgNm || Const.ALL}
@@ -445,7 +436,7 @@ export default function RealtimeSalesRatio() {
                     </TouchableOpacity>
                 </View>
                 <View style={[commonStyles.filterRowFront]}>
-                    <Text style={commonStyles.filterLabel}>조회일자</Text>
+                    <Text style={commonStyles.filterLabel}>{Const.SEARCH_DT}</Text>
                     <TouchableOpacity style={commonStyles.selectInput} onPress={openDatePicker}>
                         <Text style={commonStyles.selectText}>{formattedDate(saleDate)}</Text>
                         <Text style={commonStyles.selectArrow}> ▼</Text>
@@ -484,6 +475,8 @@ export default function RealtimeSalesRatio() {
                 data={selectedSalesOrgCd.length > 0 ? saleList : tableData}
                 columns={mainColumns}
                 listHeader={renderHeader}
+                hasSearched={hasSearched}
+                maxHeight={500}
             />
 
             <DatePickerModal

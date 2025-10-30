@@ -48,6 +48,7 @@ export default function RealtimeSalesScreen() {
     const [saleList, setSaleList] = useState<SaleRow[]>([]);
     const [saleStatList ,setSaleStatList] = useState<[] | null>([]);
     const [loading, setLoading] = useState(false);
+    const [hasSearched, setHasSearched] = useState(false);
 
     useEffect(() => {
         getSalesOrgList();
@@ -74,7 +75,7 @@ export default function RealtimeSalesScreen() {
     }
 
 
-    const onSearch = () => {
+    const onSearch = async () => {
         if(selectedSalesOrgCd=='') {
             Alert.alert(Const.ERROR, Const.NO_SALES_ORG_MSG);
             return;
@@ -92,27 +93,26 @@ export default function RealtimeSalesScreen() {
         }
         console.log('request:'+JSON.stringify(request));
         setLoading(true);
-        api.mobOilRealTimeSale(request)
-            .then(result => {
-                if (result.data.responseBody != null) {
-                    const saleList = result.data.responseBody;
-                    console.log('saleList:' + JSON.stringify(saleList))
-                    setSaleList(saleList);
-                    if(saleList.length > 0) {
-                        mobOilRealTimeSaleStat();
-                    }
-                    else {
-                        setLoading(false);
-                    }
+
+        try {
+            const result = await api.mobOilRealTimeSale(request);
+            if (result.data.responseBody != null) {
+                const saleList = result.data.responseBody;
+                console.log('saleList:' + JSON.stringify(saleList))
+                setSaleList(saleList);
+                if(saleList.length > 0) {
+                    await mobOilRealTimeSaleStat();
                 }
-            })
-            .catch(error => {
-                setLoading(false);
-                console.log("mobOilRealTimeSale error:" + error)
-            });
+                setHasSearched(true);
+            }
+        } catch(error) {
+            console.log("mobOilRealTimeSale error:" + error)
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const mobOilRealTimeSaleStat = () => {
+    const mobOilRealTimeSaleStat = async () => {
         const request = {
             cmpCd: user.cmpCd,
             cornerCd: "",
@@ -122,19 +122,17 @@ export default function RealtimeSalesScreen() {
             toSaleDt: ""
         }
         console.log('request:'+JSON.stringify(request));
-        api.mobOilRealTimeSaleStat(request)
-            .then(result => {
-                if (result.data.responseBody != null) {
-                    const saleStatList = result.data.responseBody;
-                    console.log('saleStatList:' + JSON.stringify(saleStatList))
-                    setSaleStatList(saleStatList);
-                }
-                setLoading(false);
-            })
-            .catch(error => {
-                setLoading(false);
-                console.log("mobOilRealTimeSaleStat error:" + error)
-            });
+
+        try {
+            const result = await api.mobOilRealTimeSaleStat(request);
+            if (result.data.responseBody != null) {
+                const saleStatList = result.data.responseBody;
+                console.log('saleStatList:' + JSON.stringify(saleStatList))
+                setSaleStatList(saleStatList);
+            }
+        } catch (error) {
+            console.log("mobOilRealTimeSaleStat error:" + error)
+        }
     }
 
     const openDatePicker = () => {
@@ -210,7 +208,7 @@ export default function RealtimeSalesScreen() {
                     result.push({
                         ...item,
                         no: no,
-                        isFirstRow: idx === 0 ? true : false
+                        isFirstRow: idx === 0
                     });
                 });
 
@@ -335,6 +333,7 @@ export default function RealtimeSalesScreen() {
                 data={tableData}
                 columns={mainColumns}
                 listHeader={renderListHeader}
+                hasSearched={hasSearched}
             />
 
             {loading && (<LoadingOverlay />)}
