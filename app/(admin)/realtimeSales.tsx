@@ -116,7 +116,7 @@ export default function RealtimeSales() {
         console.log('request2:'+JSON.stringify(request));
 
         try {
-            const result = api.mobRestRealTimeSaleResult(request);
+            const result = await api.mobRestRealTimeSaleResult(request);
             if (result.data.responseBody != null) {
                 const saleStatList = result.data.responseBody;
                 console.log('saleStatList:' + JSON.stringify(saleStatList))
