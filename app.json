@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.secta9ine.restapp",
+      "bundleIdentifier": "kr.co.secta9ine.restapp",
       "buildNumber": "1",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
@@ -22,7 +22,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.secta9ine.restapp"
+      "package": "kr.co.secta9ine.restapp"
     },
     "web": {
       "bundler": "metro",

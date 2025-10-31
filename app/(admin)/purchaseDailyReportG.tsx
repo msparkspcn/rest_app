@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
-import React, { useMemo, useState } from 'react';
-import { Modal, Pressable, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, {useEffect, useMemo, useState} from 'react';
+import { Modal, Pressable, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { DatePickerModal } from "../../components/DatePickerModal";
 import LoadingOverlay from "../../components/LoadingOverlay";
@@ -12,6 +12,8 @@ import { commonStyles } from "../../styles/index";
 import { ColumnDef } from "../../types/table";
 import { User } from "../../types/user";
 import { dateToYmd, formattedDate, getTodayYmd } from "../../utils/DateUtils";
+import {Vendor} from "../../types/Vendor";
+import ListModal from "../../components/ListModal";
 
 type PurchaseRow = { date: string; outSdCmpNm: string; totalOrdAmt: number };
 type PurchaseDetailRow = {
@@ -25,9 +27,12 @@ type PurchaseDetailRow = {
 export default function PurchaseDailyReportScreen() {
     const [fromPurchaseDt, setFromPurchaseDt] = useState(getTodayYmd());
     const [toPurchaseDt, setToPurchaseDt] = useState(getTodayYmd());
-    const [vendorQuery, setVendorQuery] = useState('');
+    const [vendorList, setVendorList] = useState<Vendor[]>([]);
     const [isDetailVisible, setIsDetailVisible] = useState(false);
     const [selectedVendorName, setSelectedVendorName] = useState<string | null>(null);
+    const [selectedOutSdCmpCd, setSelectedOutSdCmpCd] = useState<string | null>('');
+    const [showVendorModal, setShowVendorModal] = useState(false);
+
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [currentPickerType, setCurrentPickerType] = useState('from');
     const [tempDate, setTempDate] = useState<Date | null>(null);
@@ -36,6 +41,32 @@ export default function PurchaseDailyReportScreen() {
     const [purchaseItemList, setPurchaseItemList] = useState<[] | null>(null);
     const {user}: User = useUser();
     const [hasSearched, setHasSearched] = useState(false);
+
+    useEffect(() => {
+        getVendorList();
+    },[]);
+
+    const getVendorList = () => {
+        const request = {
+            cmpCd: user.cmpCd,
+            salesOrgCd: user.salesOrgCd,
+            schValue: '',
+        }
+        api.getVendorList(request)
+            .then(result => {
+                if (result.data.responseBody != null) {
+                    const vendorList = result.data.responseBody;
+                    // console.log('List:' + JSON.stringify(vendorList))
+                    setVendorList([
+                        { outSdCmpCd: '', outSdCmpNm: '전체' },
+                        ...vendorList
+                    ]);
+                }
+            })
+            .catch(error => {
+                console.log("getVendorList error:" + error)
+            });
+    };
 
     const mainColumns: ColumnDef<PurchaseRow>[] = useMemo(() => ([
         {key: 'no', title: Const.NO, flex: 0.5,
@@ -96,7 +127,7 @@ export default function PurchaseDailyReportScreen() {
         console.log("조회 클릭");
         const request = {
             cmpCd: user.cmpCd,
-            outSdCmpCd: vendorQuery,
+            outSdCmpCd: selectedOutSdCmpCd,
             fromDate: fromPurchaseDt,
             salesOrgCd: user.salesOrgCd,
             toDate: toPurchaseDt
@@ -187,7 +218,7 @@ export default function PurchaseDailyReportScreen() {
         }
         console.log('request:'+JSON.stringify(request));
 
-        api.getPurchaseItem(request)
+        api.getPurchaseOilItem(request)
             .then(result => {
                 if (result.data.responseBody != null) {
                     const purchaseItemList = result.data.responseBody;
@@ -197,7 +228,7 @@ export default function PurchaseDailyReportScreen() {
                 }
             })
             .catch(error => {
-                console.log("getPurchaseItem error:" + error)
+                console.log("getPurchaseOilItem error:" + error)
             });
     };
 
@@ -227,16 +258,12 @@ export default function PurchaseDailyReportScreen() {
                 </View>
 
                 <View style={commonStyles.filterRow}>
-                    <Text style={commonStyles.filterLabel}>거래처</Text>
-                    <TextInput
-                        style={commonStyles.input}
-                        placeholder="거래처 입력"
-                        placeholderTextColor="#999"
-                        value={vendorQuery}
-                        onChangeText={setVendorQuery}
-                        returnKeyType="search"
-                        onSubmitEditing={onSearch}
-                    />
+                    <Text style={commonStyles.filterLabel}>{Const.VENDOR}</Text>
+                    <TouchableOpacity style={commonStyles.selectInput} onPress={() => setShowVendorModal(true)}>
+                        <Text
+                            style={commonStyles.selectText}>{vendorList.find(g => g.outSdCmpCd === selectedOutSdCmpCd)?.outSdCmpNm || Const.ALL}</Text>
+                        <Text style={commonStyles.selectArrow}> ▼</Text>
+                    </TouchableOpacity>
                     <Pressable style={commonStyles.searchButton} onPress={onSearch}>
                         <Text style={commonStyles.searchButtonText}>{Const.SEARCH}</Text>
                     </Pressable>
@@ -259,6 +286,19 @@ export default function PurchaseDailyReportScreen() {
                 onConfirm={(date) => {
                     if (currentPickerType === 'from') setFromPurchaseDt(dateToYmd(date));
                     else setToPurchaseDt(dateToYmd(date));
+                }}
+            />
+
+            <ListModal
+                visible={showVendorModal}
+                title="거래처 선택"
+                data={vendorList}
+                keyField="outSdCmpCd"
+                labelField="outSdCmpNm"
+                onClose={() => setShowVendorModal(false)}
+                onSelect={(item) => {
+                    setSelectedOutSdCmpCd(item.outSdCmpCd);
+                    setShowVendorModal(false);
                 }}
             />
 

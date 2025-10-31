@@ -15,8 +15,10 @@
       }
     },
     "development": {
-      "developmentClient": true,
-      "distribution": "internal"
+      "ios": {
+        "distribution": "internal",
+        "simulator": false
+      }
     },
     "preview": {
       "distribution": "internal"

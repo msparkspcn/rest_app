@@ -93,8 +93,13 @@ export function getPurchaseSummary(params) {
     return post(request, params);
 }
 
-export function getPurchaseItem(params) {
-    const request = host + "/api/v1/purchase/vendor/items"; // (모바일)상품별 매입현황 조회
+export function getPurchaseRestItem(params) {
+    const request = host + "/api/v1/purchase/vendor/rest/items"; // 휴게소 일자별 매입현황 상세(차수통합)
+    return post(request, params);
+}
+
+export function getPurchaseOilItem(params) {
+    const request = host + "/api/v1/purchase/vendor/oil/items"; // 주유소 일자별 매입현황 상세(차수분리)
     return post(request, params);
 }
 
